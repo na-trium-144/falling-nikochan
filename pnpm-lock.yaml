@@ -83,7 +83,7 @@ importers:
         version: 8.58.0(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3)
       webpack:
         specifier: ^5.106.2
-        version: 5.106.2(webpack-cli@7.0.2)
+        version: 5.106.2(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2))
       webpack-cli:
         specifier: ^7.0.2
         version: 7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2)
@@ -321,8 +321,8 @@ importers:
         specifier: ^3.1.3
         version: 3.1.3
       '@scalar/hono-api-reference':
-        specifier: ^0.10.14
-        version: 0.10.14(hono@4.12.23)
+        specifier: ^0.11.4
+        version: 0.11.4(hono@4.12.23)
       '@valibot/to-json-schema':
         specifier: ^1.6.0
         version: 1.6.0(valibot@1.3.1(typescript@5.9.3))
@@ -405,7 +405,7 @@ importers:
     devDependencies:
       babel-loader:
         specifier: ^10.1.1
-        version: 10.1.1(@babel/core@7.29.0)(webpack@5.106.2(webpack-cli@7.0.2))
+        version: 10.1.1(@babel/core@7.29.0)(webpack@5.106.2(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2)))
       dotenv:
         specifier: ^16.6.1
         version: 16.6.1
@@ -1992,23 +1992,31 @@ packages:
     resolution: {integrity: sha512-xzvBr1Q1c4lCe7i6sRnrofxeO1QTP/LKQ6A6qy0iB4x5yfiSfARMEQEghojzTNALDTcv8En04qYNIco9/K9eZQ==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
 
-  '@scalar/client-side-rendering@0.1.7':
-    resolution: {integrity: sha512-IDzjKF93jrOljlvKBsLHXT1FPWgz56jFrMPC+iLihREp1qH8wF92mG8Zpakw8cURkEuw5WijRk0xNBP2moGyuw==}
+  '@scalar/client-side-rendering@0.2.4':
+    resolution: {integrity: sha512-IQC39aQQXKsZXOqQw0LNiZ/gQ1WxHpF+WLTo/hurn0S/FmNHlBGUAhFyt1BeDSUYxics7ixgzQatKJDggafBTw==}
     engines: {node: '>=22'}
 
-  '@scalar/helpers@0.6.0':
-    resolution: {integrity: sha512-pfSamAgBxqFeE8IpEG6uGkHlnPhY1CLeOTttV9+vKQbrBk5b7vvyTsUXv0Hz4kNU1TFrxcTTPE+Akn5S+jlTtQ==}
+  '@scalar/helpers@0.8.2':
+    resolution: {integrity: sha512-qNbqUjSB3S4Gr4A0oANcm5G1Ip+EqBxICYKhe9YzmnaBpbmW6shxqpiivApTvvuDf+uIhR3uMwWyVQbYcGLsxA==}
     engines: {node: '>=22'}
 
-  '@scalar/hono-api-reference@0.10.14':
-    resolution: {integrity: sha512-LCIT4ul3c4MyD7shhxsWcvvOABt0fEHNQID2n+2TPeItc/MR2qCjjp/QfqD+JoQ7zbc0nnzh1kwRR06MVBmnUA==}
+  '@scalar/hono-api-reference@0.11.4':
+    resolution: {integrity: sha512-JD5vv5z44iY2O3++l4MqJ5NrKEucCLenLP26kDLyXZfO44ip5H5XFcPw5mRfnHMFgVhdJMWsvFf1mGLiPGDy/A==}
     engines: {node: '>=22'}
     peerDependencies:
       hono: ^4.12.5
 
-  '@scalar/types@0.9.6':
-    resolution: {integrity: sha512-UaCQQcscFTJdxZREE8KhUdSJgaDlc44TZbmWcZffs4m1hzqOvEI7lEBS13iBpLq7/cxUXFgyJdecywvNqJ0PkA==}
+  '@scalar/schemas@0.5.0':
+    resolution: {integrity: sha512-aV0PWqFpQft9a6d4Z6HOTHKDaA+K4AquxSPfBDI1c5f6lMe5l3zViww/iBQA/Yw+V1+Y2iwSVzhuxaktC1UiMg==}
     engines: {node: '>=22'}
+
+  '@scalar/types@0.14.0':
+    resolution: {integrity: sha512-aS1FvHbKhBC51mWqXmhkPe6lmhCd9+u//DQ1YTiCWOz4/fXAdWfwHvW9UZ7AzzcGwGiCo9diE81xV+UvSI1qIg==}
+    engines: {node: '>=22'}
+
+  '@scalar/validation@0.6.0':
+    resolution: {integrity: sha512-tpmmG+/xRE2Kn9RpflU3AIyZv08v10+E1ZrJCx7z6+/91zHVxy0M73kC1LT4/8PbYNt85ywyC8+n+D99JdMcGA==}
+    engines: {node: '>=20'}
 
   '@schummar/icu-type-parser@1.21.5':
     resolution: {integrity: sha512-bXHSaW5jRTmke9Vd0h5P7BtWZG9Znqb8gSDxZnxaGSJnGwPLDPfS+3g0BKzeWqzgZPsIVZkM7m2tbo18cm5HBw==}
@@ -4479,8 +4487,8 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  nanoid@5.1.11:
-    resolution: {integrity: sha512-v+KEsUv2ps74PaSKv0gHTxTCgMXOIfBEbaqa6w6ISIGC7ZsvHN4N9oJ8d4cmf0n5oTzQz2SLmThbQWhjd/8eKg==}
+  nanoid@5.1.15:
+    resolution: {integrity: sha512-kBg3RpGtIe+RpTbyXwoI6pk5yD7KUiI3sygUqgeBMRst42KmhB4RZC7eiO9Wa1HIpaCCtpE2DJ6OI4Wi5ebwFw==}
     engines: {node: ^18 || >=20}
     hasBin: true
 
@@ -5294,8 +5302,8 @@ packages:
     resolution: {integrity: sha512-Ne2YiiGN8bmrmJJEuTWTLJR32nh/JdL1+PSicowtNb0WFpn59GK8/lfD61bVtzguz7b3PBt74nxpv/Pw5po5Rg==}
     engines: {node: '>=8'}
 
-  type-fest@5.6.0:
-    resolution: {integrity: sha512-8ZiHFm91orbSAe2PSAiSVBVko18pbhbiB3U9GglSzF/zCGkR+rxpHx6sEMCUm4kxY4LjDIUGgCfUMtwfZfjfUA==}
+  type-fest@5.7.0:
+    resolution: {integrity: sha512-1URUxUqfHFM1c+zfSPsa3gnkO7Aq21qyH75SIduNYz4SzY964rn1X2vCMQaHSHhktiw+0kPa2iyb6PUpXqB6Vg==}
     engines: {node: '>=20'}
 
   typed-array-buffer@1.0.3:
@@ -7211,23 +7219,32 @@ snapshots:
 
   '@sapphire/snowflake@3.5.5': {}
 
-  '@scalar/client-side-rendering@0.1.7':
+  '@scalar/client-side-rendering@0.2.4':
     dependencies:
-      '@scalar/types': 0.9.6
+      '@scalar/schemas': 0.5.0
+      '@scalar/types': 0.14.0
+      '@scalar/validation': 0.6.0
 
-  '@scalar/helpers@0.6.0': {}
+  '@scalar/helpers@0.8.2': {}
 
-  '@scalar/hono-api-reference@0.10.14(hono@4.12.23)':
+  '@scalar/hono-api-reference@0.11.4(hono@4.12.23)':
     dependencies:
-      '@scalar/client-side-rendering': 0.1.7
+      '@scalar/client-side-rendering': 0.2.4
       hono: 4.12.23
 
-  '@scalar/types@0.9.6':
+  '@scalar/schemas@0.5.0':
     dependencies:
-      '@scalar/helpers': 0.6.0
-      nanoid: 5.1.11
-      type-fest: 5.6.0
+      '@scalar/helpers': 0.8.2
+      '@scalar/validation': 0.6.0
+
+  '@scalar/types@0.14.0':
+    dependencies:
+      '@scalar/helpers': 0.8.2
+      nanoid: 5.1.15
+      type-fest: 5.7.0
       zod: 4.4.3
+
+  '@scalar/validation@0.6.0': {}
 
   '@schummar/icu-type-parser@1.21.5': {}
 
@@ -8175,12 +8192,12 @@ snapshots:
 
   axobject-query@4.1.0: {}
 
-  babel-loader@10.1.1(@babel/core@7.29.0)(webpack@5.106.2(webpack-cli@7.0.2)):
+  babel-loader@10.1.1(@babel/core@7.29.0)(webpack@5.106.2(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2))):
     dependencies:
       '@babel/core': 7.29.0
       find-up: 5.0.0
     optionalDependencies:
-      webpack: 5.106.2(webpack-cli@7.0.2)
+      webpack: 5.106.2(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2))
 
   babel-plugin-polyfill-corejs2@0.4.17(@babel/core@7.29.0):
     dependencies:
@@ -10002,7 +10019,7 @@ snapshots:
 
   nanoid@3.3.12: {}
 
-  nanoid@5.1.11: {}
+  nanoid@5.1.15: {}
 
   napi-postinstall@0.3.4: {}
 
@@ -10864,13 +10881,13 @@ snapshots:
     optionalDependencies:
       postcss: 8.5.14
 
-  terser-webpack-plugin@5.6.0(webpack@5.106.2):
+  terser-webpack-plugin@5.6.0(webpack@5.106.2(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2))):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
       schema-utils: 4.3.3
       terser: 5.47.1
-      webpack: 5.106.2(webpack-cli@7.0.2)
+      webpack: 5.106.2(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2))
 
   terser@5.47.1:
     dependencies:
@@ -10941,7 +10958,7 @@ snapshots:
 
   type-fest@0.7.1: {}
 
-  type-fest@5.6.0:
+  type-fest@5.7.0:
     dependencies:
       tagged-tag: 1.0.0
 
@@ -11159,7 +11176,7 @@ snapshots:
       import-local: 3.2.0
       interpret: 3.1.1
       rechoir: 0.8.0
-      webpack: 5.106.2(webpack-cli@7.0.2)
+      webpack: 5.106.2(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2))
       webpack-merge: 6.0.1
     optionalDependencies:
       webpack-bundle-analyzer: 4.10.1
@@ -11179,7 +11196,7 @@ snapshots:
       lodash: 4.18.1
       needle: 3.3.1
       spdx-expression-validate: 2.0.0
-      webpack: 5.106.2(webpack-cli@7.0.2)
+      webpack: 5.106.2(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2))
       webpack-sources: 3.4.1
 
   webpack-merge@6.0.1:
@@ -11232,7 +11249,7 @@ snapshots:
       - postcss
       - uglify-js
 
-  webpack@5.106.2(webpack-cli@7.0.2):
+  webpack@5.106.2(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2)):
     dependencies:
       '@types/eslint-scope': 3.7.7
       '@types/estree': 1.0.9
@@ -11255,7 +11272,7 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 4.3.3
       tapable: 2.3.3
-      terser-webpack-plugin: 5.6.0(webpack@5.106.2)
+      terser-webpack-plugin: 5.6.0(webpack@5.106.2(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2)))
       watchpack: 2.5.1
       webpack-sources: 3.4.1
     optionalDependencies:
