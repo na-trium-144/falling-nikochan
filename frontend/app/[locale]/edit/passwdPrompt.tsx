@@ -8,13 +8,17 @@ import { FetchChartOptions, LoadState } from "./chartState";
 import { SlimeSVG } from "@/common/slime";
 import { rateLimit } from "@falling-nikochan/chart";
 import { APIError, shouldHideStatus } from "@/common/apiError";
-import { ErrorMessage, LinksOnError } from "@/common/errorPageComponent";
+import {
+  ClientErrorTitle,
+  ErrorMessage,
+  LinksOnError,
+} from "@/common/errorPageComponent";
 import {
   historyBackWithReview,
   useInsideFrameDetector,
   useStandaloneDetector,
 } from "@/common/pwaInstall";
-import { formatErrorMsg, isExpectedError } from "@/common/fetch";
+import { formatErrorMsg } from "@/common/fetch";
 
 interface PasswdProps {
   loadStatus: LoadState;
@@ -33,7 +37,6 @@ export function PasswdPrompt(props: PasswdProps) {
   }, []);
   const [editPasswd, setEditPasswd] = useState<string>("");
   const te = useTranslations("error");
-  const tep = useTranslations("error.errorPage");
   const standalone = useStandaloneDetector();
   const insideFrame = useInsideFrameDetector();
 
@@ -66,14 +69,14 @@ export function PasswdPrompt(props: PasswdProps) {
           </>
         ) : (
           <>
-            <h4 className="fn-heading-box">{tep("title")}</h4>
+            <ClientErrorTitle />
             <ErrorMessage error={props.loadStatus} />
           </>
         )}
         <LinksOnError
           dependOnStatus={
             props.loadStatus instanceof APIError
-              ? String(props.loadStatus)
+              ? props.loadStatus.status
               : undefined
           }
         />

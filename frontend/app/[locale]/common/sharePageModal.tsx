@@ -45,7 +45,7 @@ export function SharePageModalProvider(props: {
   const tp = useTranslations("main.play");
   const [modalCId, setModalCId] = useState<string | null>(null);
   const [modalBrief, setModalBrief] = useState<
-    (ChartBrief & { etag: string }) | null
+    (ChartBrief & { etag: string }) | Error | null
   >(null);
   const [modalRecord, setModalRecord] = useState<
     RecordGetSummary[] | Error | null
@@ -73,6 +73,7 @@ export function SharePageModalProvider(props: {
           setModalBrief(brief);
           document.title = titleShare(th, cid, brief);
         },
+        onError: (e) => setModalBrief(e),
       });
       setModalRecord(null);
       fetchBackend()

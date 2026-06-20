@@ -17,14 +17,27 @@ import { SharedResultBox } from "./sharedResult.js";
 import { useColorThief } from "@/common/colorThief.js";
 import { ExternalLink } from "@/common/extLink.jsx";
 import { ButtonHighlight } from "@/common/button.jsx";
-import { captureAndWrap, fetchBackend } from "@/common/fetch.js";
+import {
+  captureAndWrap,
+  fetchBackend,
+  formatErrorMsg,
+} from "@/common/fetch.js";
 import * as v from "valibot";
-import { markAsExpected } from "@/common/apiError.js";
+import {
+  APIError,
+  markAsExpected,
+  shouldHideStatus,
+} from "@/common/apiError.js";
 import {
   briefIsStale,
   briefStaleKey,
   fetchBrief,
 } from "@/common/briefCache.js";
+import {
+  ClientErrorTitle,
+  ErrorMessage,
+  LinksOnError,
+} from "@/common/errorPageComponent.js";
 
 const YtMetaSchema = () =>
   v.object({
@@ -35,7 +48,7 @@ type YtMeta = v.InferOutput<ReturnType<typeof YtMetaSchema>>;
 
 interface Props {
   cid: string | undefined;
-  brief: (ChartBrief & { etag: string }) | null;
+  brief: (ChartBrief & { etag: string }) | Error | null;
   record: RecordGetSummary[] | Error | null;
   sharedResult?: ResultParams | null;
   locale: string;
@@ -44,10 +57,11 @@ interface Props {
 }
 export function ShareBox(props: Props) {
   const t = useTranslations("share");
+  const te = useTranslations("error");
   const { cid, brief: propBrief, sharedResult, locale } = props;
 
   const [refreshedBrief, setRefreshedBrief] = useState<
-    (ChartBrief & { etag: string }) | null
+    (ChartBrief & { etag: string }) | Error | null
   >(null);
   const brief = refreshedBrief ?? propBrief;
   useEffect(() => {
@@ -57,6 +71,7 @@ export function ShareBox(props: Props) {
           onResult: (brief) => {
             setRefreshedBrief(brief);
           },
+          onError: (e) => setRefreshedBrief(e),
         });
       } else {
         setRefreshedBrief(null);
@@ -82,13 +97,17 @@ export function ShareBox(props: Props) {
   const [updatedAt, setUpdatedAt] = useState<string>("");
 
   useEffect(() => {
-    if (brief) {
+    if (brief && !(brief instanceof Error)) {
       setUpdatedAt(new Date(brief.updatedAt).toLocaleDateString());
     }
   }, [brief]);
 
   const ytPlayer = useRef<YouTubePlayer>(undefined);
-  const shareLink = useShareLink(cid, brief, locale);
+  const shareLink = useShareLink(
+    cid,
+    brief instanceof Error ? undefined : brief,
+    locale
+  );
   const colorThief = useColorThief();
 
   const [ytMeta, setYtMeta] = useState<YtMeta | null>(null);
@@ -108,6 +127,48 @@ export function ShareBox(props: Props) {
       setYtMeta(null);
     }
   }, [cid, locale]);
+
+  if (brief instanceof Error) {
+    return (
+      <div className="flex flex-col items-center text-center">
+        <div
+          className={clsx("mb-2 self-start", props.forceShowCId || "no-mobile")}
+        >
+          {props.backButton && (
+            <button
+              className={clsx("fn-icon-button", "mr-4")}
+              onClick={props.backButton}
+            >
+              <ButtonHighlight />
+              <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
+            </button>
+          )}
+          {cid && (
+            <>
+              <span>ID:</span>
+              <span className="ml-2 text-lg">{cid}</span>
+            </>
+          )}
+        </div>
+        {brief instanceof APIError ? (
+          <>
+            {!shouldHideStatus(brief.status) && (
+              <h4 className="fn-heading-box">Error {brief.status}</h4>
+            )}
+            <p className="mb-3">{formatErrorMsg(brief, te)}</p>
+          </>
+        ) : (
+          <>
+            <ClientErrorTitle />
+            <ErrorMessage error={brief} />
+          </>
+        )}
+        <LinksOnError
+          dependOnStatus={brief instanceof APIError ? brief.status : undefined}
+        />
+      </div>
+    );
+  }
 
   return (
     <>

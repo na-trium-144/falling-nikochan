@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import * as Sentry from "@sentry/nextjs";
 import { CenterBox } from "@/common/box";
-import { ErrorMessage } from "@/common/errorPageComponent";
+import { ClientErrorTitle, ErrorMessage } from "@/common/errorPageComponent";
 import themeInitScript from "@/common/themeInit.js?raw";
 
 // Error boundaries must be Client Components
@@ -30,7 +30,7 @@ export default function Error(props: ErrorProps) {
         />
         <div className="fn-fallback-bg" />
         <CenterBox classNameInner="flex flex-col items-center">
-          <h4 className="fn-heading-box">An error has occurred 😢</h4>
+          <ClientErrorTitle />
           <ErrorMessage error={props.error} />
         </CenterBox>
       </body>
