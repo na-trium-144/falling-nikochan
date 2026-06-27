@@ -16,7 +16,6 @@ describe("ChartEditing", () => {
         locale: "en",
         cid: "123456",
         currentPasswd: {
-          p: "passwd",
           ph: "passwdhash",
           pbypass: null,
         },
@@ -27,7 +26,6 @@ describe("ChartEditing", () => {
       expect(ce.convertedFrom).to.equal(5);
       expect(ce.cid).to.equal("123456");
       expect(ce.currentPasswd).to.deep.equal({
-        p: "passwd",
         ph: "passwdhash",
         pbypass: null,
       });
@@ -45,7 +43,6 @@ describe("ChartEditing", () => {
       expect(ce.hasChange).to.equal(false);
       expect(ce.currentLevelIndex).to.equal(0);
       expect(ce.currentPasswd).to.deep.equal({
-        p: null,
         ph: null,
         pbypass: null,
       });
@@ -88,7 +85,6 @@ describe("ChartEditing", () => {
       });
       expect(ce.convertedFrom).to.equal(1);
       ce.resetOnSave("1", {
-        p: null,
         ph: null,
         pbypass: null,
       });
@@ -103,7 +99,6 @@ describe("ChartEditing", () => {
       });
       expect(ce.hasChange).to.equal(true);
       ce.resetOnSave("1", {
-        p: null,
         ph: null,
         pbypass: null,
       });
@@ -115,25 +110,21 @@ describe("ChartEditing", () => {
         locale: "en",
         cid: undefined,
         currentPasswd: {
-          p: "oldpass",
           ph: "oldpasshash",
           pbypass: null,
         },
       });
       ce.setChangePasswd("newpass");
       expect(ce.currentPasswd).to.deep.equal({
-        p: "oldpass",
         ph: "oldpasshash",
         pbypass: null,
       });
       expect(ce.changePasswd).to.equal("newpass");
       ce.resetOnSave("1", {
-        p: "newpass",
         ph: "newpasshash",
         pbypass: null,
       });
       expect(ce.currentPasswd).to.deep.equal({
-        p: "newpass",
         ph: "newpasshash",
         pbypass: null,
       });
@@ -147,7 +138,6 @@ describe("ChartEditing", () => {
       });
       expect(ce.cid).to.be.undefined;
       ce.resetOnSave("123", {
-        p: null,
         ph: null,
         pbypass: null,
       });
@@ -164,7 +154,6 @@ describe("ChartEditing", () => {
         rerendered = true;
       });
       ce.resetOnSave("1", {
-        p: null,
         ph: null,
         pbypass: null,
       });

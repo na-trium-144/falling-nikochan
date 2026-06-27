@@ -36,22 +36,40 @@ export async function fetchBrief(cid: string, callbacks: Callbacks) {
   let hasResult = false;
   let cachePromise: Promise<void> | undefined = undefined;
 
-  const staleLS = localStorage.getItem(briefKeyOld(cid));
-  if (staleLS) {
-    cache?.put(`/api/brief/${cid}`, new Response(staleLS));
-    localStorage.removeItem(briefKeyOld(cid));
-    callbacks.onResult({ ...(JSON.parse(staleLS) as ChartBrief), etag: "" });
-    hasResult = true;
-  } else {
-    cachePromise = cache?.match(`/api/brief/${cid}`).then(async (res) => {
-      if (res) {
-        callbacks.onResult({
-          ...((await res.json()) as ChartBrief),
-          etag: res.headers.get("ETag")?.match(etagContentRegex)?.[0] ?? "",
-        });
-        hasResult = true;
-      }
-    });
+  try {
+    const staleLS = localStorage.getItem(briefKeyOld(cid));
+    if (staleLS) {
+      const staleLSBrief = v.parse(ChartBriefSchema(), JSON.parse(staleLS));
+      cache?.put(`/api/brief/${cid}`, new Response(staleLS));
+      localStorage.removeItem(briefKeyOld(cid));
+      callbacks.onResult({ ...staleLSBrief, etag: "" });
+      hasResult = true;
+    }
+  } catch (e) {
+    console.error(
+      `Error parsing ${briefKeyOld(cid)}:`,
+      v.isValiError(e) ? v.flatten(e.issues) : e
+    );
+  }
+  if (!hasResult) {
+    cachePromise = cache
+      ?.match(`/api/brief/${cid}`)
+      .then(async (res) => {
+        if (res) {
+          const cacheBrief = v.parse(ChartBriefSchema(), await res.json());
+          callbacks.onResult({
+            ...cacheBrief,
+            etag: res.headers.get("ETag")?.match(etagContentRegex)?.[0] ?? "",
+          });
+          hasResult = true;
+        }
+      })
+      .catch((e) => {
+        console.error(
+          `Error parsing cache for ${cid}:`,
+          v.isValiError(e) ? v.flatten(e.issues) : e
+        );
+      });
   }
 
   fetchBackend()

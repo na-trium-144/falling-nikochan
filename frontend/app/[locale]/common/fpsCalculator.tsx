@@ -7,6 +7,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import * as v from "valibot";
 
 const FPSContext = createContext<{ realFps: number; stable: boolean }>({
   realFps: 20,
@@ -22,22 +23,21 @@ export function FPSCalculatorProvider(props: { children: ReactNode }) {
     let fps = 20;
     let hasStableValue = false;
     try {
-      const parsed = JSON.parse(localStorage.getItem("fpsCalculator")!) as {
-        fps?: number;
-        hasStableValue?: boolean;
-      };
-      if ("fps" in parsed && typeof parsed.fps === "number") {
+      if (localStorage.getItem("fpsCalculator")) {
+        const parsed = v.parse(
+          v.object({ fps: v.number(), hasStableValue: v.boolean() }),
+          JSON.parse(localStorage.getItem("fpsCalculator")!)
+        );
         fps = parsed.fps;
         setFPS(fps);
-      }
-      if (
-        "hasStableValue" in parsed &&
-        typeof parsed.hasStableValue === "boolean"
-      ) {
         hasStableValue = parsed.hasStableValue;
         setHasStableValue(hasStableValue);
       }
-    } catch {
+    } catch (e) {
+      console.error(
+        `Error parsing fpsCalculator:`,
+        v.isValiError(e) ? v.flatten(e.issues) : e
+      );
       // ignore error
     }
     let deltas = new Float64Array(Math.max(100, Math.min(1000, fps * 5)));

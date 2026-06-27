@@ -1,20 +1,27 @@
+import * as v from "valibot";
+
 const versionKey = "lastVisited";
 const latestChangelogMajor = 16;
 const latestChangelogMinor = 19;
 export function lastVisitedOld(): boolean {
   try {
-    const lastVisited = localStorage.getItem(versionKey);
-    if (!lastVisited) {
-      return true;
+    if (localStorage.getItem(versionKey)) {
+      const [major, minor] = v.parse(
+        v.tuple([v.number(), v.number()]),
+        localStorage.getItem(versionKey)
+      );
+      return (
+        major < latestChangelogMajor ||
+        (major === latestChangelogMajor && minor < latestChangelogMinor)
+      );
     }
-    const [major, minor] = JSON.parse(lastVisited);
-    return (
-      major < latestChangelogMajor ||
-      (major === latestChangelogMajor && minor < latestChangelogMinor)
+  } catch (e) {
+    console.error(
+      `Error parsing ${versionKey}:`,
+      v.isValiError(e) ? v.flatten(e.issues) : e
     );
-  } catch {
-    return true;
   }
+  return true;
 }
 export function updateLastVisited() {
   localStorage.setItem(
