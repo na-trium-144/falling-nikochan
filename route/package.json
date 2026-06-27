@@ -33,7 +33,7 @@
     "moji": "^0.5.1",
     "mongodb": "catalog:",
     "oauth-1.0a": "^2.2.6",
-    "react": "catalog:",
+    "react": "catalog:react",
     "sitemap": "^9.0.1",
     "twitter-text": "^3.1.0",
     "valibot": "catalog:",
@@ -43,7 +43,7 @@
     "@falling-nikochan/route": "workspace:*",
     "@types/chai": "catalog:",
     "@types/moji": "^0.5.3",
-    "@types/react": "catalog:",
+    "@types/react": "catalog:react",
     "@types/twitter-text": "^3.1.10",
     "chai": "catalog:"
   }
