@@ -1,10 +1,11 @@
 ## ver. 16.22 - 2025/06/28
 
-* pnpm11 [#1128](https://github.com/na-trium-144/falling-nikochan/pull/1128)
+* <del>pnpm11 [#1128](https://github.com/na-trium-144/falling-nikochan/pull/1128)</del>
     * catalogでパッケージのバージョンを管理
     * minimulReleaseAgeと除外パッケージを設定
     * devengines.packagemanager, runtime を指定
     * savePrefixを指定して一部のどうでもいいパッケージ以外バージョン固定するのも良さそうだが、パッケージごとに適切な指定を考えるのがめんどくさくなったので一旦現状維持
+* pnpm10に戻す [#1223](https://github.com/na-trium-144/falling-nikochan/pull/1223)
 * localStorageのバリデーション [#1221](https://github.com/na-trium-144/falling-nikochan/pull/1221)
     * 生のパスワードをセッションに保存しない
 
