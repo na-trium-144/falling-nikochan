@@ -5,7 +5,7 @@
   "license": "AGPL-3.0-or-later",
   "engines": {
     "node": "^23.6 || ^24",
-    "pnpm": ">=11"
+    "pnpm": ">=10.26.0"
   },
   "devEngines": {
     "runtime": [
@@ -17,11 +17,11 @@
     ],
     "packageManager": {
       "name": "pnpm",
-      "version": ">=11.0.0 <12.0.0",
+      "version": ">=10.26.0 <11",
       "onFail": "download"
     }
   },
-  "packageManager": "pnpm@11.9.0",
+  "packageManager": "pnpm@10.34.4",
   "scripts": {
     "lint": "tsc && pnpm run -r --if-present t && pnpm run -r --if-present lint",
     "format": "prettier --write .",

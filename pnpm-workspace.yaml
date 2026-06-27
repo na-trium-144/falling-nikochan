@@ -17,13 +17,14 @@ allowBuilds:
   unrs-resolver: true
 
 minimumReleaseAge: 1440
-minimumReleaseAgeStrict: true
+# minimumReleaseAgeStrict: true
 minimumReleaseAgeExclude:
   # these are authored by me (@na-trium-144)
   - fn-commands
   - next-license-list
 
-dedupePeers: true
+strictDepBuilds: true
+# dedupePeers: true
 verifyDepsBeforeRun: warn
 catalogMode: strict
 cleanupUnusedCatalogs: true
