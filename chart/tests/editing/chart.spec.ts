@@ -26,7 +26,6 @@ describe("ChartEditing", () => {
       expect(ce.convertedFrom).to.equal(5);
       expect(ce.cid).to.equal("123456");
       expect(ce.currentPasswd).to.deep.equal({
-        p: "passwd",
         ph: "passwdhash",
         pbypass: null,
       });
@@ -44,7 +43,6 @@ describe("ChartEditing", () => {
       expect(ce.hasChange).to.equal(false);
       expect(ce.currentLevelIndex).to.equal(0);
       expect(ce.currentPasswd).to.deep.equal({
-        p: null,
         ph: null,
         pbypass: null,
       });
