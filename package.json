@@ -5,7 +5,21 @@
   "license": "AGPL-3.0-or-later",
   "engines": {
     "node": "^23.6 || ^24",
-    "pnpm": ">=10"
+    "pnpm": ">=11"
+  },
+  "devEngines": {
+    "runtime": [
+      {
+        "name": "node",
+        "version": "^24",
+        "onFail": "warn"
+      }
+    ],
+    "packageManager": {
+      "name": "pnpm",
+      "version": ">=11.0.0 <12.0.0",
+      "onFail": "download"
+    }
   },
   "packageManager": "pnpm@11.9.0",
   "scripts": {
