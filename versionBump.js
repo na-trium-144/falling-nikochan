@@ -1,5 +1,4 @@
 import fs from "node:fs";
-import YAML from "yaml";
 import semver from "semver";
 
 // 引数から更新タイプを取得 (major, minor, patch)

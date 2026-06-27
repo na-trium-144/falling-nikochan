@@ -1,3 +1,13 @@
+## ver. 16.22 - 2025/06/28
+
+* pnpm11 [#1128](https://github.com/na-trium-144/falling-nikochan/pull/1128)
+    * catalogでパッケージのバージョンを管理
+    * minimulReleaseAgeと除外パッケージを設定
+    * devengines.packagemanager, runtime を指定
+    * savePrefixを指定して一部のどうでもいいパッケージ以外バージョン固定するのも良さそうだが、パッケージごとに適切な指定を考えるのがめんどくさくなったので一旦現状維持
+* localStorageのバリデーション [#1221](https://github.com/na-trium-144/falling-nikochan/pull/1221)
+    * 生のパスワードをセッションに保存しない
+
 ## ver. 16.21 - 2025/06/21
 
 * 譜面編集で譜面データfetch時、shareBoxでbriefのfetch時のエラーの表示を修正 [#1217](https://github.com/na-trium-144/falling-nikochan/pull/1217)
