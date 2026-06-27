@@ -1,10 +1,10 @@
-FROM node:24-slim AS builder
+FROM node:20-slim AS builder
 
 WORKDIR /app
 ENV CI=true
 
 # Install pnpm
-RUN npm install -g pnpm@11
+RUN npm install -g pnpm@10
 
 # Copy package files
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
@@ -21,13 +21,13 @@ COPY . .
 
 RUN pnpm run t
 
-FROM node:22-slim AS prod-deps
+FROM node:20-slim AS prod-deps
 
 WORKDIR /app
 ENV CI=true
 
 # Install pnpm
-RUN npm install -g pnpm@11
+RUN npm install -g pnpm@10
 
 # Copy package files
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
