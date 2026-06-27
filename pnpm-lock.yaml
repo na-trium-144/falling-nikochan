@@ -181,8 +181,8 @@ importers:
         specifier: ^3.8.3
         version: 3.8.3
       semver:
-        specifier: ^7.7.4
-        version: 7.7.4
+        specifier: ^7.8.5
+        version: 7.8.5
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -194,7 +194,7 @@ importers:
         version: 8.58.0(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3)
       webpack:
         specifier: ^5.106.2
-        version: 5.106.2(webpack-cli@7.0.2)
+        version: 5.106.2(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2))
       webpack-cli:
         specifier: ^7.0.2
         version: 7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2)
@@ -513,7 +513,7 @@ importers:
     devDependencies:
       babel-loader:
         specifier: ^10.1.1
-        version: 10.1.1(@babel/core@7.29.0)(webpack@5.106.2(webpack-cli@7.0.2))
+        version: 10.1.1(@babel/core@7.29.0)(webpack@5.106.2(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2)))
       dotenv:
         specifier: 'catalog:'
         version: 16.6.1
@@ -4915,8 +4915,8 @@ packages:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
     hasBin: true
 
-  semver@7.7.4:
-    resolution: {integrity: sha512-vFKC2IEtQnVhpT78h1Yp8wzwrf8CM+MzKMHGJZfBtzhZNycRFnXsHk6E5TxIkkMsgNS7mdX3AGB7x2QM2di4lA==}
+  semver@7.8.5:
+    resolution: {integrity: sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -7466,7 +7466,7 @@ snapshots:
       '@typescript-eslint/visitor-keys': 8.58.0
       debug: 4.4.3
       minimatch: 10.2.5
-      semver: 7.7.4
+      semver: 7.8.5
       tinyglobby: 0.2.16
       ts-api-utils: 2.5.0(typescript@5.9.3)
       typescript: 5.9.3
@@ -7805,12 +7805,12 @@ snapshots:
 
   axobject-query@4.1.0: {}
 
-  babel-loader@10.1.1(@babel/core@7.29.0)(webpack@5.106.2(webpack-cli@7.0.2)):
+  babel-loader@10.1.1(@babel/core@7.29.0)(webpack@5.106.2(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2))):
     dependencies:
       '@babel/core': 7.29.0
       find-up: 5.0.0
     optionalDependencies:
-      webpack: 5.106.2(webpack-cli@7.0.2)
+      webpack: 5.106.2(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2))
 
   babel-plugin-polyfill-corejs2@0.4.17(@babel/core@7.29.0):
     dependencies:
@@ -8957,7 +8957,7 @@ snapshots:
 
   is-bun-module@2.0.0:
     dependencies:
-      semver: 7.7.4
+      semver: 7.8.5
 
   is-callable@1.2.7: {}
 
@@ -10199,7 +10199,7 @@ snapshots:
 
   semver@6.3.1: {}
 
-  semver@7.7.4: {}
+  semver@7.8.5: {}
 
   set-function-length@1.2.2:
     dependencies:
@@ -10231,7 +10231,7 @@ snapshots:
     dependencies:
       '@img/colour': 1.0.0
       detect-libc: 2.1.2
-      semver: 7.7.4
+      semver: 7.8.5
     optionalDependencies:
       '@img/sharp-darwin-arm64': 0.34.5
       '@img/sharp-darwin-x64': 0.34.5
@@ -10463,13 +10463,13 @@ snapshots:
     optionalDependencies:
       postcss: 8.5.14
 
-  terser-webpack-plugin@5.6.0(webpack@5.106.2):
+  terser-webpack-plugin@5.6.0(webpack@5.106.2(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2))):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
       schema-utils: 4.3.3
       terser: 5.47.1
-      webpack: 5.106.2(webpack-cli@7.0.2)
+      webpack: 5.106.2(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2))
 
   terser@5.47.1:
     dependencies:
@@ -10758,7 +10758,7 @@ snapshots:
       import-local: 3.2.0
       interpret: 3.1.1
       rechoir: 0.8.0
-      webpack: 5.106.2(webpack-cli@7.0.2)
+      webpack: 5.106.2(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2))
       webpack-merge: 6.0.1
     optionalDependencies:
       webpack-bundle-analyzer: 4.10.1
@@ -10778,7 +10778,7 @@ snapshots:
       lodash: 4.18.1
       needle: 3.3.1
       spdx-expression-validate: 2.0.0
-      webpack: 5.106.2(webpack-cli@7.0.2)
+      webpack: 5.106.2(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2))
       webpack-sources: 3.4.1
 
   webpack-merge@6.0.1:
@@ -10831,7 +10831,7 @@ snapshots:
       - postcss
       - uglify-js
 
-  webpack@5.106.2(webpack-cli@7.0.2):
+  webpack@5.106.2(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2)):
     dependencies:
       '@types/eslint-scope': 3.7.7
       '@types/estree': 1.0.9
@@ -10854,7 +10854,7 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 4.3.3
       tapable: 2.3.3
-      terser-webpack-plugin: 5.6.0(webpack@5.106.2)
+      terser-webpack-plugin: 5.6.0(webpack@5.106.2(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2)))
       watchpack: 2.5.1
       webpack-sources: 3.4.1
     optionalDependencies:
