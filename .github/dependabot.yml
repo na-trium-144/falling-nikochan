@@ -31,3 +31,6 @@ updates:
         patterns:
           - "tailwindcss"
           - "@tailwindcss/*"
+      sentry:
+        patterns:
+          - "@sentry/*"

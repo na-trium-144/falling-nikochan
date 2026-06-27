@@ -258,7 +258,7 @@ export async function hash(text: string) {
 }
 
 /**
- * Calculates hash of a level using object-hash library.
+ * Calculates hash of a level.
  * This ensures consistent hashing regardless of property order.
  * Normalizes all Step types to ensure fractions are in simplest form.
  * @param level Level13Edit to hash

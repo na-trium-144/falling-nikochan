@@ -16,11 +16,11 @@
   "dependencies": {
     "@falling-nikochan/i18n": "workspace:*",
     "@falling-nikochan/route": "workspace:*",
-    "@gera2ld/tarjs": "^0.3.1",
-    "hono": "^4.12.23"
+    "@gera2ld/tarjs": "catalog:",
+    "hono": "catalog:"
   },
   "devDependencies": {
     "babel-loader": "^10.1.1",
-    "dotenv": "^16.6.1"
+    "dotenv": "catalog:"
   }
 }
