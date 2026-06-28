@@ -8,7 +8,7 @@ export function lastVisitedOld(): boolean {
     if (localStorage.getItem(versionKey)) {
       const [major, minor] = v.parse(
         v.tuple([v.number(), v.number()]),
-        localStorage.getItem(versionKey)
+        JSON.parse(localStorage.getItem(versionKey)!)
       );
       return (
         major < latestChangelogMajor ||
