@@ -14,12 +14,7 @@
         "version": "^24",
         "onFail": "warn"
       }
-    ],
-    "packageManager": {
-      "name": "pnpm",
-      "version": ">=10.33.0 <11",
-      "onFail": "download"
-    }
+    ]
   },
   "packageManager": "pnpm@10.34.4",
   "scripts": {
