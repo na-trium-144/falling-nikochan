@@ -13,7 +13,8 @@ function noteLuaCommand(n: NoteCommand | NoteCommand3) {
   if ("fall" in n) {
     return (
       `Note(${n.hitX}, ${n.hitVX}, ${n.hitVY}, ` +
-      `${n.big ? "true" : "false"}, ${n.fall ? "true" : "false"})`
+      `${n.big ? "true" : "false"}, ${n.fall ? "true" : "false"}, ` +
+      `{${n.longFrom.join(", ")}})`
     );
   } else {
     return (
