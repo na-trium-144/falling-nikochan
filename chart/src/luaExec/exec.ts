@@ -2,6 +2,7 @@ import { Step, StepSchema, stepZero } from "../step.js";
 import { LevelFreeze } from "../chart.js";
 import * as v from "valibot";
 import { LevelFreezeSchema15 } from "../legacy/chart15.js";
+import { LevelFreezeSchema17 } from "../legacy/chart17.js";
 
 export interface LuaExecResult {
   stdout: string[];
@@ -78,7 +79,7 @@ export async function luaExec(
       codeStatic.push(
         lineStr
           .replace(
-            /^( *)Note\(( *-?[\d.]+ *(?:, *-?[\d.]+ *){2}(?:, *(?:true|false) *){1,2})\)( *)$/,
+            /^( *)Note\(( *-?[\d.]+ *(?:, *-?[\d.]+ *){2}(?:, *(?:true|false) *){1,2}(?:, *{[-\d., ]+} *){0,1})\)( *)$/,
             `$1NoteStatic(${ln - levelBeginLn},$2)$3`
           )
           .replace(
@@ -126,7 +127,7 @@ export async function luaExec(
       }
     }
     if (fnState) {
-      result.levelFreezed = v.parse(LevelFreezeSchema15(), {
+      result.levelFreezed = v.parse(LevelFreezeSchema17(), {
         notes: parseArrayOrEmpty(fnState.notes),
         rest: parseArrayOrEmpty(fnState.rest),
         bpmChanges: parseArrayOrEmpty(fnState.bpmChanges),

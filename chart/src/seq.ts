@@ -19,12 +19,12 @@ import { BPMChange1 } from "./legacy/chart1.js";
 import { Signature5 } from "./legacy/chart5.js";
 import { Chart6, Level6Play } from "./legacy/chart6.js";
 import {
-  Level15Play,
   YTBeginSchema15,
   YTEndSecSchema15,
 } from "./legacy/chart15.js";
 import { docRefs, Schema } from "./docSchema.js";
 import { resolver } from "hono-openapi";
+import { Level17Play } from "./legacy/chart17.js";
 
 export const DisplayParamSchema = () =>
   v.object({
@@ -267,7 +267,7 @@ function solveQuadEquation(
  * chartを読み込む
  */
 export function loadChart(
-  level: Level15Play | Level6Play | Chart6,
+  level: Level17Play | Level6Play | Chart6,
   levelIndex?: number
 ): ChartSeqData {
   if ("levels" in level) {

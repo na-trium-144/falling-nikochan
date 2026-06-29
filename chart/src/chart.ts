@@ -48,7 +48,6 @@ import {
   Chart14Min,
   ChartEditSchema14,
   ChartMinSchema14,
-  ChartUntil14,
   convertTo14Min,
   convertToMin14,
 } from "./legacy/chart14.js";
@@ -72,15 +71,21 @@ import {
   Chart15,
   ChartSchema15,
   ChartUntil15,
-  ChartUntil15Min,
-  convertTo15,
-  convertToPlay15,
   Level15Freeze,
   Level15Meta,
-  Level15Play,
 } from "./legacy/chart15.js";
 import { docRefs, Reference, Schema } from "./docSchema.js";
 import { maxLv, minLv } from "./apiConfig.js";
+import {
+  Chart17,
+  ChartSchema17,
+  ChartUntil17,
+  ChartUntil17Min,
+  convertTo17,
+  convertToPlay17,
+  Level17Freeze,
+  Level17Play,
+} from "./legacy/chart17.js";
 
 export const YoutubeIdSchema = () =>
   v.pipe(
@@ -182,18 +187,17 @@ export function emptyBrief(): ChartBrief {
     levels: [],
   };
 }
-export const currentChartVer = 16;
+export const currentChartVer = 17;
 export const lastIncompatibleVer = 6;
-export type ChartEdit = Chart15;
-export type LevelPlay = Level15Play;
+export type ChartEdit = Chart17;
+export type LevelPlay = Level17Play;
 export type LevelMin = Level15Meta;
-export type LevelFreeze = Level15Freeze;
+export type LevelFreeze = Level17Freeze;
 export const convertToMin = convertToMin14;
-export const convertToPlay = convertToPlay15;
+export const convertToPlay = convertToPlay17;
 
-export async function convertToLatest(chart: ChartUntil15): Promise<ChartEdit> {
-  if (chart.ver !== 15 && chart.ver !== 16)
-    chart = await convertTo15(chart as ChartUntil14);
+export async function convertToLatest(chart: ChartUntil17): Promise<ChartEdit> {
+  if (chart.ver !== 17) chart = await convertTo17(chart as ChartUntil15);
   return chart;
 }
 /*
@@ -202,18 +206,21 @@ jsonシリアライズ可能ではないinfinityなどが含まれると保存�
 それを防ぐためjsonシリアライズを通してからバリデーションする。
 (TODO)そもそも保存時にjson化すべきでない。
 */
-export async function validateChart(chart: ChartUntil15): Promise<ChartEdit> {
+export async function validateChart(chart: ChartUntil17): Promise<ChartEdit> {
   chart = JSON.parse(JSON.stringify(chart));
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   chart = await convertToLatest(chart);
-  chart satisfies Chart15;
-  chart = v.parse(ChartSchema15(), chart);
+  chart satisfies Chart17;
+  chart = v.parse(ChartSchema17(), chart);
   return { ...chart, ver: currentChartVer };
 }
-export function validateChartWithoutConvert(chart: ChartUntil15): ChartUntil15 {
+export function validateChartWithoutConvert(chart: ChartUntil17): ChartUntil17 {
   chart = JSON.parse(JSON.stringify(chart));
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   switch (chart.ver) {
+    case 17:
+      chart satisfies Chart17;
+      return v.parse(ChartSchema17(), chart);
     case 16:
     case 15:
       chart satisfies Chart15;
@@ -229,15 +236,12 @@ export function validateChartWithoutConvert(chart: ChartUntil15): ChartUntil15 {
   }
 }
 export async function validateChartMin(
-  chart: ChartUntil15Min
-): Promise<Chart14Min | Chart15> {
+  chart: ChartUntil17Min
+): Promise<Chart14Min | Chart17> {
   chart = JSON.parse(JSON.stringify(chart));
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart.ver >= 15) {
-    // if(chart.ver !== 15 &&chart.ver !== 16)
-    // chart satisfies Chart15;
-    chart = v.parse(ChartSchema15(), chart);
-    return { ...chart, ver: 16 };
+    return validateChart(chart as ChartUntil17);
   } else {
     if (chart.ver !== 14)
       chart = await convertTo14Min(chart as ChartUntil13Min);
@@ -266,6 +270,7 @@ export async function hash(text: string) {
  */
 export async function hashLevel(
   level:
+    | Level17Freeze
     | Level15Freeze
     | Level13Freeze
     | Level11Freeze
@@ -286,6 +291,7 @@ export async function hashLevel(
         hitVX: note.hitVX,
         hitVY: note.hitVY,
         fall: "fall" in note ? note.fall : false,
+        longFrom: "longFrom" in note ? note.longFrom : [],
       }) satisfies NoteCommand
   );
 
@@ -430,7 +436,7 @@ export function emptyLevel(
 export async function createBrief(
   // API用に過去2バージョンサポート
   // seedでChart5を使う
-  chart: Chart5 | Chart14Edit | Chart15,
+  chart: Chart5 | Chart15 | Chart17,
   updatedAt: number
 ): Promise<ChartBrief> {
   let levelHashes: string[] = [];
@@ -443,12 +449,7 @@ export async function createBrief(
   } catch (e) {
     console.error(e);
   }
-  const levelsMin =
-    "levels" in chart
-      ? chart.levels
-      : "levelsMin" in chart
-        ? chart.levelsMin
-        : chart.levelsMeta;
+  const levelsMin = "levels" in chart ? chart.levels : chart.levelsMeta;
   const levelsFreeze = "levels" in chart ? chart.levels : chart.levelsFreeze;
   const levelBrief = levelsMin.map(
     (level, i) =>
