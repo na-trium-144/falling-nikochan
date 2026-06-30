@@ -4,6 +4,7 @@ import clsx from "clsx/lite";
 import {
   createContext,
   ReactNode,
+  RefObject,
   useCallback,
   useContext,
   useEffect,
@@ -39,6 +40,7 @@ const AceEditor = dynamic(
 );
 import type { Selection } from "ace-builds-internal/selection";
 import type { WorkerInput } from "./luaExecWorker";
+import type Ace from "ace-builds";
 
 // https://github.com/vercel/next.js/discussions/29415
 // import "remote-web-worker";
@@ -174,6 +176,8 @@ interface Props {
   seekStepAbs: (s: Step) => void;
   errLine: number | null;
   err: string[];
+  children: ReactNode;
+  aceSessionRef: RefObject<(Ace.EditSession | null)[]>;
 }
 interface LuaPositionData {
   top: number;
@@ -187,10 +191,7 @@ interface LuaPositionContext {
 }
 const LuaPositionContext = createContext<LuaPositionContext>(null!);
 
-interface PProps {
-  children: ReactNode;
-}
-export function LuaTabProvider(props: Props & PProps) {
+export function LuaTabProvider(props: Props) {
   const [data, setData] = useState<LuaPositionData>({
     top: 0,
     left: 0,
@@ -199,7 +200,15 @@ export function LuaTabProvider(props: Props & PProps) {
   });
 
   const { top, left, width, height } = data;
-  const { visible, chart, currentStepStr, seekStepAbs, errLine, err } = props;
+  const {
+    visible,
+    chart,
+    currentStepStr,
+    seekStepAbs,
+    errLine,
+    err,
+    aceSessionRef,
+  } = props;
 
   return (
     <LuaPositionContext.Provider value={{ data, setData }}>
@@ -219,6 +228,10 @@ export function LuaTabProvider(props: Props & PProps) {
             seekStepAbs={seekStepAbs}
             errLine={chart.currentLevelIndex === i ? errLine : null}
             err={chart.currentLevelIndex === i ? err : []}
+            setAceSession={(session) => {
+              aceSessionRef.current[i] = session;
+            }}
+            visible={visible && chart.currentLevelIndex === i}
           />
         </div>
       ))}
@@ -232,26 +245,37 @@ interface IProps {
   seekStepAbs: (s: Step) => void;
   errLine: number | null;
   err: string[];
+  setAceSession: (session: Ace.EditSession | null) => void;
+  visible: boolean;
 }
 function AceEditorInstance(props: IProps) {
   const themeState = useTheme();
-  const { level, currentStepStr, seekStepAbs, errLine, err } = props;
+  const {
+    level,
+    currentStepStr,
+    seekStepAbs,
+    errLine,
+    err,
+    setAceSession,
+    visible,
+  } = props;
   const cur = level.current;
   const { rem } = useDisplayMode();
   const t = useTranslations("edit.code");
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_rerenderIndex, setRerenderIndex] = useState<number>(0);
-  const rerender = useCallback(() => setRerenderIndex((i) => i + 1), []);
+  const editorRef = useRef<Ace.Editor | null>(null);
   useEffect(() => {
-    level.on("luaEditor", rerender);
+    setAceSession(editorRef.current?.session ?? null);
     return () => {
-      level.off("luaEditor", rerender);
+      setAceSession(null);
     };
-  }, [level, rerender]);
+  }, [setAceSession]);
 
   return (
     <AceEditor
+      onLoad={(editor) => {
+        editorRef.current = editor;
+      }}
       mode="lua"
       theme={themeState.isDark ? "tomorrow_night" : "tomorrow"}
       width="100%"
@@ -317,10 +341,10 @@ function AceEditorInstance(props: IProps) {
       enableLiveAutocompletion={false}
       enableSnippets={false}
       onChange={(value) => {
-        level.setLuaEditorValue(value);
+        level.setLuaEditorValue(value, visible);
       }}
       onCursorChange={(sel: Selection) => {
-        if (!sel.isMultiLine()) {
+        if (visible && !sel.isMultiLine()) {
           const step = findStepFromLua(
             { ...level.freeze, lua: [...level.lua] },
             sel.cursor.row
