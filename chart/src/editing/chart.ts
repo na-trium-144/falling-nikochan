@@ -301,6 +301,7 @@ export class ChartEditing extends EventEmitter<EventType> {
         big: this.#copyBuffer[String(copyIndex)]![3],
         fall: this.#copyBuffer[String(copyIndex)]![4],
         step: stepZero(),
+        longFrom: [],
       };
       if (this.currentLevel?.currentNote && !forceAdd) {
         this.currentLevel.updateNote(note);
