@@ -478,6 +478,18 @@ export default function Edit(props: {
           }
         } else if (e.key === "Shift") {
           setDragMode("v");
+        } else if (e.key === "z") {
+          const session =
+            chart?.currentLevelIndex !== undefined
+              ? aceSessionRef.current[chart.currentLevelIndex]
+              : undefined;
+          session?.getUndoManager().undo(session);
+        } else if (e.key === "y") {
+          const session =
+            chart?.currentLevelIndex !== undefined
+              ? aceSessionRef.current[chart.currentLevelIndex]
+              : undefined;
+          session?.getUndoManager().redo(session);
         } else {
           //
         }
@@ -499,6 +511,7 @@ export default function Edit(props: {
     seekStepRel,
     seekSec,
     currentLevel,
+    aceSessionRef,
   ]);
   return (
     <main
@@ -895,54 +908,6 @@ export default function Edit(props: {
               <HelpIcon className="self-center">
                 {t.rich("stepUnitHelp", { br: () => <br /> })}
               </HelpIcon>
-              <Button
-                small
-                text={`Undo (${
-                  chart?.currentLevelIndex !== undefined &&
-                  aceSessionRef.current[
-                    chart.currentLevelIndex
-                  ]?.getUndoManager()?.$undoStack.length
-                })`}
-                onClick={() => {
-                  if (chart?.currentLevelIndex !== undefined) {
-                    const session =
-                      aceSessionRef.current[chart.currentLevelIndex];
-                    session?.getUndoManager().undo(session);
-                  }
-                }}
-                disabled={
-                  !(
-                    chart?.currentLevelIndex !== undefined &&
-                    aceSessionRef.current[chart.currentLevelIndex]
-                      ?.getUndoManager()
-                      .canUndo()
-                  )
-                }
-              />
-              <Button
-                small
-                text={`Redo (${
-                  chart?.currentLevelIndex !== undefined &&
-                  aceSessionRef.current[
-                    chart.currentLevelIndex
-                  ]?.getUndoManager()?.$redoStack.length
-                })`}
-                onClick={() => {
-                  if (chart?.currentLevelIndex !== undefined) {
-                    const session =
-                      aceSessionRef.current[chart.currentLevelIndex];
-                    session?.getUndoManager().redo(session);
-                  }
-                }}
-                disabled={
-                  !(
-                    chart?.currentLevelIndex !== undefined &&
-                    aceSessionRef.current[chart.currentLevelIndex]
-                      ?.getUndoManager()
-                      .canRedo()
-                  )
-                }
-              />
               <div className="flex-1" />
               <span className="mr-1">{t("zoom")}</span>
               <Button
@@ -1028,7 +993,7 @@ export default function Edit(props: {
               ) : tab === 2 ? (
                 <LevelTab chart={chart} />
               ) : tab === 3 ? (
-                <NoteTab chart={chart} />
+                <NoteTab chart={chart} aceSessionRef={aceSessionRef} />
               ) : null}
               <LuaTabPlaceholder parentContainer={ref.current} />
             </Box>
