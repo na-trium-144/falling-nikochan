@@ -55,6 +55,10 @@ export class LevelEditing extends EventEmitter<EventType> {
     signature: SignatureWithBarNum[];
   };
 
+  #lastValidLua: string[];
+  #luaEditorValue: string;
+  #luaEditorDebounceTimeout: ReturnType<typeof setTimeout> | null = null;
+
   constructor(
     min: Readonly<LevelMin>,
     freeze: Readonly<LevelFreeze>,
@@ -72,6 +76,8 @@ export class LevelEditing extends EventEmitter<EventType> {
 
     this.#meta = JSON.parse(JSON.stringify(min));
     this.#lua = [...lua];
+    this.#lastValidLua = [...lua];
+    this.#luaEditorValue = lua.join("\n");
     this.#freeze = JSON.parse(JSON.stringify(freeze));
     const { bpm, speed } = updateBpmTimeSec(
       this.#freeze.bpmChanges,
@@ -160,23 +166,51 @@ export class LevelEditing extends EventEmitter<EventType> {
     this.emit("rerender");
     this.emit("change");
   }
-  async updateLua(lua: string[]) {
-    const prevLua = this.#lua;
+  async updateLua(lua: string[], fromLuaEditor: boolean = false) {
     this.#lua = lua;
+    if (!fromLuaEditor) {
+      this.#luaEditorValue = lua.join("\n");
+      this.emit("rerender");
+    }
     this.#luaExecutorRef.current.abortExec();
     const levelFreezed = await this.#luaExecutorRef.current.exec(
       lua.join("\n")
     );
     if (levelFreezed) {
-      this.#lua = lua;
+      this.#lastValidLua = lua;
       this.updateFreeze(levelFreezed);
     } else {
       if (this.#lua === lua) {
         // 変更をrevert
-        this.#lua = prevLua;
+        this.#lua = this.#lastValidLua;
       } else {
-        // すでに別のコードでupdateLuaが呼ばれているので、気にしなくて良い
+        // abortされ、すでに別のコードでupdateLuaが呼ばれている場合、何もしない
       }
+    }
+  }
+  _manualLuaUpdateForTesting(lua: string[]) {
+    this.#lua = lua;
+  }
+
+  get luaEditorValue() {
+    return this.#luaEditorValue;
+  }
+  setLuaEditorValue(lua: string, inCodeEditor: boolean) {
+    if (this.#luaEditorValue !== lua) {
+      this.#luaEditorValue = lua;
+      if (this.#luaEditorDebounceTimeout !== null) {
+        clearTimeout(this.#luaEditorDebounceTimeout);
+      }
+      // これが呼ばれるのは、ユーザーが直接コードを編集した場合だけでなく、undoボタンを押した時なども含まれる。
+      // コードエディター以外でundoボタンを押した場合には、他の編集機能と同様、即時コードを実行して反映する。
+      if (inCodeEditor) {
+        this.#luaEditorDebounceTimeout = setTimeout(() => {
+          this.updateLua(lua.split("\n"), true);
+        }, 500);
+      } else {
+        this.updateLua(lua.split("\n"), true);
+      }
+      this.emit("rerender");
     }
   }
 

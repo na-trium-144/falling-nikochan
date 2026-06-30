@@ -4,6 +4,7 @@ import clsx from "clsx/lite";
 import {
   createContext,
   ReactNode,
+  RefObject,
   useCallback,
   useContext,
   useEffect,
@@ -14,6 +15,7 @@ import { useDisplayMode } from "@/scale.js";
 import { LuaExecResult } from "@falling-nikochan/chart/dist/luaExec";
 import {
   ChartEditing,
+  LevelEditing,
   LevelFreeze,
   LuaExecutor,
 } from "@falling-nikochan/chart";
@@ -38,6 +40,7 @@ const AceEditor = dynamic(
 );
 import type { Selection } from "ace-builds-internal/selection";
 import type { WorkerInput } from "./luaExecWorker";
+import type Ace from "ace-builds";
 
 // https://github.com/vercel/next.js/discussions/29415
 // import "remote-web-worker";
@@ -173,6 +176,8 @@ interface Props {
   seekStepAbs: (s: Step) => void;
   errLine: number | null;
   err: string[];
+  children: ReactNode;
+  aceSessionRef: RefObject<(Ace.EditSession | null)[]>;
 }
 interface LuaPositionData {
   top: number;
@@ -186,11 +191,7 @@ interface LuaPositionContext {
 }
 const LuaPositionContext = createContext<LuaPositionContext>(null!);
 
-interface PProps {
-  children: ReactNode;
-}
-export function LuaTabProvider(props: Props & PProps) {
-  const themeState = useTheme();
+export function LuaTabProvider(props: Props) {
   const [data, setData] = useState<LuaPositionData>({
     top: 0,
     left: 0,
@@ -199,145 +200,171 @@ export function LuaTabProvider(props: Props & PProps) {
   });
 
   const { top, left, width, height } = data;
-  const { visible, chart, currentStepStr, seekStepAbs, errLine, err } = props;
-  const currentLevel = chart?.currentLevel;
-  const cur = currentLevel?.current;
-  const { rem } = useDisplayMode();
-  const t = useTranslations("edit.code");
-  const previousLevelCode = useRef<string>("");
-  const [code, setCode] = useState<string>("");
-  const [codeChanged, setCodeChanged] = useState<boolean>(false);
-
-  useEffect(() => {
-    const updateCode = () => {
-      const currentLevelCode = currentLevel?.lua.join("\n");
-      if (
-        !codeChanged &&
-        currentLevelCode !== undefined &&
-        previousLevelCode.current !== currentLevelCode
-      ) {
-        previousLevelCode.current = currentLevelCode;
-        setCode(currentLevelCode);
-      }
-    };
-    updateCode();
-    chart?.on("change", updateCode);
-    return () => {
-      chart?.off("change", updateCode);
-    };
-  }, [codeChanged, chart, currentLevel]);
-
-  const changeCodeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const changeCode = (code: string) => {
-    setCode(code);
-    setCodeChanged(true);
-    if (changeCodeTimeout.current !== null) {
-      clearTimeout(changeCodeTimeout.current);
-    }
-    changeCodeTimeout.current = setTimeout(() => {
-      changeCodeTimeout.current = null;
-      currentLevel
-        ?.updateLua(code.split("\n"))
-        .then(() => {
-          setCodeChanged(false);
-        })
-        .catch(() => {
-          setCodeChanged(false);
-        });
-    }, 500);
-  };
+  const {
+    visible,
+    chart,
+    currentStepStr,
+    seekStepAbs,
+    errLine,
+    err,
+    aceSessionRef,
+  } = props;
 
   return (
     <LuaPositionContext.Provider value={{ data, setData }}>
       {props.children}
-      <div
-        className={clsx("absolute rounded-sq-box isolate", visible || "hidden")}
-        style={{ top, left, width, height }}
-      >
-        <AceEditor
-          mode="lua"
-          theme={themeState.isDark ? "tomorrow_night" : "tomorrow"}
-          width="100%"
-          height="100%"
-          tabSize={2}
-          fontSize={1 * rem}
-          highlightActiveLine={false}
-          value={code}
-          setOptions={{ useWorker: false }}
-          annotations={[
-            ...(currentLevel?.barLines.map((bl) => ({
-              row: bl.luaLine,
-              column: 1,
-              text: `${bl.barNum};`,
-              type: "info",
-            })) || []),
-            {
-              row: cur?.line == null ? -1 : cur.line,
-              column: 1,
-              text: t("currentLine", { step: currentStepStr || "null" }),
-              type: "warning",
-            },
-            {
-              row: errLine === null ? -1 : errLine,
-              column: 1,
-              text: err[0],
-              type: "error",
-            },
-          ]}
-          markers={[
-            {
-              startRow: errLine === null ? -1 : errLine,
-              endRow: errLine === null ? -1 : errLine,
-              startCol: 0,
-              endCol: 1,
-              type: "fullLine" as const,
-              className: "absolute z-5 bg-red-200 dark:bg-red-900 ",
-            },
-            ...(currentLevel?.barLines.map((bl) => ({
-              startRow: bl.luaLine,
-              endRow: bl.luaLine,
-              startCol: 0,
-              endCol: 1,
-              type: "fullLine" as const,
-              className: clsx(
-                "absolute h-[1px]! bg-gray-500",
-                "shadow-[0_0_2px] shadow-gray-500/75"
-              ),
-            })) ?? []),
-            {
-              startRow: cur?.line == null ? -1 : cur?.line,
-              endRow: cur?.line == null ? -1 : cur?.line,
-              startCol: 0,
-              endCol: 1,
-              type: "fullLine" as const,
-              className: clsx(
-                "absolute h-0!",
-                "shadow-[0_0.7em_0.5em_0.2em] shadow-yellow-400/50"
-              ),
-            },
-          ]}
-          enableBasicAutocompletion={false}
-          enableLiveAutocompletion={false}
-          enableSnippets={false}
-          onChange={(value) => {
-            if (visible) {
-              changeCode(value);
-            }
-          }}
-          onCursorChange={(sel: Selection) => {
-            if (currentLevel && visible && !sel.isMultiLine()) {
-              const step = findStepFromLua(
-                { ...currentLevel.freeze, lua: [...currentLevel.lua] },
-                sel.cursor.row
-              );
-              if (step !== null) {
-                seekStepAbs(step);
-              }
-            }
-          }}
-        />
-      </div>
+      {chart?.levels.map((l, i) => (
+        <div
+          key={i}
+          className={clsx(
+            "absolute rounded-sq-box isolate",
+            (visible && i === chart?.currentLevelIndex) || "hidden"
+          )}
+          style={{ top, left, width, height }}
+        >
+          <AceEditorInstance
+            level={l}
+            currentStepStr={currentStepStr}
+            seekStepAbs={seekStepAbs}
+            errLine={chart.currentLevelIndex === i ? errLine : null}
+            err={chart.currentLevelIndex === i ? err : []}
+            setAceSession={(session) => {
+              aceSessionRef.current[i] = session;
+            }}
+            visible={visible && chart.currentLevelIndex === i}
+          />
+        </div>
+      ))}
     </LuaPositionContext.Provider>
+  );
+}
+
+interface IProps {
+  level: LevelEditing;
+  currentStepStr: string | null;
+  seekStepAbs: (s: Step) => void;
+  errLine: number | null;
+  err: string[];
+  setAceSession: (session: Ace.EditSession | null) => void;
+  visible: boolean;
+}
+function AceEditorInstance(props: IProps) {
+  const themeState = useTheme();
+  const {
+    level,
+    currentStepStr,
+    seekStepAbs,
+    errLine,
+    err,
+    setAceSession,
+    visible,
+  } = props;
+  const cur = level.current;
+  const { rem } = useDisplayMode();
+  const t = useTranslations("edit.code");
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_rerenderIndex, setRerenderIndex] = useState<number>(0);
+  const rerender = useCallback(() => setRerenderIndex((i) => i + 1), []);
+  useEffect(() => {
+    level.on("luaEditor", rerender);
+    return () => {
+      level.off("luaEditor", rerender);
+    };
+  }, [level, rerender]);
+
+  const editorRef = useRef<Ace.Editor | null>(null);
+  useEffect(() => {
+    setAceSession(editorRef.current?.session ?? null);
+    return () => {
+      setAceSession(null);
+    };
+  }, [setAceSession]);
+
+  return (
+    <AceEditor
+      onLoad={(editor) => {
+        editorRef.current = editor;
+      }}
+      mode="lua"
+      theme={themeState.isDark ? "tomorrow_night" : "tomorrow"}
+      width="100%"
+      height="100%"
+      tabSize={2}
+      fontSize={1 * rem}
+      highlightActiveLine={false}
+      value={level.luaEditorValue}
+      setOptions={{ useWorker: false }}
+      annotations={[
+        ...(level?.barLines.map((bl) => ({
+          row: bl.luaLine,
+          column: 1,
+          text: `${bl.barNum};`,
+          type: "info",
+        })) || []),
+        {
+          row: cur?.line == null ? -1 : cur.line,
+          column: 1,
+          text: t("currentLine", { step: currentStepStr || "null" }),
+          type: "warning",
+        },
+        {
+          row: errLine === null ? -1 : errLine,
+          column: 1,
+          text: err[0],
+          type: "error",
+        },
+      ]}
+      markers={[
+        {
+          startRow: errLine === null ? -1 : errLine,
+          endRow: errLine === null ? -1 : errLine,
+          startCol: 0,
+          endCol: 1,
+          type: "fullLine" as const,
+          className: "absolute z-5 bg-red-200 dark:bg-red-900 ",
+        },
+        ...(level?.barLines.map((bl) => ({
+          startRow: bl.luaLine,
+          endRow: bl.luaLine,
+          startCol: 0,
+          endCol: 1,
+          type: "fullLine" as const,
+          className: clsx(
+            "absolute h-[1px]! bg-gray-500",
+            "shadow-[0_0_2px] shadow-gray-500/75"
+          ),
+        })) ?? []),
+        {
+          startRow: cur?.line == null ? -1 : cur?.line,
+          endRow: cur?.line == null ? -1 : cur?.line,
+          startCol: 0,
+          endCol: 1,
+          type: "fullLine" as const,
+          className: clsx(
+            "absolute h-0!",
+            "shadow-[0_0.7em_0.5em_0.2em] shadow-yellow-400/50"
+          ),
+        },
+      ]}
+      enableBasicAutocompletion={false}
+      enableLiveAutocompletion={false}
+      enableSnippets={false}
+      onChange={(value) => {
+        level.setLuaEditorValue(value, visible);
+      }}
+      onCursorChange={(sel: Selection) => {
+        if (visible && !sel.isMultiLine()) {
+          const step = findStepFromLua(
+            { ...level.freeze, lua: [...level.lua] },
+            sel.cursor.row
+          );
+          if (step !== null) {
+            seekStepAbs(step);
+          }
+        }
+      }}
+    />
   );
 }
 

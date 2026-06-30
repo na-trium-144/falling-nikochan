@@ -7,9 +7,12 @@ import Select from "@/common/select";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
 import { ChartEditing } from "@falling-nikochan/chart";
+import type { Ace } from "ace-builds";
+import { RefObject } from "react";
 
 interface Props {
   chart?: ChartEditing;
+  aceSessionRef: RefObject<(Ace.EditSession | null)[]>;
 }
 export default function NoteTab(props: Props) {
   const t = useTranslations("edit.note");
@@ -86,6 +89,9 @@ export default function NoteTab(props: Props) {
       </div>
       <NoteEdit {...props} />
       <span className="flex-1 mb-4 " />
+      <div className="flex flex-row items-baseline mb-2">
+        <UndoRedoButton {...props} />
+      </div>
       <div className="flex flex-row ">
         <CopyPasteButton {...props} />
       </div>
@@ -123,6 +129,45 @@ function CopyPasteButton(props: Props) {
           />
         </div>
       ))}
+    </>
+  );
+}
+function UndoRedoButton(props: Props) {
+  const { chart, aceSessionRef } = props;
+  const t = useTranslations("edit.note");
+  const session =
+    chart?.currentLevelIndex !== undefined
+      ? aceSessionRef.current[chart.currentLevelIndex]
+      : undefined;
+  const undoManager = session?.getUndoManager();
+  // @ts-expect-error accessing undocumented property undoStack
+  const undoCount = undoManager?.$undoStack.length ?? 0;
+  // @ts-expect-error accessing undocumented property redoStack
+  const redoCount = undoManager?.$redoStack.length ?? 0;
+  return (
+    <>
+      <Button
+        text={t("undo")}
+        keyName="Z"
+        onClick={() => {
+          undoManager?.undo(session!);
+        }}
+        disabled={!undoManager?.canUndo()}
+      />
+      <span className="px-2">
+        ×<span className="ml-1">{undoCount}</span>
+      </span>
+      <span className="pl-2 self-stretch my-2 border-l border-current/50" />
+      {redoCount >= 1 && <span className="pr-2">{redoCount}</span>}
+      <Button
+        text={t("redo")}
+        keyName="Y"
+        onClick={() => {
+          undoManager?.redo(session!);
+        }}
+        disabled={!undoManager?.canRedo()}
+      />
+      <HelpIcon>{t.rich("undoHelp", { br: () => <br /> })}</HelpIcon>
     </>
   );
 }

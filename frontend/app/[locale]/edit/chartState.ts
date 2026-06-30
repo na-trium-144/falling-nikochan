@@ -37,6 +37,7 @@ import fnCommandsPackageJson from "fn-commands/package.json";
 import { captureAndWrap, fetchBackend } from "@/common/fetch";
 import { markAsExpected } from "@/common/apiError";
 import { removeRecent } from "@/common/recent";
+import type Ace from "ace-builds";
 
 interface Props {
   onLoad: (cid: string) => void;
@@ -141,6 +142,8 @@ export function useChartState(props: Props) {
       };
     }
   }, [chartState, rerender]);
+
+  const aceSessionRef = useRef<(Ace.EditSession | null)[]>([]);
 
   const t = useTranslations("edit");
   const router = useRouter();
@@ -670,5 +673,6 @@ export function useChartState(props: Props) {
     localSave,
     localLoadState,
     localLoad,
+    aceSessionRef,
   };
 }
