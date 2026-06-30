@@ -170,7 +170,7 @@ export class LevelEditing extends EventEmitter<EventType> {
     this.#lua = lua;
     if (!fromLuaEditor) {
       this.#luaEditorValue = lua.join("\n");
-      this.emit("luaEditor");
+      this.emit("rerender");
     }
     this.#luaExecutorRef.current.abortExec();
     const levelFreezed = await this.#luaExecutorRef.current.exec(
@@ -188,23 +188,29 @@ export class LevelEditing extends EventEmitter<EventType> {
       }
     }
   }
-  _manualLuaUpdateForTesting(lua: string[]){
+  _manualLuaUpdateForTesting(lua: string[]) {
     this.#lua = lua;
   }
 
   get luaEditorValue() {
     return this.#luaEditorValue;
   }
-  setLuaEditorValue(lua: string) {
+  setLuaEditorValue(lua: string, inCodeEditor: boolean) {
     if (this.#luaEditorValue !== lua) {
       this.#luaEditorValue = lua;
       if (this.#luaEditorDebounceTimeout !== null) {
         clearTimeout(this.#luaEditorDebounceTimeout);
       }
-      this.#luaEditorDebounceTimeout = setTimeout(() => {
+      // これが呼ばれるのは、ユーザーが直接コードを編集した場合だけでなく、undoボタンを押した時なども含まれる。
+      // コードエディター以外でundoボタンを押した場合には、他の編集機能と同様、即時コードを実行して反映する。
+      if (inCodeEditor) {
+        this.#luaEditorDebounceTimeout = setTimeout(() => {
+          this.updateLua(lua.split("\n"), true);
+        }, 500);
+      } else {
         this.updateLua(lua.split("\n"), true);
-      }, 500);
-      this.emit("luaEditor");
+      }
+      this.emit("rerender");
     }
   }
 

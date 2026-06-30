@@ -73,6 +73,7 @@ export default function Edit(props: {
     localSave,
     localLoadState,
     localLoad,
+    aceSessionRef,
   } = useChartState({
     luaExecutor,
     onLoad: (cid) => {
@@ -606,6 +607,7 @@ export default function Edit(props: {
         seekStepAbs={seekStepAbs}
         errLine={luaExecutor.running ? null : luaExecutor.errLine}
         err={luaExecutor.err}
+        aceSessionRef={aceSessionRef}
       >
         <div
           className={clsx(
@@ -893,6 +895,54 @@ export default function Edit(props: {
               <HelpIcon className="self-center">
                 {t.rich("stepUnitHelp", { br: () => <br /> })}
               </HelpIcon>
+              <Button
+                small
+                text={`Undo (${
+                  chart?.currentLevelIndex !== undefined &&
+                  aceSessionRef.current[
+                    chart.currentLevelIndex
+                  ]?.getUndoManager()?.$undoStack.length
+                })`}
+                onClick={() => {
+                  if (chart?.currentLevelIndex !== undefined) {
+                    const session =
+                      aceSessionRef.current[chart.currentLevelIndex];
+                    session?.getUndoManager().undo(session);
+                  }
+                }}
+                disabled={
+                  !(
+                    chart?.currentLevelIndex !== undefined &&
+                    aceSessionRef.current[chart.currentLevelIndex]
+                      ?.getUndoManager()
+                      .canUndo()
+                  )
+                }
+              />
+              <Button
+                small
+                text={`Redo (${
+                  chart?.currentLevelIndex !== undefined &&
+                  aceSessionRef.current[
+                    chart.currentLevelIndex
+                  ]?.getUndoManager()?.$redoStack.length
+                })`}
+                onClick={() => {
+                  if (chart?.currentLevelIndex !== undefined) {
+                    const session =
+                      aceSessionRef.current[chart.currentLevelIndex];
+                    session?.getUndoManager().redo(session);
+                  }
+                }}
+                disabled={
+                  !(
+                    chart?.currentLevelIndex !== undefined &&
+                    aceSessionRef.current[chart.currentLevelIndex]
+                      ?.getUndoManager()
+                      .canRedo()
+                  )
+                }
+              />
               <div className="flex-1" />
               <span className="mr-1">{t("zoom")}</span>
               <Button
