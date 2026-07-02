@@ -86,8 +86,9 @@ export function useLuaExecutor(): LuaExecutor {
 
   const initWorker = useCallback(() => {
     if (worker.current === null) {
-      worker.current = new Worker(new URL("luaExecWorker", import.meta.url));
-      worker.current.addEventListener("error", (e) => {
+      const thisWorker = new Worker(new URL("luaExecWorker", import.meta.url));
+      worker.current = thisWorker;
+      thisWorker.addEventListener("error", (e) => {
         console.error(e);
         if (!initDoneRef.current) {
           let err = e.error ?? e.message;
@@ -99,28 +100,38 @@ export function useLuaExecutor(): LuaExecutor {
           }
           setInitError(err);
         }
-        workerResolver.current?.(
-          [],
-          // e.messageが空の場合がある
-          [e.message || "Unknown error"],
-          null,
-          null
-        );
-        workerResolver.current = null;
+        if (worker.current !== thisWorker) {
+          // すでに別のworkerが動き始めているので、無視
+          return;
+        } else {
+          workerResolver.current?.(
+            [],
+            // e.messageが空の場合がある
+            [e.message || "Unknown error"],
+            null,
+            null
+          );
+          workerResolver.current = null;
+        }
       });
-      worker.current.addEventListener(
+      thisWorker.addEventListener(
         "message",
         ({ data }: { data: LuaExecResult | "initDone" }) => {
           if (typeof data === "string") {
             initDoneRef.current = true;
           } else {
-            workerResolver.current?.(
-              data.stdout,
-              data.err,
-              data.errorLine,
-              data.err.length === 0 ? data.levelFreezed : null
-            );
-            workerResolver.current = null;
+            if (worker.current !== thisWorker) {
+              // すでに別のworkerが動き始めているので、無視
+              return;
+            } else {
+              workerResolver.current?.(
+                data.stdout,
+                data.err,
+                data.errorLine,
+                data.err.length === 0 ? data.levelFreezed : null
+              );
+              workerResolver.current = null;
+            }
           }
         }
       );
