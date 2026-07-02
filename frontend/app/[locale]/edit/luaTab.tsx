@@ -220,7 +220,7 @@ export function LuaTabProvider(props: Props) {
       {props.children}
       {chart?.levels.map((l, i) => (
         <div
-          key={i}
+          key={l.localId.toString()}
           className={clsx(
             "absolute rounded-sq-box isolate",
             (visible && i === chart?.currentLevelIndex) || "hidden"
@@ -271,6 +271,11 @@ function AceEditorInstance(props: IProps) {
     <AceEditor
       onLoad={(editor) => {
         editorRef.current = editor;
+        if (level.luaEditorInitialUndoManager) {
+          editor.session
+            .getUndoManager()
+            .fromJSON(level.luaEditorInitialUndoManager);
+        }
       }}
       mode="lua"
       theme={themeState.isDark ? "tomorrow_night" : "tomorrow"}

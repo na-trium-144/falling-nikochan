@@ -51,6 +51,7 @@ export class ChartEditing extends EventEmitter<EventType> {
       convertedFrom?: number;
       currentLevelIndex?: number;
       hasChange?: boolean;
+      undoManager?: unknown[];
     }
   ) {
     super();
@@ -86,6 +87,12 @@ export class ChartEditing extends EventEmitter<EventType> {
           )
       )
     );
+    this.#levels.forEach((l, i) => {
+      if (typeof options.undoManager?.[i] === "object") {
+        l.luaEditorInitialUndoManager = options.undoManager[i];
+      }
+    });
+
     this.#copyBuffer = { ...obj.copyBuffer };
     this.#zoom = obj.zoom;
     this.#currentLevelIndex =

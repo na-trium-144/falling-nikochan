@@ -70,16 +70,17 @@ export type LocalLoadState = undefined | "loading" | "ok" | LocalLoadError;
 export type SaveState = undefined | "saving" | "ok" | Error;
 const EditSessionSchema = () =>
   v.object({
-    cid: v.undefinedable(v.string()),
+    cid: v.optional(v.string()),
     currentPasswd: v.object({
       ph: v.nullable(v.string()),
       pbypass: v.nullable(v.string()),
     }),
     chart: ChartSchema15(),
     convertedFrom: v.number(),
-    currentLevelIndex: v.undefinedable(v.number()),
+    currentLevelIndex: v.optional(v.number()),
     hasChange: v.boolean(),
     savePasswd: v.boolean(),
+    undoManager: v.array(v.unknown()),
   });
 type EditSession = v.InferOutput<ReturnType<typeof EditSessionSchema>>;
 export interface FetchChartOptions {
@@ -570,7 +571,10 @@ export function useChartState(props: Props) {
   );
 
   useEffect(() => {
-    if (chartState.state === undefined) {
+    if (chartState.state !== undefined) {
+      // setChartStateと同時に削除するとreactのstrict modeの2回実行によりset前に消えてしまう
+      sessionStorage.removeItem("editSession");
+    } else {
       const params = new URLSearchParams(window.location.search);
       const cid = params.get("cid");
       if (sessionStorage.getItem("editSession")) {
@@ -579,7 +583,6 @@ export function useChartState(props: Props) {
             EditSessionSchema(),
             JSON.parse(sessionStorage.getItem("editSession")!)
           );
-          sessionStorage.removeItem("editSession");
           if (data.cid === cid || (data.cid === undefined && cid === "new")) {
             setChartState({
               chart: new ChartEditing(data.chart, {
@@ -590,6 +593,7 @@ export function useChartState(props: Props) {
                 currentLevelIndex: data.currentLevelIndex,
                 hasChange: data.hasChange,
                 locale,
+                undoManager: data.undoManager,
               }),
               state: "ok",
             });
@@ -640,6 +644,9 @@ export function useChartState(props: Props) {
           currentLevelIndex: chartState.chart.currentLevelIndex,
           hasChange: chartState.chart.hasChange,
           savePasswd: !!savePasswd,
+          undoManager: aceSessionRef.current.map((s) =>
+            s?.getUndoManager().toJSON()
+          ),
         } satisfies EditSession)
       );
     }

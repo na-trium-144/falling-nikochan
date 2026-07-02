@@ -44,6 +44,11 @@ export class LevelEditing extends EventEmitter<EventType> {
   // これは親のChartEditingと同期
   #offset: () => number;
   index: number = null!;
+
+  // エディタ内でlevelを一意に識別するid (Reactのkeyに使う)
+  static #localCount = 0;
+  localId: number;
+
   #luaExecutorRef: LuaExecutorRef;
   // 以下の編集には updateMeta(), updateFreeze(), updateLua() を使う
   #meta: LevelMin;
@@ -59,6 +64,8 @@ export class LevelEditing extends EventEmitter<EventType> {
   #lastValidLua: string[];
   #luaEditorValue: string;
   #luaEditorDebounceTimeout: ReturnType<typeof setTimeout> | null = null;
+  // chartState.tsでsessionからの復元時にセットし、luaEditorの初期化に使う
+  luaEditorInitialUndoManager: object | null = null;
 
   constructor(
     min: Readonly<LevelMin>,
@@ -72,6 +79,7 @@ export class LevelEditing extends EventEmitter<EventType> {
     for (const type of eventTypes) {
       this.on(type, () => parentEmit(type));
     }
+    this.localId = ++LevelEditing.#localCount;
     this.#offset = offset;
     this.#luaExecutorRef = luaExecutorRef;
 
