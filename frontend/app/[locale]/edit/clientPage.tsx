@@ -618,8 +618,7 @@ export default function Edit(props: {
         chart={chart}
         currentStepStr={cur?.currentStepStr || null}
         seekStepAbs={seekStepAbs}
-        errLine={luaExecutor.running ? null : luaExecutor.errLine}
-        err={luaExecutor.err}
+        result={luaExecutor.running ? null : luaExecutor.result}
         aceSessionRef={aceSessionRef}
       >
         <div
@@ -1003,8 +1002,11 @@ export default function Edit(props: {
                 "bg-gray-500/25",
                 !(
                   luaExecutor.running ||
-                  luaExecutor.stdout.length > 0 ||
-                  luaExecutor.err.length > 0
+                  (luaExecutor.result &&
+                    luaExecutor.result.levelIndex ===
+                      chart?.currentLevelIndex &&
+                    (luaExecutor.result.stdout.length > 0 ||
+                      luaExecutor.result.err.length > 0))
                 ) && "edit-wide:hidden"
               )}
               classNameInner="h-24 max-h-24 edit-wide:h-auto"
@@ -1027,12 +1029,12 @@ export default function Edit(props: {
                 </>
               ) : (
                 <>
-                  {luaExecutor.stdout.map((s, i) => (
+                  {luaExecutor.result?.stdout.map((s, i) => (
                     <p className="text-sm" key={i}>
                       {s}
                     </p>
                   ))}
-                  {luaExecutor.err.map((e, i) => (
+                  {luaExecutor.result?.err.map((e, i) => (
                     <p
                       className="text-sm text-red-600 dark:text-red-400 "
                       key={i}

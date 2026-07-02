@@ -18,6 +18,7 @@ import {
   LevelEditing,
   LevelFreeze,
   LuaExecutor,
+  LuaExecutorLastResult,
 } from "@falling-nikochan/chart";
 import { Step } from "@falling-nikochan/chart";
 import { findStepFromLua } from "@falling-nikochan/chart";
@@ -59,19 +60,27 @@ if (typeof window !== "undefined") {
 }
 
 export function useLuaExecutor(): LuaExecutor {
+  // 1回目のworker起動時に出たエラーのみレンダリング時に再throwし、エラーページの表示にする
   const initDoneRef = useRef(false);
   const [initError, setInitError] = useState<Error>();
-  const [stdout, setStdout] = useState<string[]>([]);
-  const [err, setErr] = useState<string[]>([]);
-  const [errLine, setErrLine] = useState<number | null>(null);
+
+  // 表示用途のみのstate
+  const [result, setResult] = useState<LuaExecutorLastResult | null>(null);
   const [running, setRunning] = useState<boolean>(false);
+
   // workerは一度立てたら使いまわす。
   const worker = useRef<Worker | null>(null);
-  // コードが実行中の場合、結果を返すpromiseのresolverを保持する。
+  // コードが実行中の場合、promiseに結果を返し上2つのstateを更新するコールバックを保持する。
   // 実行が完了したらresolverを呼び出した後これをnullにする。
-  const workerResolver = useRef<((result: LevelFreeze | null) => void) | null>(
-    null
-  );
+  const workerResolver = useRef<
+    | ((
+        stdout: string[],
+        err: string[],
+        errLine: number | null,
+        freeze: LevelFreeze | null
+      ) => void)
+    | null
+  >(null);
 
   const initWorker = useCallback(() => {
     if (worker.current === null) {
@@ -88,15 +97,14 @@ export function useLuaExecutor(): LuaExecutor {
           }
           setInitError(err);
         }
-        if (workerResolver.current) {
-          setRunning(false);
-          setStdout([]);
+        workerResolver.current?.(
+          [],
           // e.messageが空の場合がある
-          setErr([e.message || "Unknown error"]);
-          setErrLine(-1);
-          workerResolver.current(null);
-          workerResolver.current = null;
-        }
+          [e.message || "Unknown error"],
+          null,
+          null
+        );
+        workerResolver.current = null;
       });
       worker.current.addEventListener(
         "message",
@@ -104,20 +112,13 @@ export function useLuaExecutor(): LuaExecutor {
           if (typeof data === "string") {
             initDoneRef.current = true;
           } else {
-            if (workerResolver.current) {
-              setRunning(false);
-              setStdout(data.stdout);
-              setErr(data.err);
-              setErrLine(data.errorLine);
-              if (data.err.length === 0) {
-                workerResolver.current(data.levelFreezed);
-              } else {
-                workerResolver.current(null);
-              }
-              workerResolver.current = null;
-            } else {
-              console.error("luaExecWorker finished but resolver is null");
-            }
+            workerResolver.current?.(
+              data.stdout,
+              data.err,
+              data.errorLine,
+              data.err.length === 0 ? data.levelFreezed : null
+            );
+            workerResolver.current = null;
           }
         }
       );
@@ -134,21 +135,21 @@ export function useLuaExecutor(): LuaExecutor {
         worker.current.terminate();
         worker.current = null;
       }
-      setRunning(false);
-      setStdout([]);
-      setErr(["terminated"]);
-      setErrLine(-1);
-      workerResolver.current(null);
+      workerResolver.current?.([], ["terminated"], null, null);
       workerResolver.current = null;
     }
   }, []);
   const exec = useCallback(
-    (code: string) => {
+    (code: string, levelIndex: number) => {
       abortExec();
       initWorker();
       setRunning(true);
       const p = new Promise<LevelFreeze | null>((resolve) => {
-        workerResolver.current = resolve;
+        workerResolver.current = (stdout, err, errLine, freeze) => {
+          setRunning(false);
+          setResult({ stdout, err, errLine, levelIndex });
+          resolve(freeze);
+        };
       });
       worker.current!.postMessage({ code } satisfies WorkerInput);
       return p;
@@ -157,9 +158,7 @@ export function useLuaExecutor(): LuaExecutor {
   );
 
   return {
-    stdout,
-    err,
-    errLine,
+    result,
     running,
     exec,
     abortExec,
@@ -174,8 +173,7 @@ interface Props {
   chart?: ChartEditing;
   currentStepStr: string | null;
   seekStepAbs: (s: Step) => void;
-  errLine: number | null;
-  err: string[];
+  result: LuaExecutorLastResult | null;
   children: ReactNode;
   aceSessionRef: RefObject<(Ace.EditSession | null)[]>;
 }
@@ -200,15 +198,8 @@ export function LuaTabProvider(props: Props) {
   });
 
   const { top, left, width, height } = data;
-  const {
-    visible,
-    chart,
-    currentStepStr,
-    seekStepAbs,
-    errLine,
-    err,
-    aceSessionRef,
-  } = props;
+  const { visible, chart, currentStepStr, seekStepAbs, result, aceSessionRef } =
+    props;
 
   return (
     <LuaPositionContext.Provider value={{ data, setData }}>
@@ -226,8 +217,7 @@ export function LuaTabProvider(props: Props) {
             level={l}
             currentStepStr={currentStepStr}
             seekStepAbs={seekStepAbs}
-            errLine={chart.currentLevelIndex === i ? errLine : null}
-            err={chart.currentLevelIndex === i ? err : []}
+            result={result?.levelIndex === i ? result : null}
             setAceSession={(session) => {
               aceSessionRef.current[i] = session;
             }}
@@ -243,22 +233,14 @@ interface IProps {
   level: LevelEditing;
   currentStepStr: string | null;
   seekStepAbs: (s: Step) => void;
-  errLine: number | null;
-  err: string[];
+  result: LuaExecutorLastResult | null;
   setAceSession: (session: Ace.EditSession | null) => void;
   visible: boolean;
 }
 function AceEditorInstance(props: IProps) {
   const themeState = useTheme();
-  const {
-    level,
-    currentStepStr,
-    seekStepAbs,
-    errLine,
-    err,
-    setAceSession,
-    visible,
-  } = props;
+  const { level, currentStepStr, seekStepAbs, result, setAceSession, visible } =
+    props;
   const cur = level.current;
   const { rem } = useDisplayMode();
   const t = useTranslations("edit.code");
@@ -299,16 +281,16 @@ function AceEditorInstance(props: IProps) {
           type: "warning",
         },
         {
-          row: errLine === null ? -1 : errLine,
+          row: result?.errLine == null ? -1 : result.errLine,
           column: 1,
-          text: err[0],
+          text: result?.err[0] ?? "",
           type: "error",
         },
       ]}
       markers={[
         {
-          startRow: errLine === null ? -1 : errLine,
-          endRow: errLine === null ? -1 : errLine,
+          startRow: result?.errLine == null ? -1 : result.errLine,
+          endRow: result?.errLine == null ? -1 : result.errLine,
           startCol: 0,
           endCol: 1,
           type: "fullLine" as const,

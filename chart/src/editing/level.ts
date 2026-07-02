@@ -43,6 +43,7 @@ import {
 export class LevelEditing extends EventEmitter<EventType> {
   // これは親のChartEditingと同期
   #offset: () => number;
+  index: number = null!;
   #luaExecutorRef: LuaExecutorRef;
   // 以下の編集には updateMeta(), updateFreeze(), updateLua() を使う
   #meta: LevelMin;
@@ -174,7 +175,8 @@ export class LevelEditing extends EventEmitter<EventType> {
     }
     this.#luaExecutorRef.current.abortExec();
     const levelFreezed = await this.#luaExecutorRef.current.exec(
-      lua.join("\n")
+      lua.join("\n"),
+      this.index
     );
     if (levelFreezed) {
       this.#lastValidLua = lua;

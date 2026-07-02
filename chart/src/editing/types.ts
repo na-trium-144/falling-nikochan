@@ -7,12 +7,16 @@ export const eventTypes = [
 ] as const;
 export type EventType = (typeof eventTypes)[number];
 
-export interface LuaExecutor {
+export interface LuaExecutorLastResult {
   stdout: string[];
   err: string[];
   errLine: number | null;
+  levelIndex: number;
+}
+export interface LuaExecutor {
+  result: LuaExecutorLastResult | null;
   running: boolean;
-  exec: (code: string) => Promise<LevelFreeze | null>;
+  exec: (code: string, levelIndex: number) => Promise<LevelFreeze | null>;
   abortExec: () => void;
 }
 export type LuaExecutorRef = { current: LuaExecutor };
