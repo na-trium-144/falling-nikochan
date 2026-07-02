@@ -16,6 +16,7 @@ export interface LuaExecutorLastResult {
 export interface LuaExecutor {
   result: LuaExecutorLastResult | null;
   running: boolean;
+  clearResult: () => void;
   exec: (code: string, levelIndex: number) => Promise<LevelFreeze | null>;
   abortExec: () => void;
 }

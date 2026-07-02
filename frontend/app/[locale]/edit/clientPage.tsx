@@ -44,6 +44,7 @@ import { useColorThief } from "@/common/colorThief.js";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft.js";
 import { useDisplayMode } from "@/scale.js";
 import { useResizeDetector } from "react-resize-detector";
+import Close from "@icon-park/react/lib/icons/Close.js";
 
 export default function Edit(props: {
   locale: string;
@@ -998,7 +999,7 @@ export default function Edit(props: {
             </Box>
             <Box
               classNameOuter={clsx(
-                "mt-2",
+                "fixed inset-1.5 ml-auto mt-auto w-max h-max shadow-modal z-edit-error",
                 "bg-gray-500/25",
                 !(
                   luaExecutor.running ||
@@ -1007,41 +1008,57 @@ export default function Edit(props: {
                       chart?.currentLevelIndex &&
                     (luaExecutor.result.stdout.length > 0 ||
                       luaExecutor.result.err.length > 0))
-                ) && "edit-wide:hidden"
+                ) && "hidden"
               )}
-              classNameInner="h-24 max-h-24 edit-wide:h-auto"
+              classNameInner={clsx(
+                // min-h: キャンセルボタンの高さ(8) + padding
+                "min-h-14 max-h-[20vh]",
+                // min-w: スクリプトを実行中...[キャンセル] が収まるサイズ
+                "edit-wide:min-w-85 edit-wide:max-w-[min(50rem,66vw)]",
+                "flex flex-col justify-center"
+              )}
               scrollableX
               scrollableY
               padding={3}
             >
               {luaExecutor.running ? (
-                <>
+                <div>
                   <span className="inline-block ">
                     <SlimeSVG />
                     {t("running")}
                   </span>
                   <Button
-                    className="ml-2"
+                    className="ml-2 my-0"
                     small
                     onClick={luaExecutor.abortExec}
                     text={t("cancel")}
                   />
-                </>
+                </div>
               ) : (
                 <>
+                  {/* mr-11: 閉じるボタンの分のスペース */}
                   {luaExecutor.result?.stdout.map((s, i) => (
-                    <p className="text-sm" key={i}>
+                    <p className="text-sm mr-11" key={i}>
                       {s}
                     </p>
                   ))}
                   {luaExecutor.result?.err.map((e, i) => (
                     <p
-                      className="text-sm text-red-600 dark:text-red-400 "
+                      className="text-sm text-red-600 dark:text-red-400 mr-11"
                       key={i}
                     >
                       {e}
                     </p>
                   ))}
+                  <button
+                    className="fn-icon-button inline-block absolute top-3 right-3"
+                    onClick={() => {
+                      luaExecutor.clearResult();
+                    }}
+                  >
+                    <ButtonHighlight />
+                    <Close />
+                  </button>
                 </>
               )}
             </Box>

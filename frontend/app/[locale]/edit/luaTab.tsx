@@ -68,6 +68,8 @@ export function useLuaExecutor(): LuaExecutor {
   const [result, setResult] = useState<LuaExecutorLastResult | null>(null);
   const [running, setRunning] = useState<boolean>(false);
 
+  const clearResult = useCallback(() => setResult(null), []);
+
   // workerは一度立てたら使いまわす。
   const worker = useRef<Worker | null>(null);
   // コードが実行中の場合、promiseに結果を返し上2つのstateを更新するコールバックを保持する。
@@ -162,6 +164,7 @@ export function useLuaExecutor(): LuaExecutor {
     running,
     exec,
     abortExec,
+    clearResult,
   };
 }
 
