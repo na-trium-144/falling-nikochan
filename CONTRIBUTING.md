@@ -259,7 +259,7 @@ The service worker ([`worker/entry.ts`](worker/entry.ts), bundled into `/sw.js`)
 | `SENTRY_DSN` | secrets.`SENTRY_DSN` | optional | optional | |
 | `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN`, `SENTRY_URL` | secrets.`SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN`, `SENTRY_URL` | optional | | |
 | `SENTRY_TUNNEL` | secrets.`SENTRY_TUNNEL` | optional | | |
-| `TWITTER_API_KEY`, `TWITTER_API_KEY_SECRET`, `TWITTER_ACCESS_TOKEN`, `TWITTER_ACCESS_TOKEN_SECRET`, `GEMINI_API_KEY`, `DISCORD_WEBHOOK_ID`, `DISCORD_WEBHOOK_TOKEN` |  |   | optional | used by cronjob |
+| `TWITTER_API_KEY`, `TWITTER_API_KEY_SECRET`, `TWITTER_ACCESS_TOKEN`, `TWITTER_ACCESS_TOKEN_SECRET`, `GEMINI_API_KEY`, `DISCORD_WEBHOOK_ID`, `DISCORD_WEBHOOK_TOKEN`, `DISCORD_ANNOUNCE_WEBHOOK_ID`, `DISCORD_ANNOUNCE_WEBHOOK_TOKEN` |  |   | optional | used by cronjob |
 | | secrets.`ACTION_FAILURE_DISCORD_WEBHOOK` | | | Notifies when action fails |
 | | secrets.`CF_ASSETS_ACCOUNT_ID`, `CF_ASSETS_API_TOKEN`, `CF_ASSETS_PROJECT_NAME` | | | cloudflare pages deploy |
 | | secrets.`CF_ASSETS_ACCOUNT_ID`, `CF_WORKER_API_TOKEN` | | | cloudflare worker deploy |

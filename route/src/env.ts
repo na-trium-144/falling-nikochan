@@ -27,6 +27,8 @@ export interface Bindings {
   GEMINI_API_KEY?: string;
   DISCORD_WEBHOOK_ID?: string;
   DISCORD_WEBHOOK_TOKEN?: string;
+  DISCORD_ANNOUNCE_WEBHOOK_ID?: string;
+  DISCORD_ANNOUNCE_WEBHOOK_TOKEN?: string;
   IS_SERVICE_WORKER?: string;
 }
 

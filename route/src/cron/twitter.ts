@@ -1,11 +1,12 @@
 import { Bindings } from "../env.js";
 import twitterText from "twitter-text";
 import { ChartBrief } from "@falling-nikochan/chart";
-import { checkTextSafety } from "./gemini.js";
-import { reportToDiscord } from "./discord.js";
-import OAuth from "oauth-1.0a";
-import crypto from "crypto";
+// import { checkTextSafety } from "./gemini.js";
+import { reportToDiscord, announceToDiscord } from "./discord.js";
+// import OAuth from "oauth-1.0a";
+// import crypto from "crypto";
 
+/*
 async function tweet(env: Bindings, content: string) {
   // https://www.leopradel.com/blog/use-twitter-api-clouflare-worker
   // https://zenn.dev/maretol/articles/163d2b82c9bb2d
@@ -49,6 +50,7 @@ async function tweet(env: Bindings, content: string) {
     );
   }
 }
+*/
 
 export async function postChart(
   env: Bindings,
@@ -93,6 +95,7 @@ export async function postChart(
       );
       return "skipped";
     }
+    /*
     const safetyReason = await checkTextSafety(env, message);
     if (safetyReason !== null) {
       await reportToDiscord(
@@ -105,8 +108,14 @@ export async function postChart(
       );
       return "skipped";
     }
+    */
 
-    await tweet(env, message);
+    // await tweet(env, message);
+    const intentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(message)}`;
+    const adminMessage = `以下のメッセージをポストしてください: ${intentUrl}\noriginal message:\n${message}`;
+    await reportToDiscord(env, adminMessage);
+
+    await announceToDiscord(env, message);
     return "ok";
   } catch (e) {
     if (String(e).includes("duplicate")) {
@@ -160,6 +169,7 @@ export async function postPopular(
       );
       return "skipped";
     }
+    /*
     const safetyReason = await checkTextSafety(env, message);
     if (safetyReason !== null) {
       await reportToDiscord(
@@ -172,8 +182,12 @@ export async function postPopular(
       );
       return "skipped";
     }
+    */
 
-    await tweet(env, message);
+    // await tweet(env, message);
+    const intentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(message)}`;
+    const adminMessage = `以下のメッセージをポストしてください: ${intentUrl}\noriginal message:\n${message}`;
+    await reportToDiscord(env, adminMessage);
     return "ok";
   } catch (e) {
     if (String(e).includes("duplicate")) {

@@ -16,7 +16,6 @@
   "dependencies": {
     "@falling-nikochan/chart": "workspace:*",
     "@falling-nikochan/i18n": "workspace:*",
-    "@google/genai": "^2.2.0",
     "@hono/node-server": "^2.0.2",
     "@hono/standard-validator": "^0.2.1",
     "@hono/swagger-ui": "^0.6.1",
@@ -32,7 +31,6 @@
     "isbot": "catalog:",
     "moji": "^0.5.1",
     "mongodb": "catalog:",
-    "oauth-1.0a": "^2.2.6",
     "react": "catalog:react",
     "sitemap": "^9.0.1",
     "twitter-text": "^3.1.0",
