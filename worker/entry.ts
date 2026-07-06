@@ -23,40 +23,60 @@ const e: Bindings = {
 // なぜconsoleが無い?
 declare const self: ServiceWorkerGlobalScope & { console: Console };
 
+function safeClone(a: unknown): unknown {
+  if (a instanceof Error) {
+    // structuredClone(error) は残りのプロパティをクローンせず、JSON.stringify(error) はmessageなどをクローンしないので、明示的に全プロパティのcloneをする
+    return {
+      name: a.name,
+      message: a.message,
+      stack: a.stack,
+      ...Object.fromEntries(
+        Object.entries(a).map(([k, v]) => [k, safeClone(v)])
+      ),
+    };
+  } else {
+    try {
+      return structuredClone(a);
+    } catch {
+      try {
+        return JSON.parse(JSON.stringify(a));
+      } catch {
+        return String(a);
+      }
+    }
+  }
+}
+function transferConsole(level: string, args: unknown[]) {
+  const safeArgs = args.map(safeClone);
+  self.clients.matchAll().then((clients) => {
+    clients.forEach((client) => {
+      client.postMessage({ type: "console", level: "log", args: safeArgs });
+    });
+  });
+}
+
 const originalConsole = self.console;
 self.console = {
   ...originalConsole,
   log: (...args: unknown[]) => {
     originalConsole.log(...args);
-    self.clients.matchAll().then((clients) => {
-      clients.forEach((client) => {
-        client.postMessage({ type: "console", level: "log", args });
-      });
-    });
+    transferConsole("log", args);
   },
   error: (...args: unknown[]) => {
     originalConsole.error(...args);
-    self.clients.matchAll().then((clients) => {
-      clients.forEach((client) => {
-        client.postMessage({ type: "console", level: "error", args });
-      });
-    });
+    transferConsole("error", args);
   },
   warn: (...args: unknown[]) => {
     originalConsole.warn(...args);
-    self.clients.matchAll().then((clients) => {
-      clients.forEach((client) => {
-        client.postMessage({ type: "console", level: "warn", args });
-      });
-    });
+    transferConsole("warn", args);
   },
   info: (...args: unknown[]) => {
     originalConsole.info(...args);
-    self.clients.matchAll().then((clients) => {
-      clients.forEach((client) => {
-        client.postMessage({ type: "console", level: "info", args });
-      });
-    });
+    transferConsole("info", args);
+  },
+  debug: (...args: unknown[]) => {
+    originalConsole.debug(...args);
+    transferConsole("debug", args);
   },
 };
 
