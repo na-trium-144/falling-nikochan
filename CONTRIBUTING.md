@@ -193,6 +193,7 @@ This inserts a sample chart at cid `102399` ("Get Started!").
 
 **Conventions**
 
+- `@hono/structured-logger` must be initialized in each entry point, and always use `c.var.logger` instead of `console`.
 - When code branches depending on the deployment target, the Hono App creation is made into a function. (`const fooApp = async (config: ...) => new Hono(...)`)
 - The error response must be in JSON format and be in the form of `{message: "predefined message"}`. The message must be one defined in `api` within `i18n/{ja,en}/error.js` or empty.
   - For unexpected errors, the global error handler (`src/error.ts`) formats the thrown error into JSON and returns it. Therefore, it is not necessary for each API handler to catch unexpected errors and return a 500 error response.
@@ -259,6 +260,7 @@ The service worker ([`worker/entry.ts`](worker/entry.ts), bundled into `/sw.js`)
 | `SENTRY_DSN` | secrets.`SENTRY_DSN` | optional | optional | |
 | `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN`, `SENTRY_URL` | secrets.`SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN`, `SENTRY_URL` | optional | | |
 | `SENTRY_TUNNEL` | secrets.`SENTRY_TUNNEL` | optional | | |
+| `AXIOM_DATASET`, `AXIOM_TOKEN`, `AXIOM_EDGE` | | | required | used in `serve-bun-prod.ts` |
 | `TWITTER_API_KEY`, `TWITTER_API_KEY_SECRET`, `TWITTER_ACCESS_TOKEN`, `TWITTER_ACCESS_TOKEN_SECRET`, `GEMINI_API_KEY`, `DISCORD_WEBHOOK_ID`, `DISCORD_WEBHOOK_TOKEN`, `DISCORD_ANNOUNCE_WEBHOOK_ID`, `DISCORD_ANNOUNCE_WEBHOOK_TOKEN` |  |   | optional | used by cronjob |
 | | secrets.`ACTION_FAILURE_DISCORD_WEBHOOK` | | | Notifies when action fails |
 | | secrets.`CF_ASSETS_ACCOUNT_ID`, `CF_ASSETS_API_TOKEN`, `CF_ASSETS_PROJECT_NAME` | | | cloudflare pages deploy |
