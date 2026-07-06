@@ -27,7 +27,12 @@ try {
             title: chart.title,
             composer: chart.composer,
             chartCreator: chart.chartCreator,
-            ytData: await getYTDataEntry(process.env as any, db, chart.ytId),
+            ytData: await getYTDataEntry(
+              console,
+              process.env as any,
+              db,
+              chart.ytId
+            ),
           }),
         },
       }
