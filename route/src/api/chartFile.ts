@@ -75,6 +75,7 @@ interface ChartFileAppVars {
   etag: string;
   db: () => Promise<Db>;
   pSecretSalt: string;
+  logger: typeof console;
 }
 const chartFileApp = async (config: {
   getConnInfo: (c: Context) => ConnInfo | null;
@@ -536,9 +537,12 @@ const chartFileApp = async (config: {
                 cid,
                 updatedAt,
                 ip,
-                await getYTDataEntry(env(c), db, newChart.ytId).catch(
-                  () => undefined
-                ),
+                await getYTDataEntry(
+                  c.var.logger,
+                  env(c),
+                  db,
+                  newChart.ytId
+                ).catch(() => undefined),
                 pSecretSalt,
                 entry,
                 newSaveHashes

@@ -41,9 +41,6 @@ export function getPasswdParamsFromAuthHeader(
     return undefined;
   }
 
-  console.log({
-    Authorization: Object.fromEntries([authorization.split(" ")]),
-  });
   const { Authorization: authParams } = v.parse(
     v.object({
       Authorization: v.strictObject({

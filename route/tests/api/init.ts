@@ -39,6 +39,7 @@ import { inspect } from "node:util";
 import { createMiddleware } from "hono/factory";
 import { Db } from "mongodb";
 import { before, after } from "node:test";
+import { structuredLogger } from "@hono/structured-logger";
 inspect.defaultOptions.depth = null;
 
 if (typeof process.env.MONGODB_URI !== "string") {
@@ -76,6 +77,13 @@ const fetchBrief = (_e: Bindings, cid: string) => getBrief(db!, cid);
 export { db };
 
 export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
+  .use(
+    structuredLogger({
+      createLogger: () => console,
+      onRequest: () => undefined,
+      onResponse: () => undefined,
+    })
+  )
   .route("/api", await apiApp({ getConnInfo: () => null, dbMiddleware }))
   .route("/share", shareApp({ fetchBrief, fetchStatic }))
   .route("/", redirectApp({ fetchStatic }))

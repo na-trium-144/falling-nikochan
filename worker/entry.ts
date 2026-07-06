@@ -13,6 +13,7 @@ import { locales } from "@falling-nikochan/i18n/staticMin.js";
 import { TarFileType, TarReader } from "@gera2ld/tarjs";
 import cfBeaconHtml from "./beacon.html?raw";
 import { getMimeType, mimes } from "hono/utils/mime";
+import { structuredLogger } from "@hono/structured-logger";
 
 const e: Bindings = {
   MONGODB_URI: "",
@@ -29,7 +30,7 @@ self.console = {
     originalConsole.log(...args);
     self.clients.matchAll().then((clients) => {
       clients.forEach((client) => {
-        client.postMessage(args.map((a) => String(a)).join(" "));
+        client.postMessage({ type: "console", level: "log", args });
       });
     });
   },
@@ -37,7 +38,7 @@ self.console = {
     originalConsole.error(...args);
     self.clients.matchAll().then((clients) => {
       clients.forEach((client) => {
-        client.postMessage(args.map((a) => String(a)).join(" "));
+        client.postMessage({ type: "console", level: "error", args });
       });
     });
   },
@@ -45,7 +46,7 @@ self.console = {
     originalConsole.warn(...args);
     self.clients.matchAll().then((clients) => {
       clients.forEach((client) => {
-        client.postMessage(args.map((a) => String(a)).join(" "));
+        client.postMessage({ type: "console", level: "warn", args });
       });
     });
   },
@@ -53,7 +54,7 @@ self.console = {
     originalConsole.info(...args);
     self.clients.matchAll().then((clients) => {
       clients.forEach((client) => {
-        client.postMessage(args.map((a) => String(a)).join(" "));
+        client.postMessage({ type: "console", level: "info", args });
       });
     });
   },
@@ -451,6 +452,13 @@ async function fetchAPI(input: string | URL | Request, init?: RequestInit) {
   return res;
 }
 const app = new Hono({ strict: false })
+  .use(
+    structuredLogger({
+      createLogger: () => console,
+      onRequest: () => undefined,
+      onResponse: () => undefined,
+    })
+  )
   .use(async (c, next) => {
     await next();
     if (c.res.headers.get("Content-Type")?.includes("text/html")) {

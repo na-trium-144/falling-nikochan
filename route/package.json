@@ -19,7 +19,7 @@
     "@falling-nikochan/i18n": "workspace:*",
     "@hono/node-server": "^2.0.2",
     "@hono/standard-validator": "^0.2.1",
-    "@hono/structured-logger": "^0.1.0",
+    "@hono/structured-logger": "catalog:",
     "@hono/swagger-ui": "^0.6.1",
     "@msgpack/msgpack": "catalog:",
     "@scalar/hono-api-reference": "^0.10.14",

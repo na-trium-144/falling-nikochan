@@ -19,7 +19,7 @@ const CACHE_MAX_AGE = 86400;
 
 const ytMetaApp = new Hono<{
   Bindings: Bindings;
-  Variables: { db: () => Promise<Db> };
+  Variables: { logger: typeof console; db: () => Promise<Db> };
 }>({
   strict: false,
 }).get(
@@ -75,7 +75,7 @@ const ytMetaApp = new Hono<{
     const db = await c.get("db")();
     const entry = await getChartEntryCompressed(db, cid, null);
     const ytId = entry.ytId;
-    const ytData = await getYTDataEntry(env(c), db, ytId);
+    const ytData = await getYTDataEntry(c.var.logger, env(c), db, ytId);
     let title =
       // exact match
       ytData.localizations[lang]?.title ??

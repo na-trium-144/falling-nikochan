@@ -34,7 +34,10 @@ import { supportedEncodings } from "./decompress.js";
 const newChartFileApp = async (config: {
   getConnInfo: (c: Context) => ConnInfo | null;
 }) =>
-  new Hono<{ Bindings: Bindings; Variables: { db: () => Promise<Db> } }>({
+  new Hono<{
+    Bindings: Bindings;
+    Variables: { logger: typeof console; db: () => Promise<Db> };
+  }>({
     strict: false,
   }).post(
     "/",
@@ -210,9 +213,12 @@ const newChartFileApp = async (config: {
               cid,
               updatedAt,
               ip,
-              await getYTDataEntry(env(c), db, newChart.ytId).catch(
-                () => undefined
-              ),
+              await getYTDataEntry(
+                c.var.logger,
+                env(c),
+                db,
+                newChart.ytId
+              ).catch(() => undefined),
               pSecretSalt,
               null
             )

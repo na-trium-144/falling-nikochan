@@ -50,6 +50,7 @@ export function normalizeEntry(data: {
 }
 
 export async function getYTDataEntry(
+  logger: typeof console,
   e: Bindings,
   db: Db,
   ytId: string
@@ -76,7 +77,7 @@ export async function getYTDataEntry(
         });
       }
       const data: any = await res.json();
-      console.log(data);
+      logger.log(data);
       if (data.items.length !== 1) {
         throw new Error("items.length !== 1");
       }

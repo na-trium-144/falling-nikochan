@@ -37,7 +37,9 @@ const shareApp = (config: {
   fetchStatic: (e: Bindings, url: URL) => Promise<ResponseOK>;
   languageDetector?: (c: Context, next: () => Promise<void>) => Promise<void>;
 }) =>
-  new Hono<{ Bindings: Bindings }>({ strict: false })
+  new Hono<{ Bindings: Bindings; Variables: { logger: typeof console } }>({
+    strict: false,
+  })
     .use(config.languageDetector || languageDetector())
     .use(etag())
     // CookieとAccept-Languageでレスポンスが変わるためprivate指定しcache middlewareは使わない
@@ -52,7 +54,7 @@ const shareApp = (config: {
         try {
           resultParams = deserializeResultParams(qResult);
         } catch (e) {
-          console.error(e);
+          c.var.logger.error(e);
           // throw new HTTPException(400, { message: "invalidResultParam" });
         }
       }

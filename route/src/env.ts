@@ -55,6 +55,7 @@ export function cacheControl(e: Bindings, age: number, private_?: boolean) {
 export function backendOrigin(
   c:
     | Context<{ Bindings: Bindings }>
+    | Context<{ Bindings: Bindings; Variables: { logger: typeof console } }>
     | Context<{ Bindings: Bindings; Variables: { db: () => Promise<Db> } }>
 ): string {
   if (env(c).BACKEND_PREFIX) {

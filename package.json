@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@falling-nikochan/route": "workspace:*",
+    "@hono/structured-logger": "catalog:",
     "@sentry/hono": "catalog:sentry",
     "@vercel/functions": "^3.6.2",
     "@vercel/og": "catalog:",

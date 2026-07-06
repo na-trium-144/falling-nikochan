@@ -45,7 +45,9 @@ const ogApp = (config: {
   fetchBrief: (e: Bindings, cid: string) => Promise<{ brief: ChartBrief }>;
   fetchStatic: (e: Bindings, url: URL) => Promise<ResponseOK>;
 }) =>
-  new Hono<{ Bindings: Bindings }>({ strict: false })
+  new Hono<{ Bindings: Bindings; Variables: { logger: typeof console } }>({
+    strict: false,
+  })
     .use("/*", cors({ origin: "*" }))
     .use(etag())
     .use(
@@ -121,7 +123,7 @@ const ogApp = (config: {
         try {
           resultParams = deserializeResultParams(qResult);
         } catch (e) {
-          console.error(e);
+          c.var.logger.error(e);
           throw new HTTPException(400, { message: "invalidResultParam" });
         }
       }
@@ -206,7 +208,7 @@ const ogApp = (config: {
             imagePath = null;
             break;
           default:
-            console.error(`unknown touch type ${resultParams.inputType}`);
+            c.var.logger.error(`unknown touch type ${resultParams.inputType}`);
             imagePath = null;
             break;
         }

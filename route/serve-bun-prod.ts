@@ -15,6 +15,7 @@ import {
   sentryBeforeSend,
 } from "./src/index.js";
 import { Hono } from "hono";
+import { logger } from "hono/logger";
 import { ImageResponse } from "@vercel/og";
 import { getConnInfo } from "hono/bun";
 import * as Sentry from "@sentry/hono/bun";
@@ -70,6 +71,7 @@ app
       createLogger: (c) => rootLogger.child({ requestId: c.var.requestId }),
     })
   )
+  .use(logger())
   .use(compress())
   .route("/api", await apiApp({ getConnInfo, dbMiddleware }))
   .route("/og", ogApp({ ImageResponse, fetchBrief, fetchStatic }))

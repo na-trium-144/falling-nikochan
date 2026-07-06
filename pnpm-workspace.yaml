@@ -18,6 +18,7 @@ allowBuilds:
 
 catalog:
   "@gera2ld/tarjs": ^0.3.1
+  "@hono/structured-logger": ^0.1.0
   "@msgpack/msgpack": ^3.1.3
   "@types/chai": ^5.2.3
   "@vercel/og": ^0.11.1
