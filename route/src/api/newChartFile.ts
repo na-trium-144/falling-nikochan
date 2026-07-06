@@ -30,13 +30,14 @@ import { errorLiteral, validationErrorSchema } from "../error.js";
 import * as v from "valibot";
 import { ConnInfo } from "hono/conninfo";
 import { supportedEncodings } from "./decompress.js";
+import { BaseLogger } from "@hono/structured-logger";
 
 const newChartFileApp = async (config: {
   getConnInfo: (c: Context) => ConnInfo | null;
 }) =>
   new Hono<{
     Bindings: Bindings;
-    Variables: { logger: typeof console; db: () => Promise<Db> };
+    Variables: { logger: BaseLogger; db: () => Promise<Db> };
   }>({
     strict: false,
   }).post(

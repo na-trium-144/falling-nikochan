@@ -20,6 +20,7 @@ import { env } from "hono/adapter";
 import { Context, Hono } from "hono";
 import { etag } from "hono/etag";
 import { etagContentRegex } from "./api/chart.js";
+import { BaseLogger } from "@hono/structured-logger";
 
 /*
 OGPの見た目を優先するため、shareページではクエリのlangを優先する。
@@ -37,7 +38,7 @@ const shareApp = (config: {
   fetchStatic: (e: Bindings, url: URL) => Promise<ResponseOK>;
   languageDetector?: (c: Context, next: () => Promise<void>) => Promise<void>;
 }) =>
-  new Hono<{ Bindings: Bindings; Variables: { logger: typeof console } }>({
+  new Hono<{ Bindings: Bindings; Variables: { logger: BaseLogger } }>({
     strict: false,
   })
     .use(config.languageDetector || languageDetector())

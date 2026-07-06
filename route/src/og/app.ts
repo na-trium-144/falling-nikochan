@@ -21,6 +21,7 @@ import * as v from "valibot";
 import { fetchError } from "../error.js";
 import { cache } from "hono/cache";
 import { etag } from "hono/etag";
+import { BaseLogger } from "@hono/structured-logger";
 
 const CACHE_MAX_AGE = 315360000;
 
@@ -45,7 +46,7 @@ const ogApp = (config: {
   fetchBrief: (e: Bindings, cid: string) => Promise<{ brief: ChartBrief }>;
   fetchStatic: (e: Bindings, url: URL) => Promise<ResponseOK>;
 }) =>
-  new Hono<{ Bindings: Bindings; Variables: { logger: typeof console } }>({
+  new Hono<{ Bindings: Bindings; Variables: { logger: BaseLogger } }>({
     strict: false,
   })
     .use("/*", cors({ origin: "*" }))

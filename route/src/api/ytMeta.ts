@@ -13,13 +13,14 @@ import {
   validationErrorSchema,
 } from "../error.js";
 import { getYTDataEntry } from "./ytData.js";
+import { BaseLogger } from "@hono/structured-logger";
 
 // Cache duration for this API endpoint (in seconds)
 const CACHE_MAX_AGE = 86400;
 
 const ytMetaApp = new Hono<{
   Bindings: Bindings;
-  Variables: { logger: typeof console; db: () => Promise<Db> };
+  Variables: { logger: BaseLogger; db: () => Promise<Db> };
 }>({
   strict: false,
 }).get(

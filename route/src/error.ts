@@ -7,6 +7,7 @@ import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
 import * as v from "valibot";
 import { ContentfulStatusCode } from "hono/utils/http-status";
 import type { captureException } from "@sentry/hono/node";
+import { BaseLogger } from "@hono/structured-logger";
 
 export function notFound(): never {
   throw new HTTPException(404);
@@ -170,7 +171,7 @@ export const onError =
 
 async function errorResponse(
   fetchStatic: (e: Bindings, url: URL) => Promise<ResponseOK>,
-  logger: typeof console,
+  logger: BaseLogger,
   e: Bindings,
   origin: string,
   lang: string,

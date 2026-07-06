@@ -2,6 +2,7 @@ import { Db } from "mongodb";
 import { Bindings } from "../env.js";
 import moji from "moji";
 import { fetchError } from "../error.js";
+import { BaseLogger } from "@hono/structured-logger";
 
 export interface YTDataEntry {
   ytId: string;
@@ -50,7 +51,7 @@ export function normalizeEntry(data: {
 }
 
 export async function getYTDataEntry(
-  logger: typeof console,
+  logger: BaseLogger,
   e: Bindings,
   db: Db,
   ytId: string
@@ -77,7 +78,7 @@ export async function getYTDataEntry(
         });
       }
       const data: any = await res.json();
-      logger.log(data);
+      logger.info({ ytData: data });
       if (data.items.length !== 1) {
         throw new Error("items.length !== 1");
       }
