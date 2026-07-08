@@ -348,6 +348,7 @@ export default function FallingWindow(props: Props) {
           dns.drawNikochan(nctx);
           dns.drawTail(ctx);
           dns.drawRipple(ectx);
+          dns.drawParticle(ectx);
         }
         lastNow.current = now;
 
@@ -655,27 +656,133 @@ function Nikochan(props: NProps) {
   4: miss は画像が0と同じ
   */
   const { displayNote, noteSize, marginX, marginY, boxSize, note } = props;
+  const particleMaxNum = 15;
+  const particleNum =
+    displayNote.chain && displayNote.baseScore !== undefined
+      ? Math.min(
+          Math.round(
+            ((1 + (2 * displayNote.chain) / bonusMax) / 3) *
+              particleMaxNum
+          ),
+          particleMaxNum
+        )
+      : 0;
+  const [particleStartAngle, setParticleStartAngle] = useState<number>();
+  useEffect(() => {
+    setParticleStartAngle(Math.random() * 360);
+  }, []);
+
   return (
     <>
-      {displayNote.chain && [1, 2].includes(displayNote.done) && (
+      {/*{displayNote.chain && [1, 2].includes(displayNote.done) && (
         <Particle
-          particleNum={
-            // 6,8,10,12
-            6 + Math.floor(3 * Math.min(1, displayNote.chain / bonusMax)) * 2
-          }
+          // particleNum={
+          //   // 6,8,10,12
+          //   6 + Math.floor(3 * Math.min(1, displayNote.chain / bonusMax)) * 2
+          // }
           left={note.targetX * boxSize + marginX}
           bottom={targetY * boxSize + marginY}
           noteSize={noteSize}
           big={!!displayNote.bigBonus}
           chain={displayNote.chain || 0}
-          particleAssets={props.particleAssets}
-          blur={props.blur}
+          // particleAssets={props.particleAssets}
+          // blur={props.blur}
         />
-      )}
+      )}*/}
+    {/*{particleStartAngle !== undefined &&
+        particleNum > 0 &&
+        Array.from(new Array(particleNum)).map((_, i) => (
+          <Particle
+            key={i}
+            angle={particleStartAngle + (360 * i) / particleNum}
+            visible={i < particleNum}
+            left={note.targetX * boxSize + marginX}
+            bottom={targetY * boxSize + marginY}
+            noteSize={noteSize}
+            big={displayNote.bigDone}
+            chain={displayNote.chain || 0}
+          />
+        ))}*/}
     </>
   );
 }
 
+interface PProps {
+  angle: number;
+  left: number;
+  bottom: number;
+  noteSize: number;
+  visible: boolean;
+  big: boolean;
+  chain: number;
+}
+function Particle(props: PProps) {
+  const ref = useRef<HTMLDivElement>(null!);
+  const animateDone = useRef<boolean>(false);
+  const angleRandom = useRef<number>(0);
+  const bigParam = useRef<number>(1);
+  const sizeParam = useRef<number>(1);
+  const hueParam = useRef<number>(0);
+  const {isDark} = useTheme();
+  let hue =
+    55 - (15 * hueParam.current * Math.min(props.chain, bonusMax)) / bonusMax;
+  if (isDark) {
+    hue = 85 - hue;
+  }
+  const { noteSize } = props;
+  const particleSize = (noteSize / 4) * sizeParam.current;
+  useEffect(() => {
+    if (!animateDone.current) {
+      const distance = noteSize * (0.5 + Math.random() * Math.random() * 1);
+      ref.current.animate(
+        [
+          { transform: "translateX(0px)", opacity: 0.8 },
+          {
+            transform: `translateX(${distance * 0.8}px)`,
+            opacity: 0.8,
+            offset: 0.8,
+          },
+          { transform: `translateX(${distance}px)`, opacity: 0 },
+        ],
+        { duration: 500, fill: "forwards", easing: "ease-out" }
+      );
+      angleRandom.current = Math.random() * Math.random() * 120;
+      bigParam.current = Math.random() * 1 + 1;
+      sizeParam.current = Math.random() * Math.random() * 0.5 + 0.5;
+      hueParam.current = Math.random() * Math.random() * 1;
+    }
+    animateDone.current = true;
+  }, [noteSize]);
+  return (
+    <div
+      className="absolute -z-10 "
+      style={{
+        width: 1,
+        height: 1,
+        left: props.left,
+        bottom: props.bottom,
+        transform:
+          `rotate(${props.angle + angleRandom.current}deg) ` +
+          `scale(${props.big ? bigParam.current : 1})`,
+        opacity: props.visible ? 1 : 0,
+      }}
+    >
+      <div
+        ref={ref}
+        className="absolute rounded-full "
+        style={{
+          background: `hsl(${hue} 100% 50%)`,
+          width: particleSize,
+          height: particleSize,
+          left: -particleSize / 2,
+          bottom: -particleSize / 2,
+        }}
+      />
+    </div>
+  );
+}
+
+/*
 interface PProps {
   particleNum: number;
   left: number;
@@ -780,3 +887,4 @@ function Particle(props: PProps) {
     </div>
   );
 }
+*/

@@ -37,6 +37,13 @@ interface Context {
   lastNow: number;
   dark: boolean;
 }
+interface ParticleParams {
+  deltaAngle: number;
+  big: number;
+  size: number;
+  hue: number;
+  distance: number;
+}
 export class DisplayNikochan {
   #n: NoteInGame;
   #dn: DisplayNote;
@@ -45,6 +52,8 @@ export class DisplayNikochan {
   #fadeinStart: DOMHighResTimeStamp;
   #fadeoutStart: DOMHighResTimeStamp | null;
   #tailVel: Pos;
+  #particleStartAngle: number | null = null;
+  #particleParams: ParticleParams[] = [];
 
   constructor(n: NoteInGame, dn: DisplayNote, c: Context) {
     this.#n = n;
@@ -203,7 +212,7 @@ export class DisplayNikochan {
     for (const i of [0, 1]) {
       const duration = 350 - 200 * i;
       const delay = 200 * i;
-      const t = (this.#now - delay - this.#fadeoutStart!) / duration
+      const t = (this.#now - delay - this.#fadeoutStart!) / duration;
       let scale = 0;
       let opacity = 0;
 
@@ -254,6 +263,74 @@ export class DisplayNikochan {
       ctx.ellipse(0, 0, width / 2, height / 2, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  drawParticle(ctx: CanvasRenderingContext2D) {
+    if (this.#dn.chain === undefined) {
+      return;
+    }
+    const particleMaxNum = 15;
+    // -ver9.3: round(((1+(2*chain)/bonusMax)/3)*max) => 5-15, no big
+    // ver9.4-16.22: 6+floor(3*min(1,chain/bonusMax))*2 => 6-12, big: (6+4)-(12+10)
+    const particleNum = Math.min(
+      Math.round(((1 + (2 * this.#dn.chain) / bonusMax) / 3) * particleMaxNum),
+      particleMaxNum
+    );
+
+    if (this.#particleStartAngle === null) {
+      this.#particleStartAngle = Math.random() * 360;
+    }
+
+    for (let i = 0; i < particleNum; i++) {
+      if (!this.#particleParams.at(i)) {
+        this.#particleParams[i] = {
+          distance: 0.5 + Math.random() * Math.random() * 1, // * noteSize
+          deltaAngle: Math.random() * Math.random() * 120,
+          big: Math.random() * 1 + 1,
+          size: Math.random() * Math.random() * 0.5 + 0.5,
+          hue: Math.random() * Math.random() * 1,
+        };
+      }
+      const pp = this.#particleParams[i];
+
+      let hue =
+        55 - (15 * pp.hue * Math.min(this.#dn.chain, bonusMax)) / bonusMax;
+      if (this.#c.dark) {
+        hue = 85 - hue;
+      }
+      const particleSize = (this.#c.noteSize / 4) * pp.size;
+
+      const t = (this.#now - this.#fadeoutStart!) / 500;
+      let opacity = 0;
+      const dx = pp.distance * this.#c.noteSize * t;
+
+      if (t <= 0 || t >= 1) {
+        continue;
+      } else if (easeOut(t) <= 0.8) {
+        // const localT = easeOut(t) / 0.8;
+        opacity = 0.8;
+      } else {
+        const localT = (easeOut(t) - 0.8) / 0.2;
+        opacity = 0.8 * (1 - localT);
+      }
+
+      ctx.save();
+      ctx.scale(this.#c.effectsCanvasDPR, this.#c.effectsCanvasDPR);
+      ctx.translate(this.left, this.top);
+      ctx.rotate(
+        this.#particleStartAngle + (i * 360) / particleNum + pp.deltaAngle
+      );
+      if(this.#dn.bigDone){
+        ctx.scale(pp.big, pp.big);
+      }
+      ctx.translate(dx, 0);
+      ctx.globalAlpha = opacity;
+      ctx.beginPath();
+      ctx.arc(0, 0, particleSize / 2, 0, Math.PI * 2);
+      ctx.fillStyle = `hsl(${hue} 100% 50%)`;
+      ctx.fill();
       ctx.restore();
     }
   }
