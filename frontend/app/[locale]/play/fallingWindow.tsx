@@ -17,6 +17,7 @@ import { useRealFPS } from "@/common/fpsCalculator";
 import { DisplayNikochan } from "./displayNikochan";
 import { OffsetEstimator } from "./offsetEstimator";
 import { fetchAsset } from "@/common/fetch";
+import { useTheme } from "@/common/theme";
 
 type Props = {
   className?: string;
@@ -73,6 +74,7 @@ export default function FallingWindow(props: Props) {
     height && boxSize && (height - boxSize) / 2;
   const tailsCanvasRef = useRef<HTMLCanvasElement>(null);
   const nikochanCanvasRef = useRef<HTMLCanvasElement>(null);
+  const effectsCanvasRef = useRef<HTMLCanvasElement>(null);
   const canvasLeft = useRef<number>(0);
   const canvasTop = useRef<number>(0);
   const canvasWidth = useRef<number>(0);
@@ -97,10 +99,12 @@ export default function FallingWindow(props: Props) {
     marginY !== undefined ? -canvasTop.current + marginY : undefined;
 
   const { rem, playUIScale } = useDisplayMode();
+  const { isDark } = useTheme();
   const noteSize = Math.max(1.5 * rem, 0.06 * (boxSize || 0));
 
   // devicePixelRatioを無視するどころか、あえて小さくすることで、ぼかす
   const tailsCanvasDPR = Math.min(1, 6.5 / noteSize);
+  const effectsCanvasDPR = 0.5;
   const nikochanCanvasDPR = useRef<number>(1);
   useEffect(() => {
     nikochanCanvasDPR.current =
@@ -203,6 +207,10 @@ export default function FallingWindow(props: Props) {
     alpha: true,
     desynchronized: true,
   });
+  const ectx = effectsCanvasRef.current?.getContext("2d", {
+    alpha: true,
+    desynchronized: true,
+  });
 
   const nikochanBitmap = useRef<ImageBitmap[][] | null>(null); // nikochanBitmap.current[0-3][big:0|1]
   useEffect(() => {
@@ -295,9 +303,11 @@ export default function FallingWindow(props: Props) {
         rem,
         now,
         tailsCanvasDPR,
+        effectsCanvasDPR,
         nikochanCanvasDPR: nikochanCanvasDPR.current,
         nikochanBitmap: nikochanBitmap.current,
         lastNow: lastNow.current,
+        dark: isDark,
       };
 
       displayNotes.current = notes
@@ -305,7 +315,13 @@ export default function FallingWindow(props: Props) {
         .filter((n) => n !== null);
       displayNotes.current.reverse(); // 奥に表示されるものが最初
 
-      if (nctx && ctx) {
+      if (ectx && nctx && ctx) {
+        ectx.clearRect(
+          0,
+          0,
+          canvasWidth.current * effectsCanvasDPR,
+          canvasHeight.current * effectsCanvasDPR
+        );
         nctx.clearRect(
           0,
           0,
@@ -331,6 +347,7 @@ export default function FallingWindow(props: Props) {
           shouldHideBPMSign ||= dns.shouldHideBPMSign;
           dns.drawNikochan(nctx);
           dns.drawTail(ctx);
+          dns.drawRipple(ectx);
         }
         lastNow.current = now;
 
@@ -355,6 +372,14 @@ export default function FallingWindow(props: Props) {
             0,
             canvasWidth.current * nikochanCanvasDPR.current,
             canvasHeight.current * nikochanCanvasDPR.current
+          );
+        }
+        if (ectx) {
+          ectx.clearRect(
+            0,
+            0,
+            canvasWidth.current * effectsCanvasDPR,
+            canvasHeight.current * effectsCanvasDPR
           );
         }
       }
@@ -413,6 +438,19 @@ export default function FallingWindow(props: Props) {
       style={props.style}
       ref={ref}
     >
+      {/* For effects */}
+      <canvas
+        ref={effectsCanvasRef}
+        className="absolute z-fw-canvas-effects pointer-events-none dark:opacity-70 opacity-90"
+        style={{
+          left: canvasLeft.current,
+          top: canvasTop.current,
+          width: canvasWidth.current,
+          height: canvasHeight.current,
+        }}
+        width={canvasWidth.current * effectsCanvasDPR}
+        height={canvasHeight.current * effectsCanvasDPR}
+      />
       {/* For nikochans tail */}
       <canvas
         ref={tailsCanvasRef}
@@ -619,16 +657,6 @@ function Nikochan(props: NProps) {
   const { displayNote, noteSize, marginX, marginY, boxSize, note } = props;
   return (
     <>
-      {[1].includes(displayNote.done) && (
-        <Ripple
-          noteSize={noteSize}
-          left={note.targetX * boxSize + marginX}
-          bottom={targetY * boxSize + marginY}
-          big={displayNote.bigDone}
-          chain={displayNote.chain || 0}
-          blur={props.blur}
-        />
-      )}
       {displayNote.chain && [1, 2].includes(displayNote.done) && (
         <Particle
           particleNum={
@@ -645,78 +673,6 @@ function Nikochan(props: NProps) {
         />
       )}
     </>
-  );
-}
-
-interface RProps {
-  noteSize: number;
-  left: number;
-  bottom: number;
-  big: boolean;
-  chain: number;
-  blur: boolean;
-}
-function Ripple(props: RProps) {
-  const ref = useRef<HTMLDivElement>(null!);
-  const ref2 = useRef<HTMLDivElement>(null!);
-  const animateDone = useRef<boolean>(false);
-  const { noteSize } = props;
-  const rippleWidth = noteSize * 2.5 * (props.big ? 1.5 : 1);
-  const rippleHeight = rippleWidth * 0.7;
-  useEffect(() => {
-    if (!animateDone.current) {
-      [ref, ref2].forEach((r, i) => {
-        r.current.animate(
-          [
-            { transform: "scale(0)", opacity: 0.5 },
-            { transform: "scale(0.8)", opacity: 0.5, offset: 0.8 },
-            { transform: `scale(1)`, opacity: 0 },
-          ],
-          {
-            duration: 350 - 200 * i,
-            delay: 200 * i,
-            fill: "forwards",
-            easing: "ease-out",
-          }
-        );
-      });
-    }
-    animateDone.current = true;
-  }, [noteSize]);
-  return (
-    <div
-      className={clsx(
-        "absolute z-fw-ripple dark:opacity-70 opacity-90",
-        props.blur && "blur-2xs"
-      )}
-      style={{
-        width: 1,
-        height: 1,
-        left: props.left,
-        bottom: props.bottom,
-      }}
-    >
-      {[ref, ref2].map((r, i) => (
-        <div
-          key={i}
-          ref={r}
-          className={clsx(
-            "absolute origin-center opacity-0",
-            props.chain >= bonusMax
-              ? "bg-amber-300 border-amber-400/70 dark:bg-yellow-500 dark:border-yellow-400/70"
-              : "bg-yellow-200 border-yellow-300/70 dark:bg-amber-600 dark:border-amber-500/70"
-          )}
-          style={{
-            borderWidth: rippleWidth / 20,
-            borderRadius: "50%",
-            width: rippleWidth,
-            height: rippleHeight,
-            left: -rippleWidth / 2,
-            bottom: -rippleHeight / 2,
-          }}
-        />
-      ))}
-    </div>
   );
 }
 

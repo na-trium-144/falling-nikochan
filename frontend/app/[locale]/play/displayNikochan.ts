@@ -1,5 +1,6 @@
 import {
   bigScale,
+  bonusMax,
   displayNote,
   DisplayNote,
   NoteInGame,
@@ -15,6 +16,10 @@ function norm(xy: Pos) {
   return Math.sqrt(xy.x * xy.x + xy.y * xy.y);
 }
 
+function easeOut(t: number) {
+  return 1 - Math.pow(1 - t, 2);
+}
+
 interface Context {
   noteSize: number;
   boxSize: number;
@@ -26,9 +31,11 @@ interface Context {
   rem: number;
   now: number;
   tailsCanvasDPR: number;
+  effectsCanvasDPR: number;
   nikochanCanvasDPR: number;
   nikochanBitmap: ImageBitmap[][];
   lastNow: number;
+  dark: boolean;
 }
 export class DisplayNikochan {
   #n: NoteInGame;
@@ -89,8 +96,8 @@ export class DisplayNikochan {
       this.#c.nikochanBitmap[this.#n.done <= 3 ? this.#n.done : 0][
         this.#n.big ? 1 : 0
       ],
-      (this.left + dx) * this.#c.nikochanCanvasDPR,
-      (this.top + dy) * this.#c.nikochanCanvasDPR,
+      (this.left - this.size / 2 + dx) * this.#c.nikochanCanvasDPR,
+      (this.top - this.size / 2 + dy) * this.#c.nikochanCanvasDPR,
       this.size * this.#c.nikochanCanvasDPR * scale,
       this.size * this.#c.nikochanCanvasDPR * scale
     );
@@ -146,13 +153,8 @@ export class DisplayNikochan {
     if (tailLength > this.#c.noteSize / 2 && tailOpacity > 0.5) {
       ctx.save();
       ctx.scale(this.#c.tailsCanvasDPR, this.#c.tailsCanvasDPR);
-      ctx.translate(
-        this.#dn.pos.x * this.#c.boxSize + this.#c.canvasMarginX,
-        this.#c.canvasMarginY +
-          this.#c.boxSize -
-          targetY * this.#c.boxSize -
-          this.#dn.pos.y * this.#c.boxSize
-      );
+      ctx.translate(this.left, this.top);
+
       ctx.rotate(velAngle);
       const tailGrad = ctx.createLinearGradient(tailLength, 0, 0, 0);
       tailGrad.addColorStop(0, "#facd0000");
@@ -176,13 +178,8 @@ export class DisplayNikochan {
     ) {
       ctx.save();
       ctx.scale(this.#c.tailsCanvasDPR, this.#c.tailsCanvasDPR);
-      ctx.translate(
-        this.#dn.pos.x * this.#c.boxSize + this.#c.canvasMarginX,
-        this.#c.canvasMarginY +
-          this.#c.boxSize -
-          targetY * this.#c.boxSize -
-          this.#dn.pos.y * this.#c.boxSize
-      );
+      ctx.translate(this.left, this.top);
+
       ctx.globalAlpha =
         (this.#n.done === 0 ? 1 : tailOpacity) * this.globalAlpha;
       ctx.beginPath();
@@ -194,6 +191,69 @@ export class DisplayNikochan {
       headGrad.addColorStop(1, "#ffe89d00");
       ctx.fillStyle = headGrad;
       ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  drawRipple(ctx: CanvasRenderingContext2D) {
+    if (this.#n.done !== 1) {
+      return;
+    }
+
+    for (const i of [0, 1]) {
+      const duration = 350 - 200 * i;
+      const delay = 200 * i;
+      const t = (this.#now - delay - this.#fadeoutStart!) / duration
+      let scale = 0;
+      let opacity = 0;
+
+      if (t <= 0 || t >= 1) {
+        continue;
+      } else if (easeOut(t) <= 0.8) {
+        const localT = easeOut(t) / 0.8;
+        scale = localT * 0.8;
+        opacity = 0.5;
+      } else {
+        const localT = (easeOut(t) - 0.8) / 0.2;
+        scale = 0.8 + localT * 0.2;
+        opacity = 0.5 * (1 - localT);
+      }
+
+      ctx.save();
+      ctx.scale(this.#c.effectsCanvasDPR, this.#c.effectsCanvasDPR);
+      ctx.translate(this.left, this.top);
+      ctx.scale(scale, scale);
+      ctx.globalAlpha = opacity;
+
+      // 色の設定
+      if ((this.#dn.chain ?? 0) >= bonusMax) {
+        if (this.#c.dark) {
+          ctx.fillStyle = "oklch(79.5% 0.184 86.047)"; // yellow-500
+          ctx.strokeStyle = "oklch(85.2% 0.199 91.936 / .7)"; // yellow-400/70
+        } else {
+          ctx.fillStyle = "oklch(87.9% 0.169 91.605)"; // amber-300
+          ctx.strokeStyle = "oklch(82.8% 0.189 84.429 / .7)"; // amber-400/70
+        }
+      } else {
+        if (this.#c.dark) {
+          ctx.fillStyle = "oklch(66.6% 0.179 58.318)"; // amber-600
+          ctx.strokeStyle = "oklch(76.9% 0.188 70.08 / .7)"; // amber-500/70
+        } else {
+          ctx.fillStyle = "oklch(94.5% 0.129 101.54)"; // yellow-200
+          ctx.strokeStyle = "oklch(90.5% 0.182 98.111 / .7)"; // yellow-300/70
+        }
+      }
+
+      const width = this.#c.noteSize * 2.5 * (this.#dn.bigDone ? 1.5 : 1);
+      const height = width * 0.7;
+
+      ctx.lineWidth = width / 20;
+
+      // 楕円を描画
+      ctx.beginPath();
+      ctx.ellipse(0, 0, width / 2, height / 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
       ctx.restore();
     }
   }
@@ -219,25 +279,22 @@ export class DisplayNikochan {
     return this.#c.noteSize * bigScale(this.#n.big);
   }
   get left() {
-    return (
-      this.#dn.pos.x * this.#c.boxSize + this.#c.canvasMarginX - this.size / 2
-    );
+    return this.#dn.pos.x * this.#c.boxSize + this.#c.canvasMarginX;
   }
   get top() {
     return (
       this.#c.canvasMarginY +
       this.#c.boxSize -
       targetY * this.#c.boxSize -
-      this.#dn.pos.y * this.#c.boxSize -
-      this.size / 2
+      this.#dn.pos.y * this.#c.boxSize
     );
   }
   get isOffScrean() {
     return (
-      this.left + this.size < 0 ||
-      this.left - this.size > window.innerWidth ||
-      this.top - this.size > this.#c.canvasMarginY + this.#c.boxSize ||
-      this.top + this.size < 0
+      this.left + this.size / 2 < 0 ||
+      this.left - this.size / 2 > window.innerWidth ||
+      this.top - this.size / 2 > this.#c.canvasMarginY + this.#c.boxSize ||
+      this.top + this.size / 2 < 0
     );
   }
   get targetLeft() {
@@ -253,7 +310,7 @@ export class DisplayNikochan {
       (this.targetLeft < 8 * this.#c.rem * this.#c.playUIScale ||
         ("vy" in this.#n &&
           this.#n.vy <= 0 &&
-          this.left < 8 * this.#c.rem * this.#c.playUIScale)) &&
+          this.left - this.size / 2 < 8 * this.#c.rem * this.#c.playUIScale)) &&
       this.#n.hitTimeSec - this.#c.now < 0.5 * this.#c.playbackRate &&
       this.#c.now - this.#n.hitTimeSec < 0.5 * this.#c.playbackRate
     );
