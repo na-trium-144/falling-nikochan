@@ -7,6 +7,7 @@ import { fetchError } from "./error.js";
 import { env } from "hono/adapter";
 import { Db } from "mongodb";
 import type { ErrorEvent, EventHint } from "@sentry/hono/node";
+import type { BaseLogger } from "@hono/structured-logger";
 
 export interface Bindings {
   ASSETS?: { fetch: typeof fetch };
@@ -55,6 +56,7 @@ export function cacheControl(e: Bindings, age: number, private_?: boolean) {
 export function backendOrigin(
   c:
     | Context<{ Bindings: Bindings }>
+    | Context<{ Bindings: Bindings; Variables: { logger: BaseLogger } }>
     | Context<{ Bindings: Bindings; Variables: { db: () => Promise<Db> } }>
 ): string {
   if (env(c).BACKEND_PREFIX) {

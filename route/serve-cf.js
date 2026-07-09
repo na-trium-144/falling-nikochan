@@ -21,6 +21,7 @@ import packageJson from "@falling-nikochan/route/package.json" with { type: "jso
 import { MongoClient } from "mongodb";
 import { createMiddleware } from "hono/factory";
 import { compress } from "hono/compress";
+import { structuredLogger } from "@hono/structured-logger";
 
 const fetchStatic = (e, url) => e.ASSETS.fetch(url);
 const sentryConfig = (env) => ({
@@ -67,6 +68,7 @@ const fetchBrief = async (e, cid) => {
 const app = new Hono({ strict: false });
 app.use(Sentry.sentry(app, sentryHonoConfig));
 app
+  .use(structuredLogger({ createLogger: () => console }))
   .use(async (c, next) => {
     await next();
     if (c.res.headers.has("content-encoding")) {

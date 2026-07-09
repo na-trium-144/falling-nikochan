@@ -30,11 +30,15 @@ import { errorLiteral, validationErrorSchema } from "../error.js";
 import * as v from "valibot";
 import { ConnInfo } from "hono/conninfo";
 import { supportedEncodings } from "./decompress.js";
+import { BaseLogger } from "@hono/structured-logger";
 
 const newChartFileApp = async (config: {
   getConnInfo: (c: Context) => ConnInfo | null;
 }) =>
-  new Hono<{ Bindings: Bindings; Variables: { db: () => Promise<Db> } }>({
+  new Hono<{
+    Bindings: Bindings;
+    Variables: { logger: BaseLogger; db: () => Promise<Db> };
+  }>({
     strict: false,
   }).post(
     "/",
@@ -210,9 +214,12 @@ const newChartFileApp = async (config: {
               cid,
               updatedAt,
               ip,
-              await getYTDataEntry(env(c), db, newChart.ytId).catch(
-                () => undefined
-              ),
+              await getYTDataEntry(
+                c.var.logger,
+                env(c),
+                db,
+                newChart.ytId
+              ).catch(() => undefined),
               pSecretSalt,
               null
             )

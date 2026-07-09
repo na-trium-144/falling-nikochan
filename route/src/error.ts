@@ -7,6 +7,7 @@ import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
 import * as v from "valibot";
 import { ContentfulStatusCode } from "hono/utils/http-status";
 import type { captureException } from "@sentry/hono/node";
+import { BaseLogger } from "@hono/structured-logger";
 
 export function notFound(): never {
   throw new HTTPException(404);
@@ -63,17 +64,6 @@ export const onError =
     setTransactionName: ((name: string) => undefined) | null;
   }) =>
   async (err: unknown, c: Context) => {
-    if (err instanceof Error) {
-      if (config.isTest) {
-        console.log(`Error handler triggered in ${c.req.path}: ${err.message}`);
-      } else {
-        console.error(
-          `Error handler triggered in ${c.req.path}: ${err.message}\n${err.cause}\n${err.stack}`
-        );
-      }
-    } else {
-      console.error(`Error handler triggered in ${c.req.path}: ${err}`);
-    }
     // routeハンドラーのあとにmiddlewareがある場合があり、routePath(c, -1)で正しく取得できないので、
     // pathが最長のハンドラーを採用する
     const route = matchedRoutes(c)
@@ -152,14 +142,15 @@ export const onError =
           status
         );
       } else {
-        if (c.req.path === `/${lang}/errorPlaceholder`) {
+        if (/\/errorPlaceholder/.test(c.req.path)) {
           // エラーハンドラーがfetchに失敗して無限ループになるのを防ぐ
-          console.warn("Fallback to plain error placeholder message.");
+          c.var.logger.warn("Fallback to plain error placeholder message.");
           return c.text("Error PLACEHOLDER_STATUS: PLACEHOLDER_MESSAGE");
         } else {
           return c.body(
             await errorResponse(
               config.fetchStatic,
+              c.var.logger,
               env(c),
               backendOrigin(c),
               lang,
@@ -172,7 +163,7 @@ export const onError =
         }
       }
     } catch (e) {
-      console.error("While handling the above error, another error thrown:", e);
+      c.var.logger.error(e);
       config.captureException?.(e, { extra: { err: String(err) } });
       return c.body(null, 500);
     }
@@ -180,6 +171,7 @@ export const onError =
 
 async function errorResponse(
   fetchStatic: (e: Bindings, url: URL) => Promise<ResponseOK>,
+  logger: BaseLogger,
   e: Bindings,
   origin: string,
   lang: string,
@@ -191,8 +183,8 @@ async function errorResponse(
     .then(
       (res) => res.text(),
       (e) => {
-        console.error(`Failed to fetch error placeholder: `, e);
-        console.warn("Fallback to plain error placeholder message.");
+        logger.error(e);
+        logger.warn("Fallback to plain error placeholder message.");
         return "Error PLACEHOLDER_STATUS: PLACEHOLDER_MESSAGE";
       }
     )

@@ -49,6 +49,7 @@ import {
   PasswdParamSchema,
 } from "./passwdAuth.js";
 import { supportedEncodings } from "./decompress.js";
+import { BaseLogger } from "@hono/structured-logger";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 /**
@@ -75,6 +76,7 @@ interface ChartFileAppVars {
   etag: string;
   db: () => Promise<Db>;
   pSecretSalt: string;
+  logger: BaseLogger;
 }
 const chartFileApp = async (config: {
   getConnInfo: (c: Context) => ConnInfo | null;
@@ -536,9 +538,12 @@ const chartFileApp = async (config: {
                 cid,
                 updatedAt,
                 ip,
-                await getYTDataEntry(env(c), db, newChart.ytId).catch(
-                  () => undefined
-                ),
+                await getYTDataEntry(
+                  c.var.logger,
+                  env(c),
+                  db,
+                  newChart.ytId
+                ).catch(() => undefined),
                 pSecretSalt,
                 entry,
                 newSaveHashes

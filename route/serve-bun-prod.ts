@@ -23,8 +23,24 @@ import packageJson from "./package.json" with { type: "json" };
 import { MongoClient } from "mongodb";
 import { createMiddleware } from "hono/factory";
 import { compress } from "hono/compress";
+import { requestId } from "hono/request-id";
+import { structuredLogger } from "@hono/structured-logger";
+import pino from "pino";
 
 const port = 8787;
+
+const rootLogger = pino(
+  { level: "info" },
+  pino.transport({
+    // https://axiom.co/docs/guides/pino
+    target: "@axiomhq/pino",
+    options: {
+      dataset: process.env.AXIOM_DATASET,
+      token: process.env.AXIOM_TOKEN,
+      edge: process.env.AXIOM_EDGE, // us-east-1.aws.edge.axiom.co or eu-central-1.aws.edge.axiom.co
+    },
+  })
+);
 
 const sentryMiddleware = (app) =>
   Sentry.sentry(app, {
@@ -49,6 +65,12 @@ const fetchBrief = (_e: Bindings, cid: string) => getBrief(db!, cid);
 const app = new Hono<{ Bindings: Bindings }>({ strict: false });
 app.use(sentryMiddleware(app));
 app
+  .use(requestId())
+  .use(
+    structuredLogger({
+      createLogger: (c) => rootLogger.child({ requestId: c.var.requestId }),
+    })
+  )
   .use(logger())
   .use(compress())
   .route("/api", await apiApp({ getConnInfo, dbMiddleware }))

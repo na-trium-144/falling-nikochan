@@ -13,6 +13,7 @@ import { locales } from "@falling-nikochan/i18n/staticMin.js";
 import { TarFileType, TarReader } from "@gera2ld/tarjs";
 import cfBeaconHtml from "./beacon.html?raw";
 import { getMimeType, mimes } from "hono/utils/mime";
+import { structuredLogger } from "@hono/structured-logger";
 
 const e: Bindings = {
   MONGODB_URI: "",
@@ -22,40 +23,60 @@ const e: Bindings = {
 // なぜconsoleが無い?
 declare const self: ServiceWorkerGlobalScope & { console: Console };
 
+function safeClone(a: unknown): unknown {
+  if (a instanceof Error) {
+    // structuredClone(error) は残りのプロパティをクローンせず、JSON.stringify(error) はmessageなどをクローンしないので、明示的に全プロパティのcloneをする
+    return {
+      name: a.name,
+      message: a.message,
+      stack: a.stack,
+      ...Object.fromEntries(
+        Object.entries(a).map(([k, v]) => [k, safeClone(v)])
+      ),
+    };
+  } else {
+    try {
+      return structuredClone(a);
+    } catch {
+      try {
+        return JSON.parse(JSON.stringify(a));
+      } catch {
+        return String(a);
+      }
+    }
+  }
+}
+function transferConsole(level: string, args: unknown[]) {
+  const safeArgs = args.map(safeClone);
+  self.clients.matchAll().then((clients) => {
+    clients.forEach((client) => {
+      client.postMessage({ type: "console", level: "log", args: safeArgs });
+    });
+  });
+}
+
 const originalConsole = self.console;
 self.console = {
   ...originalConsole,
   log: (...args: unknown[]) => {
     originalConsole.log(...args);
-    self.clients.matchAll().then((clients) => {
-      clients.forEach((client) => {
-        client.postMessage(args.map((a) => String(a)).join(" "));
-      });
-    });
+    transferConsole("log", args);
   },
   error: (...args: unknown[]) => {
     originalConsole.error(...args);
-    self.clients.matchAll().then((clients) => {
-      clients.forEach((client) => {
-        client.postMessage(args.map((a) => String(a)).join(" "));
-      });
-    });
+    transferConsole("error", args);
   },
   warn: (...args: unknown[]) => {
     originalConsole.warn(...args);
-    self.clients.matchAll().then((clients) => {
-      clients.forEach((client) => {
-        client.postMessage(args.map((a) => String(a)).join(" "));
-      });
-    });
+    transferConsole("warn", args);
   },
   info: (...args: unknown[]) => {
     originalConsole.info(...args);
-    self.clients.matchAll().then((clients) => {
-      clients.forEach((client) => {
-        client.postMessage(args.map((a) => String(a)).join(" "));
-      });
-    });
+    transferConsole("info", args);
+  },
+  debug: (...args: unknown[]) => {
+    originalConsole.debug(...args);
+    transferConsole("debug", args);
   },
 };
 
@@ -451,6 +472,13 @@ async function fetchAPI(input: string | URL | Request, init?: RequestInit) {
   return res;
 }
 const app = new Hono({ strict: false })
+  .use(
+    structuredLogger({
+      createLogger: () => console,
+      onRequest: () => undefined,
+      onResponse: () => undefined,
+    })
+  )
   .use(async (c, next) => {
     await next();
     if (c.res.headers.get("Content-Type")?.includes("text/html")) {

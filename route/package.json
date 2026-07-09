@@ -14,10 +14,12 @@
     "dev": "tsx watch serve-local.ts"
   },
   "dependencies": {
+    "@axiomhq/pino": "^1.8.0",
     "@falling-nikochan/chart": "workspace:*",
     "@falling-nikochan/i18n": "workspace:*",
     "@hono/node-server": "^2.0.2",
     "@hono/standard-validator": "^0.2.1",
+    "@hono/structured-logger": "catalog:",
     "@hono/swagger-ui": "^0.6.1",
     "@msgpack/msgpack": "catalog:",
     "@scalar/hono-api-reference": "^0.10.14",
@@ -31,6 +33,7 @@
     "isbot": "catalog:",
     "moji": "^0.5.1",
     "mongodb": "catalog:",
+    "pino": "^10.3.1",
     "react": "catalog:react",
     "sitemap": "^9.0.1",
     "twitter-text": "^3.1.0",

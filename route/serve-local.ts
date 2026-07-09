@@ -16,12 +16,12 @@ import {
   getBrief,
 } from "./src/index.js";
 import { Hono } from "hono";
-import { logger } from "hono/logger";
 import { ImageResponse } from "@vercel/og";
 import { getConnInfo } from "@hono/node-server/conninfo";
 import { Db, MongoClient } from "mongodb";
 import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
+import { structuredLogger } from "@hono/structured-logger";
 
 const port = 8787;
 
@@ -53,7 +53,12 @@ const fetchBrief = (_e: Bindings, cid: string) => getBrief(db!, cid);
 console.log(`Server is running on http://localhost:${port}`);
 
 const app = new Hono<{ Bindings: Bindings }>({ strict: false })
-  .use(logger())
+  .use(
+    structuredLogger({
+      createLogger: () => console,
+      onRequest: () => undefined,
+    })
+  )
   .route("/api", await apiApp({ getConnInfo, dbMiddleware }))
   .route("/og", ogApp({ ImageResponse, fetchBrief, fetchStatic }))
   .route("/cron", cronTestApp)

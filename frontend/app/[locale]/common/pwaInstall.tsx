@@ -413,8 +413,14 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
                 );
             }
           }
-        } else {
-          console.warn("sw:", event.data);
+        } else if (
+          typeof event.data === "object" &&
+          event.data.type === "console"
+        ) {
+          console[event.data.level as "log" | "warn" | "error" | "info"](
+            "[sw]",
+            ...event.data.args
+          );
         }
       });
     }
