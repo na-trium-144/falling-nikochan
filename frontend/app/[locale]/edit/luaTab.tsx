@@ -271,6 +271,9 @@ function AceEditorInstance(props: IProps) {
     <AceEditor
       onLoad={(editor) => {
         editorRef.current = editor;
+        // 無制限にするとsessionStorageにおさまらなくなってしまうため、適当に上限を設定している
+        // @ts-expect-error accessing private property $undoDepth
+        editor.session.getUndoManager().$undoDepth = 20;
         if (level.luaEditorInitialUndoManager) {
           editor.session
             .getUndoManager()
