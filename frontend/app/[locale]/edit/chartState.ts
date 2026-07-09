@@ -80,7 +80,7 @@ const EditSessionSchema = () =>
     currentLevelIndex: v.optional(v.number()),
     hasChange: v.boolean(),
     savePasswd: v.boolean(),
-    undoManager: v.array(v.unknown()),
+    undoManager: v.optional(v.array(v.unknown())),
   });
 type EditSession = v.InferOutput<ReturnType<typeof EditSessionSchema>>;
 export interface FetchChartOptions {
