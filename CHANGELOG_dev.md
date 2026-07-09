@@ -1,4 +1,21 @@
-## ver. 16.22 - 2025/06/28
+## ver. 16.23 - 2026/07/10
+
+* undo/redo [#1224](https://github.com/na-trium-144/falling-nikochan/pull/1224)
+    * AceEditorのインスタンスをレベルごとに作る
+        * エディターの状態をstateではなくレベル別にLevelEditing内で管理
+    * undoボタン追加 (AceEditorのundo機能を呼び出す)
+    * luaExecutorのresult管理をリファクタ
+        * LevelEditingにindexの情報を追加
+        * indexを確実に更新するためにChartEditingの#level直接アクセス禁止
+    * エラー表示をfixedに
+    * abort時のエラーメッセージ処理のrace conditionを対処
+    * undoManagerがセッションに保存されるようにした
+* pino, axiom, structured-loggerを導入 [#1226](https://github.com/na-trium-144/falling-nikochan/pull/1226)
+    * 本番環境(serve-bun-prod)でログをaxiomに送信する
+    * 全5環境にstructured logger middlewareを導入し、consoleをc.var.loggerで置き換え
+    * service worker→フロントエンドへのconsole転送において、引数が文字列でない場合も考慮しオブジェクトをそのまま送る仕様に変更
+
+## ver. 16.22 - 2026/06/28
 
 * <del>pnpm11 [#1128](https://github.com/na-trium-144/falling-nikochan/pull/1128)</del>
     * catalogでパッケージのバージョンを管理
@@ -9,25 +26,25 @@
 * localStorageのバリデーション [#1221](https://github.com/na-trium-144/falling-nikochan/pull/1221)
     * 生のパスワードをセッションに保存しない
 
-## ver. 16.21 - 2025/06/21
+## ver. 16.21 - 2026/06/21
 
 * 譜面編集で譜面データfetch時、shareBoxでbriefのfetch時のエラーの表示を修正 [#1217](https://github.com/na-trium-144/falling-nikochan/pull/1217)
 * chartのバリデーション前にjsonシリアライズを通す
 
-## ver. 16.20 - 2025/06/19
+## ver. 16.20 - 2026/06/19
 
 * /main/play からshareページ遷移前後でのクエリパラメータの挙動を修正
 * トップページの検索欄使用時に/main/playの検索ボックスへフォーカスを当てる動作をクエリではなくハッシュで行う
 * buttonhighlightはparentにイベントハンドラーを与えるようにする
 * chartlistの重複aタグをやめる
 
-## ver. 16.19 - 2025/06/14
+## ver. 16.19 - 2026/06/14
 
 * トップページに検索欄追加、cid入力でジャンプを実装 [#1208](https://github.com/na-trium-144/falling-nikochan/pull/1208)
 * shareBoxの初期レイアウトを調整
 * APIドキュメントとデバッグページのリンクをheaderとlinksに追加
 
-## ver. 16.18 - 2025/06/13 [#1205](https://github.com/na-trium-144/falling-nikochan/pull/1205)
+## ver. 16.18 - 2026/06/13 [#1205](https://github.com/na-trium-144/falling-nikochan/pull/1205)
 
 * 画像の遅延読み込み
 * mathjs,yaml,wasmoonの遅延読み込み
@@ -37,7 +54,7 @@
 * suppressHydrationWarningを追加、global-errorにもテーマ切替スクリプトを追加
 * 譜面編集のYouTube表示と譜面プレビューを画面幅と高さに応じて調整
 
-## ver. 16.17 - 2025/06/13
+## ver. 16.17 - 2026/06/13
 
 * ETagとIf-Matchの利用 [#1190](https://github.com/na-trium-144/falling-nikochan/pull/1190)
     * etag middlewareをデフォルト設定で/api,/og,/share,/rss,/sitemapに追加、If-None-MatchヘッダーがETagとマッチしたら304が返る
@@ -52,19 +69,19 @@
 * theme,recent,bestScoreの使用箇所でstorageイベントと画面遷移時に毎回更新する
 * wretchのAbortAddonをdedupe middlewareと組み合わせるのをやめる
 
-## ver. 16.16 - 2025/06/09
+## ver. 16.16 - 2026/06/09
 
 * MongoClientをリクエストごとに破棄せず再利用 [#1201](https://github.com/na-trium-144/falling-nikochan/pull/1201)
 * バックエンドのsentryのbeforeSendをenv.tsの1箇所で定義
 * フロントエンドのセッションなどのコンテキストをsentryに送信
 * record送信時のスコア0のバリデーションを修正
 
-## ver. 16.15 - 2025/06/07
+## ver. 16.15 - 2026/06/07
 
 * ver16.14のエラーハンドリングのバグ修正
 * 本番dbでのテスト、本番dbを使った開発環境サーバーへのpost、本番サーバーに対する開発フロントエンドのcredentialつきリクエストを禁止 [#1185](https://github.com/na-trium-144/falling-nikochan/pull/1185)
 
-## ver. 16.14 - 2025/06/07
+## ver. 16.14 - 2026/06/07
 
 * トップページとchartListの改善
 * トップページで表示されるオートプレイのconsole.logを削除
@@ -82,7 +99,7 @@
     * briefの取得に失敗してもリスト全体をエラー表示にしない
 * api,og,shareへのfetchBriefAPIのインジェクションをリファクタ [#1193](https://github.com/na-trium-144/falling-nikochan/pull/1193)
 
-## ver. 16.13 - 2025/06/06 [#1187](https://github.com/na-trium-144/falling-nikochan/pull/1187)
+## ver. 16.13 - 2026/06/06 [#1187](https://github.com/na-trium-144/falling-nikochan/pull/1187)
 
 * バックエンドにSentry導入
     * cloudflare, bun, vercelにsentryを導入
@@ -93,7 +110,7 @@
         * getYTDataEntryはundefinedを返すのではなくエラーをthrowする仕様に変更
     * fetchBrief,fetchStaticは異常時にResponseを含むErrorをthrowする仕様に変更
 
-## ver. 16.11 - 2025/06/04 [#1153](https://github.com/na-trium-144/falling-nikochan/pull/1153)
+## ver. 16.11 - 2026/06/04 [#1153](https://github.com/na-trium-144/falling-nikochan/pull/1153)
 
 * APIのエラーレスポンスのmessageの改善 [#1152](https://github.com/na-trium-144/falling-nikochan/pull/1152)
     * 400, 500のメッセージなしエラーに対してエラーハンドラで汎用メッセージを付与
@@ -114,7 +131,7 @@
 * APIのレスポンスを圧縮 (一旦vercelのみ)
 * APIのリクエストを圧縮 [#1162](https://github.com/na-trium-144/falling-nikochan/pull/1162)
 
-## ver. 16.10 - 2025/05/28 [#1159](https://github.com/na-trium-144/falling-nikochan/pull/1159)
+## ver. 16.10 - 2026/05/28 [#1159](https://github.com/na-trium-144/falling-nikochan/pull/1159)
 
 * tsconfigのtargetとlibをnode23相当に変更
 
