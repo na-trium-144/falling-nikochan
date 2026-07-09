@@ -20,6 +20,24 @@ function easeOut(t: number) {
   return 1 - Math.pow(1 - t, 2);
 }
 
+function normalRandom(mean: number, std: number) {
+  let u = 0,
+    v = 0;
+  while (u === 0) u = Math.random(); // 0を避ける
+  while (v === 0) v = Math.random();
+
+  // ボックス＝ミュラー法による標準正規分布
+  let z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+
+  return z * std + mean;
+}
+function logNormalRandom(mean: number, std: number) {
+  const sigma2 = Math.log1p((std * std) / (mean * mean));
+  const sigma = Math.sqrt(sigma2);
+  const mu = Math.log(mean) - sigma2 / 2.0;
+  return Math.exp(normalRandom(mu, sigma));
+}
+
 interface Context {
   noteSize: number;
   boxSize: number;
@@ -39,7 +57,7 @@ interface Context {
 }
 interface ParticleParams {
   deltaAngle: number;
-  big: number;
+  // big: number;
   size: number;
   hue: number;
   distance: number;
@@ -271,67 +289,85 @@ export class DisplayNikochan {
     if (this.#dn.chain === undefined) {
       return;
     }
-    const particleMaxNum = 15;
-    // -ver9.3: round(((1+(2*chain)/bonusMax)/3)*max) => 5-15, no big
-    // ver9.4-16.22: 6+floor(3*min(1,chain/bonusMax))*2 => 6-12, big: (6+4)-(12+10)
-    const particleNum = Math.min(
-      Math.round(((1 + (2 * this.#dn.chain) / bonusMax) / 3) * particleMaxNum),
-      particleMaxNum
-    );
-
     if (this.#particleStartAngle === null) {
       this.#particleStartAngle = Math.random() * 360;
     }
 
-    for (let i = 0; i < particleNum; i++) {
-      if (!this.#particleParams.at(i)) {
-        this.#particleParams[i] = {
-          distance: 0.5 + Math.random() * Math.random() * 1, // * noteSize
-          deltaAngle: Math.random() * Math.random() * 120,
-          big: Math.random() * 1 + 1,
-          size: Math.random() * Math.random() * 0.5 + 0.5,
-          hue: Math.random() * Math.random() * 1,
-        };
-      }
-      const pp = this.#particleParams[i];
+    // -ver9.3: round(((1+(2*chain)/bonusMax)/3)*15) => 5-15, no big
+    // ver9.4-16.22: 6+floor(3*min(1,chain/bonusMax))*2 => 6-12, big: (6+4)-(12+10)
+    const smallParticleNum =
+      6 + Math.floor(4 * Math.min(1, this.#dn.chain / bonusMax));
+    const bigParticleNum = smallParticleNum - 2;
 
-      let hue =
-        55 - (15 * pp.hue * Math.min(this.#dn.chain, bonusMax)) / bonusMax;
-      if (this.#c.dark) {
-        hue = 85 - hue;
-      }
-      const particleSize = (this.#c.noteSize / 4) * pp.size;
+    for (const big of this.#dn.bigDone ? [0, 1] : [0]) {
+      // bigの場合はparticleの輪を二重に表示する
 
-      const t = (this.#now - this.#fadeoutStart!) / 500;
-      let opacity = 0;
-      const dx = pp.distance * this.#c.noteSize * t;
+      const particleNum = big ? bigParticleNum : smallParticleNum;
 
-      if (t <= 0 || t >= 1) {
-        continue;
-      } else if (easeOut(t) <= 0.8) {
-        // const localT = easeOut(t) / 0.8;
-        opacity = 0.8;
-      } else {
-        const localT = (easeOut(t) - 0.8) / 0.2;
-        opacity = 0.8 * (1 - localT);
-      }
+      for (let i = 0; i < particleNum; i++) {
+        const pi = big ? smallParticleNum + i : i;
+        if (!this.#particleParams.at(pi)) {
+          this.#particleParams[pi] = {
+            /*
+            -ver9.3のコード
+            distance: 0.5 + Math.random() * Math.random() * 1, // * noteSize
+            deltaAngle: Math.random() * Math.random() * 120,
+            big: Math.random() * 1 + 1,
+            size: Math.random() * Math.random() * 0.5 + 0.5, // * noteSize / 4
+            hue: Math.random() * Math.random() * 1,
 
-      ctx.save();
-      ctx.scale(this.#c.effectsCanvasDPR, this.#c.effectsCanvasDPR);
-      ctx.translate(this.left, this.top);
-      ctx.rotate(
-        this.#particleStartAngle + (i * 360) / particleNum + pp.deltaAngle
-      );
-      if(this.#dn.bigDone){
-        ctx.scale(pp.big, pp.big);
+            ver9.4-16.22は通常サイズがnoteSize*2, bigがnoteSize*3.5
+            */
+            distance: big ? logNormalRandom(2, 0.3) : logNormalRandom(1, 0.2), // * noteSize
+            deltaAngle: normalRandom(0, 360 / particleNum / 4),
+            size: big ? logNormalRandom(1.5, 0.3) : logNormalRandom(1, 0.2), // * noteSize / 4
+            hue: Math.random(),
+          };
+        }
+        const pp = this.#particleParams[pi];
+
+        // -ver9.3: 55->40 (dark: 85-hue => 30->45)
+        // ver9.4-16.22: 外側#ffcd00(hue48)-内側#ffb800(hue43)
+        const hueMax = 50;
+        const hueMin = 47 - (7 * Math.min(this.#dn.chain, bonusMax)) / bonusMax;
+        let hue = hueMax * pp.hue + hueMin * (1 - pp.hue);
+        if (this.#c.dark) {
+          hue = 87 - hue;
+        }
+        const particleSize = (this.#c.noteSize / 4) * pp.size;
+
+        const t = (this.#now - this.#fadeoutStart!) / 500;
+        let opacity = 0;
+        const dx = pp.distance * this.#c.noteSize * t;
+
+        if (t <= 0 || t >= 1) {
+          continue;
+        } else if (easeOut(t) <= 0.8) {
+          // const localT = easeOut(t) / 0.8;
+          opacity = 0.8;
+        } else {
+          const localT = (easeOut(t) - 0.8) / 0.2;
+          opacity = 0.8 * (1 - localT);
+        }
+
+        ctx.save();
+        ctx.scale(this.#c.effectsCanvasDPR, this.#c.effectsCanvasDPR);
+        ctx.translate(this.left, this.top);
+        ctx.rotate(
+          ((this.#particleStartAngle +
+            (i * 360) / particleNum +
+            pp.deltaAngle) *
+            Math.PI) /
+            180
+        );
+        ctx.translate(dx, 0);
+        ctx.globalAlpha = opacity;
+        ctx.beginPath();
+        ctx.arc(0, 0, particleSize / 2, 0, Math.PI * 2);
+        ctx.fillStyle = `hsl(${hue} 100% 50%)`;
+        ctx.fill();
+        ctx.restore();
       }
-      ctx.translate(dx, 0);
-      ctx.globalAlpha = opacity;
-      ctx.beginPath();
-      ctx.arc(0, 0, particleSize / 2, 0, Math.PI * 2);
-      ctx.fillStyle = `hsl(${hue} 100% 50%)`;
-      ctx.fill();
-      ctx.restore();
     }
   }
 
