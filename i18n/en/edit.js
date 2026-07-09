@@ -251,6 +251,11 @@ export default {
       noteMirror: "Mirror",
       copy: "Copy",
       paste: "Paste",
+      undo: "Undo",
+      redo: "Redo",
+      undoHelp:
+        "Revert changes made at this level <br></br>" +
+        "in the Timing, Note, and Code tabs.",
       position: "Position",
       positionHelp:
         "x is the final position to hit the note.<br></br>" +

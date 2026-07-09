@@ -229,6 +229,11 @@ export default {
       noteMirror: "反転",
       copy: "コピー",
       paste: "貼り付け",
+      undo: "元に戻す",
+      redo: "やり直す",
+      undoHelp:
+        "タイミング タブ、音符 タブ、コード タブでの<br></br>" +
+        "このレベルに対する変更を元に戻します。",
       position: "位置",
       positionHelp:
         "x は音符を最終的に叩く位置です。<br></br>" +

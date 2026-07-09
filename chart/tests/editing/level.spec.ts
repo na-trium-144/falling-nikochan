@@ -252,89 +252,323 @@ describe("LevelEditing", () => {
     });
   });
   describe("updateLua", () => {
-    test("should abort current execution", () => {
-      let aborted = false;
-      const level = new LevelEditing(
-        dummyChartData.levelsMeta[0],
-        dummyChartData.levelsFreeze[0],
-        dummyChartData.lua[0],
-        () => {},
-        () => dummyChartData.offset,
-        dummyLuaExecutor(
-          async () => null,
-          () => {
-            aborted = true;
+    [false, true].forEach((fromLuaEditor) =>
+      describe(
+        fromLuaEditor ? "from lua editor" : "not from lua editor",
+        () => {
+          test("should abort current execution", () => {
+            let aborted = false;
+            const level = new LevelEditing(
+              dummyChartData.levelsMeta[0],
+              dummyChartData.levelsFreeze[0],
+              dummyChartData.lua[0],
+              () => {},
+              () => dummyChartData.offset,
+              dummyLuaExecutor(
+                async () => null,
+                () => {
+                  aborted = true;
+                }
+              )
+            );
+            level.updateLua([...level.lua, "print('new line')"], fromLuaEditor);
+            expect(aborted).to.equal(true);
+          });
+          test("should try to execute new lua", async () => {
+            let executedCode = "";
+            const level = new LevelEditing(
+              dummyChartData.levelsMeta[0],
+              dummyChartData.levelsFreeze[0],
+              dummyChartData.lua[0],
+              () => {},
+              () => dummyChartData.offset,
+              dummyLuaExecutor(async (code: string) => {
+                executedCode = code;
+                return null;
+              })
+            );
+            await level.updateLua(
+              ["print('new line')", "print('new line 2')"],
+              fromLuaEditor
+            );
+            expect(executedCode).to.equal(
+              "print('new line')\nprint('new line 2')"
+            );
+          });
+          test("should update lua immediately", async () => {
+            const level = new LevelEditing(
+              dummyChartData.levelsMeta[0],
+              dummyChartData.levelsFreeze[0],
+              dummyChartData.lua[0],
+              () => {},
+              () => dummyChartData.offset,
+              dummyLuaExecutor(async () => dummyChartData.levelsFreeze[0])
+            );
+            const newLua = [...level.lua, "print('new line')"];
+            const p = level.updateLua(newLua, fromLuaEditor);
+            expect(level.lua).to.deep.equal(newLua);
+            await p;
+            expect(level.lua).to.deep.equal(newLua);
+          });
+          test("should update freeze data after successful execution", async () => {
+            const level = new LevelEditing(
+              dummyChartData.levelsMeta[0],
+              dummyChartData.levelsFreeze[0],
+              dummyChartData.lua[0],
+              () => {},
+              () => dummyChartData.offset,
+              dummyLuaExecutor(async () => ({
+                notes: [
+                  ...dummyChartData.levelsFreeze[0].notes,
+                  {
+                    step: { fourth: 5, numerator: 0, denominator: 1 },
+                    big: false,
+                    hitX: -1,
+                    hitVX: 1,
+                    hitVY: 3,
+                    fall: true,
+                    luaLine: null,
+                  },
+                ],
+                rest: dummyChartData.levelsFreeze[0].rest,
+                bpmChanges: dummyChartData.levelsFreeze[0].bpmChanges,
+                speedChanges: dummyChartData.levelsFreeze[0].speedChanges,
+                signature: dummyChartData.levelsFreeze[0].signature,
+              }))
+            );
+            const newLua = [...level.lua, "print('new line')"];
+            await level.updateLua(newLua, fromLuaEditor);
+            expect(level.freeze.notes).to.have.lengthOf(
+              dummyChartData.levelsFreeze[0].notes.length + 1
+            );
+          });
+          test("should revert lua if execution returns null", async () => {
+            const level = new LevelEditing(
+              dummyChartData.levelsMeta[0],
+              dummyChartData.levelsFreeze[0],
+              dummyChartData.lua[0],
+              () => {},
+              () => dummyChartData.offset,
+              dummyLuaExecutor(async () => null)
+            );
+            const newLua = [...level.lua, "print('new line')"];
+            const p = level.updateLua(newLua, fromLuaEditor);
+            expect(level.lua).to.deep.equal(newLua);
+            await p;
+            expect(level.lua).to.deep.equal(dummyChartData.lua[0]);
+          });
+          test("should not revert lua if another execution started and lua updated", async () => {
+            const level = new LevelEditing(
+              dummyChartData.levelsMeta[0],
+              dummyChartData.levelsFreeze[0],
+              dummyChartData.lua[0],
+              () => {},
+              () => dummyChartData.offset,
+              dummyLuaExecutor(async () => null)
+            );
+            const newLua = [...level.lua, "print('new line')"];
+            const p = level.updateLua(newLua, fromLuaEditor);
+            const newLua2 = [...level.lua, "print('new line 2')"];
+            // const p2 = level.updateLua(newLua2, fromLuaEditor);
+            level._manualLuaUpdateForTesting(newLua2); // updateLuaは一瞬で終了して意図したテストができないので、手動上書き
+            await p;
+            expect(level.lua).to.deep.equal(newLua2);
+          });
+          test("should revert lua to last valid value eventually", async () => {
+            const level = new LevelEditing(
+              dummyChartData.levelsMeta[0],
+              dummyChartData.levelsFreeze[0],
+              dummyChartData.lua[0],
+              () => {},
+              () => dummyChartData.offset,
+              dummyLuaExecutor(async () => null)
+            );
+            const oldLua = level.lua;
+            const newLua = [...level.lua, "print('new line')"];
+            const p = level.updateLua(newLua, fromLuaEditor);
+            const newLua2 = [...level.lua, "print('new line 2')"];
+            const p2 = level.updateLua(newLua2, fromLuaEditor);
+            await p;
+            await p2;
+            expect(level.lua).to.deep.equal(oldLua);
+          });
+
+          if (fromLuaEditor) {
+            test("should never update luaEditorValue", async () => {
+              // ユーザーが編集した場合、またはundo/redoされた場合が考えられる。
+              const level = new LevelEditing(
+                dummyChartData.levelsMeta[0],
+                dummyChartData.levelsFreeze[0],
+                dummyChartData.lua[0],
+                () => {},
+                () => dummyChartData.offset,
+                dummyLuaExecutor(async () => dummyChartData.levelsFreeze[0])
+              );
+              const oldLua = level.lua;
+              expect(level.luaEditorValue).to.equal(oldLua.join("\n"));
+              const newLua = [...level.lua, "print('new line')"];
+              const p = level.updateLua(newLua, fromLuaEditor);
+              expect(level.luaEditorValue).to.equal(oldLua.join("\n"));
+              await p;
+              expect(level.luaEditorValue).to.equal(oldLua.join("\n"));
+            });
+          } else {
+            test("should update luaEditorValue immediately", async () => {
+              const level = new LevelEditing(
+                dummyChartData.levelsMeta[0],
+                dummyChartData.levelsFreeze[0],
+                dummyChartData.lua[0],
+                () => {},
+                () => dummyChartData.offset,
+                dummyLuaExecutor(async () => dummyChartData.levelsFreeze[0])
+              );
+              expect(level.luaEditorValue).to.equal(level.lua.join("\n"));
+              const newLua = [...level.lua, "print('new line')"];
+              const p = level.updateLua(newLua, fromLuaEditor);
+              expect(level.luaEditorValue).to.equal(newLua.join("\n"));
+              await p;
+              expect(level.luaEditorValue).to.equal(newLua.join("\n"));
+            });
+            test("should trigger rerender event immediately", async () => {
+              const level = new LevelEditing(
+                dummyChartData.levelsMeta[0],
+                dummyChartData.levelsFreeze[0],
+                dummyChartData.lua[0],
+                () => {},
+                () => dummyChartData.offset,
+                dummyLuaExecutor(async () => dummyChartData.levelsFreeze[0])
+              );
+              let luaUpdated = false;
+              level.on("rerender", () => {
+                luaUpdated = true;
+              });
+              const newLua = [...level.lua, "print('new line')"];
+              level.updateLua(newLua, fromLuaEditor);
+              expect(luaUpdated).to.equal(true);
+            });
           }
-        )
-      );
-      level.updateLua([...level.lua, "print('new line')"]);
-      expect(aborted).to.equal(true);
-    });
-    test("should try to execute new lua", async () => {
-      let executedCode = "";
-      const level = new LevelEditing(
-        dummyChartData.levelsMeta[0],
-        dummyChartData.levelsFreeze[0],
-        dummyChartData.lua[0],
-        () => {},
-        () => dummyChartData.offset,
-        dummyLuaExecutor(async (code: string) => {
-          executedCode = code;
-          return null;
-        })
-      );
-      await level.updateLua(["print('new line')", "print('new line 2')"]);
-      expect(executedCode).to.equal("print('new line')\nprint('new line 2')");
-    });
-    test("should update lua and freeze data", async () => {
-      const level = new LevelEditing(
-        dummyChartData.levelsMeta[0],
-        dummyChartData.levelsFreeze[0],
-        dummyChartData.lua[0],
-        () => {},
-        () => dummyChartData.offset,
-        dummyLuaExecutor(async () => ({
-          notes: [
-            ...dummyChartData.levelsFreeze[0].notes,
-            {
-              step: { fourth: 5, numerator: 0, denominator: 1 },
-              big: false,
-              hitX: -1,
-              hitVX: 1,
-              hitVY: 3,
-              fall: true,
-              luaLine: null,
-            },
-          ],
-          rest: dummyChartData.levelsFreeze[0].rest,
-          bpmChanges: dummyChartData.levelsFreeze[0].bpmChanges,
-          speedChanges: dummyChartData.levelsFreeze[0].speedChanges,
-          signature: dummyChartData.levelsFreeze[0].signature,
-        }))
-      );
-      const newLua = [...level.lua, "print('new line')"];
-      await level.updateLua(newLua);
-      expect(level.lua).to.deep.equal(newLua);
-      expect(level.freeze.notes).to.have.lengthOf(
-        dummyChartData.levelsFreeze[0].notes.length + 1
-      );
-    });
-    test("should not update lua and freeze data if execution returns null", async () => {
-      const level = new LevelEditing(
-        dummyChartData.levelsMeta[0],
-        dummyChartData.levelsFreeze[0],
-        dummyChartData.lua[0],
-        () => {},
-        () => dummyChartData.offset,
-        dummyLuaExecutor(async () => null)
-      );
-      const newLua = [...level.lua, "print('new line')"];
-      await level.updateLua(newLua);
-      expect(level.lua).to.deep.equal(dummyChartData.lua[0]);
-      expect(level.freeze.notes).to.have.lengthOf(
-        dummyChartData.levelsFreeze[0].notes.length
-      );
-    });
+          test("should not revert luaEditorValue if execution returns null", async () => {
+            // これは not fromLuaEditor の場合正直どちらでも良いかもしれない
+            // fromLuaEditorの場合はrevertすると履歴が消えてしまうのでしてはいけない。
+            const level = new LevelEditing(
+              dummyChartData.levelsMeta[0],
+              dummyChartData.levelsFreeze[0],
+              dummyChartData.lua[0],
+              () => {},
+              () => dummyChartData.offset,
+              dummyLuaExecutor(async () => null)
+            );
+            const newLua = [...level.lua, "print('new line')"];
+            const p = level.updateLua(newLua, fromLuaEditor);
+            const updatedLuaEditorValue = level.luaEditorValue;
+            let luaUpdated = false;
+            level.on("rerender", () => {
+              luaUpdated = true;
+            });
+            await p;
+            expect(luaUpdated).to.equal(false);
+            expect(level.luaEditorValue).to.equal(updatedLuaEditorValue);
+          });
+        }
+      )
+    );
+  });
+  describe("setLuaEditorValue", () => {
+    [false, true].forEach((inLuaEditor) =>
+      describe(inLuaEditor ? "in lua editor" : "not in lua editor", () => {
+        test("should update luaEditorValue immediately", async () => {
+          const level = new LevelEditing(
+            dummyChartData.levelsMeta[0],
+            dummyChartData.levelsFreeze[0],
+            dummyChartData.lua[0],
+            () => {},
+            () => dummyChartData.offset,
+            dummyLuaExecutor(async () => dummyChartData.levelsFreeze[0])
+          );
+          const newLua = [...level.lua, "print('new line')"];
+          level.setLuaEditorValue(newLua.join("\n"), inLuaEditor);
+          expect(level.luaEditorValue).to.equal(newLua.join("\n"));
+        });
+        test("should trigger rerender event immediately", async () => {
+          const level = new LevelEditing(
+            dummyChartData.levelsMeta[0],
+            dummyChartData.levelsFreeze[0],
+            dummyChartData.lua[0],
+            () => {},
+            () => dummyChartData.offset,
+            dummyLuaExecutor(async () => dummyChartData.levelsFreeze[0])
+          );
+          let luaUpdated = false;
+          level.on("rerender", () => {
+            luaUpdated = true;
+          });
+          const newLua = [...level.lua, "print('new line')"];
+          level.setLuaEditorValue(newLua.join("\n"), inLuaEditor);
+          expect(luaUpdated).to.equal(true);
+        });
+        if (inLuaEditor) {
+          test("should update lua after 500 ms", async () => {
+            const level = new LevelEditing(
+              dummyChartData.levelsMeta[0],
+              dummyChartData.levelsFreeze[0],
+              dummyChartData.lua[0],
+              () => {},
+              () => dummyChartData.offset,
+              dummyLuaExecutor(async () => dummyChartData.levelsFreeze[0])
+            );
+            const oldLua = level.lua;
+            const newLua = [...level.lua, "print('new line')"];
+            level.setLuaEditorValue(newLua.join("\n"), inLuaEditor);
+            expect(level.lua).to.deep.equal(oldLua);
+            await new Promise<void>((r) => setTimeout(r, 600));
+            expect(level.lua).to.deep.equal(newLua);
+          });
+          test("should reset timer on another update", async () => {
+            const level = new LevelEditing(
+              dummyChartData.levelsMeta[0],
+              dummyChartData.levelsFreeze[0],
+              dummyChartData.lua[0],
+              () => {},
+              () => dummyChartData.offset,
+              dummyLuaExecutor(async () => dummyChartData.levelsFreeze[0])
+            );
+            const oldLua = level.lua;
+            const newLua = [...level.lua, "print('new line')"];
+            level.setLuaEditorValue(newLua.join("\n"), inLuaEditor);
+            expect(level.luaEditorValue).to.equal(newLua.join("\n"));
+            expect(level.lua).to.deep.equal(oldLua);
+            await new Promise<void>((r) => setTimeout(r, 400));
+            expect(level.luaEditorValue).to.equal(newLua.join("\n"));
+            expect(level.lua).to.deep.equal(oldLua);
+            const newLua2 = [...level.lua, "print('new line 2')"];
+            level.setLuaEditorValue(newLua2.join("\n"), inLuaEditor);
+            expect(level.luaEditorValue).to.equal(newLua2.join("\n"));
+            expect(level.lua).to.deep.equal(oldLua);
+            await new Promise<void>((r) => setTimeout(r, 400));
+            expect(level.luaEditorValue).to.equal(newLua2.join("\n"));
+            expect(level.lua).to.deep.equal(oldLua);
+            await new Promise<void>((r) => setTimeout(r, 200));
+            expect(level.luaEditorValue).to.equal(newLua2.join("\n"));
+            expect(level.lua).to.deep.equal(newLua2);
+          });
+        } else {
+          test("should update lua immediately", async () => {
+            const level = new LevelEditing(
+              dummyChartData.levelsMeta[0],
+              dummyChartData.levelsFreeze[0],
+              dummyChartData.lua[0],
+              () => {},
+              () => dummyChartData.offset,
+              dummyLuaExecutor(async () => dummyChartData.levelsFreeze[0])
+            );
+            const newLua = [...level.lua, "print('new line')"];
+            level.setLuaEditorValue(newLua.join("\n"), inLuaEditor);
+            await new Promise<void>((r) => setTimeout(r, 1));
+            expect(level.lua).to.deep.equal(newLua);
+          });
+        }
+      })
+    );
   });
 
   describe("setYTDuration", () => {

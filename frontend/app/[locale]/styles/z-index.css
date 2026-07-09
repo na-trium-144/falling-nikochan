@@ -141,6 +141,9 @@
 @utility z-edit-ace-placeholder {
   z-index: -10;
 }
+@utility z-edit-error {
+  z-index: 1;
+}
 /* これはFallingWindowの中にあるので、FallingWindowにzを設定すればローカルになる */
 @utility z-edit-trace {
   z-index: -60;

@@ -43,6 +43,12 @@ import {
 export class LevelEditing extends EventEmitter<EventType> {
   // これは親のChartEditingと同期
   #offset: () => number;
+  index: number = null!;
+
+  // エディタ内でlevelを一意に識別するid (Reactのkeyに使う)
+  static #localCount = 0;
+  localId: number;
+
   #luaExecutorRef: LuaExecutorRef;
   // 以下の編集には updateMeta(), updateFreeze(), updateLua() を使う
   #meta: LevelMin;
@@ -54,6 +60,12 @@ export class LevelEditing extends EventEmitter<EventType> {
     speedChanges: SpeedChangeWithTimeSec[];
     signature: SignatureWithBarNum[];
   };
+
+  #lastValidLua: string[];
+  #luaEditorValue: string;
+  #luaEditorDebounceTimeout: ReturnType<typeof setTimeout> | null = null;
+  // chartState.tsでsessionからの復元時にセットし、luaEditorの初期化に使う
+  luaEditorInitialUndoManager: object | null = null;
 
   constructor(
     min: Readonly<LevelMin>,
@@ -67,11 +79,14 @@ export class LevelEditing extends EventEmitter<EventType> {
     for (const type of eventTypes) {
       this.on(type, () => parentEmit(type));
     }
+    this.localId = ++LevelEditing.#localCount;
     this.#offset = offset;
     this.#luaExecutorRef = luaExecutorRef;
 
     this.#meta = JSON.parse(JSON.stringify(min));
     this.#lua = [...lua];
+    this.#lastValidLua = [...lua];
+    this.#luaEditorValue = lua.join("\n");
     this.#freeze = JSON.parse(JSON.stringify(freeze));
     const { bpm, speed } = updateBpmTimeSec(
       this.#freeze.bpmChanges,
@@ -160,23 +175,52 @@ export class LevelEditing extends EventEmitter<EventType> {
     this.emit("rerender");
     this.emit("change");
   }
-  async updateLua(lua: string[]) {
-    const prevLua = this.#lua;
+  async updateLua(lua: string[], fromLuaEditor: boolean = false) {
     this.#lua = lua;
+    if (!fromLuaEditor) {
+      this.#luaEditorValue = lua.join("\n");
+      this.emit("rerender");
+    }
     this.#luaExecutorRef.current.abortExec();
     const levelFreezed = await this.#luaExecutorRef.current.exec(
-      lua.join("\n")
+      lua.join("\n"),
+      this.index
     );
     if (levelFreezed) {
-      this.#lua = lua;
+      this.#lastValidLua = lua;
       this.updateFreeze(levelFreezed);
     } else {
       if (this.#lua === lua) {
         // 変更をrevert
-        this.#lua = prevLua;
+        this.#lua = this.#lastValidLua;
       } else {
-        // すでに別のコードでupdateLuaが呼ばれているので、気にしなくて良い
+        // abortされ、すでに別のコードでupdateLuaが呼ばれている場合、何もしない
       }
+    }
+  }
+  _manualLuaUpdateForTesting(lua: string[]) {
+    this.#lua = lua;
+  }
+
+  get luaEditorValue() {
+    return this.#luaEditorValue;
+  }
+  setLuaEditorValue(lua: string, inCodeEditor: boolean) {
+    if (this.#luaEditorValue !== lua) {
+      this.#luaEditorValue = lua;
+      if (this.#luaEditorDebounceTimeout !== null) {
+        clearTimeout(this.#luaEditorDebounceTimeout);
+      }
+      // これが呼ばれるのは、ユーザーが直接コードを編集した場合だけでなく、undoボタンを押した時なども含まれる。
+      // コードエディター以外でundoボタンを押した場合には、他の編集機能と同様、即時コードを実行して反映する。
+      if (inCodeEditor) {
+        this.#luaEditorDebounceTimeout = setTimeout(() => {
+          this.updateLua(lua.split("\n"), true);
+        }, 500);
+      } else {
+        this.updateLua(lua.split("\n"), true);
+      }
+      this.emit("rerender");
     }
   }
 
