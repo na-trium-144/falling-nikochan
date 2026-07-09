@@ -13,6 +13,7 @@ import {
   fetchStatic,
   getBrief,
   sentryBeforeSend,
+  finalRoutePath,
 } from "./src/index.js";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
@@ -69,6 +70,20 @@ app
   .use(
     structuredLogger({
       createLogger: (c) => rootLogger.child({ requestId: c.var.requestId }),
+      onRequest: (logger, c) => {
+        // /api/chartFileのパスワードがクエリで渡された場合ログから除外
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { p, ph, ...query } = c.req.query();
+        logger.info(
+          {
+            method: c.req.method,
+            path: c.req.path,
+            routePath: finalRoutePath(c)?.path,
+            query,
+          },
+          "request start"
+        );
+      },
     })
   )
   .use(logger())

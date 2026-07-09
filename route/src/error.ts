@@ -44,6 +44,18 @@ export function sValidatorHook() {
 }
 
 /**
+ * マッチしたrouteハンドラーの情報を返す。
+ *
+ * routeハンドラーのあとにmiddlewareがあるため、routePath(c, -1)で正しく取得できないので、
+ * pathが最長のハンドラーを採用する
+ */
+export function finalRoutePath(c: Context) {
+  return matchedRoutes(c)
+    .sort((a, b) => a.path.length - b.path.length)
+    .at(-1);
+}
+
+/**
  * APIの異常時のレスポンスはjsonで `{message: "事前に定義されたメッセージ"}` の形式でなければならない。
  * メッセージは `i18n/{ja,en}/error.js` 内の`api`に定義されているものでなければならない。
  *
@@ -64,11 +76,7 @@ export const onError =
     setTransactionName: ((name: string) => undefined) | null;
   }) =>
   async (err: unknown, c: Context) => {
-    // routeハンドラーのあとにmiddlewareがある場合があり、routePath(c, -1)で正しく取得できないので、
-    // pathが最長のハンドラーを採用する
-    const route = matchedRoutes(c)
-      .sort((a, b) => a.path.length - b.path.length)
-      .at(-1);
+    const route = finalRoutePath(c);
     if (route && config.setTransactionName) {
       config.setTransactionName(`${route.method} ${route.path}`);
     }

@@ -1,4 +1,4 @@
-export { onError, notFound, fetchError } from "./error.js";
+export { onError, notFound, fetchError, finalRoutePath } from "./error.js";
 export { default as apiApp, getBrief } from "./api/app.js";
 export { default as ogApp } from "./og/app.js";
 export { default as shareApp } from "./share.js";
