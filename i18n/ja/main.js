@@ -143,6 +143,14 @@ export default {
         "それ以前のバージョンでは一部正常に動作・表示しない可能性があります。",
       showAll: "もっと見る",
     },
+    social: {
+      title: "ソーシャルリンク",
+      discord: {
+        online: "{num}人がオンライン",
+        members: "{num}人",
+        join: "Discordサーバーに参加",
+      },
+    },
     links: {
       title: "その他",
       titleShort: "その他",

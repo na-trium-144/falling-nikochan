@@ -32,6 +32,7 @@ import { useRouter } from "next/navigation.js";
 import * as v from "valibot";
 import { CidSchema } from "@falling-nikochan/chart";
 import { fetchBackend } from "./common/fetch.js";
+import { SocialLinks } from "./common/social.js";
 
 interface Props {
   locale: string;
@@ -364,6 +365,7 @@ export default function TopPage(props: Props) {
       </div>
 
       <Features locale={locale} />
+      <SocialLinks />
       <hr className="fn-hr" />
       <PoliciesAndLinks locale={locale} />
 

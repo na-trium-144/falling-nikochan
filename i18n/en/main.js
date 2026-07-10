@@ -152,6 +152,14 @@ export default {
         "Some parts may not function or display properly in earlier versions.",
       showAll: "Show More",
     },
+    social: {
+      title: "Social Links",
+      discord: {
+        online: "{num} Online",
+        members: "{num} Members",
+        join: "Join The Discord Server",
+      },
+    },
     links: {
       title: "Other",
       titleShort: "Other",

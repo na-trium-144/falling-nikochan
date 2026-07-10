@@ -22,6 +22,12 @@ import { Features, PoliciesAndLinks } from "@/clientPage.js";
 import { captureAndWrap, fetchBackend } from "@/common/fetch.js";
 import * as v from "valibot";
 import { etagContentRegex } from "@/common/briefCache.js";
+import {
+  DiscordInvite,
+  SocialLinks,
+  XBadge,
+  YouTubeBadge,
+} from "@/common/social.js";
 
 const dummyBrief = {
   title: "placeholder",
@@ -133,6 +139,7 @@ export default function ShareChart(props: Props) {
       </div>
 
       <Features locale={locale} />
+      <SocialLinks />
       <hr className="fn-hr" />
       <PoliciesAndLinks locale={locale} />
 
