@@ -29,6 +29,7 @@ const sentryConfig = (env) => ({
   release: `${packageJson.version}-cf-${env.CF_VERSION_METADATA.id}`,
   environment: env.CF_VERSION_METADATA.tag,
   sendDefaultPii: false,
+  normalizeDepth: 11,
   integrations: [Sentry.extraErrorDataIntegration({ depth: 10 })],
   beforeSend: sentryBeforeSend,
 });

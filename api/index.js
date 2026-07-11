@@ -36,6 +36,7 @@ Sentry.init({
   release: `${packageJson.version}-v-${process.env.VERCEL_URL.replace(".vercel.app", "")}`,
   environment: process.env.VERCEL_TARGET_ENV,
   sendDefaultPii: false,
+  normalizeDepth: 11,
   integrations: [Sentry.extraErrorDataIntegration({ depth: 10 })],
   includeLocalVariables: true,
   beforeSend: sentryBeforeSend,

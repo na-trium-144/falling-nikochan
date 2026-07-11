@@ -48,6 +48,7 @@ const sentryMiddleware = (app) =>
     dsn: process.env.SENTRY_DSN,
     release: `${packageJson.version}-bun`,
     sendDefaultPii: false,
+    normalizeDepth: 11,
     integrations: [
       Sentry.extraErrorDataIntegration({ depth: 10 }),
       Sentry.pinoIntegration({ log: { levels: ["info", "warn", "error"] } }),

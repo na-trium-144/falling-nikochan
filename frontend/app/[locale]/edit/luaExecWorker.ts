@@ -10,6 +10,7 @@ Sentry.init({
   environment:
     "lua-" + (process.env.TITLE_SUFFIX || "production").toLowerCase(),
   sendDefaultPii: false,
+  normalizeDepth: 11,
   integrations: [Sentry.extraErrorDataIntegration({ depth: 10 })],
   transport: Sentry.makeBrowserOfflineTransport(Sentry.makeFetchTransport),
   transportOptions: {
