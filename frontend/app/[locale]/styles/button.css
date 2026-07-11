@@ -29,9 +29,7 @@
       @apply bg-none;
       @apply shadow-none;
 
-      > .fn-glass-1 {
-        @apply hidden;
-      }
+      > .fn-glass-1,
       > .fn-glass-2 {
         @apply hidden;
       }
@@ -47,7 +45,7 @@
       @apply mask-linear-to-75%;
     }
 
-    &:active:not(:disabled) {
+    @variant active:not-disabled {
       @apply bg-blue-200/75 from-blue-200/75 to-blue-200/75;
       @apply dark:bg-amber-950/75 dark:from-amber-950/75 dark:to-amber-950/75;
       @apply inset-shadow-button inset-shadow-blue-400/50 dark:inset-shadow-amber-975/75;

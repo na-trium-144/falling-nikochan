@@ -12,71 +12,47 @@
       @apply cursor-default;
     }
 
-    > .fn-glass-1 {
-      @apply opacity-0;
-    }
+    > .fn-glass-1,
     > .fn-glass-2 {
       @apply opacity-0;
     }
-    &:not(:disabled) {
-      @variant hover {
-        > .fn-glass-1 {
-          @apply opacity-100;
-        }
-        > .fn-glass-2 {
-          @apply opacity-100;
-        }
-      }
-      @variant active {
-        @apply inset-shadow-button;
-        > .fn-glass-1 {
-          @apply opacity-0;
-        }
-        > .fn-glass-2 {
-          @apply mask-none;
-        }
-      }
-    }
-
-    &.fn-selected {
-      > .fn-glass-1 {
-        @apply opacity-100;
-      }
+    &.fn-selected,
+    &:hover:not(:disabled) {
+      > .fn-glass-1,
       > .fn-glass-2 {
         @apply opacity-100;
       }
     }
+    @variant active:not-disabled {
+      @apply inset-shadow-button;
+      > .fn-glass-1 {
+        @apply opacity-0;
+      }
+      > .fn-glass-2 {
+        @apply mask-none;
+      }
+    }
 
     &.fn-sky {
-      @variant hover {
-        &:not(:disabled) {
-          @apply bg-sky-200 dark:bg-orange-950;
-        }
-      }
-      @variant active {
-        &:not(:disabled) {
-          @apply bg-sky-200 dark:bg-orange-950;
-        }
+      &.fn-selected,
+      &:hover:not(:disabled),
+      &:active:not(:disabled) {
+        @apply bg-sky-200 dark:bg-orange-950;
       }
 
       &.fn-dropdown-item {
-        &.fn-selected {
-          @apply bg-sky-200/75 dark:bg-orange-950/75;
-        }
-        @variant hover {
-          @apply bg-sky-200/75 dark:bg-orange-950/75;
-        }
-        @variant active {
+        &.fn-selected,
+        &:hover:not(:disabled),
+        &:active:not(:disabled) {
           @apply bg-sky-200/75 dark:bg-orange-950/75;
         }
       }
     }
 
     &.fn-inverted {
-      @variant hover {
-        @apply bg-orange-200 dark:bg-sky-950;
-      }
-      @variant active {
+      &.fn-selected,
+      &:hover:not(:disabled),
+      &:active:not(:disabled) {
         @apply bg-orange-200 dark:bg-sky-950;
       }
     }
@@ -90,7 +66,8 @@
       @apply disabled:text-dim;
 
       &.fn-selected,
-      &:hover:not(:disabled) {
+      &:hover:not(:disabled),
+      &:active:not(:disabled) {
         @apply shadow-2xs;
       }
     }
