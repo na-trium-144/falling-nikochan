@@ -1,7 +1,7 @@
 @layer components {
   .fn-button {
     @apply appearance-none;
-    @apply relative m-0.5 h-10 py-1.5 px-2.5 min-w-max text-center content-center cursor-pointer;
+    @apply relative m-0.5 min-h-10 py-1.5 px-2.5 min-w-max text-center cursor-pointer;
     @apply rounded-xl;
     @apply bg-blue-50/75 bg-gradient-to-t from-blue-200/75 to-blue-50/75;
     @apply dark:bg-amber-800/75 dark:from-amber-950/75 dark:to-amber-800/75;
@@ -14,11 +14,11 @@
     }
 
     &.fn-cta {
-      @apply h-18 px-8 text-2xl font-bold rounded-3xl;
+      @apply py-5 px-8 text-2xl font-bold rounded-3xl;
       @apply shadow-md;
     }
     &.fn-cta2 {
-      @apply h-12 px-4 text-lg font-bold rounded-2xl;
+      @apply py-2.5 px-4 text-lg font-bold rounded-2xl;
       @apply shadow-md;
     }
 
