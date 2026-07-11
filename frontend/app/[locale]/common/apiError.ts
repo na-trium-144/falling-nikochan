@@ -1,84 +1,81 @@
-import * as Sentry from "@sentry/nextjs";
+export const FETCH_ERROR_STATUS = 499;
 
-const fetchErrorStatus = 499;
+export function shouldHideStatus(status: number) {
+  return status === FETCH_ERROR_STATUS;
+}
 
 /**
  * fetch()におけるネットワークエラーと5xxのサーバーエラーを統一して扱うクラス。
- * サーバーエラーの場合は自動的にSentryへの送信も行う。
  */
 export class APIError extends Error {
-  status: number | null;
-  original?: unknown; // 一応sentryから確認するため
-  // message: string;
-  constructor(status: number | null, message: string, original?: unknown) {
+  url: string;
+  status: number;
+  body: unknown;
+  fingerprint: string[];
+  /**
+   * false の場合、Sentryに報告し、さらに問い合わせフォームを出せる場所では出す
+   */
+  expected: boolean = false;
+  constructor(
+    url: string,
+    status: number,
+    message: string,
+    stack: string | undefined,
+    body: unknown,
+    cause?: Error
+  ) {
     super(message);
-    this.name = status ? `APIError-${status}` : "APIError";
+    this.name = `APIError-${status} (${new URL(url).pathname})`;
     this.status = status;
-    if (this.status === fetchErrorStatus) {
-      // 499はユーザーに表示しない
-      this.status = null;
+    if (status === FETCH_ERROR_STATUS) {
+      this.expected = true;
     }
-    this.original = original;
-    if (this.original instanceof Error) {
-      this.stack = this.original.stack;
-      this.original.stack = undefined;
-    } else if ("captureStackTrace" in Error) {
-      Error.captureStackTrace(this, APIError);
-    }
-    if (this.isServerSide()) {
-      Sentry.captureException(this);
-    }
-  }
-  static fetchError(original: unknown) {
-    if (
-      original instanceof TypeError ||
-      (original instanceof DOMException &&
-        ["AbortError", "NotAllowedError"].includes(original.name))
-    ) {
-      return new APIError(fetchErrorStatus, "fetchError", original);
-    } else {
-      Sentry.captureException(`Object is not fetch error: ${original}`);
-      throw original;
-    }
-  }
-  static badResponse(original: unknown) {
-    return new APIError(null, "badResponse", original);
-  }
-  static async fromRes(res: Response) {
-    let e: APIError;
-    try {
-      e = new APIError(res.status, (await res.json()).message || "");
-    } catch {
-      e = new APIError(res.status, "");
-    }
-    Error.captureStackTrace(e, APIError);
-    return e;
+    this.url = url;
+    this.stack = stack;
+    this.body = body;
+    this.cause = cause;
+    this.fingerprint = [
+      `APIError-${status}`,
+      this.message,
+      // url内のパラメータ部分を消す (cid, lvIndex など)
+      // TODO: 数値以外がパラメータになるAPIが今後作られた場合ロジックを変更する必要がある
+      new URL(this.url).pathname.replace(/\/\d+/g, ""),
+    ];
   }
 
   formatMsg(t: {
     (key: string): string;
     has: (key: string) => boolean;
   }): string {
-    if (t.has("api." + this.message)) {
+    if (this.status === FETCH_ERROR_STATUS) {
+      return t("api.fetchError");
+    } else if (t.has("api." + this.message)) {
       return t("api." + this.message);
     } else if (t.has(this.message)) {
       return t(this.message);
     } else {
-      return t("unknownApiError");
+      if (this.status === 400) {
+        return t("api.badRequest");
+      } else if (this.status === 404) {
+        return t("api.notFound");
+      } else {
+        return t("unknownApiError");
+      }
     }
   }
   format(t: { (key: string): string; has: (key: string) => boolean }): string {
-    if (this.status) {
-      return `${this.status}: ${this.formatMsg(t)}`;
-    } else {
+    if (shouldHideStatus(this.status)) {
       return this.formatMsg(t);
+    } else {
+      return `${this.status}: ${this.formatMsg(t)}`;
     }
   }
+}
 
-  isServerSide() {
-    return (
-      (this.status !== null && (this.status === 403 || this.status >= 500)) ||
-      this.message === "badResponse"
-    );
-  }
+/**
+ * expected をtrueにセットしてrethrow
+ */
+export function markAsExpected(e: APIError): never {
+  e.expected = true;
+  throw e;
 }

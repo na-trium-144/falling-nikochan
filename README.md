@@ -2,7 +2,7 @@
 
 [![Production Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fnikochan.utcode.net%2FbuildVer.json&query=%24.version&prefix=v&label=Prod&color=%23b8f6fe)](https://nikochan.utcode.net)
 [![Staging Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fnikochan-staging.utcode.net%2FbuildVer.json&query=%24.version&prefix=v&label=Staging&color=%23441306)](https://nikochan-staging.utcode.net)
-[![GitHub License](https://img.shields.io/github/license/na-trium-144/falling-nikochan)](./LICENSE)
+[![GitHub License](https://img.shields.io/badge/License-AGPL--3.0-orange)](./LICENSE)
 
 [![YouTube Channel Subscribers](https://img.shields.io/youtube/channel/subscribers/UChAEFwUtjsbWmWwZSxYLXWQ?label=%40nikochan144)](https://www.youtube.com/@nikochan144)
 [![Twitter Follow](https://img.shields.io/twitter/follow/nikochan144)](https://x.com/nikochan144)
@@ -31,7 +31,7 @@ The code for the backend is in the [route/](route/) directory, NOT in the [api/]
 
 API Reference is here: https://nikochan.utcode.net/api
 
-See also [chart/src/chart.ts](chart/src/chart.ts) for relations among the chart data formats.
+The Lua script API used for chart editing is available in a separate repository ([na-trium-144/fn-commands](https://github.com/na-trium-144/fn-commands))
 
 ## License
 

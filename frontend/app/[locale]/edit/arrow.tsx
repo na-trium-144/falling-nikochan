@@ -21,7 +21,7 @@ interface Props {
 export default function Arrow(props: Props) {
   return (
     <div
-      className="absolute left-0 origin-left "
+      className="absolute left-0 origin-left z-edit-arrow"
       style={{
         top: props.top !== undefined ? props.top - props.lineWidth : undefined,
         bottom:

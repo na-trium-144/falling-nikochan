@@ -1,3 +1,168 @@
+## ver. 16.23 - 2026/07/10
+
+* undo/redo [#1224](https://github.com/na-trium-144/falling-nikochan/pull/1224)
+    * AceEditorのインスタンスをレベルごとに作る
+        * エディターの状態をstateではなくレベル別にLevelEditing内で管理
+    * undoボタン追加 (AceEditorのundo機能を呼び出す)
+    * luaExecutorのresult管理をリファクタ
+        * LevelEditingにindexの情報を追加
+        * indexを確実に更新するためにChartEditingの#level直接アクセス禁止
+    * エラー表示をfixedに
+    * abort時のエラーメッセージ処理のrace conditionを対処
+    * undoManagerがセッションに保存されるようにした
+* pino, axiom, structured-loggerを導入 [#1226](https://github.com/na-trium-144/falling-nikochan/pull/1226)
+    * 本番環境(serve-bun-prod)でログをaxiomに送信する
+    * 全5環境にstructured logger middlewareを導入し、consoleをc.var.loggerで置き換え
+    * service worker→フロントエンドへのconsole転送において、引数が文字列でない場合も考慮しオブジェクトをそのまま送る仕様に変更
+
+## ver. 16.22 - 2026/06/28
+
+* <del>pnpm11 [#1128](https://github.com/na-trium-144/falling-nikochan/pull/1128)</del>
+    * catalogでパッケージのバージョンを管理
+    * minimulReleaseAgeと除外パッケージを設定
+    * devengines.packagemanager, runtime を指定
+    * savePrefixを指定して一部のどうでもいいパッケージ以外バージョン固定するのも良さそうだが、パッケージごとに適切な指定を考えるのがめんどくさくなったので一旦現状維持
+* pnpm10に戻す [#1223](https://github.com/na-trium-144/falling-nikochan/pull/1223)
+* localStorageのバリデーション [#1221](https://github.com/na-trium-144/falling-nikochan/pull/1221)
+    * 生のパスワードをセッションに保存しない
+
+## ver. 16.21 - 2026/06/21
+
+* 譜面編集で譜面データfetch時、shareBoxでbriefのfetch時のエラーの表示を修正 [#1217](https://github.com/na-trium-144/falling-nikochan/pull/1217)
+* chartのバリデーション前にjsonシリアライズを通す
+
+## ver. 16.20 - 2026/06/19
+
+* /main/play からshareページ遷移前後でのクエリパラメータの挙動を修正
+* トップページの検索欄使用時に/main/playの検索ボックスへフォーカスを当てる動作をクエリではなくハッシュで行う
+* buttonhighlightはparentにイベントハンドラーを与えるようにする
+* chartlistの重複aタグをやめる
+
+## ver. 16.19 - 2026/06/14
+
+* トップページに検索欄追加、cid入力でジャンプを実装 [#1208](https://github.com/na-trium-144/falling-nikochan/pull/1208)
+* shareBoxの初期レイアウトを調整
+* APIドキュメントとデバッグページのリンクをheaderとlinksに追加
+
+## ver. 16.18 - 2026/06/13 [#1205](https://github.com/na-trium-144/falling-nikochan/pull/1205)
+
+* 画像の遅延読み込み
+* mathjs,yaml,wasmoonの遅延読み込み
+* テーマの読み込みをインラインscriptタグに移動
+* next/bundle-analyzerを追加、環境変数でいつでも有効化できる
+* workerをeditページ起動時に非同期に初期化し、エラーが出たらページ全体を止める
+* suppressHydrationWarningを追加、global-errorにもテーマ切替スクリプトを追加
+* 譜面編集のYouTube表示と譜面プレビューを画面幅と高さに応じて調整
+
+## ver. 16.17 - 2026/06/13
+
+* ETagとIf-Matchの利用 [#1190](https://github.com/na-trium-144/falling-nikochan/pull/1190)
+    * etag middlewareをデフォルト設定で/api,/og,/share,/rss,/sitemapに追加、If-None-MatchヘッダーがETagとマッチしたら304が返る
+    * oembed, record, search, ytMeta, /rss.xml, /sitemap.xmlにcache middlewareを追加
+    * /share/:cidのキャッシュをbriefとおなじ10分に
+    * brief, playFile, seqFile, chartFile, newChartFile で譜面データのハッシュをETagとして返す
+    * chartFile, playFile, seqFile のcache-controlを no-cache に
+    * chartFile, playFile, seqFile リクエストにIf-MatchまたはX-If-Matchヘッダーが含まれていた場合、ETagが一致しなかったら412を返す
+* プレイ履歴で非公開譜面も表示 [#1204](https://github.com/na-trium-144/falling-nikochan/pull/1204)
+    * search APIに指定したcidの中でだけ非公開譜面も含めて検索する機能を追加
+* cloudflare,bunでAPIのレスポンスを圧縮
+* theme,recent,bestScoreの使用箇所でstorageイベントと画面遷移時に毎回更新する
+* wretchのAbortAddonをdedupe middlewareと組み合わせるのをやめる
+
+## ver. 16.16 - 2026/06/09
+
+* MongoClientをリクエストごとに破棄せず再利用 [#1201](https://github.com/na-trium-144/falling-nikochan/pull/1201)
+* バックエンドのsentryのbeforeSendをenv.tsの1箇所で定義
+* フロントエンドのセッションなどのコンテキストをsentryに送信
+* record送信時のスコア0のバリデーションを修正
+
+## ver. 16.15 - 2026/06/07
+
+* ver16.14のエラーハンドリングのバグ修正
+* 本番dbでのテスト、本番dbを使った開発環境サーバーへのpost、本番サーバーに対する開発フロントエンドのcredentialつきリクエストを禁止 [#1185](https://github.com/na-trium-144/falling-nikochan/pull/1185)
+
+## ver. 16.14 - 2026/06/07
+
+* トップページとchartListの改善
+* トップページで表示されるオートプレイのconsole.logを削除
+* webworkerのエラーハンドリング [#1188](https://github.com/na-trium-144/falling-nikochan/pull/1188)
+    * remote-web-workerを単にurlのoriginを書き換えるだけのパッチに変更
+    * luaExecWorker内のenvironmentを分ける
+    * worker自体のエラー時にメッセージを表示
+* serviceworker改善 [#1192](https://github.com/na-trium-144/falling-nikochan/pull/1192)
+    * Service Worker でフォントをプレキャッシュしない
+    * navigator.connection を見て低速だった場合はアセットの更新(プレキャッシュ)を呼び出さない
+    * ついでにmimetypeの判定にhono/utils/mimeを使うよう変更
+* フロントエンドのfetchエラー処理改善 [#1195](https://github.com/na-trium-144/falling-nikochan/pull/1195)
+    * fetchAssetのリトライ時のエラーハンドリングを修正
+    * 429リトライとネットワークエラー時リトライをfetchBackend側に常時入れる
+    * briefの取得に失敗してもリスト全体をエラー表示にしない
+* api,og,shareへのfetchBriefAPIのインジェクションをリファクタ [#1193](https://github.com/na-trium-144/falling-nikochan/pull/1193)
+
+## ver. 16.13 - 2026/06/06 [#1187](https://github.com/na-trium-144/falling-nikochan/pull/1187)
+
+* バックエンドにSentry導入
+    * cloudflare, bun, vercelにsentryを導入
+        * deploy時のsourcemap送信は未実装
+    * HTTPException(500)ではなく意味のあるErrorを投げるようにする
+        * imageGenerationFailedエラーを廃止し、そのままエラーをthrow→onErrorがキャッチし、sentryに送信
+        * unsupportedChartVersionエラーを409に移動
+        * getYTDataEntryはundefinedを返すのではなくエラーをthrowする仕様に変更
+    * fetchBrief,fetchStaticは異常時にResponseを含むErrorをthrowする仕様に変更
+
+## ver. 16.11 - 2026/06/04 [#1153](https://github.com/na-trium-144/falling-nikochan/pull/1153)
+
+* APIのエラーレスポンスのmessageの改善 [#1152](https://github.com/na-trium-144/falling-nikochan/pull/1152)
+    * 400, 500のメッセージなしエラーに対してエラーハンドラで汎用メッセージを付与
+    * 400のgeneric400をbadResponseに変更
+    ** ValiErrorの場合にその詳細をmessageではなく flattened, issues として出力する
+    * レスポンスヘッダーのドキュメントを追加、resolverを使わず直接型を記述することでtypescriptのエラー回避
+    * hono-openapiのvalidatorにhookを設定し他のエラーレスポンスと同じ出力形式にする
+    * /api/oembedのドキュメントが不要なので隠す
+* /api/chartFile APIでクエリに平文パスワードを載せるのをやめてAuthorizationヘッダーを使う [#1151](https://github.com/na-trium-144/falling-nikochan/pull/1151)
+* fetchのエラーハンドリングを改善する [#1155](https://github.com/na-trium-144/falling-nikochan/pull/1155)
+    * wretchライブラリを導入。fetchBackend, fetchAsset関数でラップ
+    * APIErrorクラスをリファクタ。
+        * staticメソッドで呼び出し側が個別にAPIErrorを作っていたのをやめ、エラーの分類とメッセージの処理はwretchのcustomErrorの中で統一的に行う。
+        * Sentryへの送信はAPIErrorの中で行わず、呼び出し側で行う。unknownからError型への変換、stackがない場合の追加、Sentryへの送信、という処理が頻出なのでcaptureAndWrap関数にまとめた
+    * ネットワークエラーとAbortエラーはSentryに送信されないようにする。(instrumentation-client.ts)
+        * また、それ以外でもエラーが想定内の箇所ではmarkAsExpected(e)でexpectedフラグを立て、Sentryがキャプチャしても送信されないようにする。
+    * fetchBriefを複数回値を返す仕様に変更
+* APIのレスポンスを圧縮 (一旦vercelのみ)
+* APIのリクエストを圧縮 [#1162](https://github.com/na-trium-144/falling-nikochan/pull/1162)
+
+## ver. 16.10 - 2026/05/28 [#1159](https://github.com/na-trium-144/falling-nikochan/pull/1159)
+
+* tsconfigのtargetとlibをnode23相当に変更
+
+## ver. 16.9 - 2026/05/27 [#1158](https://github.com/na-trium-144/falling-nikochan/pull/1158)
+
+* エラーページの中央揃えをflexに変更
+* preをglassスタイルに変更
+* DOMExceptionの場合の専用メッセージを追加 (Chromeの翻訳機能を使うとエラーになる の応急処置)
+* リンクの見出しを修正&内容を統一
+* PCHeader2とlinksページにも問い合わせリンクを追加
+
+## ver. 16.8 - 2026/05/27 [#1157](https://github.com/na-trium-144/falling-nikochan/pull/1157)
+
+* 譜面編集ページの音符と軌跡をUIの後ろに描画し、さらに範囲外に表示される場合はぼかす
+
+## ver. 16.7 - 2026/05/26 [#1154](https://github.com/na-trium-144/falling-nikochan/pull/1154)
+
+* Androidでアプリ内ブラウザ経由でFirefoxが開く隠しタブによるセッション消費を回避
+
+## ver. 16.6 - 2026/05/21
+
+* service worker側でのbeacon挿入が/shareやエラーページに対しても確実に行われるよう修正
+
+## ver. 16.5 - 2026/05/21 [#1150](https://github.com/na-trium-144/falling-nikochan/pull/1150)
+
+* 最近プレイした譜面のリストを検索機能と統合、復活
+
+## ver. 16.4 - 2026/05/17 [#1140](https://github.com/na-trium-144/falling-nikochan/pull/1140)
+
+* 譜面エディターのタイミングタブと音符タブで数式を入力可能に
+
 ## ver. 16.3 - 2026/05/17
 
 * service workerがprefetch時のHEADリクエストで毎回ページ全体をfetchしていたのを修正
@@ -5,7 +170,7 @@
     * 拡張子のないパスに対してgetContentType()でhtmlと判定するように変更
 * `main/about/__next_tree`がリダイレクト処理で404になっていたのを修正
 
-## ver. 16.2 - 2026/05/16
+## ver. 16.2 - 2026/05/16 [#1134](https://github.com/na-trium-144/falling-nikochan/pull/1134)
 
 * APIErrorクラスをErrorのサブクラスにしてSentry送信も統一して処理する
 * catchのないfetch呼び出しに空のcatchを追加

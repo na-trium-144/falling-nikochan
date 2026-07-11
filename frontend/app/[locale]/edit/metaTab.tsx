@@ -12,11 +12,11 @@ import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
 import { chartMaxEvent } from "@falling-nikochan/chart";
 import { useShareLink } from "@/common/shareLinkAndImage";
-import { isStandalone } from "@/common/pwaInstall";
+import { isInsideFrame, isStandalone } from "@/common/pwaInstall";
 import { useRouter } from "next/navigation";
-import { isInsideFrame, useDisplayMode } from "@/scale.js";
 import { LocalLoadError, LocalLoadState, SaveState } from "./chartState";
-import { APIError } from "@/common/apiError";
+import { formatError } from "@/common/fetch";
+import { useDisplayMode } from "@/scale";
 
 interface Props {
   chart?: ChartEditing;
@@ -192,8 +192,8 @@ export function MetaTab(props: Props2) {
         <span className="inline-block ml-1 ">
           {props.saveState === "ok"
             ? t("saveDone")
-            : props.saveState instanceof APIError
-              ? props.saveState.format(te)
+            : props.saveState instanceof Error
+              ? formatError(props.saveState, te)
               : !props.chart?.meta.ytId
                 ? t("saveFail.noId")
                 : !props.chart?.cid && !props.chart?.changePasswd

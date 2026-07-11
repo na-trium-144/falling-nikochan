@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import * as Sentry from "@sentry/nextjs";
 
 interface DisplayMode {
   isTouch: boolean;
   screenWidth: number;
   screenHeight: number;
   isMobileMain: boolean;
+  isMobileEdit: boolean;
+  isMobileGame: boolean;
   rem: number;
   playUIScale: number;
   statusScale: number;
@@ -28,7 +31,11 @@ export function useDisplayMode(): DisplayMode {
   const [width, height] = size;
 
   const isMobileMain = width < 48 * rem; // global.css と合わせる
-  const isMobileGame = width < height;
+  const isMobileEdit = width < 50 * rem; // global.css と合わせる
+  // TODO: cssの切り替えはjs側のこの変数ではなく landscape: variantで切り替えたほうが良さそう
+  // cssのlandscapeと挙動を合わせるため、正方形は縦長扱いとする
+  const isMobileGame = width <= height;
+
   const scalingWidthThreshold1 = 400 * (isMobileGame ? 1.1 : 1.6);
   const scalingWidthThreshold2 = 600 * (isMobileGame ? 1.1 : 1.6);
   const playUIScale =
@@ -51,11 +58,22 @@ export function useDisplayMode(): DisplayMode {
     setIsTouch(hasTouch());
   }, []);
 
+  useEffect(() => {
+    Sentry.setContext("displayMode", {
+      isMobileMain,
+      isMobileEdit,
+      isMobileGame,
+      isTouch,
+    });
+  }, [isMobileMain, isMobileEdit, isMobileGame, isTouch]);
+
   return {
     isTouch,
     screenWidth: width,
     screenHeight: height,
     isMobileMain,
+    isMobileEdit,
+    isMobileGame,
     rem,
     playUIScale,
     statusScale,
@@ -74,13 +92,4 @@ export function hasTouch() {
   } else {
     return "ontouchstart" in window;
   }
-}
-
-export function isInsideFrame() {
-  return window.self !== window.top;
-}
-export function useInsideFrameDetector() {
-  const [state, setState] = useState<boolean | null>(null);
-  useEffect(() => setState(isInsideFrame()), []);
-  return state;
 }

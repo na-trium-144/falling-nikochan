@@ -3,6 +3,7 @@ import {
   Bindings,
   cacheControl,
   languageDetector,
+  ResponseOK,
 } from "./env.js";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
 import {
@@ -14,10 +15,12 @@ import {
   levelTypes,
   ResultParams,
 } from "@falling-nikochan/chart";
-import { HTTPException } from "hono/http-exception";
 import packageJson from "../package.json" with { type: "json" };
 import { env } from "hono/adapter";
-import { Context, ExecutionContext, Hono } from "hono";
+import { Context, Hono } from "hono";
+import { etag } from "hono/etag";
+import { etagContentRegex } from "./api/chart.js";
+import { BaseLogger } from "@hono/structured-logger";
 
 /*
 OGPの見た目を優先するため、shareページではクエリのlangを優先する。
@@ -25,17 +28,22 @@ OGPの見た目を優先するため、shareページではクエリのlangを�
 bodyを無理やり書き換える。
 */
 
+const CACHE_MAX_AGE = 600;
+
 const shareApp = (config: {
   fetchBrief: (
     e: Bindings,
-    cid: string,
-    ctx: ExecutionContext | undefined
-  ) => Response | Promise<Response>;
-  fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
+    cid: string
+  ) => Promise<{ brief: ChartBrief; etag: string }>;
+  fetchStatic: (e: Bindings, url: URL) => Promise<ResponseOK>;
   languageDetector?: (c: Context, next: () => Promise<void>) => Promise<void>;
 }) =>
-  new Hono<{ Bindings: Bindings }>({ strict: false })
+  new Hono<{ Bindings: Bindings; Variables: { logger: BaseLogger } }>({
+    strict: false,
+  })
     .use(config.languageDetector || languageDetector())
+    .use(etag())
+    // CookieとAccept-Languageでレスポンスが変わるためprivate指定しcache middlewareは使わない
     .get("/:cid{[0-9]+}", async (c) => {
       const lang = c.get("language");
       const qLang = c.req.query("lang") || lang;
@@ -47,17 +55,11 @@ const shareApp = (config: {
         try {
           resultParams = deserializeResultParams(qResult);
         } catch (e) {
-          console.error(e);
+          c.var.logger.error(e);
           // throw new HTTPException(400, { message: "invalidResultParam" });
         }
       }
-      let executionCtx: ExecutionContext | undefined = undefined;
-      try {
-        executionCtx = c.executionCtx;
-      } catch {
-        //ignore
-      }
-      const pBriefRes = config.fetchBrief(env(c), cid, executionCtx);
+      const pBriefRes = config.fetchBrief(env(c), cid);
       const t = await getTranslations(qLang, "share");
       const tr = await getTranslations(qLang, "play.result");
       let placeholderUrl: URL;
@@ -69,124 +71,116 @@ const shareApp = (config: {
       //   );
       // }
       const pRes = config.fetchStatic(env(c), placeholderUrl);
-      const briefRes = await pBriefRes;
-      if (briefRes.ok) {
-        const brief = (await briefRes.json()) as ChartBrief;
-        const res = await pRes;
-        let newTitle = brief.composer
-          ? t("titleWithComposer", {
-              title: brief.title,
-              composer: brief.composer,
-              cid: cid,
-            })
-          : t("title", {
-              title: brief.title,
-              cid: cid,
-            });
-        if (resultParams) {
-          if (resultParams.date) {
-            newTitle = t("titleWithResult", {
-              title: newTitle,
-              date: resultParams.date.toLocaleDateString(qLang),
-            });
-          } else {
-            newTitle = t("titleWithResultNoDate", {
-              title: newTitle,
-            });
-          }
+      const { brief, etag } = await pBriefRes;
+      const res = await pRes;
+      let newTitle = brief.composer
+        ? t("titleWithComposer", {
+            title: brief.title,
+            composer: brief.composer,
+            cid: cid,
+          })
+        : t("title", {
+            title: brief.title,
+            cid: cid,
+          });
+      if (resultParams) {
+        if (resultParams.date) {
+          newTitle = t("titleWithResult", {
+            title: newTitle,
+            date: resultParams.date.toLocaleDateString(qLang),
+          });
+        } else {
+          newTitle = t("titleWithResultNoDate", {
+            title: newTitle,
+          });
         }
-        const newDescription = resultParams
-          ? t("descriptionWithResult", {
-              chartCreator: brief.chartCreator || t("chartCreatorEmpty"),
-              title: brief.title,
-              level:
-                (resultParams.lvName ? resultParams.lvName + " " : "") +
-                levelTypes[resultParams.lvType] +
-                "-" +
-                resultParams.lvDifficulty.toString(),
-              playbackRate:
-                resultParams.playbackRate4 !== 4
-                  ? `, ${tr("playbackRate")}×${resultParams.playbackRate4 / 4}`
-                  : "",
-              score: (resultParams.score100 / 100).toString(),
-              status:
-                resultParams.chainScore100 === chainScoreRate * 100
-                  ? " (" + // additional space on left side
-                    (resultParams.baseScore100 === baseScoreRate * 100
-                      ? tr("perfect")
-                      : tr("full")) +
-                    (resultParams.bigScore100 === bigScoreRate * 100
-                      ? "+"
-                      : "") +
-                    "!)"
-                  : "",
-            })
-          : t("description", {
-              chartCreator: brief.chartCreator || t("chartCreatorEmpty"),
-              title: brief.title,
-            });
-        const briefStr = JSON.stringify(brief);
-        const thisURL = new URL(
-          `/share/${cid}`,
-          env(c).BACKEND_PREFIX || new URL(c.req.url).origin
-        );
-        const oembedJsonURL = new URL(
-          `/api/oembed?url=${encodeURIComponent(thisURL.toString())}&format=json`,
-          env(c).BACKEND_PREFIX || new URL(c.req.url).origin
-        );
-        const oembedXmlURL = new URL(
-          `/api/oembed?url=${encodeURIComponent(thisURL.toString())}&format=xml`,
-          env(c).BACKEND_PREFIX || new URL(c.req.url).origin
-        );
-        // キャッシュが正しく動作するように、クエリパラメータの順番が常に一定である必要がある
-        const ogQuery = new URLSearchParams();
-        ogQuery.set("lang", qLang);
-        if (resultParams) ogQuery.set("result", qResult!);
-        ogQuery.set("v", packageJson.version);
-        let replacedBody = (await res.text())
-          .replaceAll('/share/placeholder\\"', `/share/${cid}\\"`) // for canonical URL in script tag
-          .replaceAll('/share/placeholder"', `/share/${cid}"`) // for canonical URL
-          .replaceAll('\\"PLACEHOLDER_TITLE', '\\"' + escapeJs(newTitle)) // "{...\"TITLE\"}" inside script tag
-          .replaceAll("PLACEHOLDER_TITLE", escapeHtml(newTitle)) // <title>TITLE</title>, "TITLE" inside meta tag
-          .replaceAll(
-            "https://placeholder_og_image/",
-            // キャッシュ対策のためクエリにバージョンを入れ、ogの仕様変更した場合に再取得してもらえるようにする
-            new URL(
-              (resultParams ? `/og/result/${cid}?` : `/og/share/${cid}?`) +
-                ogQuery.toString(),
-              backendOrigin(c)
-            ).toString()
-          )
-          .replaceAll(
-            '\\"PLACEHOLDER_DESCRIPTION',
-            '\\"' + escapeJs(newDescription)
-          )
-          .replaceAll("PLACEHOLDER_DESCRIPTION", escapeHtml(newDescription))
-          .replaceAll('\\"PLACEHOLDER_BRIEF', '\\"' + escapeJs(briefStr))
-          .replaceAll("PLACEHOLDER_BRIEF", escapeHtml(briefStr))
-          .replaceAll(
-            "https://placeholder_oembed/json",
-            oembedJsonURL.toString()
-          )
-          .replaceAll(
-            "https://placeholder_oembed/xml",
-            oembedXmlURL.toString()
-          );
-        if (c.req.path.startsWith("/share") && lang !== qLang) {
-          const q = new URLSearchParams(c.req.query());
-          q.delete("lang");
-          const newPath = c.req.path + (q.toString() ? "?" + q.toString() : "");
-          replacedBody =
-            replacedBody.slice(0, replacedBody.indexOf("<body")) +
-            "<body><script>" +
-            `location.replace("${newPath}");` +
-            "</script></body></html>";
-        }
+      }
+      const newDescription = resultParams
+        ? t("descriptionWithResult", {
+            chartCreator: brief.chartCreator || t("chartCreatorEmpty"),
+            title: brief.title,
+            level:
+              (resultParams.lvName ? resultParams.lvName + " " : "") +
+              levelTypes[resultParams.lvType] +
+              "-" +
+              resultParams.lvDifficulty.toString(),
+            playbackRate:
+              resultParams.playbackRate4 !== 4
+                ? `, ${tr("playbackRate")}×${resultParams.playbackRate4 / 4}`
+                : "",
+            score: (resultParams.score100 / 100).toString(),
+            status:
+              resultParams.chainScore100 === chainScoreRate * 100
+                ? " (" + // additional space on left side
+                  (resultParams.baseScore100 === baseScoreRate * 100
+                    ? tr("perfect")
+                    : tr("full")) +
+                  (resultParams.bigScore100 === bigScoreRate * 100 ? "+" : "") +
+                  "!)"
+                : "",
+          })
+        : t("description", {
+            chartCreator: brief.chartCreator || t("chartCreatorEmpty"),
+            title: brief.title,
+          });
+      const briefStr = JSON.stringify(brief);
+      const thisURL = new URL(
+        `/share/${cid}`,
+        env(c).BACKEND_PREFIX || new URL(c.req.url).origin
+      );
+      const oembedJsonURL = new URL(
+        `/api/oembed?url=${encodeURIComponent(thisURL.toString())}&format=json`,
+        env(c).BACKEND_PREFIX || new URL(c.req.url).origin
+      );
+      const oembedXmlURL = new URL(
+        `/api/oembed?url=${encodeURIComponent(thisURL.toString())}&format=xml`,
+        env(c).BACKEND_PREFIX || new URL(c.req.url).origin
+      );
+      // キャッシュが正しく動作するように、クエリパラメータの順番が常に一定である必要がある
+      const ogQuery = new URLSearchParams();
+      ogQuery.set("lang", qLang);
+      if (resultParams) ogQuery.set("result", qResult!);
+      ogQuery.set("v", packageJson.version);
+      let replacedBody = (await res.text())
+        .replaceAll('/share/placeholder\\"', `/share/${cid}\\"`) // for canonical URL in script tag
+        .replaceAll('/share/placeholder"', `/share/${cid}"`) // for canonical URL
+        .replaceAll('\\"PLACEHOLDER_TITLE', '\\"' + escapeJs(newTitle)) // "{...\"TITLE\"}" inside script tag
+        .replaceAll("PLACEHOLDER_TITLE", escapeHtml(newTitle)) // <title>TITLE</title>, "TITLE" inside meta tag
+        .replaceAll(
+          "https://placeholder_og_image/",
+          // キャッシュ対策のためクエリにバージョンを入れ、ogの仕様変更した場合に再取得してもらえるようにする
+          new URL(
+            (resultParams ? `/og/result/${cid}?` : `/og/share/${cid}?`) +
+              ogQuery.toString(),
+            backendOrigin(c)
+          ).toString()
+        )
+        .replaceAll(
+          '\\"PLACEHOLDER_DESCRIPTION',
+          '\\"' + escapeJs(newDescription)
+        )
+        .replaceAll("PLACEHOLDER_DESCRIPTION", escapeHtml(newDescription))
+        .replaceAll('\\"PLACEHOLDER_BRIEF', '\\"' + escapeJs(briefStr))
+        .replaceAll("PLACEHOLDER_BRIEF", escapeHtml(briefStr))
+        // 引用符やw/がついている場合ここで除外するので、fetchBrief()が返すetagはなんでもよい
+        .replaceAll("PLACEHOLDER_ETAG", etag.match(etagContentRegex)?.[0] ?? "")
+        .replaceAll("https://placeholder_oembed/json", oembedJsonURL.toString())
+        .replaceAll("https://placeholder_oembed/xml", oembedXmlURL.toString());
+      if (c.req.path.startsWith("/share") && lang !== qLang) {
+        const q = new URLSearchParams(c.req.query());
+        q.delete("lang");
+        const newPath = c.req.path + (q.toString() ? "?" + q.toString() : "");
+        replacedBody =
+          replacedBody.slice(0, replacedBody.indexOf("<body")) +
+          "<body><script>" +
+          `location.replace("${newPath}");` +
+          "</script></body></html>";
+      }
 
-        return c.text(replacedBody, 200, {
-          "Content-Type": res.headers.get("Content-Type") || "text/plain",
-          "Cache-Control": cacheControl(env(c), null),
-          /*
+      return c.text(replacedBody, 200, {
+        "Content-Type": res.headers.get("Content-Type") || "text/plain",
+        "Cache-Control": cacheControl(env(c), CACHE_MAX_AGE, true),
+        /*
           Linkヘッダーかmetaタグのどちらかがあればいいはずだが、
           Linkタグは例えばdiscordで動作しないらしい?: https://github.com/discord/discord-api-docs/issues/7370
           "Link": [
@@ -194,19 +188,7 @@ const shareApp = (config: {
             `<${oembedXmlURL.toString()}>; rel="alternate"; type="text/xml+oembed"; title="${escapeHtml(newTitle)}"`,
           ],
           */
-        });
-      } else {
-        let message = "";
-        try {
-          message =
-            ((await briefRes.json()) as { message?: string }).message || "";
-        } catch {
-          //
-        }
-        throw new HTTPException(briefRes.status as 401 | 404 | 500, {
-          message,
-        });
-      }
+      });
     });
 
 function escapeJs(str: string): string {

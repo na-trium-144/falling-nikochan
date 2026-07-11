@@ -3,11 +3,19 @@ import { useRealFPS } from "./common/fpsCalculator";
 import FallingWindow from "./play/fallingWindow";
 import { useFlash } from "./play/useFlash";
 import useGameLogic from "./play/gameLogic";
-import { ChartBrief, ChartSeqData } from "@falling-nikochan/chart";
+import {
+  ChartBrief,
+  currentChartVer,
+  Level15Play,
+  Level6Play,
+  loadChart,
+} from "@falling-nikochan/chart";
 import * as msgpack from "@msgpack/msgpack";
 import { useColorThief } from "./common/colorThief";
 import clsx from "clsx/lite";
 import { ChartListItem } from "./main/chartList";
+import { fetchBackend } from "./common/fetch";
+import { fetchBrief } from "./common/briefCache";
 
 export interface DemoChart {
   cid: string;
@@ -74,28 +82,30 @@ export function TopDemo(
       props.lvIndex !== undefined &&
       props.offset !== undefined
     ) {
-      fetch(
-        process.env.BACKEND_PREFIX +
-          `/api/seqFile/${props.cid}/${props.lvIndex}`
-      ).then(
-        (res) => {
-          if (res.ok) {
-            res.arrayBuffer().then((buf) => {
-              const seq = msgpack.decode(buf) as ChartSeqData;
-              resetNotesAll(
-                seq.notes.map((n) => ({
-                  ...n,
-                  done: 0,
-                  bigDone: false,
-                })),
-                props.offset! - seq.offset
-              );
-              currentTimeSec.current = props.offset! - seq.offset;
-            });
+      fetchBackend()
+        .get(`/api/playFile/${props.cid}/${props.lvIndex}`)
+        .arrayBuffer((buf) => {
+          currentChartVer satisfies 16; // update the code below when chart version is bumped
+          const playFile = msgpack.decode(buf) as Level6Play | Level15Play;
+          if (
+            playFile.ver === 6 ||
+            playFile.ver === 15 ||
+            playFile.ver === 16
+          ) {
+            const seq = loadChart(playFile);
+            resetNotesAll(
+              seq.notes.map((n) => ({
+                ...n,
+                done: 0,
+                bigDone: false,
+              })),
+              props.offset! - seq.offset
+            );
+            currentTimeSec.current = props.offset! - seq.offset;
+          } else {
+            // ignore
           }
-        },
-        () => undefined
-      );
+        });
     }
   }, [notesAll, resetNotesAll, props.cid, props.lvIndex, props.offset]);
 
@@ -129,21 +139,16 @@ export function TopDemo(
 
 export function DemoDetail(
   props: {
-    onClick: (cid: string, brief?: ChartBrief) => void;
-    onClickMobile: (cid: string, brief: ChartBrief | undefined) => void;
+    onClick: (cid: string) => void;
+    onClickMobile: (cid: string) => void;
   } & Partial<DemoChart>
 ) {
   const [brief, setBrief] = useState<ChartBrief>();
   useEffect(() => {
     if (!brief && props.cid) {
-      fetch(process.env.BACKEND_PREFIX + `/api/brief/${props.cid}`).then(
-        (res) => {
-          if (res.ok) {
-            res.json().then((brief: ChartBrief) => setBrief(brief));
-          }
-        },
-        () => undefined
-      );
+      fetchBrief(props.cid, {
+        onResult: (brief) => setBrief(brief),
+      });
     }
   }, [brief, props.cid]);
 
@@ -181,8 +186,8 @@ export function DemoDetail(
           cid={props.cid ?? ""}
           brief={brief}
           href={`/share/${props.cid}`}
-          onClick={() => props.onClick(props.cid!, brief)}
-          onClickMobile={() => props.onClickMobile(props.cid!, brief)}
+          onClick={() => props.onClick(props.cid!)}
+          onClickMobile={() => props.onClickMobile(props.cid!)}
           badge
           big="v"
           noDefaultColor
@@ -202,8 +207,8 @@ export function DemoDetail(
           cid={props.cid ?? ""}
           brief={brief}
           href={`/share/${props.cid}`}
-          onClick={() => props.onClick(props.cid!, brief)}
-          onClickMobile={() => props.onClickMobile(props.cid!, brief)}
+          onClick={() => props.onClick(props.cid!)}
+          onClickMobile={() => props.onClickMobile(props.cid!)}
           badge
           big="h"
           noDefaultColor

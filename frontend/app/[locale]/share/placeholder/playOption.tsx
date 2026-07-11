@@ -9,6 +9,7 @@ import {
   serializeResultParams,
 } from "@falling-nikochan/chart";
 import {
+  bestKey,
   getBestScore,
   ResultData,
   toResultParams,
@@ -22,20 +23,19 @@ import Timer from "@icon-park/react/lib/icons/Timer";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { RecordHistogram } from "@/common/recordHistogram";
-import { isStandalone } from "@/common/pwaInstall";
+import { isInsideFrame, isStandalone } from "@/common/pwaInstall";
 import { useRouter } from "next/navigation";
 import { BadgeStatus, getBadge, LevelBadge } from "@/common/levelBadge";
 import { SlimeSVG } from "@/common/slime";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useShareLink } from "@/common/shareLinkAndImage";
-import { APIError } from "@/common/apiError";
-import { isInsideFrame } from "@/scale";
+import { formatError } from "@/common/fetch";
 
 interface Props {
   locale: string;
-  cid: string;
-  brief: ChartBrief;
-  record: RecordGetSummary[] | APIError | null;
+  cid?: string;
+  brief: (ChartBrief & { etag: string }) | null;
+  record: RecordGetSummary[] | Error | null;
 }
 export function PlayOption(props: Props) {
   const t = useTranslations("share");
@@ -43,11 +43,31 @@ export function PlayOption(props: Props) {
 
   const [status, setStatus] = useState<BadgeStatus[]>([]);
   useEffect(() => {
-    setStatus(
-      props.brief?.levels
-        // .filter((l) => !l.unlisted)
-        .map((l) => getBadge(getBestScore(props.cid, l.hash))) || []
-    );
+    if (props.cid) {
+      const update = () => {
+        setStatus(
+          props.brief?.levels
+            // .filter((l) => !l.unlisted)
+            .map((l) => getBadge(getBestScore(props.cid!, l.hash))) || []
+        );
+      };
+      const storageUpdate = (e: StorageEvent) => {
+        if (
+          props.brief?.levels.some((l) => e.key === bestKey(props.cid!, l.hash))
+        ) {
+          update();
+        }
+      };
+      update();
+      window.addEventListener("storage", storageUpdate);
+      window.addEventListener("visibilitychange", update); // 別タブからもどってきたとき
+      window.addEventListener("popstate", update); // router.push()からもどってきたとき
+      return () => {
+        window.removeEventListener("storage", storageUpdate);
+        window.removeEventListener("visibilitychange", update);
+        window.removeEventListener("popstate", update);
+      };
+    }
   }, [props.cid, props.brief]);
 
   // levelが存在しない時 -1
@@ -55,12 +75,12 @@ export function PlayOption(props: Props) {
     // props.brief.levels.findIndex((l) => !l.unlisted),
     null
   );
-  const levelsNum = props.brief.levels.filter((l) => !l.unlisted).length;
+  const levelsNum = props.brief?.levels.filter((l) => !l.unlisted).length;
   useEffect(() => {
     if (selectedLevel === null && levelsNum === 1) {
-      setSelectedLevel(props.brief.levels.findIndex((l) => !l.unlisted));
+      setSelectedLevel(props.brief!.levels.findIndex((l) => !l.unlisted));
     }
-  }, [props.brief.levels, selectedLevel, levelsNum]);
+  }, [props.brief, selectedLevel, levelsNum]);
 
   return (
     <div
@@ -78,7 +98,7 @@ export function PlayOption(props: Props) {
           {t("selectLevel")}:
         </p>
         <ul className="min-w-0 max-w-full grow-0 shrink ml-2 self-center">
-          {props.brief.levels.map(
+          {props.brief?.levels.map(
             (level, i) =>
               level.unlisted || (
                 <li
@@ -113,7 +133,7 @@ export function PlayOption(props: Props) {
               )
           )}
         </ul>
-        {levelsNum === 0 && <p>{t("unavailable")}</p>}
+        {props.brief && levelsNum === 0 && <p>{t("unavailable")}</p>}
         <div
           className={clsx(
             "flex-none flex flex-col max-w-full",
@@ -134,7 +154,10 @@ export function PlayOption(props: Props) {
                 : "scale-0 px-0! py-0!"
             )}
           >
-            {selectedLevel !== null && selectedLevel >= 0 ? (
+            {props.cid &&
+            props.brief &&
+            selectedLevel !== null &&
+            selectedLevel >= 0 ? (
               <SelectedLevelInfo
                 cid={props.cid}
                 brief={props.brief}
@@ -144,31 +167,37 @@ export function PlayOption(props: Props) {
               />
             ) : null}
           </div>
-          <span style={{ flexGrow: levelsNum - (selectedLevel || 0) - 1 }} />
+          <span
+            style={{ flexGrow: (levelsNum ?? 0) - (selectedLevel || 0) - 1 }}
+          />
         </div>
       </div>
-      {selectedLevel !== null && selectedLevel >= 0 && (
-        <p className="mt-3 text-center ">
-          <Button
-            text={t("start")}
-            onClick={() => {
-              // 押したときにも再度sessionを初期化
-              const sessionId = initSession({
-                cid: props.cid,
-                lvIndex: selectedLevel,
-                brief: props.brief,
-              });
-              if (isStandalone() || isInsideFrame()) {
-                router.push(`/${props.locale}/play?sid=${sessionId}`);
-              } else {
-                window
-                  .open(`/${props.locale}/play?sid=${sessionId}`, "_blank")
-                  ?.focus();
-              }
-            }}
-          />
-        </p>
-      )}
+      {props.cid &&
+        props.brief &&
+        selectedLevel !== null &&
+        selectedLevel >= 0 && (
+          <p className="mt-3 text-center ">
+            <Button
+              text={t("start")}
+              onClick={() => {
+                // 押したときにも再度sessionを初期化
+                const sessionId = initSession({
+                  cid: props.cid!,
+                  lvIndex: selectedLevel,
+                  brief: props.brief!,
+                  editing: false as const,
+                });
+                if (isStandalone() || isInsideFrame()) {
+                  router.push(`/${props.locale}/play?sid=${sessionId}`);
+                } else {
+                  window
+                    .open(`/${props.locale}/play?sid=${sessionId}`, "_blank")
+                    ?.focus();
+                }
+              }}
+            />
+          </p>
+        )}
     </div>
   );
 }
@@ -215,7 +244,7 @@ function LevelButton(props: {
 function SelectedLevelInfo(props: {
   cid: string;
   brief: ChartBrief;
-  record: RecordGetSummary[] | APIError | null;
+  record: RecordGetSummary[] | Error | null;
   selectedLevel: number;
   locale: string;
 }) {
@@ -223,10 +252,10 @@ function SelectedLevelInfo(props: {
   const te = useTranslations("error");
   const [showBestDetail, setShowBestDetail] = useState(false);
 
-  const selectedRecord: RecordGetSummary | APIError | undefined =
+  const selectedRecord: RecordGetSummary | Error | undefined =
     props.selectedLevel === null
       ? undefined
-      : props.record instanceof APIError
+      : props.record instanceof Error
         ? props.record
         : props.record?.find(
             (r) => r.lvHash === props.brief.levels[props.selectedLevel]?.hash
@@ -237,21 +266,39 @@ function SelectedLevelInfo(props: {
   );
   const [serializedParam, setSerializedParam] = useState<string[]>([]);
   useEffect(() => {
-    const bestScoreState: (ResultData | null)[] = [];
-    const serializedParam: string[] = [];
-    for (let i = 0; i < props.brief.levels.length; i++) {
-      const bestScore = getBestScore(props.cid, props.brief.levels[i].hash);
-      bestScoreState.push(bestScore);
-      serializedParam.push(
-        bestScore
-          ? serializeResultParams(
-              toResultParams(bestScore, props.brief.levels[i])
-            )
-          : ""
-      );
-    }
-    setBestScoreState(bestScoreState);
-    setSerializedParam(serializedParam);
+    const update = () => {
+      const bestScoreState: (ResultData | null)[] = [];
+      const serializedParam: string[] = [];
+      for (let i = 0; i < props.brief.levels.length; i++) {
+        const bestScore = getBestScore(props.cid, props.brief.levels[i].hash);
+        bestScoreState.push(bestScore);
+        serializedParam.push(
+          bestScore
+            ? serializeResultParams(
+                toResultParams(bestScore, props.brief.levels[i])
+              )
+            : ""
+        );
+      }
+      setBestScoreState(bestScoreState);
+      setSerializedParam(serializedParam);
+    };
+    const storageUpdate = (e: StorageEvent) => {
+      if (
+        props.brief?.levels.some((l) => e.key === bestKey(props.cid, l.hash))
+      ) {
+        update();
+      }
+    };
+    update();
+    window.addEventListener("storage", storageUpdate);
+    window.addEventListener("visibilitychange", update); // 別タブからもどってきたとき
+    window.addEventListener("popstate", update); // router.push()からもどってきたとき
+    return () => {
+      window.removeEventListener("storage", storageUpdate);
+      window.removeEventListener("visibilitychange", update);
+      window.removeEventListener("popstate", update);
+    };
   }, [props.cid, props.brief]);
 
   const selectedBestScore = bestScoreState.at(props.selectedLevel);
@@ -322,25 +369,24 @@ function SelectedLevelInfo(props: {
       <p className="mt-2 min-w-65 ">
         {/* histogramの幅 w-5 x13 */}
         {t("otherPlayers")}
-        {selectedRecord !== undefined &&
-          !(selectedRecord instanceof APIError) && (
-            <span className="ml-2 text-sm">({selectedRecord.count || 0})</span>
-          )}
+        {selectedRecord !== undefined && !(selectedRecord instanceof Error) && (
+          <span className="ml-2 text-sm">({selectedRecord.count || 0})</span>
+        )}
       </p>
       <span className={clsx(props.record === null ? "block" : "hidden")}>
         <SlimeSVG />
         Loading...
       </span>
       {selectedRecord !== undefined &&
-        !(selectedRecord instanceof APIError) &&
+        !(selectedRecord instanceof Error) &&
         selectedRecord.count >= 5 && (
           <RecordHistogram
             histogram={selectedRecord.histogram}
             bestScoreTotal={selectedBestScore ? totalScore : null}
           />
         )}
-      {selectedRecord instanceof APIError && (
-        <p className="text-dim">{selectedRecord.format(te)}</p>
+      {selectedRecord instanceof Error && (
+        <p className="text-dim">{formatError(selectedRecord, te)}</p>
       )}
       <button
         className={clsx(

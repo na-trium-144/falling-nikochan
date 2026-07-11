@@ -28,6 +28,7 @@ import VolumeNotice from "@icon-park/react/lib/icons/VolumeNotice";
 import Range from "@/common/range";
 import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
 import { ButtonHighlight } from "@/common/button";
+import MathInput from "@/common/mathInput";
 
 interface Props {
   chart?: ChartEditing;
@@ -69,7 +70,7 @@ export default function TimingTab(props: Props) {
       <div className="mb-3">
         <span>{t("offset")}</span>
         <HelpIcon>{t.rich("offsetHelp", { br: () => <br /> })}</HelpIcon>
-        <Input
+        <MathInput
           className="w-16"
           actualValue={
             chart?.offset !== undefined ? chart.offset.toString() : ""
@@ -82,7 +83,7 @@ export default function TimingTab(props: Props) {
       <div>
         <span>{t("ytBegin")}</span>
         <HelpIcon>{t.rich("ytBeginHelp", { br: () => <br /> })}</HelpIcon>
-        <Input
+        <MathInput
           className="w-16"
           actualValue={currentLevel?.meta.ytBegin.toString() || ""}
           updateValue={(v: string) =>
@@ -131,7 +132,7 @@ export default function TimingTab(props: Props) {
         >
           {t("ytEndAt")}
         </CheckBox>
-        <Input
+        <MathInput
           className="w-16"
           actualValue={(
             Math.round((currentLevel?.meta.ytEndSec || 0) * 10) / 10
@@ -241,7 +242,7 @@ export default function TimingTab(props: Props) {
       <div className="ml-2">
         <span>{t("bpm")}</span>
         <HelpIcon>{t.rich("bpmHelp", { br: () => <br /> })}</HelpIcon>
-        <Input
+        <MathInput
           className="w-16 ml-1"
           actualValue={
             currentLevel?.bpmChangeHere
@@ -291,7 +292,7 @@ export default function TimingTab(props: Props) {
           >
             {t("changeHere")}
           </CheckBox>
-          <Input
+          <MathInput
             className="w-16 mx-1"
             actualValue={currentLevel?.currentBpm?.toString() || ""}
             updateValue={(v: string) => {
@@ -323,7 +324,7 @@ export default function TimingTab(props: Props) {
           <p className="mt-2">{t.rich("speedHelp2", { br: () => <br /> })}</p>
           <p className="mt-2">{t.rich("speedHelp3", { br: () => <br /> })}</p>
         </HelpIcon>
-        <Input
+        <MathInput
           className="w-16 ml-1"
           actualValue={
             currentLevel?.speedChangeHere
@@ -384,7 +385,7 @@ export default function TimingTab(props: Props) {
           >
             {t("interp")}
           </CheckBox>
-          <Input
+          <MathInput
             className="w-16 mx-1"
             actualValue={currentLevel?.currentSpeed?.toString() || ""}
             updateValue={(v: string) =>

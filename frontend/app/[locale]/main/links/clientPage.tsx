@@ -6,14 +6,36 @@ import Link from "next/link";
 import { MenuLangSwitcher } from "@/common/langSwitcher";
 import { MenuThemeSwitcher } from "@/common/theme";
 import { PWAInstallDesc } from "@/common/pwaInstall";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { lastVisitedOld } from "@/common/version";
+import {
+  APIDocsLink,
+  ContactFormLink,
+  DeferredEMail,
+  DevPageLink,
+  GitHubLink,
+  XLink,
+} from "@/clientPage";
 
 export default function LinksPage({ locale }: { locale: string }) {
   const t = useTranslations("main.links");
 
   const [isLastVisitedOld, setIsLastVisitedOld] = useState<boolean>(false);
   useEffect(() => setIsLastVisitedOld(lastVisitedOld()), []);
+
+  const clickCount = useRef<number>(0);
+  const prevClickCount = useRef<DOMHighResTimeStamp>(0);
+  const [showDev, setShowDev] = useState(false);
+  const clickCounter = () => {
+    if (performance.now() - prevClickCount.current > 1000) {
+      clickCount.current = 0;
+    }
+    prevClickCount.current = performance.now();
+    if (++clickCount.current >= 7) {
+      setShowDev(true);
+    }
+    console.log(clickCount.current);
+  };
 
   return (
     <IndexMain
@@ -32,8 +54,25 @@ export default function LinksPage({ locale }: { locale: string }) {
         </div>
       </section>
       <section className="fn-sect">
+        <h3 className="fn-heading-sect">{t("contactLinks")}</h3>
+        <ul className="list-disc ml-6 space-y-1 text-left">
+          <li>
+            <ContactFormLink />
+          </li>
+          <li>
+            <XLink />
+          </li>
+          <li>
+            <GitHubLink />
+          </li>
+          <li>
+            <DeferredEMail />
+          </li>
+        </ul>
+      </section>
+      <section className="fn-sect" onClick={clickCounter}>
         <h3 className="fn-heading-sect">{t("about")}</h3>
-        <div className="space-y-1">
+        <div className="space-y-1 mb-2">
           <p className="text-left">
             <span>{t("version")}:</span>
             <span className="inline-block">
@@ -61,6 +100,16 @@ export default function LinksPage({ locale }: { locale: string }) {
             })}
           </p>
         </div>
+        {showDev && (
+          <ul className="list-disc ml-6 space-y-1 text-left">
+            <li>
+              <APIDocsLink />
+            </li>
+            <li>
+              <DevPageLink locale={locale} />
+            </li>
+          </ul>
+        )}
       </section>
     </IndexMain>
   );

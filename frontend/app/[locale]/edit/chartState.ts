@@ -22,20 +22,22 @@ import {
   convertToLatest,
   updateBpmTimeSec,
   updateBarNum,
+  ChartSchema15,
 } from "@falling-nikochan/chart";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as msgpack from "@msgpack/msgpack";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { APIError } from "@/common/apiError";
 import saveAs from "file-saver";
-import YAML from "yaml";
 import { luaExec } from "@falling-nikochan/chart/dist/luaExec";
-import { isStandalone } from "@/common/pwaInstall";
+import { isInsideFrame, isStandalone } from "@/common/pwaInstall";
 import * as v from "valibot";
 import fnCommandsLib from "fn-commands?raw";
 import fnCommandsPackageJson from "fn-commands/package.json";
-import { isInsideFrame } from "@/scale";
+import { captureAndWrap, fetchBackend } from "@/common/fetch";
+import { markAsExpected } from "@/common/apiError";
+import { removeRecent } from "@/common/recent";
+import type Ace from "ace-builds";
 
 interface Props {
   onLoad: (cid: string) => void;
@@ -55,7 +57,7 @@ export type ChartAndState =
         | "passwdFailedSilent"
         | "passwdFailed"
         | "rateLimited"
-        | APIError;
+        | Error;
     };
 export type LoadState = ChartAndState["state"];
 export class LocalLoadError {
@@ -65,22 +67,65 @@ export class LocalLoadError {
   }
 }
 export type LocalLoadState = undefined | "loading" | "ok" | LocalLoadError;
-export type SaveState = undefined | "saving" | "ok" | APIError;
-interface EditSession {
-  cid: string | undefined;
-  currentPasswd: CurrentPasswd;
-  chart: ChartEdit;
-  convertedFrom: number;
-  currentLevelIndex: number | undefined;
-  hasChange: boolean;
-  savePasswd: boolean;
-}
+export type SaveState = undefined | "saving" | "ok" | Error;
+const EditSessionSchema = () =>
+  v.object({
+    cid: v.optional(v.string()),
+    currentPasswd: v.object({
+      ph: v.nullable(v.string()),
+      pbypass: v.nullable(v.string()),
+    }),
+    chart: ChartSchema15(),
+    convertedFrom: v.number(),
+    currentLevelIndex: v.optional(v.number()),
+    hasChange: v.boolean(),
+    savePasswd: v.boolean(),
+    undoManager: v.optional(v.array(v.unknown())),
+  });
+type EditSession = v.InferOutput<ReturnType<typeof EditSessionSchema>>;
 export interface FetchChartOptions {
   isFirst?: boolean;
   bypass?: boolean;
   editPasswd: string;
   savePasswd: boolean;
 }
+
+async function compressBodyIfSupported(body: Uint8Array<ArrayBuffer>) {
+  if ("CompressionStream" in window) {
+    return {
+      body: await new Response(
+        new Blob([body])
+          .stream()
+          .pipeThrough(new window.CompressionStream("gzip"))
+      ).blob(),
+      encoding: "gzip",
+    };
+  } else {
+    return { body, encoding: undefined };
+  }
+}
+const encodeBase64Utf8 = (value: string) => {
+  return btoa(
+    Array.from(new TextEncoder().encode(value), (byte) =>
+      String.fromCodePoint(byte)
+    ).join("")
+  );
+};
+const basicAuthorization = (passwd: string) =>
+  `Nikochan-Basic ${encodeBase64Utf8(passwd)}`;
+const chartAuthorization = (currentPasswd: CurrentPasswd) => {
+  if (currentPasswd.pbypass) {
+    return `Nikochan-Bypass ${currentPasswd.pbypass}`;
+  }
+  if (currentPasswd.ph) {
+    return `Nikochan-Hash ${currentPasswd.ph}`;
+  }
+  return undefined;
+};
+const credentials =
+  process.env.NODE_ENV === "development" ? "include" : "same-origin";
+const xCredentialsHeader: Record<string, string> =
+  process.env.NODE_ENV === "development" ? { "X-Credentials": "include" } : {};
 
 export function useChartState(props: Props) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -99,6 +144,8 @@ export function useChartState(props: Props) {
     }
   }, [chartState, rerender]);
 
+  const aceSessionRef = useRef<(Ace.EditSession | null)[]>([]);
+
   const t = useTranslations("edit");
   const router = useRouter();
 
@@ -116,100 +163,90 @@ export function useChartState(props: Props) {
       setChartState({ state: "loading" });
       setSavePasswd(options.savePasswd);
 
-      const currentPasswd: CurrentPasswd = {
-        p: options.editPasswd,
+      const initialPasswd: CurrentPasswd = {
         ph: getPasswd(cid),
         pbypass: options.bypass ? "1" : null,
       };
-      const q = new URLSearchParams(
-        Object.entries(currentPasswd).filter(([, v]) => v)
-      );
-      let res: Response | null = null;
-      try {
-        for (let retry = 0; ; retry++) {
-          res = await fetch(
-            process.env.BACKEND_PREFIX +
-              `/api/chartFile/${cid}?` +
-              q.toString(),
-            {
-              cache: "no-store",
-              credentials:
-                process.env.NODE_ENV === "development"
-                  ? "include"
-                  : "same-origin",
-            }
-          );
-          if (res.ok) {
-            try {
-              const chartRes = msgpack.decode(
-                await res.arrayBuffer()
-              ) as ChartUntil14;
-              if (options.savePasswd) {
-                if (options.editPasswd) {
-                  try {
-                    const res = await fetch(
-                      process.env.BACKEND_PREFIX +
-                        `/api/hashPasswd/${cid}?p=${options.editPasswd}`,
-                      {
-                        credentials:
-                          process.env.NODE_ENV === "development"
-                            ? "include"
-                            : "same-origin",
-                      }
-                    );
-                    const ph = await res.text();
-                    setPasswd(cid, ph);
-                    currentPasswd.ph = ph;
-                  } catch {
-                    //ignore
-                  }
+      const result = await fetchBackend()
+        .url(`/api/chartFile/${cid}`)
+        .options({
+          cache: "no-store",
+          credentials,
+        })
+        .headers(xCredentialsHeader)
+        .auth(
+          options.editPasswd
+            ? basicAuthorization(options.editPasswd)
+            : (chartAuthorization(initialPasswd) ?? "")
+        )
+        .get()
+        // passwdPrompt has unique handler for 401 and 429 messages
+        .unauthorized(
+          () =>
+            ({
+              state: options.isFirst ? "passwdFailedSilent" : "passwdFailed",
+            }) as const
+        )
+        .error(429, () => ({ state: "rateLimited" }) as const)
+        .badRequest(markAsExpected)
+        .notFound(markAsExpected)
+        .arrayBuffer(async (buf) => {
+          const chartRes = msgpack.decode(buf) as ChartUntil14;
+          let updatedPh: string | undefined = undefined;
+          if (options.editPasswd) {
+            updatedPh = await fetchBackend()
+              .url(`/api/hashPasswd/${cid}`)
+              .options({ credentials })
+              .headers(xCredentialsHeader)
+              .auth(basicAuthorization(options.editPasswd))
+              .get()
+              .badRequest((e) => {
+                if (e.message === "noPasswd") {
+                  // 譜面データにパスワードが設定されていない場合
+                  return undefined;
+                } else {
+                  throw e;
                 }
-              } else {
-                // unsetPasswd(cid);
-              }
-              setChartState({
-                chart: new ChartEditing(await validateChart(chartRes), {
-                  luaExecutorRef,
-                  locale,
-                  cid,
-                  currentPasswd,
-                  convertedFrom: chartRes.ver,
-                }),
-                state: "ok",
-              });
-              onLoadRef.current(cid);
-            } catch (e) {
-              console.error(e);
-              setChartState({ state: APIError.badResponse(e) });
+              })
+              .notFound(markAsExpected)
+              .text(); // エラーになったら続行できない。awaitで再送出
+            if (updatedPh && options.savePasswd) {
+              setPasswd(cid, updatedPh);
             }
           } else {
-            if (res.status === 401 || res.status === 400) {
-              if (options.isFirst) {
-                setChartState({ state: "passwdFailedSilent" });
-              } else {
-                setChartState({ state: "passwdFailed" });
-              }
-            } else if (res?.status === 429) {
-              if (retry < 3) {
-                await new Promise((r) =>
-                  setTimeout(
-                    r,
-                    Number(res?.headers.get("Retry-After")) * 1000 + 500
-                  )
-                );
-                continue;
-              }
-              setChartState({ state: "rateLimited" });
-            } else {
-              setChartState({ state: await APIError.fromRes(res) });
-            }
+            /* パスワード保存のチェックが外れたときに保存済みパスワードを消す処理だが、PR#973でコメントアウトされている。
+            issue#971:
+              ある譜面に「パスワードを保存する」のチェックを外してパスワードを入力すると、
+              すでにパスワードを保存済みの別の譜面を読み込んだ際に
+              「パスワードを保存する」がオフ かつ 保存済みパスワードを使って譜面をロードした 状態になり、バグる
+            (...つまりどういうこと?)
+            */
+            // unsetPasswd(cid);
           }
-          break;
-        }
-      } catch (e) {
-        console.error(e);
-        setChartState({ state: APIError.fetchError(e) });
+
+          // savePasswdがtrueでもfalseでもこのセッションではupdatePhを使う
+          const finalPasswd: CurrentPasswd = {
+            ...initialPasswd,
+            ...(updatedPh ? { ph: updatedPh } : {}),
+          };
+          const chart = new ChartEditing(await validateChart(chartRes), {
+            luaExecutorRef,
+            locale,
+            cid,
+            currentPasswd: finalPasswd,
+            convertedFrom: chartRes.ver,
+          });
+          return {
+            chart,
+            state: "ok" as const,
+          };
+        })
+        .catch((e: unknown) => ({ state: captureAndWrap(e, { cid }) }));
+
+      if (result.state === "ok") {
+        onLoadRef.current(cid);
       }
+      setChartState(result);
     },
     [locale]
   );
@@ -218,120 +255,86 @@ export function useChartState(props: Props) {
   const remoteSave = useCallback<() => Promise<void>>(async () => {
     if (chartState.state === "ok") {
       const onSave = async (cid: string) => {
-        const currentPasswd = chartState.chart.currentPasswd;
+        let currentPasswd = chartState.chart.currentPasswd;
         if (chartState.chart.changePasswd) {
-          currentPasswd.p = chartState.chart.changePasswd;
-        }
-        if (savePasswd) {
-          if (currentPasswd.p) {
-            fetch(
-              process.env.BACKEND_PREFIX +
-                `/api/hashPasswd/${cid}?p=${currentPasswd.p}`,
-              {
-                credentials:
-                  process.env.NODE_ENV === "development"
-                    ? "include"
-                    : "same-origin",
-              }
-            ).then(
-              async (res) => {
-                if (res.ok) {
-                  const ph = await res.text();
-                  setPasswd(cid, ph);
-                  currentPasswd.ph = ph;
-                }
-              },
-              () => undefined
-            );
+          const updatedPh = await fetchBackend()
+            .url(`/api/hashPasswd/${cid}`)
+            .options({ credentials })
+            .headers(xCredentialsHeader)
+            .auth(basicAuthorization(chartState.chart.changePasswd))
+            .get()
+            .notFound(markAsExpected)
+            .text();
+          if (savePasswd) {
+            setPasswd(cid, updatedPh);
           }
-        } else {
+          currentPasswd = {
+            ...currentPasswd,
+            ph: updatedPh,
+          };
+        }
+        if (!savePasswd) {
           unsetPasswd(cid);
         }
         chartState.chart.resetOnSave(cid, currentPasswd);
       };
 
       setSaveState("saving");
+      const { body: requestBody, encoding } = await compressBodyIfSupported(
+        msgpack.encode(chartState.chart.toObject())
+      );
+      const requestHeaders: Record<string, string> = {
+        "Content-Type": "application/vnd.msgpack",
+        ...(encoding ? { "Content-Encoding": encoding } : {}),
+      };
       if (chartState.chart.cid === undefined) {
-        try {
-          const res = await fetch(
-            process.env.BACKEND_PREFIX + `/api/newChartFile`,
-            {
-              method: "POST",
-              body: msgpack.encode(chartState.chart.toObject()),
-              cache: "no-store",
-              credentials:
-                process.env.NODE_ENV === "development"
-                  ? "include"
-                  : "same-origin",
-            }
-          );
-          if (res.ok) {
-            try {
-              const resBody = v.parse(
-                v.object({ cid: v.string() }),
-                await res.json()
-              );
-              onLoadRef.current(resBody.cid);
-              onSave(resBody.cid);
-              setSaveState("ok");
-              return;
-            } catch (e) {
-              setSaveState(APIError.badResponse(e));
-            }
-            return;
-          } else {
-            setSaveState(await APIError.fromRes(res));
-            return;
-          }
-        } catch (e) {
-          console.error(e);
-          setSaveState(APIError.fetchError(e));
-          return;
-        }
+        await fetchBackend()
+          .url(`/api/newChartFile`)
+          .headers(requestHeaders)
+          .body(requestBody)
+          .options({
+            cache: "no-store",
+            credentials,
+          })
+          .headers(xCredentialsHeader)
+          .post()
+          .notFound(markAsExpected)
+          .error(409, markAsExpected)
+          .error(413, markAsExpected)
+          .error(429, markAsExpected)
+          .json(async (res) => {
+            const resBody = v.parse(v.object({ cid: v.string() }), res);
+            onLoadRef.current(resBody.cid);
+            await onSave(resBody.cid);
+            return "ok" as const;
+          })
+          .catch((e: unknown) => captureAndWrap(e))
+          .then((result) => setSaveState(result));
       } else {
-        const q = new URLSearchParams(
-          Object.entries(chartState.chart.currentPasswd).filter(([, v]) => v)
-        );
-        try {
-          for (let retry = 0; ; retry++) {
-            const res = await fetch(
-              process.env.BACKEND_PREFIX +
-                `/api/chartFile/${chartState.chart.cid}?` +
-                q.toString(),
-              {
-                method: "POST",
-                body: msgpack.encode(chartState.chart.toObject()),
-                cache: "no-store",
-                credentials:
-                  process.env.NODE_ENV === "development"
-                    ? "include"
-                    : "same-origin",
-              }
-            );
-            if (res.ok) {
-              onSave(chartState.chart.cid);
-              setSaveState("ok");
-              return;
-            } else {
-              if (res.status === 429 && retry < 3) {
-                await new Promise((r) =>
-                  setTimeout(
-                    r,
-                    Number(res?.headers.get("Retry-After")) * 1000 + 500
-                  )
-                );
-                continue;
-              }
-              setSaveState(await APIError.fromRes(res));
-              return;
-            }
-            break;
-          }
-        } catch (e) {
-          console.error(e);
-          setSaveState(APIError.fetchError(e));
-          return;
-        }
+        await fetchBackend()
+          .url(`/api/chartFile/${chartState.chart.cid}`)
+          .headers(requestHeaders)
+          .body(requestBody)
+          .options({
+            cache: "no-store",
+            credentials,
+          })
+          .headers(xCredentialsHeader)
+          .auth(chartAuthorization(chartState.chart.currentPasswd) ?? "")
+          .post()
+          .unauthorized(markAsExpected)
+          .notFound(markAsExpected)
+          .error(409, markAsExpected)
+          .error(413, markAsExpected)
+          .error(429, markAsExpected)
+          .res(async () => {
+            await onSave(chartState.chart.cid!);
+            return "ok" as const;
+          })
+          .catch((e: unknown) =>
+            captureAndWrap(e, { cid: chartState.chart.cid })
+          )
+          .then((result) => setSaveState(result));
       }
     } else {
       throw new Error("chart is empty");
@@ -353,47 +356,27 @@ export function useChartState(props: Props) {
         }
       }
 
-      const q = new URLSearchParams(
-        Object.entries(chartState.chart.currentPasswd).filter(([, v]) => v)
-      );
-      try {
-        for (let retry = 0; ; retry++) {
-          const res = await fetch(
-            process.env.BACKEND_PREFIX +
-              `/api/chartFile/${chartState.chart.cid}?` +
-              q.toString(),
-            {
-              method: "DELETE",
-              cache: "no-store",
-              credentials:
-                process.env.NODE_ENV === "development"
-                  ? "include"
-                  : "same-origin",
-            }
-          );
-          if (res.ok) {
-            if (isStandalone() || isInsideFrame()) {
-              history.back();
-            } else {
-              window.close();
-            }
+      await fetchBackend()
+        .url(`/api/chartFile/${chartState.chart.cid}`)
+        .options({
+          cache: "no-store",
+          credentials,
+        })
+        .headers(xCredentialsHeader)
+        .auth(chartAuthorization(chartState.chart.currentPasswd) ?? "")
+        .delete()
+        .unauthorized(() => undefined)
+        .notFound(() => undefined)
+        .error(429, () => undefined)
+        .res(() => {
+          removeRecent("edit", chartState.chart.cid!);
+          if (isStandalone() || isInsideFrame()) {
+            history.back();
           } else {
-            if (res.status === 429 && retry < 3) {
-              await new Promise((r) =>
-                setTimeout(
-                  r,
-                  Number(res?.headers.get("Retry-After")) * 1000 + 500
-                )
-              );
-              continue;
-            }
+            window.close();
           }
-          break;
-        }
-      } catch (e) {
-        console.error(e);
-        Sentry.captureException(e);
-      }
+        });
+      // TODO: エラーの場合ユーザーにエラーメッセージを表示する?
     } else {
       throw new Error("chart is empty");
     }
@@ -501,6 +484,7 @@ export function useChartState(props: Props) {
         }
       };
       let result: Awaited<ReturnType<typeof validateAndExec>> | null = null;
+      const YAML = await import("yaml");
       try {
         result = await validateAndExec(
           YAML.parse(new TextDecoder().decode(buffer))
@@ -549,6 +533,7 @@ export function useChartState(props: Props) {
             } else if (e3 instanceof LocalLoadError) {
               setLocalLoadState(e3);
             } else {
+              // いずれにおいてもvalidation以前のエラー → たぶんnikochanのファイルではない
               setLocalLoadState(new LocalLoadError(""));
             }
             return;
@@ -557,21 +542,28 @@ export function useChartState(props: Props) {
       }
 
       if (confirm(t("meta.confirmLoad"))) {
-        setChartState({
-          chart: new ChartEditing(result.newChart, {
-            luaExecutorRef,
-            locale,
-            cid: chartState.state === "ok" ? chartState.chart.cid : undefined,
-            currentPasswd:
-              chartState.state === "ok"
-                ? chartState.chart.currentPasswd
-                : undefined,
-            convertedFrom: result.originalVer,
-          }),
-          state: "ok",
-        });
-        setLocalLoadState("ok");
-        return;
+        try {
+          setChartState({
+            chart: new ChartEditing(result.newChart, {
+              luaExecutorRef,
+              locale,
+              cid: chartState.state === "ok" ? chartState.chart.cid : undefined,
+              currentPasswd:
+                chartState.state === "ok"
+                  ? chartState.chart.currentPasswd
+                  : undefined,
+              convertedFrom: result.originalVer,
+            }),
+            state: "ok",
+          });
+          setLocalLoadState("ok");
+          return;
+        } catch (e) {
+          // ここでエラーが出るのはバグ、でも失敗したことは伝えなければならない
+          Sentry.captureException(e, { extra: { captured: "localLoadState" } });
+          setLocalLoadState(new LocalLoadError(String(e)));
+          return;
+        }
       }
       return setLocalLoadState(undefined);
     },
@@ -579,30 +571,41 @@ export function useChartState(props: Props) {
   );
 
   useEffect(() => {
-    if (chartState.state === undefined) {
+    if (chartState.state !== undefined) {
+      // setChartStateと同時に削除するとreactのstrict modeの2回実行によりset前に消えてしまう
+      sessionStorage.removeItem("editSession");
+    } else {
       const params = new URLSearchParams(window.location.search);
       const cid = params.get("cid");
       if (sessionStorage.getItem("editSession")) {
-        const data = JSON.parse(
-          sessionStorage.getItem("editSession")!
-        ) as EditSession;
-        sessionStorage.removeItem("editSession");
-        if (data.cid === cid || (data.cid === undefined && cid === "new")) {
-          setChartState({
-            chart: new ChartEditing(data.chart, {
-              luaExecutorRef,
-              cid: data.cid,
-              currentPasswd: data.currentPasswd,
-              convertedFrom: data.convertedFrom,
-              currentLevelIndex: data.currentLevelIndex,
-              hasChange: data.hasChange,
-              locale,
-            }),
-            state: "ok",
-          });
-          setSavePasswd(data.savePasswd);
-          // onLoadRef.current();
-          return;
+        try {
+          const data = v.parse(
+            EditSessionSchema(),
+            JSON.parse(sessionStorage.getItem("editSession")!)
+          );
+          if (data.cid === cid || (data.cid === undefined && cid === "new")) {
+            setChartState({
+              chart: new ChartEditing(data.chart, {
+                luaExecutorRef,
+                cid: data.cid,
+                currentPasswd: data.currentPasswd,
+                convertedFrom: data.convertedFrom,
+                currentLevelIndex: data.currentLevelIndex,
+                hasChange: data.hasChange,
+                locale,
+                undoManager: data.undoManager,
+              }),
+              state: "ok",
+            });
+            setSavePasswd(data.savePasswd);
+            // onLoadRef.current();
+            return;
+          }
+        } catch (e) {
+          console.error(
+            `Error parsing edit session from sessionStorage:`,
+            v.isValiError(e) ? v.flatten(e.issues) : e
+          );
         }
       }
 
@@ -641,6 +644,9 @@ export function useChartState(props: Props) {
           currentLevelIndex: chartState.chart.currentLevelIndex,
           hasChange: chartState.chart.hasChange,
           savePasswd: !!savePasswd,
+          undoManager: aceSessionRef.current.map((s) =>
+            s?.getUndoManager().toJSON()
+          ),
         } satisfies EditSession)
       );
     }
@@ -674,5 +680,6 @@ export function useChartState(props: Props) {
     localSave,
     localLoadState,
     localLoad,
+    aceSessionRef,
   };
 }

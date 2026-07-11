@@ -17,12 +17,39 @@ import { SharedResultBox } from "./sharedResult.js";
 import { useColorThief } from "@/common/colorThief.js";
 import { ExternalLink } from "@/common/extLink.jsx";
 import { ButtonHighlight } from "@/common/button.jsx";
-import { APIError } from "@/common/apiError.js";
+import {
+  captureAndWrap,
+  fetchBackend,
+  formatErrorMsg,
+} from "@/common/fetch.js";
+import * as v from "valibot";
+import {
+  APIError,
+  markAsExpected,
+  shouldHideStatus,
+} from "@/common/apiError.js";
+import {
+  briefIsStale,
+  briefStaleKey,
+  fetchBrief,
+} from "@/common/briefCache.js";
+import {
+  ClientErrorTitle,
+  ErrorMessage,
+  LinksOnError,
+} from "@/common/errorPageComponent.js";
+
+const YtMetaSchema = () =>
+  v.object({
+    title: v.string(),
+    channelTitle: v.string(),
+  });
+type YtMeta = v.InferOutput<ReturnType<typeof YtMetaSchema>>;
 
 interface Props {
   cid: string | undefined;
-  brief: ChartBrief | null;
-  record: RecordGetSummary[] | APIError | null;
+  brief: (ChartBrief & { etag: string }) | Error | null;
+  record: RecordGetSummary[] | Error | null;
   sharedResult?: ResultParams | null;
   locale: string;
   backButton?: () => void;
@@ -30,41 +57,118 @@ interface Props {
 }
 export function ShareBox(props: Props) {
   const t = useTranslations("share");
-  const { cid, brief, sharedResult, locale } = props;
+  const te = useTranslations("error");
+  const { cid, brief: propBrief, sharedResult, locale } = props;
+
+  const [refreshedBrief, setRefreshedBrief] = useState<
+    (ChartBrief & { etag: string }) | Error | null
+  >(null);
+  const brief = refreshedBrief ?? propBrief;
+  useEffect(() => {
+    const update = () => {
+      if (cid && briefIsStale(cid)) {
+        fetchBrief(cid, {
+          onResult: (brief) => {
+            setRefreshedBrief(brief);
+          },
+          onError: (e) => setRefreshedBrief(e),
+        });
+      } else {
+        setRefreshedBrief(null);
+      }
+    };
+    const storageUpdate = (e: StorageEvent) => {
+      if (cid && e.key === briefStaleKey(cid)) {
+        update();
+      }
+    };
+    update();
+    // TODO: ページ間でのlocalStorageの同期のために shareBox, theme, recentを読み込む2箇所, bestScoreを読み込む3箇所 で似たようなコードを書いているが、統一したい。
+    window.addEventListener("storage", storageUpdate);
+    window.addEventListener("visibilitychange", update); // 別タブからもどってきたとき
+    window.addEventListener("popstate", update); // router.push()からもどってきたとき
+    return () => {
+      window.removeEventListener("storage", storageUpdate);
+      window.removeEventListener("visibilitychange", update);
+      window.removeEventListener("popstate", update);
+    };
+  }, [cid]);
 
   const [updatedAt, setUpdatedAt] = useState<string>("");
 
   useEffect(() => {
-    if (brief) {
+    if (brief && !(brief instanceof Error)) {
       setUpdatedAt(new Date(brief.updatedAt).toLocaleDateString());
     }
   }, [brief]);
 
   const ytPlayer = useRef<YouTubePlayer>(undefined);
-  const shareLink = useShareLink(cid, brief, locale);
+  const shareLink = useShareLink(
+    cid,
+    brief instanceof Error ? undefined : brief,
+    locale
+  );
   const colorThief = useColorThief();
 
-  interface YtMeta {
-    title: string;
-    channelTitle: string;
-  }
   const [ytMeta, setYtMeta] = useState<YtMeta | null>(null);
   useEffect(() => {
     if (cid) {
-      fetch(
-        process.env.BACKEND_PREFIX + `/api/ytMeta/${cid}?lang=${locale}`
-      ).then(
-        async (res) => {
-          if (res.ok) {
-            setYtMeta(await res.json());
-          } else {
-            setYtMeta(null);
-          }
-        },
-        () => setYtMeta(null)
-      );
+      fetchBackend()
+        .url(`/api/ytMeta/${cid}`)
+        .query({ lang: locale })
+        .get()
+        .notFound((e) => markAsExpected(e))
+        .json((res) => setYtMeta(v.parse(YtMetaSchema(), res)))
+        .catch((e) => {
+          captureAndWrap(e, { cid });
+          setYtMeta(null);
+        });
+    } else {
+      setYtMeta(null);
     }
   }, [cid, locale]);
+
+  if (brief instanceof Error) {
+    return (
+      <div className="flex flex-col items-center text-center">
+        <div
+          className={clsx("mb-2 self-start", props.forceShowCId || "no-mobile")}
+        >
+          {props.backButton && (
+            <button
+              className={clsx("fn-icon-button", "mr-4")}
+              onClick={props.backButton}
+            >
+              <ButtonHighlight />
+              <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
+            </button>
+          )}
+          {cid && (
+            <>
+              <span>ID:</span>
+              <span className="ml-2 text-lg">{cid}</span>
+            </>
+          )}
+        </div>
+        {brief instanceof APIError ? (
+          <>
+            {!shouldHideStatus(brief.status) && (
+              <h4 className="fn-heading-box">Error {brief.status}</h4>
+            )}
+            <p className="mb-3">{formatErrorMsg(brief, te)}</p>
+          </>
+        ) : (
+          <>
+            <ClientErrorTitle />
+            <ErrorMessage error={brief} />
+          </>
+        )}
+        <LinksOnError
+          dependOnStatus={brief instanceof APIError ? brief.status : undefined}
+        />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -76,7 +180,7 @@ export function ShareBox(props: Props) {
       >
         <div
           className={clsx(
-            "w-full shrink-0 main-wide:basis-1/3 share-yt-wide:w-80",
+            "w-full shrink-0 main-wide:w-80",
             "p-2 rounded-sq-lg",
             ytMeta &&
               colorThief.ready &&
@@ -178,18 +282,21 @@ export function ShareBox(props: Props) {
               </div>
               <p
                 className={clsx(
-                  "font-title text-2xl font-semibold",
+                  "font-title text-2xl min-h-8 font-semibold",
                   "fg-bright"
                 )}
               >
                 {brief?.title}
               </p>
               <p
-                className={clsx("font-title text-lg font-medium", "fg-bright")}
+                className={clsx(
+                  "font-title text-lg min-h-7 font-medium",
+                  "fg-bright"
+                )}
               >
                 {brief?.composer}
               </p>
-              <p className="mt-1">
+              <p className="mt-1 min-h-7">
                 <span className="inline-block">
                   <span className="text-sm">
                     {brief && `${t("chartCreator")}:`}
@@ -233,28 +340,24 @@ export function ShareBox(props: Props) {
         </div>
       </div>
       {sharedResult && <SharedResultBox result={sharedResult} />}
-      {brief && (
-        <p className="mt-2">
-          <span className="no-mobile mr-2">{t("shareLink")}:</span>
-          <a
-            className={clsx("inline-block py-2", "fn-link-1")}
-            href={shareLink.path}
-            onClick={(e) => e.preventDefault()}
-          >
-            <span className="no-pc">{t("shareLink")}</span>
-            <span className="no-mobile">{shareLink.url}</span>
-          </a>
-          <span className="inline-block ml-2">{shareLink.buttons}</span>
-        </p>
-      )}
-      {cid && brief && (
-        <PlayOption
-          cid={cid}
-          brief={brief}
-          record={props.record}
-          locale={props.locale}
-        />
-      )}
+      <p className="mt-2">
+        <span className="no-mobile mr-2">{t("shareLink")}:</span>
+        <a
+          className={clsx("inline-block py-2", "fn-link-1")}
+          href={shareLink.path}
+          onClick={(e) => e.preventDefault()}
+        >
+          <span className="no-pc">{t("shareLink")}</span>
+          <span className="no-mobile">{shareLink.url}</span>
+        </a>
+        <span className="inline-block ml-2">{shareLink.buttons}</span>
+      </p>
+      <PlayOption
+        cid={cid}
+        brief={brief}
+        record={props.record}
+        locale={props.locale}
+      />
     </>
   );
 }

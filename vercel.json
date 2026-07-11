@@ -48,7 +48,7 @@
       "destination": "/api"
     },
     {
-      "source": "/(.*)/main/(latest|popular)",
+      "source": "/(.*)/main/(latest|popular|recent)",
       "destination": "/api"
     },
     {

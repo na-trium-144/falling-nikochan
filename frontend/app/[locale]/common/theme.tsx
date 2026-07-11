@@ -10,12 +10,18 @@ import {
   useState,
 } from "react";
 import { useTranslations } from "next-intl";
-import { themeColorDark, themeColorLight } from "@/metadata.js";
 import DropDown from "./dropdown";
 import { IrasutoyaLikeBg } from "./irasutoyaLike.jsx";
 import Moon from "@icon-park/react/lib/icons/Moon";
 import Sun from "@icon-park/react/lib/icons/Sun";
 import DownOne from "@icon-park/react/lib/icons/DownOne";
+import themeInitScript from "./themeInit.js?raw";
+
+declare global {
+  var fnGetCurrentTheme: () => "dark" | "light" | null;
+  var fnCurrentThemeIsDark: () => boolean;
+  var fnApplyTheme: () => void;
+}
 
 export interface ThemeState {
   theme: "dark" | "light" | null;
@@ -29,69 +35,32 @@ const ThemeContext = createContext<ThemeState>({
 });
 export const useTheme = () => useContext(ThemeContext);
 
-function getCurrentTheme(): "dark" | "light" | null {
-  const theme = localStorage?.getItem("theme");
-  return theme === "dark" || theme === "light" ? theme : null;
-}
-function currentThemeIsDark() {
-  switch (getCurrentTheme()) {
-    case "dark":
-      return true;
-    case "light":
-      return false;
-    default:
-      return (
-        window?.matchMedia("(prefers-color-scheme: dark)").matches || false
-      );
-  }
-}
-const applyTheme = () => {
-  if (typeof document !== "undefined") {
-    document.body.classList.add("fn-csr-ready");
-    if (currentThemeIsDark()) {
-      /* ダークテーマの時 */
-      document.body.classList.add("dark");
-    } else {
-      /* ライトテーマの時 */
-      document.body.classList.remove("dark");
-    }
-    const metaThemeColor = document.querySelectorAll("meta[name=theme-color]");
-    switch (getCurrentTheme()) {
-      case "dark":
-        metaThemeColor.forEach((e) => {
-          e.setAttribute("content", themeColorDark);
-        });
-        break;
-      case "light":
-        metaThemeColor.forEach((e) => {
-          e.setAttribute("content", themeColorLight);
-        });
-        break;
-      default:
-        metaThemeColor[0].setAttribute("content", themeColorLight);
-        metaThemeColor[1].setAttribute("content", themeColorDark);
-        break;
-    }
-  }
-};
-
 export function ThemeProvider(props: { children: ReactNode }) {
   const [theme, setTheme] = useState<"dark" | "light" | null>(null);
   const [isDark, setIsDark] = useState<boolean>(false);
   const updateTheme = useCallback(() => {
-    setTheme(getCurrentTheme());
-    const isDark = currentThemeIsDark();
+    setTheme(window.fnGetCurrentTheme());
+    const isDark = window.fnCurrentThemeIsDark();
     setIsDark(isDark);
-    applyTheme();
+    window.fnApplyTheme();
   }, []);
   useLayoutEffect(() => {
     updateTheme();
+    const storageUpdate = (e: StorageEvent) => {
+      if (e.key === "theme") {
+        updateTheme();
+      }
+    };
     const mql = window.matchMedia("(prefers-color-scheme: dark)");
     mql.addEventListener("change", updateTheme);
-    const i = setInterval(updateTheme, 1000);
+    window.addEventListener("storage", storageUpdate);
+    window.addEventListener("visibilitychange", updateTheme); // 別タブからもどってきたとき
+    window.addEventListener("popstate", updateTheme); // router.push()からもどってきたとき
     return () => {
       mql.removeEventListener("change", updateTheme);
-      clearInterval(i);
+      window.removeEventListener("storage", storageUpdate);
+      window.removeEventListener("visibilitychange", updateTheme);
+      window.removeEventListener("popstate", updateTheme);
     };
   }, [updateTheme]);
   return (
@@ -109,6 +78,12 @@ export function ThemeProvider(props: { children: ReactNode }) {
         },
       }}
     >
+      <script
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{
+          __html: themeInitScript.replace(/\s+/g, " "),
+        }}
+      />
       <div className="fn-fallback-bg" />
       <IrasutoyaLikeBg />
       {props.children}

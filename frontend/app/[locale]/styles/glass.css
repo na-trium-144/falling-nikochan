@@ -77,7 +77,8 @@
       @apply mask-linear-to-75%;
     }
 
-    &.fn-play-option {
+    &.fn-play-option,
+    &.fn-pre {
       @apply bg-sky-200/25 dark:bg-orange-950/25;
       @apply inset-shadow-button inset-shadow-sky-300/15 dark:inset-shadow-orange-975/15;
     }

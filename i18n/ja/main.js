@@ -70,10 +70,11 @@ export default {
       descriptionPublic:
         "譜面編集から「一般公開する」にチェックを入れると、数分後にここに反映されます。",
       search: "検索",
-      searchPlaceholder: "曲名や作曲者、譜面製作者など",
+      searchPlaceholder: "曲名や作曲者、または譜面IDで検索",
       searchTitle: "{search} の検索結果",
+      cidNotFound: "譜面ID {cid} は見つかりませんでした",
       sort: "表示順",
-      recent: "最近プレイした譜面",
+      recent: "プレイ履歴",
       relevance: "関連度順",
       latest: "更新日順",
       popular: "人気順",
@@ -146,6 +147,7 @@ export default {
       title: "その他",
       titleShort: "その他",
       description: "モバイル用その他ページ",
+      contactLinks: "お問い合わせリンク",
       about: "Falling Nikochan について",
       supportedBrowsers:
         "対応ブラウザは {browserslist} です。" +
@@ -164,13 +166,14 @@ export default {
       officialAccountShort: "公式アカウント",
       apiReference: "Falling Nikochan API リファレンス",
       apiReferenceShort: "API リファレンス",
+      devPage: "デバッグ用ページ",
       aboutUTCode: "ut.code(); について",
     },
     festival:
       "<utcode></utcode> 第{num}回{kind, select, mf {五月} kf {駒場} other {other}}祭トップに戻る",
   },
   dev: {
-    title: "デバッグ用",
+    title: "デバッグ用ページ",
     description: "デバッグ用の隠しページ",
     back: "戻る",
   },

@@ -3,7 +3,6 @@
   --breakpoint-main-wide: 48rem; /* タイトルと各タブの内容が別ページ */
   --breakpoint-share-wide2: 35rem; /* sharedResultのrankとjudgeを横並びにする */
   --breakpoint-edit-wide: 50rem; /* editのPC表示 */
-  --breakpoint-share-yt-wide: 60rem; /* shareでYouTubeを表示する場所が変わる */
   --color-orange-975: #20100a; /* この色ってどうやって作ったの? 記憶にない */
   --color-amber-975: #20180a;
   --color-sky-975: #091823;

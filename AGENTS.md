@@ -33,6 +33,11 @@ AIエージェントは以下の特殊な構成に注意してください。
 - 入力のバリデーションやOpenAPIドキュメントの入出力型定義には Valibot を使用しています。
 - バックエンドのエントリーポイントは、Node.js用の route/serve-local.ts 、Bun用の route/serve-bun-prod.ts 、Cloudflare Worker用の route/serve-cf.js 、Vercel用の api/index.js 、Service Workerで実行される worker/entry.ts (リダイレクトなど一部のロジックのみ) の5箇所あります。変更する際はこれらすべてを更新してください。
 - バックエンドが処理するパスを追加した場合には vercel.json のrewritesの更新も必要な場合があります。
+- 異常時のレスポンスはjsonで `{message: "事前に定義されたメッセージ"}` の形式でなければなりません。メッセージは `i18n/{ja,en}/error.js` 内の`api`に定義されているもの、または空でなければなりません。
+    - 想定外のエラーについてはthrowされたものをグローバルなエラーハンドラー(`src/error.ts`)がJSONに整形して返します。したがってそれぞれのAPIのハンドラーで想定外のエラーをcatchして500エラーレスポンスを返す必要はありません。
+    - ValiErrorや外部fetchのResponseをもとにthrowする場合の形式については`src/error.ts`の `onError` のコメントを参照してください。
+- /api 以下のAPIには既存のAPIと同様にOpenAPIのドキュメントを記述してください。異常時のレスポンスのスキーマは `await errorLiteral("メッセージ")` (またはvalibotのissueを含む場合 `await validationErrorSchema("メッセージ")`) で記述してください。
+- レスポンスが `Cache-Control: max-age=...` を返す場合は、Honoのcache middlewareを併用します。
 
 ### 3. Frontend Code
 - すべてのフロントエンドのソースコードは frontend/app/[locale]/ ディレクトリ内にあります。 ja, en ディレクトリではなく文字通り [locale] という名前のディレクトリです(dynamic route)。
@@ -40,6 +45,7 @@ AIエージェントは以下の特殊な構成に注意してください。
 - `@/...` のパスは `app/[locale]/` ディレクトリを基準としたパスに解決します。
 - アイコンは icon-park ライブラリを使用しています。 `import アイコン名 from "@icon-park/react/lib/icons/アイコン名";` でインポートしてください。
 - CSSはTailwindCSSを使用しています。app/[locale]/globals.cssで独自のテーマ変数を定義しており、特にbreakpointは一般的なmdやlgを使わず独自のmain-wide:などを使用します。またstyles/utilities.cssに独自のユーティリティクラスが定義されています。同じスタイルの記述を複数書く場合はtailwind componentに抽出し、styles/以下のcssファイルに書きます(その場合独自のコンポーネントの名前はfn-で始めます)。
+- フロントエンドがHTTPリクエストを行う際は生の fetch API の代わりに `wretch` ライブラリを使用しています。ただし、`wretch()` を直接使用せず `@/common/fetch.ts` で定義されているラッパーメソッド `fetchBackend()` `fetchAsset()` を使用してください。使用方法はfetch.tsのコメントを参照してください。
 - これはパブリックなサイトであり、また meta referrer タグでreferrerをoriginのみに制限しているので、外部へのリンクに `rel="noreferrer"` をつける必要はありません。また現代のモダンなブラウザでは `noopener` も不要です。
 - shareページ(`/share/[cid]`)はNext.jsの標準的な開発環境（`pnpm run ndev`）では正しく動作しません。実際には [locale]/share/placeholder にあるダミーのページをエクスポートしたHTMLを本番環境のHonoバックエンドが書き換えることで動作しています。
 - playページでは、 FallingWindow コンポーネントで`rerenderIndex` というstateをrequestAnimationFrame内で更新することで毎フレームReactの再レンダリングを起こしています。

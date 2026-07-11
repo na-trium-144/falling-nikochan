@@ -2,10 +2,12 @@ import { locales } from "@falling-nikochan/i18n/dynamic.js";
 import { languageDetector as honoLanguageDetector } from "hono/language";
 import dotenv from "dotenv";
 import { dirname, join } from "node:path";
-import briefApp from "./api/brief.js";
-import { Context, ExecutionContext, Hono } from "hono";
-import { fetchError, onError } from "./error.js";
+import { Context } from "hono";
+import { fetchError } from "./error.js";
 import { env } from "hono/adapter";
+import { Db } from "mongodb";
+import type { ErrorEvent, EventHint } from "@sentry/hono/node";
+import type { BaseLogger } from "@hono/structured-logger";
 
 export interface Bindings {
   ASSETS?: { fetch: typeof fetch };
@@ -26,6 +28,8 @@ export interface Bindings {
   GEMINI_API_KEY?: string;
   DISCORD_WEBHOOK_ID?: string;
   DISCORD_WEBHOOK_TOKEN?: string;
+  DISCORD_ANNOUNCE_WEBHOOK_ID?: string;
+  DISCORD_ANNOUNCE_WEBHOOK_TOKEN?: string;
   IS_SERVICE_WORKER?: string;
 }
 
@@ -39,19 +43,22 @@ export function secretSalt(e: Bindings) {
   }
 }
 
-export function cacheControl(e: Bindings, age: number | null) {
-  if (age) {
-    if (e.API_CACHE_EDGE) {
-      return `max-age=${age}, s-maxage=${age}`;
-    } else {
-      return `max-age=${age}`;
-    }
+export function cacheControl(e: Bindings, age: number, private_?: boolean) {
+  if (private_) {
+    return `private, max-age=${age}, must-revalidate`;
+  } else if (e.API_CACHE_EDGE) {
+    return `max-age=${age}, s-maxage=${age}, must-revalidate`;
   } else {
-    return "no-store";
+    return `max-age=${age}, must-revalidate`;
   }
 }
 
-export function backendOrigin(c: Context<{ Bindings: Bindings }>): string {
+export function backendOrigin(
+  c:
+    | Context<{ Bindings: Bindings }>
+    | Context<{ Bindings: Bindings; Variables: { logger: BaseLogger } }>
+    | Context<{ Bindings: Bindings; Variables: { db: () => Promise<Db> } }>
+): string {
   if (env(c).BACKEND_PREFIX) {
     return env(c).BACKEND_PREFIX!;
   } else {
@@ -62,18 +69,14 @@ export function backendOrigin(c: Context<{ Bindings: Bindings }>): string {
     return url.origin;
   }
 }
-export const fetchBrief =
-  (config: {
-    fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
-  }) =>
-  (e: Bindings, cid: string, ctx: ExecutionContext | undefined) => {
-    return new Hono<{ Bindings: Bindings }>({ strict: false })
-      .route("/api/brief", briefApp)
-      .onError(onError({ fetchStatic: config.fetchStatic }))
-      .request(`/api/brief/${cid}`, undefined, e, ctx);
-  };
-export function fetchStatic(e: Bindings, url: URL) {
-  return fetch(new URL(url.pathname, e.ASSET_PREFIX || url.origin), {
+
+export type ResponseOK = Response & { ok: true };
+/**
+ * URLをfetch()してリソースを取得。OKの場合のみreturnする。
+ * ネットワークエラー時HTTPException(502), エラーレスポンス時Responseを含むErrorをthrowする
+ */
+export async function fetchStatic(e: Bindings, url: URL): Promise<ResponseOK> {
+  const res = await fetch(new URL(url.pathname, e.ASSET_PREFIX || url.origin), {
     headers: {
       // https://vercel.com/docs/security/deployment-protection/methods-to-bypass-deployment-protection/protection-bypass-automation
       // same as VERCEL_AUTOMATION_BYPASS_SECRET but manually set for preview env only
@@ -84,6 +87,11 @@ export function fetchStatic(e: Bindings, url: URL) {
         : {}),
     },
   }).catch(fetchError(e));
+  if (res.ok) {
+    return res as ResponseOK;
+  } else {
+    throw new Error(`failed to fetch ${url} (${res.status})`, { cause: res });
+  }
 }
 
 export function languageDetector() {
@@ -104,4 +112,17 @@ export function languageDetector() {
     },
     // debug: process.env.API_ENV === "development",
   });
+}
+
+export function sentryBeforeSend(
+  event: ErrorEvent,
+  hint: EventHint
+): ErrorEvent | null {
+  if (
+    hint.originalException instanceof Error &&
+    hint.originalException.name === "MongoServerError"
+  ) {
+    event.fingerprint = ["MongoServerError"];
+  }
+  return event;
 }

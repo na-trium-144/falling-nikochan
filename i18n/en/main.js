@@ -76,10 +76,11 @@ export default {
       descriptionPublic:
         "Check 'Publish this chart' in chart editor to reflect here after a few minutes.",
       search: "Search",
-      searchPlaceholder: "Song title, composer, chart creator, etc.",
+      searchPlaceholder: "Song title, composer, etc. or chart ID",
       searchTitle: "Search results for {search}",
+      cidNotFound: "The chart ID {cid} was not found.",
       sort: "Sort by",
-      recent: "Recently Played Charts",
+      recent: "Play history",
       relevance: "Relevance",
       latest: "Latest",
       popular: "Popular",
@@ -155,6 +156,7 @@ export default {
       title: "Other",
       titleShort: "Other",
       description: "'Other' page for mobile UI",
+      contactLinks: "Contact Links",
       about: "About Falling Nikochan",
       supportedBrowsers:
         "Supported browsers are {browserslist}. " +
@@ -174,6 +176,7 @@ export default {
       officialAccountShort: "Official Account",
       apiReference: "Falling Nikochan API Reference",
       apiReferenceShort: "API Reference",
+      devPage: "Debugging Page",
       aboutUTCode: "About ut.code();",
     },
     // previously used in a school festival in the university of tokyo
@@ -182,7 +185,7 @@ export default {
       "{kind, select, mf {May} kf {Komaba} other {other}} Festival website",
   },
   dev: {
-    title: "Debugging Tools",
+    title: "Debugging Page",
     description: "Hidden page for debugging purposes",
     back: "Back",
   },

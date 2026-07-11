@@ -20,6 +20,7 @@ import { useOSDetector } from "./pwaInstall";
 import Pic from "@icon-park/react/lib/icons/Pic";
 import Select from "./select";
 import { XLogo } from "./x";
+import { fetchBackend } from "./fetch";
 
 export function useShareLink(
   cid: string | undefined,
@@ -74,7 +75,9 @@ export function useShareLink(
       // og画像の生成は時間がかかるので、
       // 共有される前にogを1回fetchしておくことにより、
       // cloudflareにキャッシュさせる
-      void fetch(process.env.BACKEND_PREFIX + ogPath).catch(() => undefined);
+      fetchBackend()
+        .get(ogPath)
+        .res(() => undefined);
       if (withTitle) {
         navigator.clipboard.writeText(
           newTitle +
@@ -92,7 +95,9 @@ export function useShareLink(
   );
   const [shareData, setShareData] = useState<object | null>(null);
   const toAPI = useCallback(() => {
-    void fetch(process.env.BACKEND_PREFIX + ogPath).catch(() => undefined);
+    fetchBackend()
+      .get(ogPath)
+      .res(() => undefined);
     navigator.share(shareData!);
   }, [shareData, ogPath]);
   useEffect(() => {
@@ -221,10 +226,10 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
   const [imageBlob, setImageBlob] = useState<Blob>();
   useEffect(() => {
     if (modalOpened) {
-      fetch(process.env.BACKEND_PREFIX + ogPath).then(
-        (r) => r.blob().then((b) => setImageBlob(b)),
-        () => undefined
-      );
+      fetchBackend()
+        .get(ogPath)
+        .blob((b) => setImageBlob(b));
+      // TODO: エラーの場合imageBlobがundefinedのままになっている。エラーであることをユーザーに表示するべき
     }
   }, [ogPath, modalOpened]);
 

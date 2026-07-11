@@ -6,6 +6,7 @@ import {
   ChartBrief,
   deserializeResultParams,
   RecordGetSummary,
+  RecordGetSummarySchema,
   ResultParams,
 } from "@falling-nikochan/chart";
 import { useEffect, useState } from "react";
@@ -16,9 +17,11 @@ import { Box } from "@/common/box.js";
 import { RedirectedWarning } from "@/common/redirectedWarning.js";
 import { TitleAsLink } from "@/common/titleLogo.jsx";
 import { MobileFooter } from "@/common/footer.jsx";
-import { APIError } from "@/common/apiError.js";
 import { PCHeader2 } from "@/common/header.js";
 import { Features, PoliciesAndLinks } from "@/clientPage.js";
+import { captureAndWrap, fetchBackend } from "@/common/fetch.js";
+import * as v from "valibot";
+import { etagContentRegex } from "@/common/briefCache.js";
 
 const dummyBrief = {
   title: "placeholder",
@@ -51,10 +54,10 @@ export default function ShareChart(props: Props) {
   const { locale } = props;
   const [cid, setCId] = useState<string>("");
   // const { res, brief } = await getBrief(cid, true);
-  const [brief, setBrief] = useState<ChartBrief | null>(null);
-  const [record, setRecord] = useState<RecordGetSummary[] | APIError | null>(
+  const [brief, setBrief] = useState<(ChartBrief & { etag: string }) | null>(
     null
   );
+  const [record, setRecord] = useState<RecordGetSummary[] | Error | null>(null);
   const [sharedResult, setSharedResult] = useState<ResultParams | null>(null);
 
   useEffect(() => {
@@ -62,16 +65,23 @@ export default function ShareChart(props: Props) {
     setCId(cid);
     const searchParams = new URLSearchParams(window.location.search);
     let brief: ChartBrief;
+    let etag: string;
     if (process.env.NODE_ENV === "development") {
       brief = dummyBrief;
+      etag = "";
     } else {
       brief = JSON.parse(
         document
           .querySelector('meta[name="nikochanSharingBrief"]')!
           .getAttribute("content")!
       );
+      etag =
+        document
+          .querySelector('meta[name="nikochanSharingETag"]')!
+          .getAttribute("content")
+          ?.match(etagContentRegex)?.[0] ?? "";
     }
-    setBrief(brief);
+    setBrief({ ...brief, etag });
     document.title = titleShare(t, cid, brief);
     const titleUpdate = setInterval(() => {
       // Next.jsが元のタイトルに戻してしまう場合があるので、再度上書き
@@ -80,31 +90,18 @@ export default function ShareChart(props: Props) {
       }
     }, 100);
     setRecord(null);
-    (async () => {
-      try {
-        const res = await fetch(
-          process.env.BACKEND_PREFIX + `/api/record/${cid}`
-        );
-        if (res.ok) {
-          try {
-            setRecord(await res.json());
-          } catch (e) {
-            console.error(e);
-            setRecord(APIError.badResponse(e));
-          }
-        } else {
-          setRecord(await APIError.fromRes(res));
-        }
-      } catch (e) {
-        setRecord(APIError.fetchError(e));
-      }
-    })();
+    fetchBackend()
+      .get(`/api/record/${cid}`)
+      .json((record) => v.parse(v.array(RecordGetSummarySchema()), record))
+      .catch((e: unknown) => captureAndWrap(e, { cid }))
+      .then((record) => setRecord(record));
     if (searchParams.get("result")) {
       try {
         setSharedResult(deserializeResultParams(searchParams.get("result")!));
       } catch (e) {
         console.error(e);
         Sentry.captureException(e);
+        // TODO: show error message?
       }
     }
     return () => clearInterval(titleUpdate);

@@ -5,6 +5,11 @@ on:
       - staging
   pull_request:
     types: [opened, synchronize, labeled]
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        required: true
+        type: string
 
 concurrency:
   group: staging
@@ -17,17 +22,17 @@ jobs:
   sync-staging:
     runs-on: ubuntu-latest
     if: >-
-      github.event_name == 'pull_request' &&
-      contains(github.event.pull_request.labels.*.name, 'staging')
+      (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'staging'))
+      || github.event_name == 'workflow_dispatch'
     permissions:
       contents: write
     steps:
-      - name: Checkout PR code
+      - name: Checkout code
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 0 # force pushするために履歴が必要
-
+          fetch-depth: 0
+          # workflow_dispatch の場合は指定コミット、それ以外はPRのHEAD
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.commit_sha || github.event.pull_request.head.sha }}
       - name: Force push to staging branch
         run: |
           git config user.name "github-actions[bot]"
@@ -55,14 +60,13 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: 24.x
           cache: "pnpm"
       - run: pnpm config set node-linker hoisted --local
       - name: Pull Vercel Environment Information
         run: pnpm dlx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: Build Project Artifacts
         env:
-          MONGODB_URI: ${{ secrets.PRODUCTION_MONGODB_URI }}
           ASSET_PREFIX: ${{ vars.STAGING_ASSET_PREFIX }}
           NO_PREFETCH: ${{ vars.STAGING_NO_PREFETCH }}
           VERSION_SUFFIX: +stg
@@ -97,7 +101,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: 24.x
           cache: "pnpm"
       - run: pnpm config set node-linker hoisted --local
       - run: pnpm install --frozen-lockfile

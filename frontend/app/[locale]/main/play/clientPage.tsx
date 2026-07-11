@@ -4,7 +4,7 @@ import clsx from "clsx/lite";
 import { IndexMain } from "../main.js";
 import { ChartList } from "../chartList.js";
 import { ExternalLink } from "@/common/extLink.js";
-import { maxLv, minLv, popularDays } from "@falling-nikochan/chart";
+import { CidSchema, maxLv, minLv, popularDays } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { ChartLineBrief } from "../chartList.js";
 import Input from "@/common/input.jsx";
@@ -16,17 +16,23 @@ import {
   Suspense,
   useMemo,
   useLayoutEffect,
+  useEffect,
 } from "react";
 import { titleWithSiteName } from "@/common/title.js";
 import { useSharePageModal } from "@/common/sharePageModal.jsx";
 import { useResizeDetector } from "react-resize-detector";
 import { useDisplayMode } from "@/scale.jsx";
 import { XLogo } from "@/common/x.jsx";
-import { APIError } from "@/common/apiError.js";
-import { useRouter, useSearchParams } from "next/navigation.js";
+import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation.js";
 import { ButtonHighlight } from "@/common/button.js";
 import { Range2 } from "@/common/range.js";
+import { getRecent, recentKey } from "@/common/recent.js";
 import Search from "@icon-park/react/lib/icons/Search";
+import { captureAndWrap, fetchBackend } from "@/common/fetch.js";
+import * as v from "valibot";
+
+// route/src/api/search.tsとあわせる
+const MAX_CIDS_COUNT = 100;
 
 interface Props {
   locale: string;
@@ -51,42 +57,91 @@ function PlayTabInternal(
   const t = useTranslations("main.play");
   const { locale } = props;
 
+  // 基本的には現在のlocationのクエリパラメーター(props.searchParamsで得られる)を真とするが、
+  // URLが/shareの場合のみそれを使用できないので、stateにもコピーを保存しておく
+  // /shareの間にfetchした検索結果を反映するため、shareから戻る瞬間にもこのstateを参照してhistoryを修正する
+  const [fallbackSearchParams, setFallbackSearchParams] =
+    useState<URLSearchParams>(new URLSearchParams());
+  let searchParams: ReadonlyURLSearchParams | URLSearchParams | undefined =
+    props.searchParams;
+  const prevPathName = useRef<string>("");
+  if (typeof window !== "undefined") {
+    if (window.location.pathname.includes("/share")) {
+      searchParams = fallbackSearchParams;
+    } else {
+      if (
+        window.location.search &&
+        window.location.search !== "?" + fallbackSearchParams?.toString()
+      ) {
+        if (prevPathName.current.includes("/share")) {
+          searchParams = fallbackSearchParams;
+          window.history.replaceState(
+            null,
+            "",
+            `?${fallbackSearchParams.toString()}`
+          );
+        } else {
+          setFallbackSearchParams(new URLSearchParams(window.location.search));
+        }
+      }
+    }
+    prevPathName.current = window.location.pathname;
+  }
+
   const { openModal, openShareInternal } = useSharePageModal();
 
   // ユーザーが文字を入力してから実際にAPIを呼び出すまでの間loading表示にする
   const [waitingDebounce, setWaitingDebounce] = useState(false);
 
-  const router = useRouter();
-
   interface PageParams {
     search: string;
-    sort: "relevance" | "latest" | "popular" | undefined;
+    sort: "relevance" | "latest" | "popular" | "recent" | undefined;
     minLv: number;
     maxLv: number;
   }
+  interface APIParams {
+    q: string;
+    sort?: "relevance" | "latest" | "popular";
+    c?: string[];
+    difficultyMin: string;
+    difficultyMax: string;
+  }
   const prevParam = useRef<PageParams>(null);
   const params = useMemo(() => {
-    // /share の間はsearchParamを無視する
-    if (prevParam.current && window.location.pathname.includes("/share")) {
-      return prevParam.current;
-    }
-    const params: PageParams = {
-      search: props.searchParams?.get("search") || "",
-      sort: props.searchParams
-        ? (props.searchParams.get("sort") as
+    if (!searchParams) {
+      // SSR時・初期化前
+      return {
+        search: "",
+        sort: undefined, // 最初はどれも選択していない状態でレンダリングする
+        minLv: minLv,
+        maxLv: maxLv,
+      };
+    } else {
+      const params: PageParams = {
+        search: searchParams.get("search") || "",
+        sort:
+          (searchParams.get("sort") as
             | "relevance"
             | "latest"
-            | "popular") || "relevance"
-        : undefined,
-      minLv: Number(props.searchParams?.get("minLv") ?? minLv),
-      maxLv: Number(props.searchParams?.get("maxLv") ?? maxLv),
-    };
-    if (params && !params.search && params.sort === "relevance") {
-      params.sort = "latest";
+            | "popular"
+            | "recent") || "relevance",
+        minLv: Number(searchParams.get("minLv") ?? minLv),
+        maxLv: Number(searchParams.get("maxLv") ?? maxLv),
+      };
+      if (params && !params.search && params.sort === "relevance") {
+        params.sort = "latest";
+      }
+      prevParam.current = params;
+      return params;
     }
-    prevParam.current = params;
-    return params;
-  }, [props.searchParams]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams?.toString()]);
+  const searchRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (window.location.hash === "#search") {
+      searchRef.current?.focus();
+    }
+  }, []);
   const updateParams = useCallback(
     (params: Partial<PageParams>) => {
       const newParams = new URLSearchParams(props.searchParams);
@@ -106,7 +161,10 @@ function PlayTabInternal(
       if (params.maxLv !== undefined) {
         newParams.set("maxLv", String(params.maxLv));
       }
-      router.replace(`?${newParams.toString()}`);
+      if (!window.location.pathname.includes("/share")) {
+        window.history.replaceState(null, "", `?${newParams.toString()}`);
+      }
+      setFallbackSearchParams(newParams);
       // useEffectでAPIを呼び出すときにwaitingDebounceをfalseにするが、
       // paramsに変化がなかったときなどuseEffectが呼び出されない可能性もあるので、
       // そのfallback
@@ -114,60 +172,108 @@ function PlayTabInternal(
         setWaitingDebounce(false);
       }, 250);
     },
-    [props.searchParams, router]
+    [props.searchParams]
   );
 
-  const abortSearching = useRef<AbortController | null>(null);
+  // [] = not found, empty = empty
   const [searchResult, setSearchResult] = useState<
-    ChartLineBrief[] | APIError | undefined
-  >();
+    ChartLineBrief[] | Error | "loading" | "empty"
+  >("loading");
 
   useLayoutEffect(() => {
     if (!params.sort) {
       return;
     }
-    if (abortSearching.current) {
-      abortSearching.current.abort();
-      abortSearching.current = null;
-    }
     setWaitingDebounce(false);
-    setSearchResult(undefined);
-    const apiParams = new URLSearchParams({
-      q: params.search,
-      sort: params.sort,
-      difficultyMin: String(params.minLv),
-      difficultyMax: String(params.maxLv),
-    });
-    if (!params.search) {
-      document.title = titleWithSiteName(t("title"));
-    } else {
-      document.title = titleWithSiteName(
-        t("searchTitle", { search: params.search })
-      );
-    }
-    abortSearching.current = new AbortController();
-    fetch(process.env.BACKEND_PREFIX + `/api/search?${apiParams.toString()}`, {
-      signal: abortSearching.current.signal,
-    })
-      .then(async (res) => {
-        if (res.ok) {
-          setSearchResult(
-            (await res.json()).map(
-              (r: { cid: string; updatedAt?: number }) => ({
-                cid: r.cid,
-                updatedAt: r.updatedAt,
-                fetched: false,
-              })
+    setSearchResult("loading");
+    let aborted = false;
+    const doSearch = () => {
+      const apiBaseParams = {
+        q: params.search,
+        difficultyMin: String(params.minLv),
+        difficultyMax: String(params.maxLv),
+      };
+      const recent = getRecent("play").reverse();
+      // recentの場合、cidが100件を超えると複数リクエストになる
+      const apiSortParams =
+        params.sort === "recent"
+          ? Array.from(
+              new Array(Math.ceil(recent.length / MAX_CIDS_COUNT))
+            ).map((_, i) => ({
+              c: recent.slice(i * MAX_CIDS_COUNT, (i + 1) * MAX_CIDS_COUNT),
+            }))
+          : [{ sort: params.sort ?? "relevance" }];
+      if (!params.search) {
+        document.title = titleWithSiteName(t("title"));
+      } else {
+        document.title = titleWithSiteName(
+          t("searchTitle", { search: params.search })
+        );
+      }
+      if (apiSortParams.length === 0) {
+        setSearchResult("empty");
+      } else {
+        let searchResultChunks: ChartLineBrief[][] = [];
+        let firstError: Error | null = null;
+        apiSortParams.forEach((apiSortParam, i) => {
+          searchResultChunks.push([]);
+          fetchBackend()
+            .url(`/api/search`)
+            .query({ ...apiBaseParams, ...apiSortParam } satisfies APIParams)
+            .get()
+            .json((res) =>
+              v
+                .parse(
+                  v.array(
+                    v.object({
+                      cid: v.string(),
+                      count: v.optional(v.number()),
+                      updatedAt: v.optional(v.number()),
+                    })
+                  ),
+                  res
+                )
+                .map((r) => ({
+                  cid: r.cid,
+                  updatedAt: r.updatedAt,
+                  fetched: false,
+                }))
             )
-          );
-        } else {
-          setSearchResult(await APIError.fromRes(res));
-        }
-      })
-      .catch((e) => {
-        console.error(e);
-        setSearchResult(APIError.fetchError(e));
-      });
+            .catch((e: unknown) => captureAndWrap(e))
+            .then((res) => {
+              if (aborted) {
+                return; // ignore
+              }
+              if (Array.isArray(res)) {
+                searchResultChunks[i] = res;
+              } else if (res instanceof Error && !firstError) {
+                firstError = res;
+              }
+              setSearchResult(
+                firstError ? firstError : searchResultChunks.flat(1)
+              );
+            });
+        });
+      }
+    };
+    doSearch();
+    const storageUpdate = (e: StorageEvent) => {
+      if (e.key === recentKey("play")) {
+        doSearch();
+      }
+    };
+    if (params.sort === "recent") {
+      // recentは別タブで更新される場合があり、そのとき再検索する
+      window.addEventListener("storage", storageUpdate);
+      window.addEventListener("visibilitychange", doSearch); // 別タブからもどってきたとき
+      window.addEventListener("popstate", doSearch); // router.push()からもどってきたとき
+    }
+    return () => {
+      window.removeEventListener("storage", storageUpdate);
+      window.removeEventListener("visibilitychange", doSearch);
+      window.removeEventListener("popstate", doSearch);
+      aborted = true;
+    };
   }, [t, params.search, params.sort, params.maxLv, params.minLv]);
 
   const boxSize = useResizeDetector();
@@ -191,6 +297,20 @@ function PlayTabInternal(
       setWaitingDebounce(false);
     }
   }
+
+  const { isMobileMain } = useDisplayMode();
+  const gotoCId = (cid: string) => {
+    fetchBackend()
+      .get(`/api/brief/${cid}`)
+      .notFound(() => undefined)
+      .res(() => {
+        if (isMobileMain) {
+          openShareInternal(cid);
+        } else {
+          openModal(cid);
+        }
+      });
+  };
 
   return (
     <IndexMain
@@ -222,16 +342,22 @@ function PlayTabInternal(
         />
       </section>
       <section className="fn-sect">
-        <ul className="list-disc ml-6 space-y-1 text-left">
+        <ul className="list-disc ml-6 space-y-2 text-left">
           <li>
             <div className="flex items-baseline">
               <span className="mr-2 flex-none">{t("search")}:</span>
               <Search className="text-lg self-center" />
               <Input
+                ref={searchRef}
                 actualValue={params.search}
                 updateValue={(v) => updateParams({ search: v })}
                 updateDebounce={1000}
-                onChange={() => setWaitingDebounce(true)}
+                onChange={(val) => {
+                  setWaitingDebounce(true);
+                  if (v.safeParse(CidSchema(), val).success) {
+                    gotoCId(val);
+                  }
+                }}
                 left
                 className="flex-1 font-title min-w-0"
                 placeholder={t("searchPlaceholder")}
@@ -241,28 +367,36 @@ function PlayTabInternal(
           <li>
             <div className="flex flex-wrap items-center">
               <span className="mr-2">{t("sort")}:</span>
-              <span className="inline-grid grid-cols-3 w-max max-w-full">
-                {(["relevance", "latest", "popular"] as const).map((sort) => (
-                  <button
-                    key={sort}
-                    className={clsx(
-                      "fn-toggle",
-                      sort === params.sort
-                        ? "fn-flat-button fn-plain fn-selected"
-                        : "fn-flat-button fn-sky"
-                    )}
-                    onClick={() => updateParams({ sort })}
-                    disabled={sort === "relevance" && !params.search}
-                  >
-                    <span className="fn-glass-1" />
-                    <span className="fn-glass-2" />
-                    <ButtonHighlight />
-                    {t(sort)}
-                  </button>
-                ))}
+              <span
+                className={clsx(
+                  "inline-grid max-w-full text-nowrap",
+                  "grid-cols-1 w-full",
+                  "min-[18rem]:grid-cols-2 min-[18rem]:w-max min-[36rem]:grid-cols-4"
+                )}
+              >
+                {(["relevance", "latest", "popular", "recent"] as const).map(
+                  (sort) => (
+                    <button
+                      key={sort}
+                      className={clsx(
+                        "fn-toggle",
+                        sort === params.sort
+                          ? "fn-flat-button fn-plain fn-selected"
+                          : "fn-flat-button fn-sky"
+                      )}
+                      onClick={() => updateParams({ sort })}
+                      disabled={sort === "relevance" && !params.search}
+                    >
+                      <span className="fn-glass-1" />
+                      <span className="fn-glass-2" />
+                      <ButtonHighlight />
+                      {t(sort)}
+                    </button>
+                  )
+                )}
               </span>
             </div>
-            <p className="ml-2">
+            <p className="ml-2 mt-1">
               {params.sort === "popular" && t("popularDesc", { popularDays })}
               {
                 params.sort === "latest" && t("latestDesc")

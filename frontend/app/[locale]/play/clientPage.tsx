@@ -28,6 +28,7 @@ import {
   loadChart,
   ChartSeqData,
   Level15Play,
+  RecordGetSummarySchema,
 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
@@ -38,15 +39,13 @@ import StatusBox from "./statusBox.js";
 import { useResizeDetector } from "react-resize-detector";
 import { ChartBrief } from "@falling-nikochan/chart";
 import * as msgpack from "@msgpack/msgpack";
-import { Box, CenterBox } from "@/common/box.js";
-import { isInsideFrame, useDisplayMode } from "@/scale.js";
+import { CenterBox } from "@/common/box.js";
 import { addRecent } from "@/common/recent.js";
 import Result, { resultAnimDelays } from "./result.js";
 import { getBestScore, setBestScore } from "@/common/bestScore.js";
 import BPMSign from "./bpmSign.js";
 import { getSession } from "./session.js";
 import { MusicArea } from "./musicArea.js";
-import { fetchBrief } from "@/common/briefCache.js";
 import { Level6Play } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { SlimeSVG } from "@/common/slime.js";
@@ -56,6 +55,7 @@ import { Key } from "@/common/key.js";
 import {
   detectOS,
   historyBackWithReview,
+  isInsideFrame,
   isStandalone,
   updatePlayCountForReview,
 } from "@/common/pwaInstall.js";
@@ -64,8 +64,13 @@ import { useRealFPS } from "@/common/fpsCalculator.jsx";
 import { IrasutoyaLikeGrass } from "@/common/irasutoyaLike.jsx";
 import { getQueryOptions, QueryOptions } from "./queryOption.js";
 import { ButtonHighlight } from "@/common/button.jsx";
-import { APIError } from "@/common/apiError.js";
 import { useFlash } from "./useFlash.js";
+import { captureAndWrap, fetchBackend } from "@/common/fetch.js";
+import * as v from "valibot";
+import { markAsExpected } from "@/common/apiError.js";
+import * as Sentry from "@sentry/nextjs";
+import { useDisplayMode } from "@/scale.js";
+import { refreshBrief } from "@/common/briefCache.js";
 import { RecOverlay } from "./recOverlay.js";
 
 export function InitPlay({ locale }: { locale: string }) {
@@ -79,86 +84,81 @@ export function InitPlay({ locale }: { locale: string }) {
   const [chartSeq, setChartSeq] = useState<ChartSeqData>();
   const [editing, setEditing] = useState<boolean>(false);
 
-  const [errorMsg, setErrorMsg] = useState<string | APIError>();
+  const [errorMsg, setErrorMsg] = useState<string | Error>();
   useEffect(() => {
     const q = getQueryOptions();
     setQueryOptions(q);
 
     const session = getSession(q.sid);
     // history.replaceState(null, "", location.pathname);
-    if (session !== null) {
-      setCid(session.cid);
-      setLvIndex(session.lvIndex);
-      setChartBrief(session.brief);
-      setEditing(!!session.editing);
-    } else {
-      if (q.cid) {
-        setCid(q.cid);
-        setLvIndex(q.lvIndex);
-        void (async () => setChartBrief((await fetchBrief(q.cid!)).brief))();
-        setEditing(false);
-      } else {
-        setErrorMsg(te("noSession"));
-        return;
-      }
+    if (session === null) {
+      setErrorMsg(te("noSession"));
+      return;
     }
     // document.title =
     //   (session.editing ? "(テストプレイ) " : "") +
     //   pageTitle(session.cid || "-", session.brief) +
     //   " | Falling Nikochan";
 
-    if (session?.level) {
+    Sentry.setContext("play.init", {
+      ...q,
+      cid: session.cid,
+      lvIndex: session.lvIndex,
+    });
+    setCid(session.cid);
+    setLvIndex(session.lvIndex);
+    setChartBrief(session.brief);
+    setEditing(session.editing);
+
+    if (session.editing) {
       setChartSeq(loadChart(session.level));
       setErrorMsg(undefined);
     } else {
-      void (async () => {
-        try {
-          const res = await fetch(
-            process.env.BACKEND_PREFIX +
-              `/api/playFile/${session?.cid ?? q.cid}` +
-              `/${session?.lvIndex ?? q.lvIndex}`,
-            { cache: "no-store" }
-          );
-          if (res.ok) {
-            try {
-              currentChartVer satisfies 16; // update the code below when chart version is bumped
-              const seq = msgpack.decode(await res.arrayBuffer()) as
-                | Level6Play
-                | Level15Play;
-              console.log("seq.ver", seq.ver);
-              if (seq.ver === 6 || seq.ver === 15 || seq.ver === 16) {
-                switch (seq.ver) {
-                  case 6:
-                  case 15:
-                  case 16:
-                    setChartSeq(loadChart(seq));
-                    break;
-                  default:
-                    seq satisfies never;
-                }
-                setErrorMsg(undefined);
-                addRecent("play", session?.cid ?? q.cid ?? "");
-                updatePlayCountForReview();
-              } else {
-                // seq satisfies never;
-                setChartSeq(undefined);
-                setErrorMsg(te("chartVersion", { ver: (seq as any)?.ver }));
-              }
-            } catch (e) {
-              setChartSeq(undefined);
-              console.error(e);
-              setErrorMsg(APIError.badResponse(e));
-            }
+      /*
+      briefデータのetagをX-If-Matchで送り、データに変更があった場合412が返るので、ユーザーにやり直させる
+
+      標準のIf-MatchにはvercelのCDNが勝手にetag比較して412を返したり、
+      (少なくともchromeでは)If-Matchを送るとIf-None-Matchは自動送信されず304時のレスポンスもブラウザが自動処理してくれない
+      といった不都合がある
+      */
+      fetchBackend()
+        .url(`/api/playFile/${session.cid}/${session.lvIndex}`)
+        .headers({ "X-If-Match": `"${session.brief.etag}"` })
+        .get()
+        .badRequest(markAsExpected)
+        .notFound(markAsExpected)
+        .error(412, (e) => {
+          refreshBrief(session.cid);
+          markAsExpected(e);
+        })
+        .arrayBuffer((buf) => {
+          currentChartVer satisfies 16; // update the code below when chart version is bumped
+          const playFile = msgpack.decode(buf) as Level6Play | Level15Play;
+          console.log("playFile.ver", playFile.ver);
+          if (
+            playFile.ver === 6 ||
+            playFile.ver === 15 ||
+            playFile.ver === 16
+          ) {
+            addRecent("play", session.cid ?? "");
+            updatePlayCountForReview();
+            return { seq: loadChart(playFile), error: undefined };
           } else {
-            setChartSeq(undefined);
-            setErrorMsg(await APIError.fromRes(res));
+            // playFile satisfies never;
+            return {
+              seq: undefined,
+              error: te("chartVersion", { ver: (playFile as any)?.ver }),
+            };
           }
-        } catch (e) {
-          setChartSeq(undefined);
-          console.error(e);
-          setErrorMsg(APIError.fetchError(e));
-        }
-      })();
+        })
+        .catch((e: unknown) => ({
+          seq: undefined,
+          error: captureAndWrap(e),
+        }))
+        .then(({ seq, error }) => {
+          setChartSeq(seq);
+          setErrorMsg(error);
+        });
     }
   }, [te]);
 
@@ -177,7 +177,7 @@ export function InitPlay({ locale }: { locale: string }) {
 }
 
 interface Props {
-  apiErrorMsg?: string | APIError;
+  apiErrorMsg?: string | Error;
   cid?: string;
   lvIndex: number;
   chartBrief?: ChartBrief;
@@ -199,9 +199,7 @@ function Play(props: Props) {
   const te = useTranslations("error");
   const t = useTranslations("play");
 
-  const [record, setRecord] = useState<
-    RecordGetSummary | APIError | undefined
-  >(); // for showing in the result dialog
+  const [record, setRecord] = useState<RecordGetSummary | Error | undefined>(); // for showing in the result dialog
 
   const [initAnim, setInitAnim] = useState<boolean>(false);
   useEffect(() => {
@@ -263,11 +261,14 @@ function Play(props: Props) {
   );
 
   const ref = useRef<HTMLDivElement>(null!);
-  const { isTouch, screenWidth, screenHeight, rem, statusScale, largeResult } =
-    useDisplayMode();
-  // TODO: cssの切り替えはjs側のこの変数ではなく landscape: variantで切り替えたほうが良さそう
-  // cssのlandscapeと挙動を合わせるため、正方形は縦長扱いとする
-  const isMobile = screenWidth <= screenHeight;
+  const {
+    isTouch,
+    isMobileGame: isMobile,
+    screenHeight,
+    rem,
+    statusScale,
+    largeResult,
+  } = useDisplayMode();
 
   const statusSpace = useResizeDetector();
   const statusHide = !isMobile && statusSpace.height === 0;
@@ -547,7 +548,7 @@ function Play(props: Props) {
   const [ytReady, setYtReady] = useState<boolean>(false);
   const [ytError, setYtError] = useState<number | null>(null);
   const [initDone, setInitDone] = useState<boolean>(false);
-  const [errorMsg, setErrorMsg] = useState<string | APIError>();
+  const [errorMsg, setErrorMsg] = useState<string | Error>();
   const [showLoading, setShowLoading] = useState<boolean>(false);
   const showLoadingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [giveUpWaitingFps, setGiveUpWaitingFps] = useState<boolean>(false);
@@ -665,34 +666,20 @@ function Play(props: Props) {
             });
             reloadBestScore();
           }
-          (async () => {
-            try {
-              const res = await fetch(
-                process.env.BACKEND_PREFIX + `/api/record/${cid}`
-              );
-              if (res.ok) {
-                try {
-                  const records: RecordGetSummary[] = await res.json();
-                  setRecord(
-                    records.find(
-                      (r) => r.lvHash === chartBrief!.levels[lvIndex]?.hash
-                    )
-                  );
-                } catch (e) {
-                  console.error(e);
-                  setRecord(APIError.badResponse(e));
-                }
-              } else {
-                setRecord(await APIError.fromRes(res));
-              }
-            } catch (e) {
-              setRecord(APIError.fetchError(e));
-            }
-          })();
+          fetchBackend()
+            .get(`/api/record/${cid}`)
+            .json((record) =>
+              v
+                .parse(v.array(RecordGetSummarySchema()), record)
+                .find((r) => r.lvHash === chartBrief!.levels[lvIndex]?.hash)
+            )
+            .catch((e: unknown) => captureAndWrap(e, { cid }))
+            .then((record) => setRecord(record));
         }
         const t = setTimeout(() => {
           setShowResult(true);
           if (
+            cid &&
             userBegin === null &&
             playbackRate === 1 &&
             chartBrief?.levels.at(lvIndex)
@@ -703,10 +690,9 @@ function Play(props: Props) {
                 chartBrief.levels[lvIndex].hash,
                 auto
               );
-              fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
+              fetchBackend()
+                .url(`/api/record/${cid}`)
+                .json({
                   lvHash: chartBrief.levels[lvIndex].hash,
                   auto,
                   score,
@@ -717,8 +703,12 @@ function Play(props: Props) {
                   fb: bigScore === bigScoreRate,
                   editing,
                   factor,
-                } satisfies RecordPost),
-              }).catch(() => undefined);
+                } satisfies RecordPost)
+                .post()
+                .notFound(() => undefined)
+                .error(429, () => undefined)
+                .res()
+                .catch((e: unknown) => captureAndWrap(e, { cid }));
             } catch {
               // ignore errors from updateRecordFactor
             }
@@ -737,31 +727,9 @@ function Play(props: Props) {
     } else if (queryOptions.result) {
       setShowResult(true);
     }
-  }, [
-    chartPlaying,
-    showResult,
-    chartEnd,
-    endSecPassed,
-    chartSeq,
-    score,
-    bestScoreState,
-    cid,
-    auto,
-    userBegin,
-    playbackRate,
-    lvIndex,
-    chartBrief,
-    baseScore,
-    chainScore,
-    bigScore,
-    judgeCount,
-    stop,
-    queryOptions,
-    bigCount,
-    hitType,
-    editing,
-    reloadBestScore,
-  ]);
+    // 値の変化にあわせて正確に再実行することよりも二重送信を防ぐことのほうが大事
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chartPlaying, showResult, chartEnd, endSecPassed]);
 
   const onReady = useCallback(() => {
     console.log("ready ->", ytPlayer.current?.getPlayerState());
@@ -781,13 +749,13 @@ function Play(props: Props) {
       }
       setLoadingAfterReady(false);
       setNeedManualStart(false);
-      setShowResult(false);
       setChartPlaying(true);
       setWasAutoPlay(auto);
       setOldPlaybackRate(playbackRate);
       setOldUserBegin(userBegin);
       // setChartStarted(true);
       setExitable(null);
+      setShowResult(false);
       const now =
         (ytPlayer.current?.getCurrentTime() ?? -Infinity) -
         chartSeq.offset -

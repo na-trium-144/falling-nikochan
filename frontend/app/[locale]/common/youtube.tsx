@@ -161,14 +161,12 @@ export function FlexYouTube(props: Props) {
   return (
     <div
       className={clsx(
-        "relative isolate",
+        "relative isolate aspect-video",
         props.className
         /* "flex justify-center items-center" */
       )}
       style={{
         ...props.style,
-        width: fixedSide === "height" && height ? (height * 16) / 9 : undefined,
-        height: fixedSide === "width" && width ? (width * 9) / 16 : undefined,
       }}
       ref={ref}
     >

@@ -1,5 +1,5 @@
-import { ExecutionContext, Hono } from "hono";
-import { backendOrigin, Bindings, cacheControl } from "../env.js";
+import { Hono } from "hono";
+import { backendOrigin, Bindings, cacheControl, ResponseOK } from "../env.js";
 // import { ImageResponse } from "@vercel/og";
 import { HTTPException } from "hono/http-exception";
 import {
@@ -19,6 +19,11 @@ import { getColor } from "colorthief";
 import { adjustColor } from "./style.js";
 import * as v from "valibot";
 import { fetchError } from "../error.js";
+import { cache } from "hono/cache";
+import { etag } from "hono/etag";
+import { BaseLogger } from "@hono/structured-logger";
+
+const CACHE_MAX_AGE = 315360000;
 
 export interface ChartBriefMin {
   ytId: string;
@@ -38,15 +43,20 @@ const ChartBriefMinArraySchema = v.tuple([
 
 const ogApp = (config: {
   ImageResponse: any;
-  fetchBrief: (
-    e: Bindings,
-    cid: string,
-    ctx: ExecutionContext | undefined
-  ) => Response | Promise<Response>;
-  fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
+  fetchBrief: (e: Bindings, cid: string) => Promise<{ brief: ChartBrief }>;
+  fetchStatic: (e: Bindings, url: URL) => Promise<ResponseOK>;
 }) =>
-  new Hono<{ Bindings: Bindings }>({ strict: false })
+  new Hono<{ Bindings: Bindings; Variables: { logger: BaseLogger } }>({
+    strict: false,
+  })
     .use("/*", cors({ origin: "*" }))
+    .use(etag())
+    .use(
+      "/*",
+      cache({
+        cacheName: "og",
+      })
+    )
     .get("/:type/:cid", async (c) => {
       const cid = c.req.param("cid");
 
@@ -54,26 +64,7 @@ const ogApp = (config: {
       // /og/share/cid?brief=表示する全情報 で生成した画像を永久にキャッシュ
       // (vパラメータは /share でも追加されるけど)
       if (!c.req.query("brief")) {
-        let executionCtx: ExecutionContext | undefined = undefined;
-        try {
-          executionCtx = c.executionCtx;
-        } catch {
-          //ignore
-        }
-        const briefRes = await config.fetchBrief(env(c), cid, executionCtx);
-        if (!briefRes.ok) {
-          let message = "";
-          try {
-            message =
-              ((await briefRes.json()) as { message?: string }).message || "";
-          } catch {
-            //
-          }
-          throw new HTTPException(briefRes.status as 401 | 404 | 500, {
-            message,
-          });
-        }
-        const brief = (await briefRes.json()) as ChartBrief;
+        const { brief } = await config.fetchBrief(env(c), cid);
         const lvType = levelTypes.indexOf(
           brief.levels.filter((l) => !l.unlisted).at(0)?.type || ""
         );
@@ -133,7 +124,7 @@ const ogApp = (config: {
         try {
           resultParams = deserializeResultParams(qResult);
         } catch (e) {
-          console.error(e);
+          c.var.logger.error(e);
           throw new HTTPException(400, { message: "invalidResultParam" });
         }
       }
@@ -183,9 +174,8 @@ const ogApp = (config: {
         default:
           throw new HTTPException(404);
       }
-      const pBgImageBin = new Promise<Response>((res) =>
-        res(config.fetchStatic(env(c), new URL(imagePath, backendOrigin(c))))
-      )
+      const pBgImageBin = config
+        .fetchStatic(env(c), new URL(imagePath, backendOrigin(c)))
         .then((bgImage) => bgImage.arrayBuffer())
         .then((buf) => {
           const bgImageBuf = new Uint8Array(buf);
@@ -219,16 +209,13 @@ const ogApp = (config: {
             imagePath = null;
             break;
           default:
-            console.error(`unknown touch type ${resultParams.inputType}`);
+            c.var.logger.error(`unknown touch type ${resultParams.inputType}`);
             imagePath = null;
             break;
         }
         if (imagePath) {
-          pInputTypeImageBin = new Promise<Response>((res) =>
-            res(
-              config.fetchStatic(env(c), new URL(imagePath, backendOrigin(c)))
-            )
-          )
+          pInputTypeImageBin = config
+            .fetchStatic(env(c), new URL(imagePath, backendOrigin(c)))
             .then((image) => image.arrayBuffer())
             .then((buf) => {
               const inputTypeImageBuf = new Uint8Array(buf);
@@ -288,15 +275,10 @@ const ogApp = (config: {
           }))
         ),
       }) as Response;
-      if (imRes.ok && imRes.body) {
-        return c.body(imRes.body, 200, {
-          "Content-Type": imRes.headers.get("Content-Type") || "",
-          "Cache-Control": cacheControl(env(c), 315360000),
-        });
-      } else {
-        console.error(imRes);
-        throw new HTTPException(500, { message: "imageGenerationFailed" });
-      }
+      return c.body(imRes.body!, imRes.status as 200, {
+        "Content-Type": imRes.headers.get("Content-Type") || "",
+        "Cache-Control": cacheControl(env(c), CACHE_MAX_AGE),
+      });
     })
     .get("/:cid{[0-9]+}", (c) =>
       // deprecated (used until ver8.11)

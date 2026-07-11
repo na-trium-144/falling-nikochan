@@ -51,6 +51,14 @@ export function isAndroidTWA(): boolean {
       document.referrer.includes("android-app://net.utcode.nikochan.twa/"))
   );
 }
+export function isInsideFrame() {
+  return window.self !== window.top;
+}
+export function useInsideFrameDetector() {
+  const [state, setState] = useState<boolean | null>(null);
+  useEffect(() => setState(isInsideFrame()), []);
+  return state;
+}
 
 export function updatePlayCountForReview() {
   localStorage.setItem(
@@ -192,6 +200,35 @@ export function useSafariDetector() {
   return isSafari;
 }
 
+function isLowSpeed(): boolean {
+  const connection =
+    (navigator as any).connection ||
+    (navigator as any).mozConnection ||
+    (navigator as any).webkitConnection;
+  if (!connection) {
+    return false;
+  }
+  if (connection.saveData) {
+    console.warn(
+      "skipping service worker update because of connection.saveData"
+    );
+    return true;
+  }
+  if (connection.type && ["ethernet", "wifi"].includes(connection.type)) {
+    return false;
+  }
+  if (
+    connection.effectiveType &&
+    ["slow-2g", "2g", "3g"].includes(connection.effectiveType)
+  ) {
+    console.warn(
+      `skipping service worker update because of connection.effectiveType=${connection.effectiveType} and type=${connection.type}`
+    );
+    return true;
+  }
+  return false;
+}
+
 interface InitAssetsState {
   type?: "initAssets";
   state: InitAssetsResult;
@@ -227,6 +264,11 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
     if (isAndroidTWA()) {
       sessionStorage.setItem("fromAndroidTWA", "1");
     }
+    Sentry.setContext("pwaInstall.mode", {
+      standalone: isStandalone(),
+      androidTWA: isAndroidTWA(),
+      insideFrame: isInsideFrame(),
+    });
     setDismissed(
       isStandalone() || localStorage.getItem("PWADismissed") === "1"
     );
@@ -259,32 +301,41 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
       process.env.NODE_ENV !== "development" &&
       "serviceWorker" in navigator
     ) {
-      navigator.serviceWorker.addEventListener("message", (e) => {
-        console.warn("sw:", e.data);
-      });
       if (SW_ALLOWED_ORIGINS.includes(window.location.origin)) {
-        navigator.serviceWorker
-          .register("/sw.js", { scope: "/" })
-          .then((reg) => {
+        navigator.serviceWorker.register("/sw.js", { scope: "/" }).then(
+          (reg) => {
+            Sentry.setContext("pwaInstall.serviceWorker", { register: true });
             if (updateFetching.current !== null) {
               clearTimeout(updateFetching.current);
             }
-            const checkUpdate = () =>
-              fetch("/worker/checkUpdate").then(
-                (res) => {
-                  // okの場合、messageイベントで受け取るのでここでは何もしない
-                  if (!res.ok) {
+            const checkUpdate = () => {
+              if (isStandalone()) {
+                // standaloneの場合、ネットワークの状態に関わらず更新を行う (良いのか?)
+                // もともとこのSWはv10.0でPWAが絶対にエラーページを出さないようにという意図で実装したものなので、そっちの意図を優先している
+                fetch("/worker/checkUpdate").then(
+                  (res) => {
+                    // okの場合、messageイベントで受け取るのでここでは何もしない
+                    if (!res.ok) {
+                      if (isStandalone()) {
+                        setWorkerUpdate({ state: "failed" });
+                      }
+                    }
+                  },
+                  () => {
                     if (isStandalone()) {
                       setWorkerUpdate({ state: "failed" });
                     }
                   }
-                },
-                () => {
-                  if (isStandalone()) {
-                    setWorkerUpdate({ state: "failed" });
-                  }
+                );
+              } else {
+                if (isLowSpeed()) {
+                  // standaloneでなく、かつ低速の場合、アセットの更新を行わない
+                } else {
+                  // 更新を行うが、結果が何であってもなにもしない
+                  fetch("/worker/checkUpdate").catch(() => undefined);
                 }
-              );
+              }
+            };
             updateFetching.current = setTimeout(checkUpdate, 1000);
             reg.addEventListener("updatefound", () => {
               if (isStandalone()) {
@@ -297,19 +348,16 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
               newWorker?.addEventListener("statechange", () => {
                 console.log("sw statechange:", newWorker?.state);
                 if (newWorker?.state === "activated") {
-                  // setWorkerUpdate({ state: "done" });
                   updateFetching.current = setTimeout(checkUpdate, 1000);
                 }
               });
             });
-          })
-          .catch((e) => {
-            Sentry.withScope((scope) => {
-              // ページURLごとに別issueに分けられるのを防ぐ
-              scope.setTransactionName("common/pwaInstall");
-              Sentry.captureException(e);
-            });
-          });
+          },
+          (e) => {
+            console.error("Failed to register service worker:", e);
+            Sentry.setContext("pwaInstall.serviceWorker", { register: false });
+          }
+        );
       } else {
         console.warn(
           `This origin is not included in the list of origins that are permitted to run the service worker: ${JSON.stringify(SW_ALLOWED_ORIGINS)}.` +
@@ -336,34 +384,43 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
       navigator.serviceWorker.addEventListener("message", (event) => {
         if (
           typeof event.data === "object" &&
-          event.data.type === "initAssets" &&
-          isStandalone()
+          event.data.type === "initAssets"
         ) {
-          const state = (event.data as InitAssetsState).state;
-          switch (state) {
-            case "done":
-            case "failed":
-            case "updating":
-              setWorkerUpdate(event.data);
-              break;
-            case "noUpdate":
-              setWorkerUpdate((current) => {
-                if (current?.state === "updating") {
-                  // serviceworkerのinstallのためにupdatingになり、その後assetの更新はない場合
-                  return { state: "done" };
-                }
-                return null;
-              });
-              break;
-            case "inProgress":
-              // ignore
-              break;
-            default:
-              state satisfies never;
-              throw new Error(
-                `Unknown worker update state: ${event.data.state}`
-              );
+          if (isStandalone()) {
+            const state = (event.data as InitAssetsState).state;
+            switch (state) {
+              case "done":
+              case "failed":
+              case "updating":
+                setWorkerUpdate(event.data);
+                break;
+              case "noUpdate":
+                setWorkerUpdate((current) => {
+                  if (current?.state === "updating") {
+                    // serviceworkerのinstallのためにupdatingになり、その後assetの更新はない場合
+                    return { state: "done" };
+                  }
+                  return null;
+                });
+                break;
+              case "inProgress":
+                // ignore
+                break;
+              default:
+                state satisfies never;
+                throw new Error(
+                  `Unknown worker update state: ${event.data.state}`
+                );
+            }
           }
+        } else if (
+          typeof event.data === "object" &&
+          event.data.type === "console"
+        ) {
+          console[event.data.level as "log" | "warn" | "error" | "info"](
+            "[sw]",
+            ...event.data.args
+          );
         }
       });
     }

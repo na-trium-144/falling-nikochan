@@ -1,25 +1,32 @@
-import { Hono } from "hono";
+import { Hono, MiddlewareHandler } from "hono";
 import { backendOrigin, Bindings, cacheControl } from "./env.js";
 import { env } from "hono/adapter";
-import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "./api/chart.js";
 import xmlbuilder2 from "xmlbuilder2";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
+import { Db } from "mongodb";
+import { cache } from "hono/cache";
+import { etag } from "hono/etag";
 
 // Cache duration for RSS feed (in seconds) - 30 minutes
 const CACHE_MAX_AGE = 1800;
 // Number of items to include in RSS feed
 const RSS_ITEM_LIMIT = 25;
 
-const rssApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
-  "/",
-  async (c) => {
-    const t = await getTranslations("en", "share");
-    const client = new MongoClient(env(c).MONGODB_URI);
-    try {
-      await client.connect();
-      const db = client.db("nikochan");
+const rssApp = async (config: { dbMiddleware: MiddlewareHandler }) =>
+  new Hono<{ Bindings: Bindings; Variables: { db: () => Promise<Db> } }>({
+    strict: false,
+  }).get(
+    "/",
+    etag(),
+    cache({
+      cacheName: "rss",
+    }),
+    config.dbMiddleware,
+    async (c) => {
+      const t = await getTranslations("en", "share");
 
+      const db = await c.get("db")();
       const charts = await db
         .collection<ChartEntryCompressed>("chart")
         .find({ published: true, deleted: false })
@@ -116,10 +123,7 @@ const rssApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         "Content-Type": "application/rss+xml; charset=utf-8",
         "Cache-Control": cacheControl(env(c), CACHE_MAX_AGE),
       });
-    } finally {
-      await client.close();
     }
-  }
-);
+  );
 
 export default rssApp;

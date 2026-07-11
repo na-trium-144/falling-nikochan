@@ -10,6 +10,8 @@ updates:
     schedule:
       interval: "monthly"
     open-pull-requests-limit: 50
+    cooldown:
+      default-days: 1
     ignore:
       - dependency-name: "@fontsource/*"
       - dependency-name: "@fontsource-variable/*"
@@ -29,3 +31,6 @@ updates:
         patterns:
           - "tailwindcss"
           - "@tailwindcss/*"
+      sentry:
+        patterns:
+          - "@sentry/*"

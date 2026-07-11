@@ -1,4 +1,3 @@
-import { LuaFactory } from "wasmoon";
 import { Step, StepSchema, stepZero } from "../step.js";
 import { LevelFreeze } from "../chart.js";
 import * as v from "valibot";
@@ -22,6 +21,7 @@ export async function luaExec(
     isChartFile?: boolean;
   }
 ): Promise<LuaExecResult> {
+  const { LuaFactory } = await import("wasmoon");
   const factory = new LuaFactory(wasmPath);
   await factory.mountFile(
     "/usr/local/share/lua/5.4/fn-commands.lua",

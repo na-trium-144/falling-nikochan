@@ -213,7 +213,7 @@ export default function useGameLogic(
             chain: c.note.chain || 0,
           });
 
-          console.log(notesDone);
+          // console.log(notesDone);
 
           // 各indexにつき最大3個 or アニメーションが完了するまで のみを表示
           return notesDone.map((row) =>
@@ -582,7 +582,7 @@ export default function useGameLogic(
     if (auto) {
       let timer: ReturnType<typeof setTimeout> | null = null;
       const removeOneNote = () => {
-        console.log("auto");
+        // console.log("auto");
         timer = null;
         const now = getCurrentTimeSec();
         const nextHitTime: number[] = [];

@@ -9,10 +9,14 @@ import {
   RecordPostSchema,
 } from "@falling-nikochan/chart";
 import * as v from "valibot";
-import { MongoClient } from "mongodb";
+import { Db } from "mongodb";
 import { env } from "hono/adapter";
 import { describeRoute, resolver, validator } from "hono-openapi";
-import { errorLiteral } from "../error.js";
+import {
+  errorLiteral,
+  sValidatorHook,
+  validationErrorSchema,
+} from "../error.js";
 import { getIp, updateIp } from "./dbRateLimit.js";
 import { ConnInfo } from "hono/conninfo";
 
@@ -36,12 +40,13 @@ export interface PlayRecordEntry {
 const recordApp = async (config: {
   getConnInfo: (c: Context) => ConnInfo | null;
 }) =>
-  new Hono<{ Bindings: Bindings }>({ strict: false })
+  new Hono<{ Bindings: Bindings; Variables: { db: () => Promise<Db> } }>({
+    strict: false,
+  })
     .get(
       "/:cid",
       cache({
         cacheName: "api-record",
-        cacheControl: `max-age=${CACHE_MAX_AGE}`,
       }),
       describeRoute({
         description: "Get play record summary for the chart.",
@@ -53,12 +58,18 @@ const recordApp = async (config: {
                 schema: resolver(v.array(RecordGetSummarySchema())),
               },
             },
+            headers: {
+              "Cache-Control": {
+                description: `max-age=${CACHE_MAX_AGE}`,
+                schema: { type: "string" },
+              },
+            },
           },
           400: {
             description: "invalid chart id",
             content: {
               "application/json": {
-                schema: resolver(v.object({ message: v.string() })),
+                schema: resolver(await validationErrorSchema()),
               },
             },
           },
@@ -72,62 +83,55 @@ const recordApp = async (config: {
           },
         },
       }),
-      validator("param", v.object({ cid: CidSchema() })),
+      validator("param", v.object({ cid: CidSchema() }), sValidatorHook()),
       async (c) => {
         const { cid } = c.req.valid("param");
-        const client = new MongoClient(env(c).MONGODB_URI);
-        try {
-          await client.connect();
-          const db = client.db("nikochan");
-          const records = db
-            .collection<PlayRecordEntry>("playRecord")
-            .find({ cid });
-          const summary: RecordGetSummary[] = [];
-          for await (const record of records) {
-            let s = summary.find((s) => s.lvHash === record.lvHash);
-            if (!s) {
-              s = {
-                lvHash: record.lvHash,
-                count: 0,
-                countAuto: 0,
-                histogram: Array(13).fill(0),
-                countFC: 0,
-                countFB: 0,
-              } satisfies RecordGetSummary;
-              summary.push(s);
+        const db = await c.get("db")();
+        const records = db
+          .collection<PlayRecordEntry>("playRecord")
+          .find({ cid });
+        const summary: RecordGetSummary[] = [];
+        for await (const record of records) {
+          let s = summary.find((s) => s.lvHash === record.lvHash);
+          if (!s) {
+            s = {
+              lvHash: record.lvHash,
+              count: 0,
+              countAuto: 0,
+              histogram: Array(13).fill(0),
+              countFC: 0,
+              countFB: 0,
+            } satisfies RecordGetSummary;
+            summary.push(s);
+          }
+          const factor = typeof record.factor === "number" ? record.factor : 1;
+          if (record.auto) {
+            s.countAuto += factor;
+          } else {
+            s.count += factor;
+            s.histogram[Math.floor(record.score / 10)] += factor;
+            if (record.fc) {
+              s.countFC += factor;
             }
-            const factor =
-              typeof record.factor === "number" ? record.factor : 1;
-            if (record.auto) {
-              s.countAuto += factor;
-            } else {
-              s.count += factor;
-              s.histogram[Math.floor(record.score / 10)] += factor;
-              if (record.fc) {
-                s.countFC += factor;
-              }
-              if (record.fb) {
-                s.countFB += factor;
-              }
+            if (record.fb) {
+              s.countFB += factor;
             }
           }
-          return c.json(
-            summary.map((s) => ({
-              lvHash: s.lvHash,
-              count: Math.ceil(s.count),
-              countAuto: Math.ceil(s.countAuto),
-              histogram: s.histogram.map((h) => Math.ceil(h)),
-              countFC: Math.ceil(s.countFC),
-              countFB: Math.ceil(s.countFB),
-            })),
-            200,
-            {
-              "cache-control": cacheControl(env(c), CACHE_MAX_AGE),
-            }
-          );
-        } finally {
-          await client.close();
         }
+        return c.json(
+          summary.map((s) => ({
+            lvHash: s.lvHash,
+            count: Math.ceil(s.count),
+            countAuto: Math.ceil(s.countAuto),
+            histogram: s.histogram.map((h) => Math.ceil(h)),
+            countFC: Math.ceil(s.countFC),
+            countFB: Math.ceil(s.countFB),
+          })),
+          200,
+          {
+            "cache-control": cacheControl(env(c), CACHE_MAX_AGE),
+          }
+        );
       }
     )
     .post(
@@ -142,7 +146,7 @@ const recordApp = async (config: {
             description: "invalid chart id or body",
             content: {
               "application/json": {
-                schema: resolver(v.object({ message: v.string() })),
+                schema: resolver(await validationErrorSchema()),
               },
             },
           },
@@ -164,8 +168,8 @@ const recordApp = async (config: {
           },
         },
       }),
-      validator("param", v.object({ cid: CidSchema() })),
-      validator("json", RecordPostSchema()),
+      validator("param", v.object({ cid: CidSchema() }), sValidatorHook()),
+      validator("json", RecordPostSchema(), sValidatorHook()),
       async (c) => {
         const { cid } = c.req.valid("param");
         const {
@@ -182,39 +186,33 @@ const recordApp = async (config: {
         } = c.req.valid("json");
 
         const ip = getIp(c, config.getConnInfo);
-        const client = new MongoClient(env(c).MONGODB_URI);
-        try {
-          await client.connect();
-          const db = client.db("nikochan");
+        const db = await c.get("db")();
 
-          if (!(await updateIp(env(c), db, ip, "record"))) {
-            return c.json(
-              {
-                message: "tooManyRequest",
-              },
-              429,
-              { "retry-after": rateLimit.record.toString() }
-            );
-          }
-
-          await db.collection<PlayRecordEntry>("playRecord").insertOne({
-            cid,
-            lvHash,
-            auto,
-            playedAt: Date.now(),
-            score,
-            baseScore,
-            chainScore,
-            bigScore,
-            fc,
-            fb,
-            factor: typeof factor === "number" ? factor : 1,
-            editing: !!editing,
-          });
-          return c.body(null, 204);
-        } finally {
-          await client.close();
+        if (!(await updateIp(env(c), db, ip, "record"))) {
+          return c.json(
+            {
+              message: "tooManyRequest",
+            },
+            429,
+            { "retry-after": rateLimit.record.toString() }
+          );
         }
+
+        await db.collection<PlayRecordEntry>("playRecord").insertOne({
+          cid,
+          lvHash,
+          auto,
+          playedAt: Date.now(),
+          score,
+          baseScore,
+          chainScore,
+          bigScore,
+          fc,
+          fb,
+          factor: typeof factor === "number" ? factor : 1,
+          editing: !!editing,
+        });
+        return c.body(null, 204);
       }
     );
 

@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: MetadataProps) {
 
 export default async function NotFoundPage() {
   return (
-    <CenterBox scrollableY>
+    <CenterBox scrollableY classNameInner="flex flex-col items-center">
       <h4 className="fn-heading-box">Error PLACEHOLDER_STATUS</h4>
       <p className="mb-3">PLACEHOLDER_MESSAGE</p>
       {/*placeholder_statusが403または500番台に置き換えられた場合にのみクライアントサイドでlinksがレンダリングされる*/}

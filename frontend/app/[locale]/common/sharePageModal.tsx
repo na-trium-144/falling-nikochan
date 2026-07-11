@@ -2,7 +2,11 @@
 
 import clsx from "clsx/lite";
 import { titleShare, titleWithSiteName } from "@/common/title";
-import { ChartBrief, RecordGetSummary } from "@falling-nikochan/chart";
+import {
+  ChartBrief,
+  RecordGetSummary,
+  RecordGetSummarySchema,
+} from "@falling-nikochan/chart";
 import {
   createContext,
   ReactNode,
@@ -18,11 +22,12 @@ import { ShareBox } from "@/share/placeholder/shareBox";
 import { useRouter } from "next/navigation";
 import { useDelayedDisplayState } from "./delayedDisplayState";
 import { historyBackWithReview } from "./pwaInstall";
-import { APIError } from "./apiError";
+import { captureAndWrap, fetchBackend } from "./fetch";
+import * as v from "valibot";
 
 interface SharePageModalState {
   openModal: (cid: string) => void;
-  openShareInternal: (cid: string, brief?: ChartBrief) => void;
+  openShareInternal: (cid: string) => void;
 }
 const SharePageModalContext = createContext<SharePageModalState>({
   openModal: () => {},
@@ -39,9 +44,11 @@ export function SharePageModalProvider(props: {
   const th = useTranslations("share");
   const tp = useTranslations("main.play");
   const [modalCId, setModalCId] = useState<string | null>(null);
-  const [modalBrief, setModalBrief] = useState<ChartBrief | null>(null);
+  const [modalBrief, setModalBrief] = useState<
+    (ChartBrief & { etag: string }) | Error | null
+  >(null);
   const [modalRecord, setModalRecord] = useState<
-    RecordGetSummary[] | APIError | null
+    RecordGetSummary[] | Error | null
   >(null);
   const [modalOpened, modalAppearing, setModalOpened] =
     useDelayedDisplayState(200);
@@ -61,44 +68,29 @@ export function SharePageModalProvider(props: {
       setModalBrief(null);
       setModalCId(cid);
       // document.title = titleShare(th, cid);
-      fetchBrief(cid).then((res) => {
-        if (res.ok) {
-          setModalBrief(res.brief!);
-          document.title = titleShare(th, cid, res.brief!);
-        }
+      fetchBrief(cid, {
+        onResult: (brief) => {
+          setModalBrief(brief);
+          document.title = titleShare(th, cid, brief);
+        },
+        onError: (e) => setModalBrief(e),
       });
       setModalRecord(null);
-      (async () => {
-        try {
-          const res = await fetch(
-            process.env.BACKEND_PREFIX + `/api/record/${cid}`
-          );
-          if (res.ok) {
-            try {
-              setModalRecord(await res.json());
-            } catch (e) {
-              console.error(e);
-              setModalRecord(APIError.badResponse(e));
-            }
-          } else {
-            setModalRecord(await APIError.fromRes(res));
-          }
-        } catch (e) {
-          setModalRecord(APIError.fetchError(e));
-        }
-      })();
+      fetchBackend()
+        .get(`/api/record/${cid}`)
+        .json((record) => v.parse(v.array(RecordGetSummarySchema()), record))
+        .catch((e: unknown) => captureAndWrap(e, { cid }))
+        .then((record) => setModalRecord(record));
       setModalOpened(true);
     },
     [th, setModalOpened, modalCId]
   );
   const openShareInternal = useCallback(
-    (cid: string, brief: ChartBrief | undefined) => {
-      if (brief) {
-        router.push(
-          `/${props.locale}/main/shareInternal` +
-            `?cid=${cid}&fromPlay=${props.from === "play" ? "1" : ""}`
-        );
-      }
+    (cid: string) => {
+      router.push(
+        `/${props.locale}/main/shareInternal` +
+          `?cid=${cid}&fromPlay=${props.from === "play" ? "1" : ""}`
+      );
     },
     [props.locale, props.from, router]
   );

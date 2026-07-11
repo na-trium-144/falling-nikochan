@@ -24,7 +24,6 @@ import { LuaTabPlaceholder, LuaTabProvider, useLuaExecutor } from "./luaTab.js";
 import Select from "@/common/select.js";
 import LevelTab from "./levelTab.js";
 import { initSession, SessionData } from "@/play/session.js";
-import { useDisplayMode, useInsideFrameDetector } from "@/scale.js";
 import Forbid from "@icon-park/react/lib/icons/Forbid";
 import Move from "@icon-park/react/lib/icons/Move";
 import { GuideMain } from "./guideMain.js";
@@ -35,6 +34,7 @@ import { SlimeSVG } from "@/common/slime.js";
 import {
   historyBackWithReview,
   updatePlayCountForReview,
+  useInsideFrameDetector,
   useStandaloneDetector,
 } from "@/common/pwaInstall.jsx";
 import { useSE } from "@/common/se.js";
@@ -42,6 +42,9 @@ import { useChartState } from "./chartState.js";
 import { PasswdPrompt } from "./passwdPrompt.jsx";
 import { useColorThief } from "@/common/colorThief.js";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft.js";
+import { useDisplayMode } from "@/scale.js";
+import { useResizeDetector } from "react-resize-detector";
+import Close from "@icon-park/react/lib/icons/Close.js";
 
 export default function Edit(props: {
   locale: string;
@@ -51,7 +54,7 @@ export default function Edit(props: {
   const [guidePage, setGuidePage] = useState<number | null>(null);
 
   const t = useTranslations("edit");
-  const { isTouch } = useDisplayMode();
+  const { isTouch, isMobileEdit } = useDisplayMode();
   const standalone = useStandaloneDetector();
   const insideFrame = useInsideFrameDetector();
 
@@ -71,6 +74,7 @@ export default function Edit(props: {
     localSave,
     localLoadState,
     localLoad,
+    aceSessionRef,
   } = useChartState({
     luaExecutor,
     onLoad: (cid) => {
@@ -111,7 +115,7 @@ export default function Edit(props: {
               chart.toObject(),
               chart.currentLevelIndex || 0
             ),
-            editing: true,
+            editing: true as const,
           };
           setSessionData(data);
           initSession(data, sessionId);
@@ -421,6 +425,12 @@ export default function Edit(props: {
 
   const colorThief = useColorThief();
 
+  const youtubeSpace = useResizeDetector();
+  const youtubeFitToWidth =
+    isMobileEdit ||
+    (youtubeSpace.width ?? 0) / (youtubeSpace.height ?? 0) < 16 / 9;
+  const fallingWindowSpace = useResizeDetector();
+
   useEffect(() => {
     const keydown = (e: KeyboardEvent) => {
       if (chart && !isCodeTab) {
@@ -469,6 +479,18 @@ export default function Edit(props: {
           }
         } else if (e.key === "Shift") {
           setDragMode("v");
+        } else if (e.key === "z") {
+          const session =
+            chart?.currentLevelIndex !== undefined
+              ? aceSessionRef.current[chart.currentLevelIndex]
+              : undefined;
+          session?.getUndoManager().undo(session);
+        } else if (e.key === "y") {
+          const session =
+            chart?.currentLevelIndex !== undefined
+              ? aceSessionRef.current[chart.currentLevelIndex]
+              : undefined;
+          session?.getUndoManager().redo(session);
         } else {
           //
         }
@@ -490,6 +512,7 @@ export default function Edit(props: {
     seekStepRel,
     seekSec,
     currentLevel,
+    aceSessionRef,
   ]);
   return (
     <main
@@ -545,7 +568,7 @@ export default function Edit(props: {
                 "w-max h-max max-w-full max-h-full",
                 "shadow-modal"
               )}
-              classNameInner="flex flex-col items-center"
+              classNameInner="flex flex-col items-center text-center"
               scrollableY
               padding={6}
             >
@@ -596,13 +619,14 @@ export default function Edit(props: {
         chart={chart}
         currentStepStr={cur?.currentStepStr || null}
         seekStepAbs={seekStepAbs}
-        errLine={luaExecutor.running ? null : luaExecutor.errLine}
-        err={luaExecutor.err}
+        result={luaExecutor.running ? null : luaExecutor.result}
+        aceSessionRef={aceSessionRef}
       >
         <div
           className={clsx(
             "w-full",
-            "edit-wide:h-full edit-wide:flex edit-wide:items-stretch edit-wide:justify-center edit-wide:flex-row"
+            "edit-wide:h-full edit-wide:flex edit-wide:items-stretch edit-wide:justify-center edit-wide:flex-row",
+            "overflow-hidden"
           )}
         >
           <div
@@ -636,54 +660,89 @@ export default function Edit(props: {
               <Button text={t("help")} onClick={openGuide} />
             </div>
             <div
-              className={clsx(
-                "relative grow-0 shrink-0 p-3 rounded-sq-xl flex flex-col items-center",
-                // levelBgColors[levelTypes.indexOf(currentLevel?.meta.type || "")] ||
-                //   levelBgColors[1],
-                chart || "invisible",
-                colorThief.boxStyle
-              )}
-              style={{ color: colorThief.currentColor }}
+              ref={youtubeSpace.ref}
+              className="grow-0 shrink-0 grid-centering edit-wide:h-9/25"
             >
-              <span className={clsx("fn-glass-1")} />
-              <span className={clsx("fn-glass-2")} />
-              <FlexYouTube
-                fixedSide="width"
+              <div
                 className={clsx(
-                  "w-full h-max",
-                  "edit-wide:w-full edit-wide:h-auto"
+                  youtubeFitToWidth ? "w-full" : "h-full",
+                  "relative p-3 rounded-sq-xl",
+                  // levelBgColors[levelTypes.indexOf(currentLevel?.meta.type || "")] ||
+                  //   levelBgColors[1],
+                  chart || "invisible",
+                  colorThief.boxStyle
                 )}
-                control={true}
-                id={chart?.meta.ytId}
-                ytPlayer={ytPlayer}
-                onReady={onReady}
-                onStart={onStart}
-                onStop={onStop}
-                onPlaybackRateChange={setPlaybackRate}
-              />
-              {chart?.meta.ytId && (
-                <img
-                  ref={colorThief.imgRef}
-                  className="hidden"
-                  src={`https://i.ytimg.com/vi/${chart?.meta.ytId}/mqdefault.jpg`}
-                  crossOrigin="anonymous"
+                style={{ color: colorThief.currentColor }}
+              >
+                <span className={clsx("fn-glass-1")} />
+                <span className={clsx("fn-glass-2")} />
+                <FlexYouTube
+                  fixedSide={youtubeFitToWidth ? "width" : "height"}
+                  className={youtubeFitToWidth ? "w-full" : "h-full"}
+                  control={true}
+                  id={chart?.meta.ytId}
+                  ytPlayer={ytPlayer}
+                  onReady={onReady}
+                  onStart={onStart}
+                  onStop={onStop}
+                  onPlaybackRateChange={setPlaybackRate}
                 />
-              )}
+                {chart?.meta.ytId && (
+                  <img
+                    ref={colorThief.imgRef}
+                    className="hidden"
+                    src={`https://i.ytimg.com/vi/${chart?.meta.ytId}/mqdefault.jpg`}
+                    crossOrigin="anonymous"
+                  />
+                )}
+              </div>
             </div>
             <div
+              ref={fallingWindowSpace.ref}
               className={clsx(
-                "relative",
-                "w-full aspect-square",
-                "edit-wide:flex-1 edit-wide:basis-8/12 edit-wide:aspect-auto"
+                "w-full aspect-square min-h-0",
+                "edit-wide:flex-1 edit-wide:aspect-auto"
               )}
             >
-              <FallingWindow
-                inCodeTab={isCodeTab}
-                className="absolute inset-0"
-                chart={chart}
-                dragMode={dragMode}
-                setDragMode={setDragMode}
-              />
+              <div
+                className="m-auto relative border border-gray-400/25"
+                style={{
+                  width: `min(${fallingWindowSpace.width}px,${fallingWindowSpace.height}px)`,
+                  height: `min(${fallingWindowSpace.width}px,${fallingWindowSpace.height}px)`,
+                }}
+              >
+                <FallingWindow
+                  inCodeTab={isCodeTab}
+                  className="absolute inset-0"
+                  chart={chart}
+                  dragMode={dragMode}
+                  setDragMode={setDragMode}
+                />
+                <div
+                  className={clsx(
+                    "absolute -top-[200%] bottom-full -left-[50%] -right-[250%]",
+                    "z-edit-blur-overlay backdrop-blur-2xs"
+                  )}
+                />
+                <div
+                  className={clsx(
+                    "absolute top-full -bottom-[300vh] -left-[50%] -right-[250%]",
+                    "z-edit-blur-overlay backdrop-blur-2xs"
+                  )}
+                />
+                <div
+                  className={clsx(
+                    "absolute inset-y-0 -left-[50%] right-full",
+                    "z-edit-blur-overlay backdrop-blur-2xs"
+                  )}
+                />
+                <div
+                  className={clsx(
+                    "absolute inset-y-0 left-full -right-[250%]",
+                    "z-edit-blur-overlay backdrop-blur-2xs"
+                  )}
+                />
+              </div>
             </div>
             {chart && isTouch && (
               <button
@@ -934,53 +993,72 @@ export default function Edit(props: {
               ) : tab === 2 ? (
                 <LevelTab chart={chart} />
               ) : tab === 3 ? (
-                <NoteTab chart={chart} />
+                <NoteTab chart={chart} aceSessionRef={aceSessionRef} />
               ) : null}
               <LuaTabPlaceholder parentContainer={ref.current} />
             </Box>
             <Box
               classNameOuter={clsx(
-                "mt-2",
+                "fixed inset-1.5 ml-auto mt-auto w-max h-max shadow-modal z-edit-error",
                 "bg-gray-500/25",
                 !(
                   luaExecutor.running ||
-                  luaExecutor.stdout.length > 0 ||
-                  luaExecutor.err.length > 0
-                ) && "edit-wide:hidden"
+                  (luaExecutor.result &&
+                    luaExecutor.result.levelIndex ===
+                      chart?.currentLevelIndex &&
+                    (luaExecutor.result.stdout.length > 0 ||
+                      luaExecutor.result.err.length > 0))
+                ) && "hidden"
               )}
-              classNameInner="h-24 max-h-24 edit-wide:h-auto"
+              classNameInner={clsx(
+                // min-h: キャンセルボタンの高さ(8) + padding
+                "min-h-14 max-h-[20vh]",
+                // min-w: スクリプトを実行中...[キャンセル] が収まるサイズ
+                "edit-wide:min-w-85 edit-wide:max-w-[min(50rem,66vw)]",
+                "flex flex-col justify-center"
+              )}
               scrollableX
               scrollableY
               padding={3}
             >
               {luaExecutor.running ? (
-                <>
+                <div>
                   <span className="inline-block ">
                     <SlimeSVG />
                     {t("running")}
                   </span>
                   <Button
-                    className="ml-2"
+                    className="ml-2 my-0"
                     small
                     onClick={luaExecutor.abortExec}
                     text={t("cancel")}
                   />
-                </>
+                </div>
               ) : (
                 <>
-                  {luaExecutor.stdout.map((s, i) => (
-                    <p className="text-sm" key={i}>
+                  {/* mr-11: 閉じるボタンの分のスペース */}
+                  {luaExecutor.result?.stdout.map((s, i) => (
+                    <p className="text-sm mr-11" key={i}>
                       {s}
                     </p>
                   ))}
-                  {luaExecutor.err.map((e, i) => (
+                  {luaExecutor.result?.err.map((e, i) => (
                     <p
-                      className="text-sm text-red-600 dark:text-red-400 "
+                      className="text-sm text-red-600 dark:text-red-400 mr-11"
                       key={i}
                     >
                       {e}
                     </p>
                   ))}
+                  <button
+                    className="fn-icon-button inline-block absolute top-3 right-3"
+                    onClick={() => {
+                      luaExecutor.clearResult();
+                    }}
+                  >
+                    <ButtonHighlight />
+                    <Close />
+                  </button>
                 </>
               )}
             </Box>

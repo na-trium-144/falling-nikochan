@@ -63,6 +63,7 @@
 
   .fn-highlight {
     @apply absolute inset-0 z-3 rounded-[inherit] sq-inherit;
+    @apply pointer-events-none;
     @apply bg-radial-[circle_3rem_at_var(--hl-x,50%)_var(--hl-y,50%)];
     @apply from-white/50 to-white/25;
     @apply dark:from-stone-300/20 dark:to-stone-300/10;

@@ -33,23 +33,69 @@ import {
   onError,
   languageDetector,
   fetchStatic,
-  fetchBrief,
+  getBrief,
 } from "@falling-nikochan/route";
 import { inspect } from "node:util";
+import { createMiddleware } from "hono/factory";
+import { Db } from "mongodb";
+import { before, after } from "node:test";
+import { structuredLogger } from "@hono/structured-logger";
 inspect.defaultOptions.depth = null;
 
+if (typeof process.env.MONGODB_URI !== "string") {
+  throw new Error("MONGODB_URI is not set");
+}
+if (/[a-z]\.[a-z]/.test(process.env.MONGODB_URI)) {
+  // 本番環境(ネットワーク越し)はTLDを含むはずという雑なチェック
+  throw new Error("MONGODB_URI seems to be a production database.");
+}
+
+let client: MongoClient | null;
+let db: Db;
+
+before(async () => {
+  client = new MongoClient(process.env.MONGODB_URI!);
+  await client.connect();
+  db = client.db("nikochan");
+  console.log(`connected to ${process.env.MONGODB_URI}`);
+});
+
+// 🔥 ファイル内の全テスト終了時に実行される
+after(async () => {
+  if (client) {
+    await client.close();
+    client = null;
+  }
+});
+
+const dbMiddleware = createMiddleware(async (c, next) => {
+  c.set("db", async () => db);
+  await next();
+});
+const fetchBrief = (_e: Bindings, cid: string) => getBrief(db!, cid);
+
+export { db };
+
 export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
-  .route("/api", await apiApp({ getConnInfo: () => null }))
-  .route(
-    "/share",
-    shareApp({
-      fetchBrief: fetchBrief({ fetchStatic }),
-      fetchStatic,
+  .use(
+    structuredLogger({
+      createLogger: () => console,
+      onRequest: () => undefined,
+      onResponse: () => undefined,
     })
   )
+  .route("/api", await apiApp({ getConnInfo: () => null, dbMiddleware }))
+  .route("/share", shareApp({ fetchBrief, fetchStatic }))
   .route("/", redirectApp({ fetchStatic }))
   .use(languageDetector())
-  .onError(onError({ fetchStatic, isTest: true }))
+  .onError(
+    onError({
+      fetchStatic,
+      isTest: true,
+      captureException: null,
+      setTransactionName: null,
+    })
+  )
   .notFound(notFound);
 
 export const dummyCid = "100000";
@@ -342,384 +388,374 @@ cid100000に最新バージョンのchart(dummyChart()参照)を、
 100004〜100013にそれぞれver4〜13のchartを保存する
 */
 export async function initDb() {
-  if (typeof process.env.MONGODB_URI !== "string") {
-    throw new Error("MONGODB_URI is not set");
-  }
   const pSecretSalt = process.env.SECRET_SALT || "SecretSalt";
-  const client = new MongoClient(process.env.MONGODB_URI);
-  try {
-    await client.connect();
-    const db = client.db("nikochan");
-    await db.collection("rateLimit").deleteMany({});
-    await db.collection<PlayRecordEntry>("playRecord").deleteMany({});
-    await db.collection<PlayRecordEntry>("playRecord").insertOne({
-      cid: dummyCid,
-      lvHash: "dummy",
-      playedAt: Date.now(),
-      auto: false,
-      score: 100,
-      fc: true,
-      fb: false,
-      factor: 0.7,
-      editing: false,
-    });
-    await db.collection<PlayRecordEntry>("playRecord").insertOne({
-      cid: dummyCid,
-      lvHash: "dummy",
-      playedAt: Date.now(),
-      auto: false,
-      score: 100,
-      fc: true,
-      fb: false,
-      factor: 0.1,
-      editing: false,
-    });
-    await db.collection<PlayRecordEntry>("playRecord").insertOne({
-      cid: dummyCid,
-      lvHash: "dummy",
-      playedAt: Date.now(),
-      auto: false,
-      score: 50,
-      fc: false,
-      fb: false,
-      factor: 0.5,
-      editing: false,
-    });
-    await db.collection<PlayRecordEntry>("playRecord").insertOne({
-      cid: dummyCid,
-      lvHash: "dummy",
-      playedAt: Date.now(),
-      auto: true,
-      score: 50,
-      fc: false,
-      fb: false,
-      factor: 1,
-      editing: false,
-    });
-    await db.collection<PlayRecordEntry>("playRecord").insertOne({
-      cid: dummyCid,
-      lvHash: "dummy",
-      playedAt: Date.now(),
-      auto: false,
-      score: 30,
-      fc: false,
-      fb: false,
-      factor: 1,
-      editing: true,
-    });
-    await db.collection<ChartEntryCompressed>("chart").updateOne(
-      { cid: dummyCid },
-      {
-        $set: await zipEntry(
-          await chartToEntry(
-            { ...dummyChart(), changePasswd: "p", published: true },
-            dummyCid,
-            dummyDate.getTime(),
-            null,
-            undefined,
-            pSecretSalt,
-            null
-          )
-        ),
-      },
-      { upsert: true }
-    );
-    await db.collection<ChartEntryCompressed>("chart").updateOne(
-      { cid: dummyCid + 1 },
-      {
-        $set: await zipEntry({
-          ...(await chartToEntry(
-            {
-              ...dummyChart(),
-              changePasswd: "p",
-              published: true,
-            },
-            dummyCid,
-            dummyDate.getTime(),
-            null,
-            undefined,
-            pSecretSalt,
-            null
-          )),
-          deleted: true,
-        }),
-      },
-      { upsert: true }
-    );
-    await db.collection<ChartEntryCompressed>("chart").updateOne(
-      { cid: String(Number(dummyCid) + 4) },
-      {
-        $set: await zipEntry({
-          ...(await chartToEntry(
-            {
-              ...dummyChart(),
-              changePasswd: "p",
-            },
-            String(Number(dummyCid) + 4),
-            dummyDate.getTime(),
-            null,
-            undefined,
-            pSecretSalt,
-            null
-          )),
-          ver: 4,
-          levels: dummyChart4().levels,
-        }),
-      },
-      { upsert: true }
-    );
-    await db.collection<ChartEntryCompressed>("chart").updateOne(
-      { cid: String(Number(dummyCid) + 5) },
-      {
-        $set: await zipEntry({
-          ...(await chartToEntry(
-            {
-              ...dummyChart(),
-              changePasswd: "p",
-            },
-            String(Number(dummyCid) + 5),
-            dummyDate.getTime(),
-            null,
-            undefined,
-            pSecretSalt,
-            null
-          )),
-          ver: 5,
-          levels: dummyChart5().levels,
-        }),
-      },
-      { upsert: true }
-    );
-    await db.collection<ChartEntryCompressed>("chart").updateOne(
-      { cid: String(Number(dummyCid) + 6) },
-      {
-        $set: await zipEntry({
-          ...(await chartToEntry(
-            {
-              ...dummyChart(),
-              changePasswd: "p",
-            },
-            String(Number(dummyCid) + 6),
-            dummyDate.getTime(),
-            null,
-            undefined,
-            pSecretSalt,
-            null
-          )),
-          ver: 6,
-          levels: dummyChart6().levels,
-        }),
-      },
-      { upsert: true }
-    );
-    await db.collection<ChartEntryCompressed>("chart").updateOne(
-      { cid: String(Number(dummyCid) + 7) },
-      {
-        $set: await zipEntry({
-          ...(await chartToEntry(
-            {
-              ...dummyChart(),
-              changePasswd: "p",
-            },
-            String(Number(dummyCid) + 7),
-            dummyDate.getTime(),
-            null,
-            undefined,
-            pSecretSalt,
-            null
-          )),
-          ver: 7,
-          levels: dummyChart7().levels,
-        }),
-      },
-      { upsert: true }
-    );
-    await db.collection<ChartEntryCompressed>("chart").updateOne(
-      { cid: String(Number(dummyCid) + 8) },
-      {
-        $set: await zipEntry({
-          ...(await chartToEntry(
-            {
-              ...dummyChart(),
-              changePasswd: "p",
-            },
-            String(Number(dummyCid) + 8),
-            dummyDate.getTime(),
-            null,
-            undefined,
-            pSecretSalt,
-            null
-          )),
-          ver: 8,
-          levels: dummyChart8().levels,
-        }),
-      },
-      { upsert: true }
-    );
-    await db.collection<ChartEntryCompressed>("chart").updateOne(
-      { cid: String(Number(dummyCid) + 9) },
-      {
-        $set: await zipEntry({
-          ...(await chartToEntry(
-            {
-              ...dummyChart(),
-              changePasswd: "p",
-            },
-            String(Number(dummyCid) + 9),
-            dummyDate.getTime(),
-            null,
-            undefined,
-            pSecretSalt,
-            null
-          )),
-          ver: 9,
-          levels: dummyChart9().levels,
-        }),
-      },
-      { upsert: true }
-    );
-    await db.collection<ChartEntryCompressed>("chart").updateOne(
-      { cid: String(Number(dummyCid) + 10) },
-      {
-        $set: await zipEntry({
-          ...(await chartToEntry(
-            {
-              ...dummyChart(),
-              changePasswd: "p",
-            },
-            String(Number(dummyCid) + 10),
-            dummyDate.getTime(),
-            null,
-            undefined,
-            pSecretSalt,
-            null
-          )),
-          ver: 10,
-          levels: dummyChart10().levels,
-        }),
-      },
-      { upsert: true }
-    );
-    await db.collection<ChartEntryCompressed>("chart").updateOne(
-      { cid: String(Number(dummyCid) + 11) },
-      {
-        $set: await zipEntry({
-          ...(await chartToEntry(
-            {
-              ...dummyChart(),
-              changePasswd: "p",
-            },
-            String(Number(dummyCid) + 11),
-            dummyDate.getTime(),
-            null,
-            undefined,
-            pSecretSalt,
-            null
-          )),
-          ver: 11,
-          levels: dummyChart11().levels,
-        }),
-      },
-      { upsert: true }
-    );
-    await db.collection<ChartEntryCompressed>("chart").updateOne(
-      { cid: String(Number(dummyCid) + 12) },
-      {
-        $set: await zipEntry({
-          ...(await chartToEntry(
-            {
-              ...dummyChart(),
-              changePasswd: "p",
-            },
-            String(Number(dummyCid) + 12),
-            dummyDate.getTime(),
-            null,
-            undefined,
-            pSecretSalt,
-            null
-          )),
-          ver: 12,
-          levels: dummyChart12().levels,
-        }),
-      },
-      { upsert: true }
-    );
-    await db.collection<ChartEntryCompressed>("chart").updateOne(
-      { cid: String(Number(dummyCid) + 13) },
-      {
-        $set: await zipEntry({
-          ...(await chartToEntry(
-            {
-              ...dummyChart(),
-              changePasswd: "p",
-            },
-            String(Number(dummyCid) + 13),
-            dummyDate.getTime(),
-            null,
-            undefined,
-            pSecretSalt,
-            null
-          )),
-          ver: 13,
-          levels: dummyChart13().levels,
-        }),
-      },
-      { upsert: true }
-    );
-    await db.collection<ChartEntryCompressed>("chart").updateOne(
-      { cid: String(Number(dummyCid) + 14) },
-      {
-        $set: await zipEntry({
-          ...(await chartToEntry(
-            {
-              ...dummyChart(),
-              changePasswd: "p",
-            },
-            String(Number(dummyCid) + 14),
-            dummyDate.getTime(),
-            null,
-            undefined,
-            pSecretSalt,
-            null
-          )),
-          ver: 14,
-          levels: dummyChart14().levelsMin.map((meta, i) => ({
-            ...meta,
-            ...dummyChart14().levelsFreeze![i],
-            lua: dummyChart14().lua![i],
-          })),
-        }),
-      },
-      { upsert: true }
-    );
-    await db.collection<ChartEntryCompressed>("chart").updateOne(
-      { cid: String(Number(dummyCid) + 15) },
-      {
-        $set: await zipEntry({
-          ...(await chartToEntry(
-            {
-              ...dummyChart(),
-              changePasswd: "p",
-            },
-            String(Number(dummyCid) + 15),
-            dummyDate.getTime(),
-            null,
-            undefined,
-            pSecretSalt,
-            null
-          )),
-          ver: 15,
-          levels: dummyChart15().levelsMeta.map((meta, i) => ({
-            ...meta,
-            ...dummyChart15().levelsFreeze![i],
-            lua: dummyChart15().lua![i],
-          })),
-        }),
-      },
-      { upsert: true }
-    );
-    currentChartVer satisfies 16;
-  } finally {
-    await client.close();
-  }
+  await db.collection("rateLimit").deleteMany({});
+  await db.collection<PlayRecordEntry>("playRecord").deleteMany({});
+  await db.collection<PlayRecordEntry>("playRecord").insertOne({
+    cid: dummyCid,
+    lvHash: "dummy",
+    playedAt: Date.now(),
+    auto: false,
+    score: 100,
+    fc: true,
+    fb: false,
+    factor: 0.7,
+    editing: false,
+  });
+  await db.collection<PlayRecordEntry>("playRecord").insertOne({
+    cid: dummyCid,
+    lvHash: "dummy",
+    playedAt: Date.now(),
+    auto: false,
+    score: 100,
+    fc: true,
+    fb: false,
+    factor: 0.1,
+    editing: false,
+  });
+  await db.collection<PlayRecordEntry>("playRecord").insertOne({
+    cid: dummyCid,
+    lvHash: "dummy",
+    playedAt: Date.now(),
+    auto: false,
+    score: 50,
+    fc: false,
+    fb: false,
+    factor: 0.5,
+    editing: false,
+  });
+  await db.collection<PlayRecordEntry>("playRecord").insertOne({
+    cid: dummyCid,
+    lvHash: "dummy",
+    playedAt: Date.now(),
+    auto: true,
+    score: 50,
+    fc: false,
+    fb: false,
+    factor: 1,
+    editing: false,
+  });
+  await db.collection<PlayRecordEntry>("playRecord").insertOne({
+    cid: dummyCid,
+    lvHash: "dummy",
+    playedAt: Date.now(),
+    auto: false,
+    score: 30,
+    fc: false,
+    fb: false,
+    factor: 1,
+    editing: true,
+  });
+  await db.collection<ChartEntryCompressed>("chart").updateOne(
+    { cid: dummyCid },
+    {
+      $set: await zipEntry(
+        await chartToEntry(
+          { ...dummyChart(), changePasswd: "p", published: true },
+          dummyCid,
+          dummyDate.getTime(),
+          null,
+          undefined,
+          pSecretSalt,
+          null
+        )
+      ),
+    },
+    { upsert: true }
+  );
+  await db.collection<ChartEntryCompressed>("chart").updateOne(
+    { cid: dummyCid + 1 },
+    {
+      $set: await zipEntry({
+        ...(await chartToEntry(
+          {
+            ...dummyChart(),
+            changePasswd: "p",
+            published: true,
+          },
+          dummyCid,
+          dummyDate.getTime(),
+          null,
+          undefined,
+          pSecretSalt,
+          null
+        )),
+        deleted: true,
+      }),
+    },
+    { upsert: true }
+  );
+  await db.collection<ChartEntryCompressed>("chart").updateOne(
+    { cid: String(Number(dummyCid) + 4) },
+    {
+      $set: await zipEntry({
+        ...(await chartToEntry(
+          {
+            ...dummyChart(),
+            changePasswd: "p",
+          },
+          String(Number(dummyCid) + 4),
+          dummyDate.getTime(),
+          null,
+          undefined,
+          pSecretSalt,
+          null
+        )),
+        ver: 4,
+        levels: dummyChart4().levels,
+      }),
+    },
+    { upsert: true }
+  );
+  await db.collection<ChartEntryCompressed>("chart").updateOne(
+    { cid: String(Number(dummyCid) + 5) },
+    {
+      $set: await zipEntry({
+        ...(await chartToEntry(
+          {
+            ...dummyChart(),
+            changePasswd: "p",
+          },
+          String(Number(dummyCid) + 5),
+          dummyDate.getTime(),
+          null,
+          undefined,
+          pSecretSalt,
+          null
+        )),
+        ver: 5,
+        levels: dummyChart5().levels,
+      }),
+    },
+    { upsert: true }
+  );
+  await db.collection<ChartEntryCompressed>("chart").updateOne(
+    { cid: String(Number(dummyCid) + 6) },
+    {
+      $set: await zipEntry({
+        ...(await chartToEntry(
+          {
+            ...dummyChart(),
+            changePasswd: "p",
+          },
+          String(Number(dummyCid) + 6),
+          dummyDate.getTime(),
+          null,
+          undefined,
+          pSecretSalt,
+          null
+        )),
+        ver: 6,
+        levels: dummyChart6().levels,
+      }),
+    },
+    { upsert: true }
+  );
+  await db.collection<ChartEntryCompressed>("chart").updateOne(
+    { cid: String(Number(dummyCid) + 7) },
+    {
+      $set: await zipEntry({
+        ...(await chartToEntry(
+          {
+            ...dummyChart(),
+            changePasswd: "p",
+          },
+          String(Number(dummyCid) + 7),
+          dummyDate.getTime(),
+          null,
+          undefined,
+          pSecretSalt,
+          null
+        )),
+        ver: 7,
+        levels: dummyChart7().levels,
+      }),
+    },
+    { upsert: true }
+  );
+  await db.collection<ChartEntryCompressed>("chart").updateOne(
+    { cid: String(Number(dummyCid) + 8) },
+    {
+      $set: await zipEntry({
+        ...(await chartToEntry(
+          {
+            ...dummyChart(),
+            changePasswd: "p",
+          },
+          String(Number(dummyCid) + 8),
+          dummyDate.getTime(),
+          null,
+          undefined,
+          pSecretSalt,
+          null
+        )),
+        ver: 8,
+        levels: dummyChart8().levels,
+      }),
+    },
+    { upsert: true }
+  );
+  await db.collection<ChartEntryCompressed>("chart").updateOne(
+    { cid: String(Number(dummyCid) + 9) },
+    {
+      $set: await zipEntry({
+        ...(await chartToEntry(
+          {
+            ...dummyChart(),
+            changePasswd: "p",
+          },
+          String(Number(dummyCid) + 9),
+          dummyDate.getTime(),
+          null,
+          undefined,
+          pSecretSalt,
+          null
+        )),
+        ver: 9,
+        levels: dummyChart9().levels,
+      }),
+    },
+    { upsert: true }
+  );
+  await db.collection<ChartEntryCompressed>("chart").updateOne(
+    { cid: String(Number(dummyCid) + 10) },
+    {
+      $set: await zipEntry({
+        ...(await chartToEntry(
+          {
+            ...dummyChart(),
+            changePasswd: "p",
+          },
+          String(Number(dummyCid) + 10),
+          dummyDate.getTime(),
+          null,
+          undefined,
+          pSecretSalt,
+          null
+        )),
+        ver: 10,
+        levels: dummyChart10().levels,
+      }),
+    },
+    { upsert: true }
+  );
+  await db.collection<ChartEntryCompressed>("chart").updateOne(
+    { cid: String(Number(dummyCid) + 11) },
+    {
+      $set: await zipEntry({
+        ...(await chartToEntry(
+          {
+            ...dummyChart(),
+            changePasswd: "p",
+          },
+          String(Number(dummyCid) + 11),
+          dummyDate.getTime(),
+          null,
+          undefined,
+          pSecretSalt,
+          null
+        )),
+        ver: 11,
+        levels: dummyChart11().levels,
+      }),
+    },
+    { upsert: true }
+  );
+  await db.collection<ChartEntryCompressed>("chart").updateOne(
+    { cid: String(Number(dummyCid) + 12) },
+    {
+      $set: await zipEntry({
+        ...(await chartToEntry(
+          {
+            ...dummyChart(),
+            changePasswd: "p",
+          },
+          String(Number(dummyCid) + 12),
+          dummyDate.getTime(),
+          null,
+          undefined,
+          pSecretSalt,
+          null
+        )),
+        ver: 12,
+        levels: dummyChart12().levels,
+      }),
+    },
+    { upsert: true }
+  );
+  await db.collection<ChartEntryCompressed>("chart").updateOne(
+    { cid: String(Number(dummyCid) + 13) },
+    {
+      $set: await zipEntry({
+        ...(await chartToEntry(
+          {
+            ...dummyChart(),
+            changePasswd: "p",
+          },
+          String(Number(dummyCid) + 13),
+          dummyDate.getTime(),
+          null,
+          undefined,
+          pSecretSalt,
+          null
+        )),
+        ver: 13,
+        levels: dummyChart13().levels,
+      }),
+    },
+    { upsert: true }
+  );
+  await db.collection<ChartEntryCompressed>("chart").updateOne(
+    { cid: String(Number(dummyCid) + 14) },
+    {
+      $set: await zipEntry({
+        ...(await chartToEntry(
+          {
+            ...dummyChart(),
+            changePasswd: "p",
+          },
+          String(Number(dummyCid) + 14),
+          dummyDate.getTime(),
+          null,
+          undefined,
+          pSecretSalt,
+          null
+        )),
+        ver: 14,
+        levels: dummyChart14().levelsMin.map((meta, i) => ({
+          ...meta,
+          ...dummyChart14().levelsFreeze![i],
+          lua: dummyChart14().lua![i],
+        })),
+      }),
+    },
+    { upsert: true }
+  );
+  await db.collection<ChartEntryCompressed>("chart").updateOne(
+    { cid: String(Number(dummyCid) + 15) },
+    {
+      $set: await zipEntry({
+        ...(await chartToEntry(
+          {
+            ...dummyChart(),
+            changePasswd: "p",
+          },
+          String(Number(dummyCid) + 15),
+          dummyDate.getTime(),
+          null,
+          undefined,
+          pSecretSalt,
+          null
+        )),
+        ver: 15,
+        levels: dummyChart15().levelsMeta.map((meta, i) => ({
+          ...meta,
+          ...dummyChart15().levelsFreeze![i],
+          lua: dummyChart15().lua![i],
+        })),
+      }),
+    },
+    { upsert: true }
+  );
+  currentChartVer satisfies 16;
 }

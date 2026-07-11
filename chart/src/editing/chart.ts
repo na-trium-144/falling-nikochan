@@ -12,7 +12,6 @@ import { CopyBuffer } from "../legacy/chart15.js";
 import { stepZero } from "../step.js";
 
 export interface CurrentPasswd {
-  p: string | null;
   ph: string | null;
   pbypass: string | null;
 }
@@ -26,7 +25,7 @@ export class ChartEditing extends EventEmitter<EventType> {
     composer: string;
     chartCreator: string;
   };
-  #levels: LevelEditing[];
+  #levels: LevelEditing[] = []; // 変更時にはindexの再設定が必要なので、直接アクセスせずsetterを使うこと
   #currentLevelIndex: number | undefined; // 範囲外にはせず、levelsが空の場合undefined
   #copyBuffer: CopyBuffer;
   #zoom: number;
@@ -52,6 +51,7 @@ export class ChartEditing extends EventEmitter<EventType> {
       convertedFrom?: number;
       currentLevelIndex?: number;
       hasChange?: boolean;
+      undoManager?: unknown[];
     }
   ) {
     super();
@@ -61,7 +61,6 @@ export class ChartEditing extends EventEmitter<EventType> {
     this.#convertedFrom = options.convertedFrom ?? obj.ver;
     this.#cid = options.cid;
     this.#currentPasswd = options.currentPasswd ?? {
-      p: null,
       ph: null,
       pbypass: null,
     };
@@ -75,21 +74,29 @@ export class ChartEditing extends EventEmitter<EventType> {
       composer: obj.composer,
       chartCreator: obj.chartCreator,
     };
-    this.#levels = obj.levelsMeta.map(
-      (_, i) =>
-        new LevelEditing(
-          obj.levelsMeta[i],
-          obj.levelsFreeze[i],
-          obj.lua[i],
-          (type) => this.emit(type),
-          () => this.#offset,
-          this.#luaExecutorRef
-        )
+    this.#setLevels(
+      obj.levelsMeta.map(
+        (_, i) =>
+          new LevelEditing(
+            obj.levelsMeta[i],
+            obj.levelsFreeze[i],
+            obj.lua[i],
+            (type) => this.emit(type),
+            () => this.#offset,
+            this.#luaExecutorRef
+          )
+      )
     );
+    this.#levels.forEach((l, i) => {
+      if (typeof options.undoManager?.[i] === "object") {
+        l.luaEditorInitialUndoManager = options.undoManager[i];
+      }
+    });
+
     this.#copyBuffer = { ...obj.copyBuffer };
     this.#zoom = obj.zoom;
     this.#currentLevelIndex =
-      options.currentLevelIndex ?? (this.#levels.length >= 1 ? 0 : undefined);
+      options.currentLevelIndex ?? (this.levels.length >= 1 ? 0 : undefined);
 
     this.#hasChange = options.hasChange ?? false;
     this.#numEvents = numEvents(this.toObject());
@@ -113,9 +120,9 @@ export class ChartEditing extends EventEmitter<EventType> {
       offset: this.#offset,
       locale: this.#locale,
       ...this.#meta,
-      levelsMeta: this.#levels.map((l) => l.meta),
-      lua: this.#levels.map((l) => [...l.lua]),
-      levelsFreeze: this.#levels.map((l) => ({
+      levelsMeta: this.levels.map((l) => l.meta),
+      lua: this.levels.map((l) => [...l.lua]),
+      levelsFreeze: this.levels.map((l) => ({
         ...l.freeze,
         bpmChanges: l.freeze.bpmChanges.map((c) => ({
           step: c.step,
@@ -148,11 +155,15 @@ export class ChartEditing extends EventEmitter<EventType> {
     return this.#numEvents;
   }
   get levels() {
-    return [...this.#levels] as const;
+    return this.#levels as readonly LevelEditing[];
+  }
+  #setLevels(levels: LevelEditing[]) {
+    this.#levels = levels;
+    this.#levels.forEach((l, i) => (l.index = i));
   }
   get currentLevel() {
     if (this.#currentLevelIndex !== undefined) {
-      return this.#levels[this.#currentLevelIndex];
+      return this.levels[this.#currentLevelIndex];
     } else {
       return undefined;
     }
@@ -163,13 +174,12 @@ export class ChartEditing extends EventEmitter<EventType> {
     freeze: Readonly<LevelFreeze>;
   }) {
     if (this.#currentLevelIndex === undefined) {
-      this.#currentLevelIndex = this.#levels.length;
+      this.#currentLevelIndex = this.levels.length;
     } else {
       this.#currentLevelIndex = this.#currentLevelIndex + 1;
     }
-    this.#levels.splice(
-      this.#currentLevelIndex,
-      0,
+    this.#setLevels([
+      ...this.levels.slice(0, this.#currentLevelIndex),
       new LevelEditing(
         level.min,
         level.freeze,
@@ -177,19 +187,23 @@ export class ChartEditing extends EventEmitter<EventType> {
         (type) => this.emit(type),
         () => this.#offset,
         this.#luaExecutorRef
-      )
-    );
+      ),
+      ...this.levels.slice(this.#currentLevelIndex),
+    ]);
     this.emit("rerender");
     this.emit("change");
     this.emit("levelIndex");
   }
   deleteLevel() {
-    if (this.#currentLevelIndex !== undefined && this.#levels.length > 0) {
-      this.#levels.splice(this.#currentLevelIndex, 1);
-      if (this.#levels.length === 0) {
+    if (this.#currentLevelIndex !== undefined && this.levels.length > 0) {
+      this.#setLevels([
+        ...this.levels.slice(0, this.#currentLevelIndex),
+        ...this.levels.slice(this.#currentLevelIndex + 1),
+      ]);
+      if (this.levels.length === 0) {
         this.#currentLevelIndex = undefined;
-      } else if (this.#currentLevelIndex >= this.#levels.length) {
-        this.#currentLevelIndex = this.#levels.length - 1;
+      } else if (this.#currentLevelIndex >= this.levels.length) {
+        this.#currentLevelIndex = this.levels.length - 1;
       }
       this.emit("rerender");
       this.emit("change");
@@ -199,9 +213,12 @@ export class ChartEditing extends EventEmitter<EventType> {
   moveLevelUp() {
     if (this.#currentLevelIndex !== undefined && this.#currentLevelIndex > 0) {
       const idx = this.#currentLevelIndex;
-      const tmp = this.#levels[idx];
-      this.#levels[idx] = this.#levels[idx - 1];
-      this.#levels[idx - 1] = tmp;
+      this.#setLevels([
+        ...this.levels.slice(0, idx - 1),
+        this.levels[idx],
+        this.levels[idx - 1],
+        ...this.levels.slice(idx),
+      ]);
       this.#currentLevelIndex = idx - 1;
       this.emit("rerender");
       this.emit("change");
@@ -211,12 +228,15 @@ export class ChartEditing extends EventEmitter<EventType> {
   moveLevelDown() {
     if (
       this.#currentLevelIndex !== undefined &&
-      this.#currentLevelIndex < this.#levels.length - 1
+      this.#currentLevelIndex < this.levels.length - 1
     ) {
       const idx = this.#currentLevelIndex;
-      const tmp = this.#levels[idx];
-      this.#levels[idx] = this.#levels[idx + 1];
-      this.#levels[idx + 1] = tmp;
+      this.#setLevels([
+        ...this.levels.slice(0, idx),
+        this.levels[idx + 1],
+        this.levels[idx],
+        ...this.levels.slice(idx + 1),
+      ]);
       this.#currentLevelIndex = idx + 1;
       this.emit("rerender");
       this.emit("change");
@@ -227,7 +247,7 @@ export class ChartEditing extends EventEmitter<EventType> {
     return this.#currentLevelIndex;
   }
   setCurrentLevelIndex(index: number) {
-    if (index >= 0 && index < this.#levels.length) {
+    if (index >= 0 && index < this.levels.length) {
       this.#currentLevelIndex = index;
       this.emit("rerender");
       this.emit("levelIndex");
@@ -264,19 +284,19 @@ export class ChartEditing extends EventEmitter<EventType> {
   setOffset(ofs: number) {
     const oldOffset = this.#offset;
     this.#offset = ofs;
-    for (const level of this.#levels) {
+    for (const level of this.levels) {
       level.setCurrentTimeWithoutOffset(level.current.timeSec + oldOffset);
     }
     this.emit("rerender");
     this.emit("change");
   }
   setCurrentTimeWithoutOffset(timeSecWithoutOffset: number) {
-    for (const level of this.#levels) {
+    for (const level of this.levels) {
       level.setCurrentTimeWithoutOffset(timeSecWithoutOffset);
     }
   }
   setYTDuration(duration: number) {
-    for (const level of this.#levels) {
+    for (const level of this.levels) {
       level.setYTDuration(duration);
     }
   }

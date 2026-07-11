@@ -1,5 +1,5 @@
 import Button from "@/common/button.js";
-import Input from "@/common/input.js";
+import MathInput from "@/common/mathInput.js";
 import { Key } from "@/common/key.js";
 import Mouse from "@icon-park/react/lib/icons/Mouse";
 import CheckBox from "@/common/checkBox.js";
@@ -7,9 +7,12 @@ import Select from "@/common/select";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
 import { ChartEditing } from "@falling-nikochan/chart";
+import type { Ace } from "ace-builds";
+import { RefObject } from "react";
 
 interface Props {
   chart?: ChartEditing;
+  aceSessionRef: RefObject<(Ace.EditSession | null)[]>;
 }
 export default function NoteTab(props: Props) {
   const t = useTranslations("edit.note");
@@ -86,6 +89,9 @@ export default function NoteTab(props: Props) {
       </div>
       <NoteEdit {...props} />
       <span className="flex-1 mb-4 " />
+      <div className="flex flex-row items-baseline mb-2">
+        <UndoRedoButton {...props} />
+      </div>
       <div className="flex flex-row ">
         <CopyPasteButton {...props} />
       </div>
@@ -126,6 +132,45 @@ function CopyPasteButton(props: Props) {
     </>
   );
 }
+function UndoRedoButton(props: Props) {
+  const { chart, aceSessionRef } = props;
+  const t = useTranslations("edit.note");
+  const session =
+    chart?.currentLevelIndex !== undefined
+      ? aceSessionRef.current[chart.currentLevelIndex]
+      : undefined;
+  const undoManager = session?.getUndoManager();
+  // @ts-expect-error accessing undocumented property undoStack
+  const undoCount = undoManager?.$undoStack.length ?? 0;
+  // @ts-expect-error accessing undocumented property redoStack
+  const redoCount = undoManager?.$redoStack.length ?? 0;
+  return (
+    <>
+      <Button
+        text={t("undo")}
+        keyName="Z"
+        onClick={() => {
+          undoManager?.undo(session!);
+        }}
+        disabled={!undoManager?.canUndo()}
+      />
+      <span className="px-2">
+        ×<span className="ml-1">{undoCount}</span>
+      </span>
+      <span className="pl-2 self-stretch my-2 border-l border-current/50" />
+      {redoCount >= 1 && <span className="pr-2">{redoCount}</span>}
+      <Button
+        text={t("redo")}
+        keyName="Y"
+        onClick={() => {
+          undoManager?.redo(session!);
+        }}
+        disabled={!undoManager?.canRedo()}
+      />
+      <HelpIcon>{t.rich("undoHelp", { br: () => <br /> })}</HelpIcon>
+    </>
+  );
+}
 
 function NoteEdit(props: Props) {
   const { chart } = props;
@@ -155,7 +200,7 @@ function NoteEdit(props: Props) {
               </td>
               <td>x =</td>
               <td>
-                <Input
+                <MathInput
                   className="w-20"
                   actualValue={n.hitX.toString()}
                   updateValue={(v) =>
@@ -211,7 +256,7 @@ function NoteEdit(props: Props) {
               </td>
               <td>vx =</td>
               <td>
-                <Input
+                <MathInput
                   className="w-20"
                   actualValue={n.hitVX.toString()}
                   updateValue={(v) =>
@@ -227,7 +272,7 @@ function NoteEdit(props: Props) {
               <td>,</td>
               <td>vy =</td>
               <td>
-                <Input
+                <MathInput
                   className="w-20"
                   actualValue={n.hitVY.toString()}
                   updateValue={(v) =>
@@ -245,7 +290,7 @@ function NoteEdit(props: Props) {
               <td></td>
               <td>|v| =</td>
               <td>
-                <Input
+                <MathInput
                   className="w-20"
                   actualValue={(Math.round(nv * 100) / 100).toString()}
                   updateValue={(v) =>
@@ -264,7 +309,7 @@ function NoteEdit(props: Props) {
               <td>,</td>
               <td>angle =</td>
               <td>
-                <Input
+                <MathInput
                   className="w-20"
                   actualValue={(
                     (Math.atan2(n.hitVY, n.hitVX) / Math.PI) *

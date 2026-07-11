@@ -1,22 +1,29 @@
-import { ChartBrief } from "@falling-nikochan/chart";
+import { ChartBrief, ChartBriefSchema } from "@falling-nikochan/chart";
+import { captureAndWrap, fetchBackend } from "./fetch";
+import * as v from "valibot";
 
 function briefKeyOld(cid: string) {
   return "brief-" + cid;
 }
 const briefCacheName = "brief1";
 
-export async function fetchBrief(
-  cid: string,
-  noCache?: boolean
-): Promise<{ brief?: ChartBrief; ok: boolean; is404: boolean }> {
-  const fetchRes = fetch(process.env.BACKEND_PREFIX + `/api/brief/${cid}`, {
-    cache: noCache ? "no-store" : "default",
-  });
-  const staleLS = localStorage.getItem(briefKeyOld(cid));
-  let stale: string | undefined = undefined;
+// w/や引用符を除いた部分
+export const etagContentRegex = /\d+-[a-zA-Z0-9+/]+=*/;
+
+interface Callbacks {
+  onResult: (brief: ChartBrief & { etag: string }) => void;
+  onNotFound?: () => void;
+  onError?: (e: Error) => void;
+}
+/**
+ * cacheからbriefデータを取得し、あればonResultを呼ぶ。
+ * APIをfetchし、レスポンスが返ってきたら再度onResultを呼ぶ。
+ * APIのレスポンスが404だった場合は、onNotFoundを呼びcacheを消す。
+ * APIのレスポンスがエラーになり、かつcacheデータもない場合、onErrorを呼ぶ。fetchBrief()側でsentryへは送信済み。
+ */
+export async function fetchBrief(cid: string, callbacks: Callbacks) {
   let cache: Cache | undefined = undefined;
   if ("caches" in window) {
-    cache = await window.caches.open(briefCacheName);
     window.caches
       .keys()
       .then((keys) =>
@@ -24,50 +31,102 @@ export async function fetchBrief(
           .filter((k) => k.startsWith("brief") && k !== briefCacheName)
           .forEach((k) => window.caches.delete(k))
       );
-    if (staleLS) {
-      cache.put(`/api/brief/${cid}`, new Response(staleLS));
-      localStorage.removeItem(briefKeyOld(cid));
-    }
-    stale =
-      staleLS ||
-      (await cache.match(`/api/brief/${cid}`).then((res) => res?.text()));
+    cache = await window.caches.open(briefCacheName);
   }
-  if (stale && !noCache) {
-    fetchRes
+  let hasResult = false;
+  let cachePromise: Promise<void> | undefined = undefined;
+
+  try {
+    const staleLS = localStorage.getItem(briefKeyOld(cid));
+    if (staleLS) {
+      const staleLSBrief = v.parse(ChartBriefSchema(), JSON.parse(staleLS));
+      cache?.put(`/api/brief/${cid}`, new Response(staleLS));
+      localStorage.removeItem(briefKeyOld(cid));
+      callbacks.onResult({ ...staleLSBrief, etag: "" });
+      hasResult = true;
+    }
+  } catch (e) {
+    console.error(
+      `Error parsing ${briefKeyOld(cid)}:`,
+      v.isValiError(e) ? v.flatten(e.issues) : e
+    );
+  }
+  if (!hasResult) {
+    cachePromise = cache
+      ?.match(`/api/brief/${cid}`)
       .then(async (res) => {
-        if (res.ok) {
-          cache?.put(`/api/brief/${cid}`, res);
-        } else if (res.status == 404) {
-          cache?.delete(`/api/brief/${cid}`);
-          localStorage.removeItem(briefKeyOld(cid));
+        if (res) {
+          const cacheBrief = v.parse(ChartBriefSchema(), await res.json());
+          callbacks.onResult({
+            ...cacheBrief,
+            etag: res.headers.get("ETag")?.match(etagContentRegex)?.[0] ?? "",
+          });
+          hasResult = true;
         }
       })
-      .catch(() => undefined);
-    return {
-      brief: JSON.parse(stale) as ChartBrief,
-      ok: true,
-      is404: false,
-    };
-  } else {
-    try {
-      const res = await fetchRes;
-      if (res.ok) {
-        cache?.put(`/api/brief/${cid}`, res.clone());
-        const brief = (await res.json()) as ChartBrief;
-        return {
-          brief,
-          ok: true,
-          is404: false,
-        };
-      } else {
-        if (res.status == 404) {
-          cache?.delete(`/api/brief/${cid}`);
-          localStorage.removeItem(briefKeyOld(cid));
-        }
-        return { ok: false, is404: res.status == 404 };
+      .catch((e) => {
+        console.error(
+          `Error parsing cache for ${cid}:`,
+          v.isValiError(e) ? v.flatten(e.issues) : e
+        );
+      });
+  }
+
+  fetchBackend()
+    .url(`/api/brief/${cid}`)
+    .query(
+      briefIsStale(cid)
+        ? // クエリパラメータをセットすることでキャッシュを回避し最新のbriefを取得する。パラメータ自体に意味はない。
+          { refreshKey: localStorage.getItem(briefStaleKey(cid)) }
+        : {}
+    )
+    .get()
+    .notFound(async () => {
+      await cachePromise;
+      if ("caches" in window) {
+        cache?.delete(`/api/brief/${cid}`);
       }
-    } catch {
-      return { ok: false, is404: false };
-    }
+      localStorage.removeItem(briefKeyOld(cid));
+      callbacks.onNotFound?.();
+      hasResult = false;
+    })
+    .res(async (res) => {
+      const result = v.parse(ChartBriefSchema(), await res.clone().json());
+      await cachePromise;
+      callbacks.onResult({
+        ...result,
+        etag: res.headers.get("ETag")?.match(/\d+-[a-zA-Z0-9+/]+=*/)?.[0] ?? "",
+      });
+      hasResult = true;
+      await cache?.put(`/api/brief/${cid}`, res);
+    })
+    .catch(async (e: unknown) => {
+      await cachePromise;
+      e = captureAndWrap(e, { cid });
+      if (!hasResult) {
+        callbacks.onError?.(e as Error);
+      }
+    });
+}
+
+export function briefStaleKey(cid: string) {
+  return `stale-${cid}`;
+}
+/**
+ * 412レスポンスを受け取った場合に、localStorageに時刻を保存
+ * その間fetchBrief()はリクエストにクエリパラメータをセットすることでキャッシュを回避し最新のbriefを取得する。
+ */
+export function refreshBrief(cid: string) {
+  localStorage.setItem(briefStaleKey(cid), String(Date.now()));
+}
+export function briefIsStale(cid: string) {
+  if (
+    localStorage.getItem(briefStaleKey(cid)) &&
+    Date.now() - Number(localStorage.getItem(briefStaleKey(cid))) < 600 * 1000
+  ) {
+    return true;
+  } else {
+    localStorage.removeItem(briefStaleKey(cid));
+    return false;
   }
 }

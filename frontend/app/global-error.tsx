@@ -2,8 +2,8 @@
 import { useEffect } from "react";
 import * as Sentry from "@sentry/nextjs";
 import { CenterBox } from "@/common/box";
-import { ErrorMessage } from "@/common/errorPageComponent";
-import clsx from "clsx/lite";
+import { ClientErrorTitle, ErrorMessage } from "@/common/errorPageComponent";
+import themeInitScript from "@/common/themeInit.js?raw";
 
 // Error boundaries must be Client Components
 
@@ -13,22 +13,24 @@ interface ErrorProps {
 }
 export default function Error(props: ErrorProps) {
   useEffect(() => {
-    Sentry.captureException(props.error);
+    Sentry.captureException(props.error, {
+      extra: { captured: "global-error.tsx" },
+    });
   }, [props.error]);
   // ここに到達するのは error.tsx のレンダリングですらエラーになった場合。
   // ボタンとかは置いても無駄でしょう
   return (
     <html>
-      <body
-        className={clsx(
-          "fn-body",
-          // ThemeProviderのimportも避けて直接書いている。
-          "fn-csr-ready"
-        )}
-      >
+      <body className="fn-body" suppressHydrationWarning>
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: themeInitScript.replace(/\s+/g, " "),
+          }}
+        />
         <div className="fn-fallback-bg" />
-        <CenterBox>
-          <h4 className="fn-heading-box">An error has occurred 😢</h4>
+        <CenterBox classNameInner="flex flex-col items-center">
+          <ClientErrorTitle />
           <ErrorMessage error={props.error} />
         </CenterBox>
       </body>

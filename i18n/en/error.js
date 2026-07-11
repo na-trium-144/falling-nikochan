@@ -2,7 +2,7 @@ export default {
   error: {
     api: {
       // 400
-      generic400: "The parameter is invalid",
+      badRequest: "The parameter is invalid",
       noPasswd: "Password is not specified",
       invalidChartId: "Chart ID is invalid",
       invalidResultParam: "Result parameter is invalid",
@@ -13,33 +13,45 @@ export default {
       notFound: "The specified URL does not exist",
       chartIdNotFound: "The specified chart ID does not exist",
       levelNotFound: "The specified level does not exist",
+      // 405
+      readonlyOnDev:
+        "Modification to the production database is not allowed on the development server",
       // 409
       oldChartVersion: "The chart data version is not up to date",
+      unsupportedChartVersion: "Unsupported chart data version",
       // 410
       noLongerSupportedAPI: "This API is no longer supported",
+      // 412
+      etagMismatch: "Chart data has been updated. Please try again",
       // 413
       tooLargeFile: "File size is too large",
       tooManyEvent: "Too many events in the chart data",
       // 415
       invalidChart: "Invalid chart data format",
+      unsupportedContentEncoding: "Unsupported content encoding",
+      invalidContentEncoding: "Invalid content encoding",
+      // 418
+      noCORSCredentialsOnProd:
+        "Cross-origin authentication using cookie is not allowed on the production server",
       // 429
       tooManyRequest: "Please wait a while and try again",
       // 500
-      imageGenerationFailed: "Failed to generate the image",
-      unsupportedChartVersion: "Unsupported chart data version",
+      unknownApiError: "An error occurred on the server",
       // 499
       fetchError: "Failed to connect to the server (offline?)",
     },
     unknownApiError: "An error occurred on the server",
     noSession: "Failed to load session data",
     chartVersion: "The version of the chart data (ver. {ver}) is invalid",
-    badResponse: "Failed to process the server response",
+    badResponse: "An unknown error occurred",
     ytError: "Error on the YouTube video ({code})",
     noYtId: "No YouTube video is specified",
     seqEmpty: "The chart data is empty",
     errorPage: {
       title: "An error has occurred 😢",
       goHome: "Return to top page",
+      disableTranslation:
+        "Please disable your browser's automatic translation or extensions and try again.",
     },
   },
 };

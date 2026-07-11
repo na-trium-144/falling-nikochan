@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { fetchAsset } from "./fetch";
 
 export type SEType = "hit" | "hitBig" | "beat" | "beat1";
 
@@ -139,14 +140,12 @@ export function useSE(
           ["beat1", audioBeat1],
         ] as const
       ).forEach(([name, audioBuffer]) =>
-        fetch(process.env.ASSET_PREFIX + `/assets/${name}.wav`).then(
-          async (res) => {
-            const aryBuf = await res.arrayBuffer();
+        fetchAsset()
+          .get(`/assets/${name}.wav`)
+          .arrayBuffer(async (aryBuf) => {
             const audio = await audioContext.current!.decodeAudioData(aryBuf);
             audioBuffer.current = audio;
-          },
-          () => undefined
-        )
+          })
       );
       return () => {
         gainNodeHit.current?.disconnect();

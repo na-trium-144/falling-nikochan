@@ -25,8 +25,10 @@ import DropDown from "@/common/dropdown";
 import DownOne from "@icon-park/react/lib/icons/DownOne";
 import { Scrollable } from "@/common/scrollable";
 import { HelpIcon } from "@/common/caption";
-import { APIError } from "@/common/apiError";
+import { APIError, shouldHideStatus } from "@/common/apiError";
 import { LinksOnError } from "@/common/errorPageComponent";
+import { formatErrorMsg, isExpectedError } from "@/common/fetch";
+import * as Sentry from "@sentry/nextjs";
 
 interface MessageProps {
   className?: string;
@@ -73,6 +75,28 @@ export function ReadyMessage(props: MessageProps) {
   });
   const [optionOpen, optionSlideIn, setOptionOpen] =
     useDelayedDisplayState(200);
+
+  useEffect(() => {
+    Sentry.setContext("play.options", {
+      auto: props.auto,
+      enableIOSThru: props.enableIOSThru,
+      enableSE: props.enableSE,
+      audioLatency: props.audioLatency,
+      // displaySpeed: props.displaySpeed,
+      playbackRate: props.playbackRate,
+      userBegin: props.userBegin !== null,
+      autoOffset: props.autoOffset,
+      // userOffset: props.userOffset,
+    });
+  }, [
+    props.auto,
+    props.enableIOSThru,
+    props.enableSE,
+    props.audioLatency,
+    props.playbackRate,
+    props.userBegin,
+    props.autoOffset,
+  ]);
 
   return (
     <CenterBox
@@ -462,7 +486,7 @@ interface MessageProps3 {
   className?: string;
   isTouch: boolean;
   exit: () => void;
-  msg: string | APIError;
+  msg: string | Error;
 }
 export function InitErrorMessage(props: MessageProps3) {
   const t = useTranslations("play.message");
@@ -470,7 +494,7 @@ export function InitErrorMessage(props: MessageProps3) {
 
   const status = props.msg instanceof APIError ? props.msg.status : undefined;
   const message =
-    props.msg instanceof APIError ? props.msg.formatMsg(te) : props.msg;
+    props.msg instanceof Error ? formatErrorMsg(props.msg, te) : props.msg;
 
   return (
     <CenterBox
@@ -478,11 +502,17 @@ export function InitErrorMessage(props: MessageProps3) {
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
     >
-      {status && <h4 className="fn-heading-box">Error {status}</h4>}
-      <p className="mb-3">{message}</p>
-      {props.msg instanceof APIError && props.msg.isServerSide() && (
-        <LinksOnError />
+      {status && !shouldHideStatus(status) && (
+        <h4 className="fn-heading-box">Error {status}</h4>
       )}
+      <p className="mb-3">{message}</p>
+
+      {
+        // play/clientPage.tsx で生成されるstring型のerrorMsgはすべてexpectedのエラー
+        props.msg instanceof Error && !isExpectedError(props.msg) && (
+          <LinksOnError />
+        )
+      }
       <p>
         <Button
           text={t("exit")}

@@ -11,35 +11,92 @@ import {
   onError,
   notFound,
   fetchStatic,
-  fetchBrief,
+  getBrief,
+  sentryBeforeSend,
+  finalRoutePath,
 } from "./src/index.js";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { ImageResponse } from "@vercel/og";
 import { getConnInfo } from "hono/bun";
+import * as Sentry from "@sentry/hono/bun";
+import packageJson from "./package.json" with { type: "json" };
+import { MongoClient } from "mongodb";
+import { createMiddleware } from "hono/factory";
+import { compress } from "hono/compress";
+import { requestId } from "hono/request-id";
+import { structuredLogger } from "@hono/structured-logger";
+import pino from "pino";
 
 const port = 8787;
 
-const app = new Hono<{ Bindings: Bindings }>({ strict: false })
+const rootLogger = pino(
+  { level: "info" },
+  pino.transport({
+    // https://axiom.co/docs/guides/pino
+    target: "@axiomhq/pino",
+    options: {
+      dataset: process.env.AXIOM_DATASET,
+      token: process.env.AXIOM_TOKEN,
+      edge: process.env.AXIOM_EDGE, // us-east-1.aws.edge.axiom.co or eu-central-1.aws.edge.axiom.co
+    },
+  })
+);
+
+const sentryMiddleware = (app) =>
+  Sentry.sentry(app, {
+    dsn: process.env.SENTRY_DSN,
+    release: `${packageJson.version}-bun`,
+    sendDefaultPii: false,
+    normalizeDepth: 11,
+    integrations: [
+      Sentry.extraErrorDataIntegration({ depth: 10 }),
+      Sentry.pinoIntegration({ log: { levels: ["info", "warn", "error"] } }),
+    ],
+    shouldHandleError: () => false,
+    beforeSend: sentryBeforeSend,
+  });
+
+const client = new MongoClient(process.env.MONGODB_URI!);
+await client.connect();
+const db = client.db("nikochan");
+console.log(`connected to ${process.env.MONGODB_URI}`);
+const dbMiddleware = createMiddleware(async (c, next) => {
+  c.set("db", async () => db);
+  await next();
+});
+const fetchBrief = (_e: Bindings, cid: string) => getBrief(db!, cid);
+
+const app = new Hono<{ Bindings: Bindings }>({ strict: false });
+app.use(sentryMiddleware(app));
+app
+  .use(requestId())
+  .use(
+    structuredLogger({
+      createLogger: (c) => rootLogger.child({ requestId: c.var.requestId }),
+      onRequest: (logger, c) => {
+        // /api/chartFileのパスワードがクエリで渡された場合ログから除外
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { p, ph, ...query } = c.req.query();
+        logger.info(
+          {
+            method: c.req.method,
+            path: c.req.path,
+            routePath: finalRoutePath(c)?.path,
+            query,
+          },
+          "request start"
+        );
+      },
+    })
+  )
   .use(logger())
-  .route("/api", await apiApp({ getConnInfo }))
-  .route(
-    "/og",
-    ogApp({
-      ImageResponse,
-      fetchBrief: fetchBrief({ fetchStatic }),
-      fetchStatic,
-    })
-  )
-  .route("/sitemap.xml", sitemapApp)
-  .route("/rss.xml", rssApp)
-  .route(
-    "/share",
-    shareApp({
-      fetchBrief: fetchBrief({ fetchStatic }),
-      fetchStatic,
-    })
-  )
+  .use(compress())
+  .route("/api", await apiApp({ getConnInfo, dbMiddleware }))
+  .route("/og", ogApp({ ImageResponse, fetchBrief, fetchStatic }))
+  .route("/sitemap.xml", await sitemapApp({ dbMiddleware }))
+  .route("/rss.xml", await rssApp({ dbMiddleware }))
+  .route("/share", shareApp({ fetchBrief, fetchStatic }))
   .route("/", redirectApp({ fetchStatic }))
   .use(
     "/*",
@@ -61,7 +118,14 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
     })
   )
   .use(languageDetector())
-  .onError(onError({ fetchStatic }))
+  .onError(
+    onError({
+      fetchStatic,
+      captureException: Sentry.captureException,
+      setTransactionName: (name) =>
+        void Sentry.getCurrentScope().setTransactionName(name),
+    })
+  )
   .notFound(notFound);
 
 export default {

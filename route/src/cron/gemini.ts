@@ -1,3 +1,4 @@
+/*
 import { GoogleGenAI } from "@google/genai";
 import { Bindings } from "../env.js";
 
@@ -86,7 +87,7 @@ export async function generateContent(
 /**
  * Check if the content is safe to post on X (Twitter).
  * Returns null if safe, or a string describing the reason (Gemini's full output) if unsafe.
- */
+ * /
 export async function checkTextSafety(
   env: Bindings,
   content: string
@@ -138,3 +139,4 @@ ${content}
   }
   return reasons.join("\n");
 }
+*/

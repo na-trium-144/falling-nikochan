@@ -9,6 +9,7 @@ import {
   unlinkSync,
 } from "node:fs";
 import createMDX from "@next/mdx";
+import createBundleAnalyzer from "@next/bundle-analyzer";
 import { withSentryConfig } from "@sentry/nextjs";
 import packageJson from "./package.json" with { type: "json" };
 import parentPackageJson from "../package.json" with { type: "json" };
@@ -203,6 +204,11 @@ nextConfig = withLicense(nextConfig, {
         dirname(fileURLToPath(import.meta.resolve(`${pkg}/package.json`)))
     ),
 });
+
+const withBundleAnalyzer = createBundleAnalyzer({
+  enabled: !!process.env.ANALYZE,
+});
+nextConfig = withBundleAnalyzer(nextConfig);
 
 export default withSentryConfig(nextConfig, {
   org: process.env.SENTRY_ORG,

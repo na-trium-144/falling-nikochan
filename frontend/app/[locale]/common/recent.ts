@@ -1,11 +1,16 @@
-function recentKey(key: string) {
+import { CidSchema } from "@falling-nikochan/chart";
+import * as v from "valibot";
+
+export function recentKey(key: string) {
   return "recent-" + key;
 }
 export function getRecent(key: string): string[] {
   try {
-    const items = JSON.parse(localStorage.getItem(recentKey(key)) || "");
-    if (Array.isArray(items) && items.every((b) => typeof b === "string")) {
-      return items;
+    if (localStorage.getItem(recentKey(key))) {
+      return v.parse(
+        v.array(CidSchema()),
+        JSON.parse(localStorage.getItem(recentKey(key))!)
+      );
     }
   } catch {
     //

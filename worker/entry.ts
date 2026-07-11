@@ -6,11 +6,14 @@ import {
   notFound,
   onError,
   redirectApp,
+  ResponseOK,
   shareApp,
 } from "@falling-nikochan/route";
 import { locales } from "@falling-nikochan/i18n/staticMin.js";
 import { TarFileType, TarReader } from "@gera2ld/tarjs";
 import cfBeaconHtml from "./beacon.html?raw";
+import { getMimeType, mimes } from "hono/utils/mime";
+import { structuredLogger } from "@hono/structured-logger";
 
 const e: Bindings = {
   MONGODB_URI: "",
@@ -20,40 +23,60 @@ const e: Bindings = {
 // なぜconsoleが無い?
 declare const self: ServiceWorkerGlobalScope & { console: Console };
 
+function safeClone(a: unknown): unknown {
+  if (a instanceof Error) {
+    // structuredClone(error) は残りのプロパティをクローンせず、JSON.stringify(error) はmessageなどをクローンしないので、明示的に全プロパティのcloneをする
+    return {
+      name: a.name,
+      message: a.message,
+      stack: a.stack,
+      ...Object.fromEntries(
+        Object.entries(a).map(([k, v]) => [k, safeClone(v)])
+      ),
+    };
+  } else {
+    try {
+      return structuredClone(a);
+    } catch {
+      try {
+        return JSON.parse(JSON.stringify(a));
+      } catch {
+        return String(a);
+      }
+    }
+  }
+}
+function transferConsole(level: string, args: unknown[]) {
+  const safeArgs = args.map(safeClone);
+  self.clients.matchAll().then((clients) => {
+    clients.forEach((client) => {
+      client.postMessage({ type: "console", level: "log", args: safeArgs });
+    });
+  });
+}
+
 const originalConsole = self.console;
 self.console = {
   ...originalConsole,
   log: (...args: unknown[]) => {
     originalConsole.log(...args);
-    self.clients.matchAll().then((clients) => {
-      clients.forEach((client) => {
-        client.postMessage(args.map((a) => String(a)).join(" "));
-      });
-    });
+    transferConsole("log", args);
   },
   error: (...args: unknown[]) => {
     originalConsole.error(...args);
-    self.clients.matchAll().then((clients) => {
-      clients.forEach((client) => {
-        client.postMessage(args.map((a) => String(a)).join(" "));
-      });
-    });
+    transferConsole("error", args);
   },
   warn: (...args: unknown[]) => {
     originalConsole.warn(...args);
-    self.clients.matchAll().then((clients) => {
-      clients.forEach((client) => {
-        client.postMessage(args.map((a) => String(a)).join(" "));
-      });
-    });
+    transferConsole("warn", args);
   },
   info: (...args: unknown[]) => {
     originalConsole.info(...args);
-    self.clients.matchAll().then((clients) => {
-      clients.forEach((client) => {
-        client.postMessage(args.map((a) => String(a)).join(" "));
-      });
-    });
+    transferConsole("info", args);
+  },
+  debug: (...args: unknown[]) => {
+    originalConsole.debug(...args);
+    transferConsole("debug", args);
   },
 };
 
@@ -97,7 +120,7 @@ async function fetchStatic(_e: any, url: URL): Promise<Response> {
     return res;
   } else {
     // 通常は全部cacheに入っているはずなのでここに来ることはほぼない
-    console.warn(`${url} is not in cache`);
+    // console.warn(`${url} is not in cache`);
     const res = await fetch(
       (process.env.ASSET_PREFIX || self.origin) + url.pathname
     ).catch(fetchError(e));
@@ -108,6 +131,14 @@ async function fetchStatic(_e: any, url: URL): Promise<Response> {
     } else {
       return res;
     }
+  }
+}
+async function fetchStaticWithThrow(_e: any, url: URL): Promise<ResponseOK> {
+  const res = await fetchStatic(_e, url);
+  if (res.ok) {
+    return res as ResponseOK;
+  } else {
+    throw new Error(`failed to fetch ${url} (${res.status})`, { cause: res });
   }
 }
 
@@ -131,27 +162,13 @@ function getContentType(pathname: string): string {
   } else {
     ext = pathname.split(".").pop()?.toLowerCase();
   }
-  const types: Record<string, string> = {
-    html: "text/html; charset=utf-8",
-    css: "text/css; charset=utf-8",
-    js: "application/javascript; charset=utf-8",
-    mjs: "application/javascript; charset=utf-8",
-    json: "application/json; charset=utf-8",
-    txt: "text/plain; charset=utf-8",
-    svg: "image/svg+xml",
-    png: "image/png",
-    jpg: "image/jpeg",
-    jpeg: "image/jpeg",
-    webp: "image/webp",
-    ico: "image/x-icon",
-    woff: "font/woff",
-    woff2: "font/woff2",
-    wasm: "application/wasm",
-    xml: "application/xml",
-    gz: "application/gzip",
-  };
-  if (ext && ext in types) {
-    return types[ext];
+  const type = getMimeType("." + ext, {
+    ...mimes,
+    wav: "audio/wav",
+    md: "text/markdown; charset=utf-8",
+  });
+  if (type) {
+    return type;
   } else {
     console.error(`Unknown extension ${ext} for path ${pathname}`);
     return "application/octet-stream";
@@ -289,10 +306,14 @@ async function initAssetsCache(config: {
         .split("\n")
         .map((file) => file.replaceAll("[", "%5B").replaceAll("]", "%5D"));
       // パス名にハッシュが入っているので既にキャッシュ済みのものはスキップ
+      // フォントはスキップ (必要なときにダウンロードすればいい)
       const toFetch = (
         await Promise.all(
           nextFiles.map(async (pathname) =>
-            (await cache.match(pathname)) || (await tmp.match(pathname))
+            pathname.endsWith(".woff") ||
+            pathname.endsWith(".woff2") ||
+            (await cache.match(pathname)) ||
+            (await tmp.match(pathname))
               ? null
               : pathname
           )
@@ -321,11 +342,11 @@ async function initAssetsCache(config: {
               progressSize += size;
               sendInitState("updating", progressNum, totalNum, progressSize);
             } else {
-              console.error(`failed to fetch ${pathname}: ${res.status}`);
+              // console.error(`failed to fetch ${pathname}: ${res.status}`);
               failed = true;
             }
-          } catch (err) {
-            console.error(`failed to fetch ${pathname}: ${err}`);
+          } catch {
+            // console.error(`failed to fetch ${pathname}: ${err}`);
             failed = true;
           }
         })
@@ -343,8 +364,8 @@ async function initAssetsCache(config: {
         downloadNextAssets(),
       ]);
       allPathnames = [...tarPathnames, ...nextPathnames];
-    } catch (err) {
-      console.error(err);
+    } catch {
+      // console.error(err);
       return sendInitState("failed");
     }
 
@@ -353,7 +374,7 @@ async function initAssetsCache(config: {
       await Promise.all(
         keys.map(async (req) => {
           if (!allPathnames.includes(new URL(req.url).pathname)) {
-            console.warn(`delete ${req.url}`);
+            // console.warn(`delete ${req.url}`);
             await cache.delete(req);
           }
         })
@@ -439,22 +460,53 @@ async function fetchAPI(input: string | URL | Request, init?: RequestInit) {
         signal: inputReq.signal,
       }
     );
-    const resAlt = await fetch(altReq).catch(fetchError(e));
-    if (resAlt.ok) {
-      return resAlt;
+    try {
+      const resAlt = await fetch(altReq).catch(fetchError(e));
+      if (resAlt.ok) {
+        return resAlt;
+      }
+    } catch {
+      // pass
     }
   }
   return res;
 }
 const app = new Hono({ strict: false })
+  .use(
+    structuredLogger({
+      createLogger: () => console,
+      onRequest: () => undefined,
+      onResponse: () => undefined,
+    })
+  )
+  .use(async (c, next) => {
+    await next();
+    if (c.res.headers.get("Content-Type")?.includes("text/html")) {
+      c.res = returnBody(
+        (await c.res.text()).replace("</body>", cfBeaconHtml + "</body>"),
+        c.res.headers
+      );
+    }
+  })
   .route(
     "/share",
     // fetch済みの新しいページ + 古いサーバーのコード ではバグを起こす可能性があるため、
     // /shareページ自体についてはfetchせずcacheにあるもののみを使用する
     shareApp({
-      fetchBrief: (_e, cid: string /*, _ctx */) =>
-        fetchAPI(self.origin + `/api/brief/${cid}`),
-      fetchStatic,
+      fetchBrief: async (_e, cid) => {
+        const res = await fetchAPI(self.origin + `/api/brief/${cid}`);
+        if (res.ok) {
+          return {
+            brief: await res.json(),
+            etag: res.headers.get("ETag") ?? "",
+          };
+        } else {
+          throw new Error(`failed to fetch /api/brief/${cid} (${res.status})`, {
+            cause: res,
+          });
+        }
+      },
+      fetchStatic: fetchStaticWithThrow,
       languageDetector,
     })
   )
@@ -462,7 +514,7 @@ const app = new Hono({ strict: false })
     "/",
     redirectApp({
       languageDetector,
-      fetchStatic,
+      fetchStatic: fetchStaticWithThrow,
     })
   )
   .all("/api/*", (c) => fetchAPI(c.req.raw))
@@ -520,7 +572,6 @@ const app = new Hono({ strict: false })
       });
     }
 
-    let res: Response | undefined = undefined;
     if (
       !c.req.path.includes(".") ||
       c.req.path.endsWith(".txt") ||
@@ -538,25 +589,22 @@ const app = new Hono({ strict: false })
         ).catch(fetchError(e));
         clearTimeout(timeout);
         if (remoteRes.ok) {
-          res = returnBody(remoteRes.body, remoteRes.headers);
+          return returnBody(remoteRes.body, remoteRes.headers);
         }
       } catch {
         // pass
       }
     }
-    if (!res) {
-      res = await fetchStatic(null, new URL(c.req.url));
-    }
-    if (res.headers.get("Content-Type")?.includes("text/html")) {
-      res = returnBody(
-        (await res.text()).replace("</body>", cfBeaconHtml + "</body>"),
-        res.headers
-      );
-    }
-    return res;
+    return await fetchStatic(null, new URL(c.req.url));
   })
   .use(languageDetector)
-  .onError(onError({ fetchStatic }))
+  .onError(
+    onError({
+      fetchStatic: fetchStaticWithThrow,
+      captureException: null,
+      setTransactionName: null,
+    })
+  )
   .notFound(notFound);
 
 self.addEventListener("install", () => {

@@ -9,7 +9,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SmallDomainShare } from "./common/small.jsx";
 import { ChartList } from "./main/chartList.jsx";
-import { FesData, FestivalLink, useFestival } from "./common/festival.jsx";
+import { FestivalLink, useFestival } from "./common/festival.jsx";
 import { useSharePageModal } from "./common/sharePageModal.jsx";
 import { ButtonHighlight } from "./common/button.jsx";
 import Youtube from "@icon-park/react/lib/icons/Youtube.js";
@@ -18,13 +18,20 @@ import FormOne from "@icon-park/react/lib/icons/FormOne.js";
 import { ExternalLink } from "./common/extLink.js";
 import { XLogo } from "./common/x.js";
 import Github from "@icon-park/react/lib/icons/Github.js";
-import Code from "@icon-park/react/lib/icons/Code.js";
 import Mail from "@icon-park/react/lib/icons/Mail.js";
+import Code from "@icon-park/react/lib/icons/Code.js";
+import Tool from "@icon-park/react/lib/icons/Tool.js";
 import { PCHeader2 } from "./common/header.js";
 import { IrasutoyaLikeGrass } from "./common/irasutoyaLike.js";
 import { useDisplayMode } from "./scale.js";
 import { DemoChart, demoCharts, DemoDetail, TopDemo } from "./topDemo.js";
 import { Box } from "./common/box.js";
+import { LazyImg } from "./common/lazyImage.js";
+import Search from "@icon-park/react/lib/icons/Search.js";
+import { useRouter } from "next/navigation.js";
+import * as v from "valibot";
+import { CidSchema } from "@falling-nikochan/chart";
+import { fetchBackend } from "./common/fetch.js";
 
 interface Props {
   locale: string;
@@ -35,11 +42,10 @@ export default function TopPage(props: Props) {
   const { openModal, openShareInternal } = useSharePageModal();
   const fes = useFestival();
 
-  const { isMobileMain, screenWidth, screenHeight, rem, statusScale } =
+  const { isMobileMain, isMobileGame, screenHeight, rem, statusScale } =
     useDisplayMode();
-  const isMobilePlay = screenWidth <= screenHeight;
   // 画面幅が一定以下 or 画面が縦長 のときデモ画面をモバイルレイアウトにする
-  const isMobileEither = isMobileMain || isMobilePlay;
+  const isMobileEither = isMobileMain || isMobileGame;
   const isSafari = useSafariDetector();
   const grassRefNear = useRef<HTMLDivElement | SVGSVGElement>(null);
   const grassRefFar = useRef<HTMLDivElement | SVGSVGElement>(null);
@@ -100,6 +106,33 @@ export default function TopPage(props: Props) {
     }
     // initAnimがtrueになる瞬間にも再実行する必要がある
   }, [isSafari, initAnim, rem]);
+
+  const [searchText, setSearchText] = useState<string>("");
+  const router = useRouter();
+  // cidの検索中にsearchTextが変わる可能性もある → 見つからなかったcidを入れ、searchText===cidNotFoundなら見つかりませんでしたを表示する
+  const [cidNotFound, setCidNotFound] = useState<string | null>(null);
+  const gotoCId = (cid: string) => {
+    fetchBackend()
+      .get(`/api/brief/${cid}`)
+      .notFound(() => {
+        setCidNotFound(cid);
+      })
+      .res(() => {
+        if (isMobileMain) {
+          openShareInternal(cid);
+        } else {
+          openModal(cid);
+        }
+      });
+  };
+  const searchParams = new URLSearchParams({ search: searchText });
+  let searchHash = "";
+  if (!isMobileMain) {
+    // スマホでは検索欄にフォーカスしたらソフトキーボードで結果が隠れて邪魔なのでは。
+    searchHash = "#search";
+  }
+  const searchURL =
+    `/${locale}/main/play?` + searchParams.toString() + searchHash;
 
   return (
     <main
@@ -174,7 +207,7 @@ export default function TopPage(props: Props) {
       <div
         id="top"
         className={clsx(
-          "w-full h-screen flex items-center justify-center",
+          "w-full h-screen min-h-max flex items-center justify-center",
           "flex-col demo-wide:flex-row-reverse"
         )}
       >
@@ -197,7 +230,7 @@ export default function TopPage(props: Props) {
             className={clsx(
               "w-full max-w-main",
               "flex flex-col items-center text-center",
-              "justify-start px-3 gap-6",
+              "justify-start px-3 py-6 gap-6",
               "demo-wide:justify-center demo-wide:pl-12 demo-wide:pr-0",
               "min-[64rem]:gap-8 min-[82rem]:gap-12"
             )}
@@ -229,6 +262,54 @@ export default function TopPage(props: Props) {
               <ButtonHighlight />
               {t("playNow")}
             </Link>
+            <div className="flex flex-col items-center w-full gap-1">
+              <div
+                className={clsx(
+                  "fn-flat-button fn-selected fn-plain rounded-sq-2xl w-full max-w-120 main-wide:max-w-160",
+                  "has-focus:shadow-sm hover:shadow-sm shadow-slate-500/50 dark:shadow-stone-950/50"
+                )}
+              >
+                <span className="fn-glass-1" />
+                <span className="fn-glass-2" />
+                <ButtonHighlight />
+                <input
+                  className={clsx(
+                    "w-full font-title text-base min-[64rem]:text-xl p-3",
+                    "border-0 outline-0! bg-transparent appearance-none rounded-none"
+                  )}
+                  placeholder={t("play.searchPlaceholder")}
+                  value={searchText}
+                  onChange={(e) => {
+                    setSearchText(e.target.value);
+                    setCidNotFound(null);
+                    if (v.safeParse(CidSchema(), e.target.value).success) {
+                      gotoCId(e.target.value);
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    e.stopPropagation();
+                    if (e.key === "Enter") {
+                      router.push(searchURL);
+                    }
+                  }}
+                />
+                <Link
+                  href={searchURL}
+                  className="absolute right-1.5 inset-y-0 my-auto fn-icon-button h-max"
+                  prefetch={process.env.PREFETCH as "auto"}
+                >
+                  <Search className="text-lg min-[64rem]:text-2xl self-center" />
+                </Link>
+              </div>
+              <span
+                className={clsx(
+                  "text-red-500",
+                  cidNotFound !== searchText && "invisible"
+                )}
+              >
+                {t("play.cidNotFound", { cid: cidNotFound ?? "" })}
+              </span>
+            </div>
             <RedirectedWarning />
             <PWAInstallMain />
           </section>
@@ -284,7 +365,7 @@ export default function TopPage(props: Props) {
 
       <Features locale={locale} />
       <hr className="fn-hr" />
-      <PoliciesAndLinks locale={locale} fes={fes} />
+      <PoliciesAndLinks locale={locale} />
 
       <div className="flex-none basis-mobile-footer no-pc" />
       <MobileFooter
@@ -297,7 +378,7 @@ export default function TopPage(props: Props) {
   );
 }
 
-function DeferredEMail() {
+export function DeferredEMail() {
   const [mailAddress, setMailAddress] = useState<string>("");
   const deferShowMail = () =>
     setMailAddress(atob("bmlrb2NoYW5hYWExNDRAZ21haWwuY29t"));
@@ -344,23 +425,10 @@ export function Features({ locale }: { locale: string }) {
   const t = useTranslations("main");
   return (
     <>
-      <section
-        id="feature-play"
-        className={clsx(
-          "w-full max-w-main flex",
-          "flex-col gap-4 mb-8 px-3",
-          "main-wide:flex-row main-wide:gap-4 main-wide:mb-12 main-wide:pl-12 main-wide:pr-0"
-        )}
-      >
-        <div
-          className={clsx(
-            "flex-1 flex flex-col items-center justify-center text-center"
-          )}
-        >
-          <h2 className="fn-heading-sect text-3xl mb-4">
-            {t("howToPlay.title")}
-          </h2>
-          <div className="mb-4 space-y-2">
+      <section id="feature-play" className="fn-feature mb-8 main-wide:mb-12">
+        <div>
+          <h2 className="fn-heading-sect text-3xl">{t("howToPlay.title")}</h2>
+          <div className="space-y-2">
             <p>{t("howToPlay.content1")}</p>
             <p>{t("howToPlay.content3")}</p>
             <p>{t("howToPlay.content5")}</p>
@@ -389,48 +457,33 @@ export function Features({ locale }: { locale: string }) {
             </Link>
           </div>
         </div>
-        <Box
-          classNameOuter="w-full main-wide:w-3/7 main-wide:-mr-3"
-          padding={4.5}
-        >
-          <div className="relative w-full aspect-[1.6] overflow-hidden">
-            <img
-              src={
-                process.env.ASSET_PREFIX +
-                "/assets/lp-play.jpg" +
-                process.env.ASSET_LP
-              }
-              className="absolute bottom-[10%] left-[-1%] w-[70%]"
-            />
-            <img
-              src={
-                process.env.ASSET_PREFIX +
-                "/assets/lp-play-mobile.jpg" +
-                process.env.ASSET_LP
-              }
-              className="absolute right-[-4%] top-0 h-[105%] rotate-3 origin-top-right"
-            />
-          </div>
+        <Box>
+          <LazyImg
+            src={
+              process.env.ASSET_PREFIX +
+              "/assets/lp-play.jpg" +
+              process.env.ASSET_LP
+            }
+            className="absolute bottom-[10%] left-[-1%] w-[70%]"
+          />
+          <LazyImg
+            src={
+              process.env.ASSET_PREFIX +
+              "/assets/lp-play-mobile.jpg" +
+              process.env.ASSET_LP
+            }
+            className="absolute right-[-4%] top-0 h-[105%] rotate-3 origin-top-right"
+          />
         </Box>
       </section>
 
       <section
         id="feature-edit"
-        className={clsx(
-          "w-full max-w-main flex items-center",
-          "flex-col gap-4 mb-8 px-3",
-          "main-wide:flex-row-reverse main-wide:gap-4 main-wide:mb-12 main-wide:pl-0 main-wide:pr-12"
-        )}
+        className="fn-feature fn-reverse mb-8 main-wide:mb-12"
       >
-        <div
-          className={clsx(
-            "flex-1 flex flex-col items-center justify-center text-center"
-          )}
-        >
-          <h2 className="fn-heading-sect text-3xl mb-4">
-            {t("howToEdit.title")}
-          </h2>
-          <div className="mb-4 space-y-2">
+        <div>
+          <h2 className="fn-heading-sect text-3xl">{t("howToEdit.title")}</h2>
+          <div className="space-y-2">
             <p>{t("howToEdit.content1")}</p>
             <p>
               {t.rich("howToEdit.content2", {
@@ -462,17 +515,14 @@ export function Features({ locale }: { locale: string }) {
             {t("editNow")}
           </Link>
         </div>
-        <Box
-          classNameOuter="w-full main-wide:w-3/7 main-wide:-ml-3"
-          padding={4.5}
-        >
-          <img
+        <Box>
+          <LazyImg
             src={
               process.env.ASSET_PREFIX +
               "/assets/lp-edit.jpg" +
               process.env.ASSET_LP
             }
-            className="w-full"
+            className="absolute inset-0 w-full h-auto my-auto!"
           />
         </Box>
       </section>
@@ -480,24 +530,104 @@ export function Features({ locale }: { locale: string }) {
   );
 }
 
+export function ContactFormLink() {
+  const t = useTranslations("main");
+  return (
+    <>
+      <FormOne className="inline-block align-middle mr-1" />
+      <ExternalLink href="https://forms.gle/3PVFRA7nUtXSHb8TA">
+        {t("links.contactForm")}
+      </ExternalLink>
+    </>
+  );
+}
+export function YouTubeLink() {
+  const t = useTranslations("main");
+  return (
+    <>
+      <Youtube className="inline-block align-middle mr-1" theme="filled" />
+      <ExternalLink href="https://www.youtube.com/@nikochan144">
+        <span className="no-mobile">{t("links.officialChannel")}</span>
+        <span className="no-pc">{t("links.officialChannelShort")}</span>
+      </ExternalLink>
+    </>
+  );
+}
+export function XLink({ small }: { small?: boolean }) {
+  const t = useTranslations("main");
+  return (
+    <>
+      <XLogo className="mr-1" />
+      <ExternalLink href="https://twitter.com/nikochan144">
+        {small ? (
+          <span>{t("links.officialAccountShort")}</span>
+        ) : (
+          <>
+            <span className="no-mobile">{t("links.officialAccount")}</span>
+            <span className="no-pc">{t("links.officialAccountShort")}</span>
+          </>
+        )}
+      </ExternalLink>
+    </>
+  );
+}
+export function GitHubLink({ small }: { small?: boolean }) {
+  return (
+    <>
+      <Github className="inline-block align-middle mr-1" />
+      <span className="mr-1">GitHub:</span>
+      <ExternalLink href="https://github.com/na-trium-144/falling-nikochan">
+        {!small && <span className="no-mobile">na-trium-144/</span>}
+        <span>falling-nikochan</span>
+      </ExternalLink>
+    </>
+  );
+}
+export function APIDocsLink({ small }: { small?: boolean }) {
+  const t = useTranslations("main");
+  return (
+    <>
+      <Code className="inline-block align-middle mr-1" />
+      <a className="fn-link-1" href={process.env.BACKEND_PREFIX + "/api"}>
+        {small ? (
+          <span>{t("links.apiReferenceShort")}</span>
+        ) : (
+          <>
+            <span className="no-mobile">{t("links.apiReference")}</span>
+            <span className="no-pc">{t("links.apiReferenceShort")}</span>
+          </>
+        )}
+      </a>
+    </>
+  );
+}
+export function DevPageLink({ locale }: { locale: string }) {
+  const t = useTranslations("main");
+  return (
+    <>
+      <Tool className="inline-block align-middle mr-1" />
+      <Link
+        className="fn-link-1"
+        href={`/${locale}/dev`}
+        prefetch={process.env.PREFETCH as "auto"}
+      >
+        {t("links.devPage")}
+      </Link>
+    </>
+  );
+}
 export function PoliciesAndLinks({
   locale,
-  fes,
+  // fes,
 }: {
   locale: string;
-  fes?: FesData;
+  // fes?: FesData;
 }) {
   const t = useTranslations("main");
   return (
     <>
-      <section
-        className={clsx(
-          "w-full max-w-main flex",
-          "flex-col px-3 gap-6 mb-3",
-          "main-wide:flex-row main-wide:px-12 main-wide:gap-12 main-wide:mb-24"
-        )}
-      >
-        <div className="basis-1/2 flex flex-col items-center justify-center text-center">
+      <section className="fn-policies-and-links mb-3 main-wide:mb-24">
+        <div>
           <h2 className="fn-heading-sect text-2xl mb-3">
             {t("policies.title")}
           </h2>
@@ -518,60 +648,41 @@ export function PoliciesAndLinks({
             />
           </Link>
         </div>
-        <div className="basis-1/2 flex flex-col items-center justify-center text-center">
-          <h2 className="fn-heading-sect text-2xl mb-3">{t("links.title")}</h2>
+        <div>
+          <h2 className="fn-heading-sect text-2xl mb-3">
+            {t("links.contactLinks")}
+          </h2>
           <ul className="list-disc ml-6 text-left space-y-1">
             <li>
-              <FormOne className="inline-block align-middle mr-1" />
-              <ExternalLink href="https://forms.gle/3PVFRA7nUtXSHb8TA">
-                {t("links.contactForm")}
-              </ExternalLink>
+              <ContactFormLink />
+            </li>
+            {/*<li>
+              YouTubeは問い合わせ用リンクではない
+              ソーシャルリンクとしてもっと目立つところに置きたいかも?
+              <YouTubeLink />
+            </li>*/}
+            <li>
+              <XLink />
+            </li>
+            <li>
+              <GitHubLink />
             </li>
             <li>
               <DeferredEMail />
             </li>
-            <li>
-              <Youtube
-                className="inline-block align-middle mr-1"
-                theme="filled"
-              />
-              <ExternalLink href="https://www.youtube.com/@nikochan144">
-                <span className="no-mobile">{t("links.officialChannel")}</span>
-                <span className="no-pc">{t("links.officialChannelShort")}</span>
-              </ExternalLink>
-            </li>
-            <li>
-              <XLogo className="mr-1" />
-              <ExternalLink href="https://twitter.com/nikochan144">
-                <span className="no-mobile">{t("links.officialAccount")}</span>
-                <span className="no-pc">{t("links.officialAccountShort")}</span>
-              </ExternalLink>
-            </li>
-            <li>
-              <Github className="inline-block align-middle mr-1" />
-              <span className="mr-1">GitHub:</span>
-              <ExternalLink href="https://github.com/na-trium-144/falling-nikochan">
-                <span className="no-mobile">na-trium-144/</span>
-                <span>falling-nikochan</span>
-              </ExternalLink>
-            </li>
-            <li>
-              <Code className="inline-block align-middle mr-1" />
-              <ExternalLink href="/api" forceColor>
-                <span className="no-mobile">{t("links.apiReference")}</span>
-                <span className="no-pc">{t("links.apiReferenceShort")}</span>
-              </ExternalLink>
-            </li>
-            <li>
+            {/*<li>
+              <APIDocsLink />
+            </li>*/}
+            {/*<li>
               <ExternalLink href="https://utcode.net">
                 {t("links.aboutUTCode")}
               </ExternalLink>
-            </li>
-            {fes?.num && (
+            </li>*/}
+            {/*fes?.num && (
               <li>
                 <FestivalLink {...fes} />
               </li>
-            )}
+            )*/}
           </ul>
         </div>
       </section>

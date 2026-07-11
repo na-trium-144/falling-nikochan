@@ -15,9 +15,7 @@ export function dummyLuaExecutor(
 ): { current: LuaExecutor } {
   return {
     current: {
-      stdout: [],
-      err: [],
-      errLine: null,
+      result: null,
       running: false,
       exec,
       abortExec,

@@ -1,26 +1,41 @@
 import { Hono } from "hono";
-import { Bindings, cacheControl } from "../env.js";
+import { Bindings } from "../env.js";
 import { env } from "hono/adapter";
 import { getCookie, setCookie } from "hono/cookie";
 import { getChartEntryCompressed, getPUserHash } from "./chart.js";
 import { randomBytes } from "node:crypto";
-import { MongoClient } from "mongodb";
+import { Db } from "mongodb";
 import { CidSchema } from "@falling-nikochan/chart";
 import * as v from "valibot";
 import { HTTPException } from "hono/http-exception";
 import { describeRoute, resolver, validator } from "hono-openapi";
-import { errorLiteral } from "../error.js";
+import {
+  errorLiteral,
+  sValidatorHook,
+  validationErrorSchema,
+} from "../error.js";
+import {
+  getPasswdParamsFromAuthHeader,
+  plainPasswdHeaderDoc,
+  PlainPasswdParamSchema,
+} from "./passwdAuth.js";
 
 /**
  * chartFile のコメントを参照
  */
-const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
+const hashPasswdApp = new Hono<{
+  Bindings: Bindings;
+  Variables: { db: () => Promise<Db> };
+}>({
+  strict: false,
+}).get(
   "/:cid",
   describeRoute({
     description:
       "Generate a unique hash of the password to be used when accessing the chart. " +
-      "The correct password for the chart is required. " +
+      "The correct password for the chart is required (query p or Authorization header). " +
       "The hashed password will be different for each client and each chart (due to the pUserSalt cookie).",
+    parameters: [plainPasswdHeaderDoc],
     responses: {
       200: {
         description:
@@ -34,16 +49,25 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           "Set-Cookie": {
             description:
               "Sets the pUserSalt cookie if it was not present in the request.",
-            // @ts-expect-error type OpenAPIV3_1.SchemaObject is not assignable to type OpenAPIV3.SchemaObject... why?
-            schema: (await resolver(v.string()).toOpenAPISchema()).schema,
+            schema: { type: "string" },
+          },
+          "Cache-Control": {
+            description: `no-store`,
+            schema: { type: "string" },
           },
         },
       },
       400: {
-        description: "invalid chart id or password not specified",
+        description:
+          "invalid chart id or parameter, or password not specified in the chart data",
         content: {
           "application/json": {
-            schema: resolver(v.object({ message: v.string() })),
+            schema: resolver(
+              v.union([
+                await validationErrorSchema(),
+                await errorLiteral("badRequest", "noPasswd"),
+              ])
+            ),
           },
         },
       },
@@ -65,17 +89,27 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       },
     },
   }),
-  validator("param", v.object({ cid: CidSchema() })),
+  validator("param", v.object({ cid: CidSchema() }), sValidatorHook()),
   validator(
     "query",
     v.object({
-      p: v.pipe(v.string(), v.minLength(1), v.description("plain password")),
-    })
+      p: v.optional(PlainPasswdParamSchema()),
+    }),
+    sValidatorHook()
   ),
-  validator("cookie", v.object({ pUserSalt: v.optional(v.string()) })),
+  validator(
+    "cookie",
+    v.object({ pUserSalt: v.optional(v.string()) }),
+    sValidatorHook()
+  ),
   async (c) => {
     const { cid } = c.req.valid("param");
-    const { p } = c.req.valid("query");
+    const { p } =
+      getPasswdParamsFromAuthHeader(c.req.header("Authorization")) ??
+      c.req.valid("query");
+    if (p === undefined) {
+      throw new HTTPException(400, { message: "badRequest" });
+    }
     let pUserSalt: string;
     const newUserSalt = () =>
       randomBytes(16)
@@ -109,23 +143,17 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     } else {
       throw new Error("SECRET_SALT not set in production environment!");
     }
-    const client = new MongoClient(env(c).MONGODB_URI);
-    try {
-      await client.connect();
-      const db = client.db("nikochan");
-      const entry = await getChartEntryCompressed(db, cid, {
-        rawPasswd: p,
-        pSecretSalt,
+    const db = await c.get("db")();
+    const entry = await getChartEntryCompressed(db, cid, {
+      rawPasswd: p,
+      pSecretSalt,
+    });
+    if (entry.pServerHash) {
+      return c.text(await getPUserHash(entry.pServerHash, pUserSalt), 200, {
+        "cache-control": "no-store",
       });
-      if (entry.pServerHash) {
-        return c.text(await getPUserHash(entry.pServerHash, pUserSalt), 200, {
-          "cache-control": cacheControl(env(c), null),
-        });
-      } else {
-        throw new HTTPException(400, { message: "noPasswd" });
-      }
-    } finally {
-      await client.close();
+    } else {
+      throw new HTTPException(400, { message: "noPasswd" });
     }
   }
 );

@@ -49,7 +49,6 @@ import {
   ChartEditSchema14,
   ChartMinSchema14,
   ChartUntil14,
-  ChartUntil14Min,
   convertTo14Min,
   convertToMin14,
 } from "./legacy/chart14.js";
@@ -73,6 +72,7 @@ import {
   Chart15,
   ChartSchema15,
   ChartUntil15,
+  ChartUntil15Min,
   convertTo15,
   convertToPlay15,
   Level15Freeze,
@@ -196,7 +196,14 @@ export async function convertToLatest(chart: ChartUntil15): Promise<ChartEdit> {
     chart = await convertTo15(chart as ChartUntil14);
   return chart;
 }
+/*
+サーバーはchartデータをjsonにシリアライズしてから保存しており、
+jsonシリアライズ可能ではないinfinityなどが含まれると保存はできて読み込みができないということが起きる。
+それを防ぐためjsonシリアライズを通してからバリデーションする。
+(TODO)そもそも保存時にjson化すべきでない。
+*/
 export async function validateChart(chart: ChartUntil15): Promise<ChartEdit> {
+  chart = JSON.parse(JSON.stringify(chart));
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   chart = await convertToLatest(chart);
   chart satisfies Chart15;
@@ -204,6 +211,7 @@ export async function validateChart(chart: ChartUntil15): Promise<ChartEdit> {
   return { ...chart, ver: currentChartVer };
 }
 export function validateChartWithoutConvert(chart: ChartUntil15): ChartUntil15 {
+  chart = JSON.parse(JSON.stringify(chart));
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   switch (chart.ver) {
     case 16:
@@ -221,13 +229,22 @@ export function validateChartWithoutConvert(chart: ChartUntil15): ChartUntil15 {
   }
 }
 export async function validateChartMin(
-  chart: ChartUntil14Min
-): Promise<Chart14Min> {
+  chart: ChartUntil15Min
+): Promise<Chart14Min | Chart15> {
+  chart = JSON.parse(JSON.stringify(chart));
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
-  if (chart.ver !== 14) chart = await convertTo14Min(chart as ChartUntil13Min);
-  chart satisfies Chart14Min;
-  chart = v.parse(ChartMinSchema14(), chart);
-  return { ...chart, ver: 14 };
+  if (chart.ver >= 15) {
+    // if(chart.ver !== 15 &&chart.ver !== 16)
+    // chart satisfies Chart15;
+    chart = v.parse(ChartSchema15(), chart);
+    return { ...chart, ver: 16 };
+  } else {
+    if (chart.ver !== 14)
+      chart = await convertTo14Min(chart as ChartUntil13Min);
+    chart satisfies Chart14Min;
+    chart = v.parse(ChartMinSchema14(), chart);
+    return { ...chart, ver: 14 };
+  }
 }
 
 export async function hash(text: string) {
@@ -241,7 +258,7 @@ export async function hash(text: string) {
 }
 
 /**
- * Calculates hash of a level using object-hash library.
+ * Calculates hash of a level.
  * This ensures consistent hashing regardless of property order.
  * Normalizes all Step types to ensure fractions are in simplest form.
  * @param level Level13Edit to hash

@@ -4,21 +4,32 @@ import clsx from "clsx/lite";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { Fragment, RefObject, useEffect, useRef, useState } from "react";
+import {
+  Fragment,
+  RefObject,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { SlimeSVG } from "@/common/slime.js";
-import { useStandaloneDetector } from "@/common/pwaInstall.js";
+import {
+  useInsideFrameDetector,
+  useStandaloneDetector,
+} from "@/common/pwaInstall.js";
 import { IndexMain } from "./main.js";
-import { getRecent, updateRecent } from "@/common/recent.js";
+import { getRecent, recentKey, updateRecent } from "@/common/recent.js";
 import { TabKeys } from "@/common/footer.jsx";
 import { BadgeStatus, getBadge, LevelBadge } from "@/common/levelBadge.jsx";
-import { getBestScore } from "@/common/bestScore.js";
+import { bestKey, getBestScore } from "@/common/bestScore.js";
 import { useSharePageModal } from "@/common/sharePageModal.jsx";
 import { fetchBrief } from "@/common/briefCache.js";
 import { useResizeDetector } from "react-resize-detector";
-import { useDisplayMode, useInsideFrameDetector } from "@/scale.jsx";
 import { ButtonHighlight } from "@/common/button.jsx";
-import { APIError } from "@/common/apiError.js";
 import { Scrollable } from "@/common/scrollable.js";
+import { captureAndWrap, fetchBackend, formatError } from "@/common/fetch.js";
+import * as v from "valibot";
+import { useDisplayMode } from "@/scale.js";
 
 interface PProps {
   locale: string;
@@ -83,7 +94,7 @@ export interface ChartLineBrief {
 interface Props {
   classNameOuter?: string;
   type?: ChartListType;
-  briefs?: ChartLineBrief[] | APIError | undefined;
+  briefs?: ChartLineBrief[] | Error | undefined | "loading" | "empty"; // undefined is loading
   fetchAll?: boolean;
   fixedRows?: number; // 表示数を固定する
   containerHeight?: number;
@@ -93,8 +104,8 @@ interface Props {
   dateDiff?: boolean;
   search?: boolean;
   href: (cid: string) => string;
-  onClick?: (cid: string, brief?: ChartBrief) => void;
-  onClickMobile?: (cid: string, brief?: ChartBrief) => void;
+  onClick?: (cid: string) => void;
+  onClickMobile?: (cid: string) => void;
   newTab?: boolean;
   moreHref?: string | null;
   onMoreClick?: () => void;
@@ -108,55 +119,91 @@ export function ChartList(props: Props) {
 
   // props.briefs が初期値 (prerenderされたsample譜面リストなどの場合はすでにfetch済みのbriefを渡し、そうでない場合はChartList内でfetchする)
   const [briefs, setBriefs] = useState<
-    (ChartLineBrief | null)[] | APIError | undefined
-  >(props.briefs || undefined);
-  const prevPropBriefs = useRef<ChartLineBrief[] | APIError | undefined>(
+    (ChartLineBrief | null)[] | Error | "loading" | "empty"
+  >(props.briefs || "loading");
+  const prevPropBriefs = useRef<ChartLineBrief[] | Error | "loading" | "empty">(
     props.briefs
+  );
+  // briefのリストを更新する際に、既存のfetch済みbriefデータを引き継ぐ。
+  const mergeAndSetBriefs = useCallback(
+    (briefs: ChartLineBrief[] | Error | "loading" | "empty") => {
+      setBriefs((prev) => {
+        if (!Array.isArray(briefs) || !Array.isArray(prev)) {
+          return briefs;
+        }
+        // 既存の要素を cid をキーにしたマップにして、検索しやすくする
+        const prevMap = new Map<string, ChartLineBrief>();
+        prev.forEach((item) => {
+          if (item && item.cid) {
+            prevMap.set(item.cid, item);
+          }
+        });
+        // 新しい id リストを回し、既存のデータがあれば引き継ぐ
+        return briefs.map((brief) => {
+          const prevItem = prevMap.get(brief.cid);
+          if (prevItem?.fetched) {
+            // すでにデータが存在するので、それをそのまま返す（loadingにならない）
+            return {
+              ...brief,
+              fetched: true,
+              brief: prevItem.brief,
+            };
+          } else {
+            return brief;
+          }
+        });
+      });
+    },
+    []
   );
   useEffect(() => {
     if (props.briefs !== prevPropBriefs.current) {
-      setBriefs(props.briefs);
+      mergeAndSetBriefs(props.briefs ?? "loading");
       prevPropBriefs.current = props.briefs;
     }
-  }, [props.briefs]);
+  }, [props.briefs, mergeAndSetBriefs]);
   useEffect(() => {
     // 譜面リストのfetch (中身のbriefのfetchは別で行う)
     switch (props.type) {
       case "recent":
-        setBriefs(
-          getRecent("play")
-            .reverse()
-            .map((cid) => ({ cid, fetched: false }))
-        );
-        break;
-      case "recentEdit":
-        setBriefs(
-          getRecent("edit")
-            .reverse()
-            .map((cid) => ({ cid, fetched: false }))
-        );
-        break;
+      case "recentEdit": {
+        const update = () => {
+          mergeAndSetBriefs(
+            getRecent(props.type === "recent" ? "play" : "edit")
+              .reverse()
+              .map((cid) => ({ cid, fetched: false }))
+          );
+        };
+        const storageUpdate = (e: StorageEvent) => {
+          if (e.key === recentKey(props.type === "recent" ? "play" : "edit")) {
+            update();
+          }
+        };
+        update();
+        window.addEventListener("storage", storageUpdate);
+        window.addEventListener("visibilitychange", update); // 別タブからもどってきたとき
+        window.addEventListener("popstate", update); // router.push()からもどってきたとき
+        return () => {
+          window.removeEventListener("storage", storageUpdate);
+          window.removeEventListener("visibilitychange", update);
+          window.removeEventListener("popstate", update);
+        };
+      }
       case "latest":
       case "popular":
-        void (async () => {
-          try {
-            const latestRes = await fetch(
-              process.env.BACKEND_PREFIX + `/api/${props.type}`,
-              { cache: "default" }
-            );
-            if (latestRes.ok) {
-              const latestCId = (await latestRes.json()) as { cid: string }[];
-              setBriefs(latestCId.map(({ cid }) => ({ cid, fetched: false })));
-            } else {
-              setBriefs(await APIError.fromRes(latestRes));
-            }
-          } catch (e) {
-            console.error(e);
-            setBriefs(APIError.fetchError(e));
-          }
-        })();
+        fetchBackend()
+          .url(`/api/${props.type}`)
+          .options({ cache: "default" })
+          .get()
+          .json((latest) =>
+            v
+              .parse(v.array(v.object({ cid: v.string() })), latest)
+              .map(({ cid }) => ({ cid, fetched: false }))
+          )
+          .catch((e: unknown) => captureAndWrap(e, { type: props.type }))
+          .then((latest) => mergeAndSetBriefs(latest));
     }
-  }, [props.type]);
+  }, [props.type, mergeAndSetBriefs]);
 
   const ulSize = useResizeDetector();
   const { rem } = useDisplayMode();
@@ -216,27 +263,45 @@ export function ChartList(props: Props) {
       ) {
         const b = briefs[i];
         if (b !== null && !b.fetched && !b.fetching) {
+          // eslint-disable-next-line react-hooks/immutability
           b.fetching = true;
           changed = true;
-          fetchBrief(b.cid).then(({ brief, is404 }) => {
-            setBriefs((briefs) => {
-              if (
-                Array.isArray(briefs) &&
-                briefs[i] !== null &&
-                briefs[i]!.cid === b.cid
-              ) {
-                if (is404) {
-                  briefs[i] = null;
-                } else {
-                  briefs[i]!.fetched = true;
-                  briefs[i]!.brief = brief;
+          fetchBrief(b.cid, {
+            onResult: (brief) =>
+              setBriefs((briefs) => {
+                if (Array.isArray(briefs)) {
+                  briefs = briefs.slice();
+                  const i = briefs.findIndex((b2) => b2?.cid === b.cid);
+                  if (i >= 0) {
+                    briefs[i]!.fetched = true;
+                    briefs[i]!.brief = brief;
+                  }
                 }
-                return briefs.slice();
-              } else {
-                // そんなことあるのか...?
                 return briefs;
-              }
-            });
+              }),
+            onNotFound: () =>
+              setBriefs((briefs) => {
+                if (Array.isArray(briefs)) {
+                  briefs = briefs.slice();
+                  const i = briefs.findIndex((b2) => b2?.cid === b.cid);
+                  if (i >= 0) {
+                    briefs[i] = null;
+                  }
+                }
+                return briefs;
+              }),
+            onError: () =>
+              setBriefs((briefs) => {
+                if (Array.isArray(briefs)) {
+                  briefs = briefs.slice();
+                  const i = briefs.findIndex((b2) => b2?.cid === b.cid);
+                  if (i >= 0) {
+                    briefs[i]!.fetched = true;
+                    // briefs[i]!.brief = undefined;
+                  }
+                }
+                return briefs;
+              }),
           });
         }
       }
@@ -268,9 +333,12 @@ export function ChartList(props: Props) {
     }
   }, [briefs, props.type]);
 
-  const filteredBriefs: ChartLineBrief[] | APIError | undefined = Array.isArray(
-    briefs
-  )
+  const filteredBriefs:
+    | ChartLineBrief[]
+    | Error
+    | undefined
+    | "loading"
+    | "empty" = Array.isArray(briefs)
     ? fetchAll
       ? briefs.filter((b) => b !== null)
       : briefs.filter((b) => b !== null).slice(0, maxRow)
@@ -280,10 +348,10 @@ export function ChartList(props: Props) {
     Array.isArray(filteredBriefs) && (fetchAll || props.containerRef)
       ? filteredBriefs.length
       : 0;
-  // filteredBriefs内で最初にfetch中のbriefのインデックス
-  // すべてfetch完了なら-1
+  // loadingを表示するための、filteredBriefs内で最初にfetch中のbriefのインデックス
+  // すべてfetch完了なら-1 (loadingを表示しない)
   const firstFetchingIndex: number =
-    filteredBriefs === undefined
+    filteredBriefs === "loading"
       ? 0
       : Array.isArray(filteredBriefs)
         ? filteredBriefs.findIndex((b) => !b.fetched)
@@ -363,20 +431,12 @@ export function ChartList(props: Props) {
                 href={props.href(filteredBriefs.at(i)!.cid)}
                 onClick={
                   props.onClick
-                    ? () =>
-                        props.onClick!(
-                          filteredBriefs.at(i)!.cid,
-                          filteredBriefs.at(i)!.brief
-                        )
+                    ? () => props.onClick!(filteredBriefs.at(i)!.cid)
                     : undefined
                 }
                 onClickMobile={
                   props.onClickMobile
-                    ? () =>
-                        props.onClickMobile!(
-                          filteredBriefs.at(i)!.cid,
-                          filteredBriefs.at(i)!.brief
-                        )
+                    ? () => props.onClickMobile!(filteredBriefs.at(i)!.cid)
                     : undefined
                 }
                 creator={props.creator}
@@ -437,12 +497,14 @@ export function ChartList(props: Props) {
           <SlimeSVG />
           Loading...
         </div>
-      ) : briefs && "message" in briefs ? (
-        <div className="fn-cl-message">{briefs.format(te)}</div>
+      ) : briefs instanceof Error ? (
+        <div className="fn-cl-message">{formatError(briefs, te)}</div>
       ) : Array.isArray(briefs) && briefs.length === 0 ? (
         <div className="fn-cl-message">
           {props.search ? t("notFound") : t("empty")}
         </div>
+      ) : briefs === "empty" ? (
+        <div className="fn-cl-message">{t("empty")}</div>
       ) : null}
       {Array.isArray(briefs) &&
       briefs.filter((b) => b !== null).length > maxRow ? (
@@ -507,74 +569,44 @@ interface CProps {
 export function ChartListItem(props: CProps) {
   const isStandalone = useStandaloneDetector();
   const isInsideFrame = useInsideFrameDetector();
+  const { isMobileMain } = useDisplayMode();
 
   return (
     <li className="fn-cl-item">
-      {props.onClick || (props.newTab && !isStandalone && !isInsideFrame) ? (
-        <>
-          <a
-            href={props.href}
-            className={clsx(
-              "fn-flat-button",
-              !props.noDefaultColor && "fn-sky",
-              props.className,
-              props.onClickMobile && "no-mobile"
-            )}
-            style={{ ...props.style }}
-            target={props.newTab ? "_blank" : undefined}
-            onClick={
-              props.onClick
-                ? (e) => {
-                    props.onClick!();
-                    e.preventDefault();
-                  }
-                : undefined
-            }
-          >
-            <span className="fn-glass-1" />
-            <span className="fn-glass-2" />
-            <ButtonHighlight />
-            <ChartListItemChildren {...props} />
-          </a>
-          {props.onClickMobile && (
-            <a
-              href={props.href}
-              className={clsx(
-                "fn-flat-button",
-                !props.noDefaultColor && "fn-sky",
-                props.className,
-                "no-pc"
-              )}
-              style={{ ...props.style }}
-              onClick={(e) => {
-                props.onClickMobile!();
-                e.preventDefault();
-              }}
-            >
-              <span className="fn-glass-1" />
-              <span className="fn-glass-2" />
-              <ButtonHighlight />
-              <ChartListItemChildren {...props} />
-            </a>
-          )}
-        </>
-      ) : (
-        <Link
-          href={props.href}
-          className={clsx(
-            "fn-flat-button",
-            !props.noDefaultColor && "fn-sky",
-            props.className
-          )}
-          style={{ ...props.style }}
-          prefetch={process.env.PREFETCH as "auto"}
-        >
-          <span className="fn-glass-1" />
-          <span className="fn-glass-2" />
-          <ButtonHighlight />
-          <ChartListItemChildren {...props} />
-        </Link>
-      )}
+      <Link
+        href={props.href}
+        className={clsx(
+          "fn-flat-button",
+          !props.noDefaultColor && "fn-sky",
+          props.className
+        )}
+        style={{ ...props.style }}
+        prefetch={
+          props.onClick ||
+          props.onClickMobile ||
+          (props.newTab && !isStandalone && !isInsideFrame)
+            ? false
+            : (process.env.PREFETCH as "auto")
+        }
+        target={
+          props.newTab && !isStandalone && !isInsideFrame ? "_blank" : undefined
+        }
+        onClick={(e) => {
+          if (props.onClick && !isMobileMain) {
+            props.onClick();
+            e.preventDefault();
+          }
+          if (props.onClickMobile && isMobileMain) {
+            props.onClickMobile();
+            e.preventDefault();
+          }
+        }}
+      >
+        <span className="fn-glass-1" />
+        <span className="fn-glass-2" />
+        <ButtonHighlight />
+        <ChartListItemChildren {...props} />
+      </Link>
     </li>
   );
 }
@@ -587,11 +619,29 @@ function ChartListItemChildren(props: CProps) {
       .map((l) => levelTypes.indexOf(l.type)) || [];
   useEffect(() => {
     if (props.badge) {
-      setStatus(
-        props.brief?.levels
-          .filter((l) => !l.unlisted)
-          .map((l) => getBadge(getBestScore(props.cid, l.hash))) || []
-      );
+      const update = () => {
+        setStatus(
+          props.brief?.levels
+            .filter((l) => !l.unlisted)
+            .map((l) => getBadge(getBestScore(props.cid, l.hash))) || []
+        );
+      };
+      const storageUpdate = (e: StorageEvent) => {
+        if (
+          props.brief?.levels.some((l) => e.key === bestKey(props.cid, l.hash))
+        ) {
+          update();
+        }
+      };
+      update();
+      window.addEventListener("storage", storageUpdate);
+      window.addEventListener("visibilitychange", update); // 別タブからもどってきたとき
+      window.addEventListener("popstate", update); // router.push()からもどってきたとき
+      return () => {
+        window.removeEventListener("storage", storageUpdate);
+        window.removeEventListener("visibilitychange", update);
+        window.removeEventListener("popstate", update);
+      };
     } else {
       setStatus([]);
     }
@@ -612,8 +662,11 @@ function ChartListItemChildren(props: CProps) {
       )}
       {props.brief?.ytId ? (
         <img
+          loading="lazy"
+          decoding="async"
+          fetchPriority="low"
           className="fn-thumbnail"
-          src={`https://i.ytimg.com/vi/${props.brief?.ytId}/default.jpg`}
+          src={`https://i.ytimg.com/vi/${props.brief?.ytId}/${props.big ? "mqdefault" : "default"}.jpg`}
         />
       ) : (
         <div className="fn-thumbnail" />
@@ -645,16 +698,16 @@ function ChartListItemChildren(props: CProps) {
                 </span>
               </div>
             )}
-            <div className="h-4.5 **:leading-4.5">
-              {props.creator && (
+            {props.creator && (
+              <div className="h-4.5 **:leading-4.5">
                 <span className="fn-cl-clip">
                   <span className="text-xs">{t("chartCreator")}:</span>
                   <span className="ml-1 font-title text-sm fg-bright">
                     {props.brief?.chartCreator}
                   </span>
                 </span>
-              )}
-            </div>
+              </div>
+            )}
             <div
               className={clsx(
                 "h-4.5 **:leading-4.5",
@@ -678,7 +731,7 @@ function ChartListItemChildren(props: CProps) {
                         {status[i] && (
                           <span className="inline-block relative w-4 h-0">
                             <LevelBadge
-                              className="absolute -bottom-3"
+                              className="absolute -bottom-2.5"
                               status={[status[i]]}
                               levels={[levelTypes.indexOf(l.type)]}
                             />

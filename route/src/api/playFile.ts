@@ -1,9 +1,13 @@
 import * as msgpack from "@msgpack/msgpack";
-import { MongoClient } from "mongodb";
-import { getChartEntry } from "./chart.js";
+import { Db } from "mongodb";
+import {
+  etagHeaderDoc,
+  getChartEntry,
+  ifMatchHeaderDoc,
+  ifNoneMatchHeaderDoc,
+} from "./chart.js";
 import { Bindings } from "../env.js";
 import { Hono } from "hono";
-import { env } from "hono/adapter";
 import {
   convertTo6,
   Level6Play,
@@ -16,15 +20,25 @@ import {
 import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
 import { describeRoute, resolver, validator } from "hono-openapi";
-import { errorLiteral } from "../error.js";
+import {
+  errorLiteral,
+  sValidatorHook,
+  validationErrorSchema,
+} from "../error.js";
 
-const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
+const playFileApp = new Hono<{
+  Bindings: Bindings;
+  Variables: { db: () => Promise<Db> };
+}>({
+  strict: false,
+}).get(
   "/:cid/:lvIndex",
   describeRoute({
     description:
       "Gets level data in MessagePack format, which is only used for playing the chart, not for editing. " +
       "Note that the level data is either in Level6Play or Level15Play format, " +
       `while this documentation only describes Level15Play format. `,
+    parameters: [ifNoneMatchHeaderDoc, ifMatchHeaderDoc],
     responses: {
       200: {
         description: "chart file in MessagePack format.",
@@ -33,12 +47,26 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
             schema: docRefs("LevelPlay15"),
           },
         },
+        headers: {
+          "Content-Disposition": {
+            description: "Filename with extension of .fn{ver}p.mpk",
+            schema: { type: "string" },
+          },
+          "Cache-Control": {
+            description: `no-cache`,
+            schema: { type: "string" },
+          },
+          ...etagHeaderDoc,
+        },
+      },
+      304: {
+        description: "No content if If-None-Match header matches",
       },
       400: {
         description: "invalid chart id",
         content: {
           "application/json": {
-            schema: resolver(v.object({ message: v.string() })),
+            schema: resolver(await validationErrorSchema()),
           },
         },
       },
@@ -52,6 +80,14 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           },
         },
       },
+      412: {
+        description: "ETag does not match with given If-Match header",
+        content: {
+          "application/json": {
+            schema: resolver(await errorLiteral("etagMismatch")),
+          },
+        },
+      },
     },
   }),
   validator(
@@ -59,81 +95,80 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     v.object({
       cid: CidSchema(),
       lvIndex: v.pipe(v.string(), v.regex(/^[0-9]+$/), v.transform(Number)),
-    })
+    }),
+    sValidatorHook()
   ),
   async (c) => {
     const { cid, lvIndex } = c.req.valid("param");
 
-    const client = new MongoClient(env(c).MONGODB_URI);
-    try {
-      await client.connect();
-      const db = client.db("nikochan");
-      let { chart } = await getChartEntry(db, cid, null);
+    const db = await c.get("db")();
+    let { chart, etag } = await getChartEntry(
+      db,
+      cid,
+      null,
+      c.req.header("X-If-Match") ?? c.req.header("If-Match")
+    );
 
-      let level: Level6Play | Level15Play;
-      switch (chart.ver) {
-        case 4:
-        case 5:
-          if (!chart.levels.at(lvIndex)) {
-            throw new HTTPException(404, { message: "levelNotFound" });
-          }
-          level = {
-            ...(await convertTo6(chart)).levels.at(lvIndex)!,
-            ver: 6,
-            offset: chart.offset,
-          };
-          break;
-        case 6:
-          if (!chart.levels.at(lvIndex)) {
-            throw new HTTPException(404, { message: "levelNotFound" });
-          }
-          level = {
-            ...chart.levels.at(lvIndex)!,
-            ver: 6,
-            offset: chart.offset,
-          };
-          break;
-        case 7:
-        case 8:
-        case 9:
-        case 10:
-        case 11:
-        case 12:
-        case 13:
-          if (!chart.levels.at(lvIndex)) {
-            throw new HTTPException(404, { message: "levelNotFound" });
-          }
-          level = convertToPlay15(await convertTo15(chart), lvIndex);
-          break;
-        case 14:
-          if (!chart.levelsMin.at(lvIndex) || !chart.levelsFreeze.at(lvIndex)) {
-            throw new HTTPException(404, { message: "levelNotFound" });
-          }
-          level = convertToPlay15(await convertTo15(chart), lvIndex);
-          break;
-        case 15:
-        case 16:
-          if (
-            !chart.levelsMeta.at(lvIndex) ||
-            !chart.levelsFreeze.at(lvIndex)
-          ) {
-            throw new HTTPException(404, { message: "levelNotFound" });
-          }
-          level = convertToPlay15(chart, lvIndex);
-          break;
-        default:
-          chart satisfies never;
-          throw new HTTPException(500, { message: "unsupportedChartVersion" });
-      }
-
-      const filename = `${cid}.${lvIndex}.fn${level.ver}p.mpk`;
-      return c.body(new Blob([msgpack.encode(level)]).stream(), 200, {
-        "Content-Type": "application/vnd.msgpack",
-        "Content-Disposition": `attachment; filename="${filename}"`,
-      });
-    } finally {
-      await client.close();
+    let level: Level6Play | Level15Play;
+    switch (chart.ver) {
+      case 4:
+      case 5:
+        if (!chart.levels.at(lvIndex)) {
+          throw new HTTPException(404, { message: "levelNotFound" });
+        }
+        level = {
+          ...(await convertTo6(chart)).levels.at(lvIndex)!,
+          ver: 6,
+          offset: chart.offset,
+        };
+        break;
+      case 6:
+        if (!chart.levels.at(lvIndex)) {
+          throw new HTTPException(404, { message: "levelNotFound" });
+        }
+        level = {
+          ...chart.levels.at(lvIndex)!,
+          ver: 6,
+          offset: chart.offset,
+        };
+        break;
+      case 7:
+      case 8:
+      case 9:
+      case 10:
+      case 11:
+      case 12:
+      case 13:
+        if (!chart.levels.at(lvIndex)) {
+          throw new HTTPException(404, { message: "levelNotFound" });
+        }
+        level = convertToPlay15(await convertTo15(chart), lvIndex);
+        break;
+      case 14:
+        if (!chart.levelsMin.at(lvIndex) || !chart.levelsFreeze.at(lvIndex)) {
+          throw new HTTPException(404, { message: "levelNotFound" });
+        }
+        level = convertToPlay15(await convertTo15(chart), lvIndex);
+        break;
+      case 15:
+      case 16:
+        if (!chart.levelsMeta.at(lvIndex) || !chart.levelsFreeze.at(lvIndex)) {
+          throw new HTTPException(404, { message: "levelNotFound" });
+        }
+        level = convertToPlay15(chart, lvIndex);
+        break;
+      default:
+        chart satisfies never;
+        throw new HTTPException(409, { message: "unsupportedChartVersion" });
     }
+
+    const filename = `${cid}.${lvIndex}.fn${level.ver}p.mpk`;
+    return c.body(new Blob([msgpack.encode(level)]).stream(), 200, {
+      "Content-Type": "application/vnd.msgpack",
+      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Cache-Control": "no-cache",
+      "ETag": etag,
+    });
   }
 );
 

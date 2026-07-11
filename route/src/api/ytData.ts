@@ -1,6 +1,8 @@
 import { Db } from "mongodb";
 import { Bindings } from "../env.js";
 import moji from "moji";
+import { fetchError } from "../error.js";
+import { BaseLogger } from "@hono/structured-logger";
 
 export interface YTDataEntry {
   ytId: string;
@@ -49,42 +51,36 @@ export function normalizeEntry(data: {
 }
 
 export async function getYTDataEntry(
+  logger: BaseLogger,
   e: Bindings,
   db: Db,
   ytId: string
-): Promise<YTDataEntry | undefined> {
+): Promise<YTDataEntry> {
   const entry = await db.collection<YTDataEntry>("ytData").findOne({ ytId });
   if (entry && entry.lastFetched > Date.now() - 24 * 60 * 60 * 1000) {
     return entry;
   } else {
     if (!e.YOUTUBE_API_KEY) {
-      console.error("YOUTUBE_API_KEY not set");
-      return undefined;
-    }
-    const res = await fetch(
-      "https://www.googleapis.com/youtube/v3/videos?" +
-        new URLSearchParams({
-          part: "snippet,localizations",
-          id: ytId,
-          key: e.YOUTUBE_API_KEY,
-        })
-    ).catch(() => null);
-    if (!res) {
-      console.error(`Failed to fetch YT data for ${ytId}`);
-      return undefined;
-    }
-    if (!res.ok) {
-      console.error(
-        `Failed to fetch YT data for ${ytId}: ${res.status} ${await res.text()}`
-      );
-      return undefined;
+      throw new Error("YOUTUBE_API_KEY not set");
     }
     try {
+      const res = await fetch(
+        "https://www.googleapis.com/youtube/v3/videos?" +
+          new URLSearchParams({
+            part: "snippet,localizations",
+            id: ytId,
+            key: e.YOUTUBE_API_KEY,
+          })
+      ).catch(fetchError(e));
+      if (!res.ok) {
+        throw new Error(`Failed to fetch YT data (${res.status})`, {
+          cause: res,
+        });
+      }
       const data: any = await res.json();
-      console.log(data);
+      logger.info({ ytData: data });
       if (data.items.length !== 1) {
-        console.error("items.length !== 1");
-        return undefined;
+        throw new Error("items.length !== 1");
       }
       const entry: YTDataEntry = {
         ytId,
@@ -99,9 +95,9 @@ export async function getYTDataEntry(
         .collection<YTDataEntry>("ytData")
         .updateOne({ ytId }, { $set: entry }, { upsert: true });
       return entry;
-    } catch (e) {
-      console.error("Failed to parse YT data", e);
-      return undefined;
+    } catch (e: any) {
+      e.ytId = ytId; // Sentryに報告されたときのために追加情報としてytIdを入れておく
+      throw e;
     }
   }
 }
