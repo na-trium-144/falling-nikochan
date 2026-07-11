@@ -207,7 +207,7 @@ export default function TopPage(props: Props) {
       <div
         id="top"
         className={clsx(
-          "w-full h-screen min-h-max flex items-center justify-center",
+          "w-full h-max min-h-screen flex items-center justify-center",
           "flex-col demo-wide:flex-row-reverse"
         )}
       >
