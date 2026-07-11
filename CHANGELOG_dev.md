@@ -1,3 +1,9 @@
+## ver. 16.24 - 2026/07/12
+
+* TailwindCSS4.3にアップデート、古いブラウザでの表示を修正 [#1104](https://github.com/na-trium-144/falling-nikochan/pull/1104)
+    * fn-buttonのcontent-center指定を削除し、padding-yでの高さ調整に置き換え
+    * h-screen min-h-max はsafariで正しく動作しないので h-max min-h-screen に置き換え
+
 ## ver. 16.23 - 2026/07/10
 
 * undo/redo [#1224](https://github.com/na-trium-144/falling-nikochan/pull/1224)

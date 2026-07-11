@@ -64,8 +64,8 @@ catalogs:
     "@sentry/hono": ^10.56.0
     "@sentry/nextjs": ^10.56.0
   tailwindcss:
-    "@tailwindcss/postcss": ^4.2.2
-    tailwindcss: ^4.2.2
+    "@tailwindcss/postcss": ^4.3.2
+    tailwindcss: ^4.3.2
 
 cleanupUnusedCatalogs: true
 dedupePeers: true
