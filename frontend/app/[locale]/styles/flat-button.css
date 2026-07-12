@@ -76,6 +76,10 @@
       @apply flex flex-row items-center;
       @apply rounded-xl px-4 h-10 gap-1;
       @apply fg-bright font-title font-medium;
+
+      @variant hover, active, group-hover, group-active {
+        @apply shadow-sm;
+      }
     }
   }
 }

@@ -61,6 +61,7 @@ function DiscordInvite(props: { socialData?: SocialData }) {
       target="_blank"
       className={clsx(
         "fn-flat-button fn-selected fn-plain rounded-sq-box",
+        "hover:shadow-sm active:shadow-sm",
         "flex flex-col items-center px-8 py-4 gap-2",
         "main-wide:flex-row main-wide:gap-4 main-wide:pl-4 main-wide:pr-6"
       )}
