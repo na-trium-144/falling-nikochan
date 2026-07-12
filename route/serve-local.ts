@@ -14,6 +14,7 @@ import {
   fetchStatic,
   cronTestApp,
   getBrief,
+  discordInviteApp,
 } from "./src/index.js";
 import { Hono } from "hono";
 import { ImageResponse } from "@vercel/og";
@@ -65,6 +66,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   .route("/sitemap.xml", await sitemapApp({ dbMiddleware }))
   .route("/rss.xml", await rssApp({ dbMiddleware }))
   .route("/share", shareApp({ fetchBrief, fetchStatic }))
+  .route("/discord", discordInviteApp)
   .route("/", redirectApp({ fetchStatic }))
   .use(
     "/*",

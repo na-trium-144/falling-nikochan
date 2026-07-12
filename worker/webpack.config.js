@@ -67,6 +67,7 @@ const config = {
       "./cron/discord.js": false,
       "./sitemap.js": false,
       "./rss.js": false,
+      "./discord.js": false, // データベースへのアクセスはないが、hono/jsxを含むので重い
     },
     fallback: {
       path: false,

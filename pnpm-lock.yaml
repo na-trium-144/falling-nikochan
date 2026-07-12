@@ -474,6 +474,9 @@ importers:
       mongodb:
         specifier: 'catalog:'
         version: 7.2.0
+      node-html-parser:
+        specifier: ^9.0.0
+        version: 9.0.0
       pino:
         specifier: ^10.3.1
         version: 10.3.1
@@ -3313,6 +3316,10 @@ packages:
     resolution: {integrity: sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==}
     engines: {node: '>=0.12'}
 
+  entities@8.0.0:
+    resolution: {integrity: sha512-zwfzJecQ/Uej6tusMqwAqU/6KL2XaB2VZ2Jg54Je6ahNBGNH6Ek6g3jjNCF0fG9EWQKGZNddNjU5F1ZQn/sBnA==}
+    engines: {node: '>=20.19.0'}
+
   envinfo@7.21.0:
     resolution: {integrity: sha512-Lw7I8Zp5YKHFCXL7+Dz95g4CcbMEpgvqZNNq3AmlT5XAV6CgAAk6gyAMqn2zjw08K9BHfcNuKrMiCPLByGafow==}
     engines: {node: '>=4'}
@@ -4535,6 +4542,9 @@ packages:
     peerDependenciesMeta:
       encoding:
         optional: true
+
+  node-html-parser@9.0.0:
+    resolution: {integrity: sha512-MhdaHPyxnyYu/sf0TpiRvDnTrkum0UKHC7FdbDGIUQNlx3I7xzwXoyV0eMUMv/XU+lkJT1glOUzpDPq7b2p1Ew==}
 
   node-releases@2.0.37:
     resolution: {integrity: sha512-1h5gKZCF+pO/o3Iqt5Jp7wc9rH3eJJ0+nh/CIoiRwjRxde/hAHyLPXYN4V3CqKAbiZPSeJFSWHmJsbkicta0Eg==}
@@ -8243,6 +8253,8 @@ snapshots:
 
   entities@4.5.0: {}
 
+  entities@8.0.0: {}
+
   envinfo@7.21.0: {}
 
   es-abstract@1.24.2:
@@ -9752,6 +9764,11 @@ snapshots:
   node-fetch@2.7.0:
     dependencies:
       whatwg-url: 5.0.0
+
+  node-html-parser@9.0.0:
+    dependencies:
+      css-select: 5.2.2
+      entities: 8.0.0
 
   node-releases@2.0.37: {}
 

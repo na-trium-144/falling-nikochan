@@ -1,10 +1,15 @@
 import React from "react";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
 import { black, flexCol, flexRow, fontTitle, slate800 } from "./style.js";
+import type { discordMembers } from "../api/social.js";
 
 // common/social.tsx とだいたいあわせる (ちょっとレイアウトが違う)
 // サイズをem単位で common/social.tsx や公式とほぼ同じにし、全体のfontSizeを調整することでサイズを変える
-export async function DiscordInvite(lang: string, appIconBin: Promise<string>) {
+export async function DiscordInvite(
+  lang: string,
+  appIconBin: Promise<string>,
+  data: ReturnType<typeof discordMembers>
+) {
   const t = await getTranslations(lang, "main.social.discord");
   return (
     <div
@@ -79,7 +84,7 @@ export async function DiscordInvite(lang: string, appIconBin: Promise<string>) {
                 marginRight: "0.571em",
               }}
             >
-              {t("online", { num: 0 })}
+              {t("online", { num: (await data).online })}
             </span>
             <span
               style={{
@@ -90,7 +95,7 @@ export async function DiscordInvite(lang: string, appIconBin: Promise<string>) {
                 marginRight: "0.286em", // 0.25rem / 0.875
               }}
             />
-            <span>{t("members", { num: 0 })}</span>
+            <span>{t("members", { num: (await data).member })}</span>
           </div>
         </div>
       </div>

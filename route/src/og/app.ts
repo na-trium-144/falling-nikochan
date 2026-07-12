@@ -23,9 +23,9 @@ import { cache } from "hono/cache";
 import { etag } from "hono/etag";
 import { BaseLogger } from "@hono/structured-logger";
 import { DiscordInvite } from "./discord.js";
+import { discordMembers, SOCIAL_CACHE_MAX_AGE } from "../api/social.js";
 
 const CACHE_MAX_AGE = 315360000;
-const DISCORD_CACHE_MAX_AGE = 3600;
 
 export interface ChartBriefMin {
   ytId: string;
@@ -352,7 +352,8 @@ const ogApp = (config: {
           }
           return bgImageBin;
         });
-      const Image = DiscordInvite(lang, pAppIconBin);
+      const pMemberData = discordMembers(env(c));
+      const Image = DiscordInvite(lang, pAppIconBin, pMemberData);
       const imRes = new config.ImageResponse(await Image!, {
         width: 1200,
         height: 630,
@@ -367,7 +368,7 @@ const ogApp = (config: {
       }) as Response;
       return c.body(imRes.body!, imRes.status as 200, {
         "Content-Type": imRes.headers.get("Content-Type") || "",
-        "Cache-Control": cacheControl(env(c), DISCORD_CACHE_MAX_AGE),
+        "Cache-Control": cacheControl(env(c), SOCIAL_CACHE_MAX_AGE),
       });
     });
 

@@ -510,6 +510,10 @@ const app = new Hono({ strict: false })
       languageDetector,
     })
   )
+  .get("/discord", async (c) => {
+    const data = await fetchAPI(`/api/social`).then((res) => res.json());
+    return c.redirect(`https://discord.gg/${data.discord.invite}`, 302);
+  })
   .route(
     "/",
     redirectApp({

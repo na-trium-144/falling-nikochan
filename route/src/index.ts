@@ -5,6 +5,7 @@ export { default as shareApp } from "./share.js";
 export { default as redirectApp } from "./redirect.js";
 export { default as sitemapApp } from "./sitemap.js";
 export { default as rssApp } from "./rss.js";
+export { default as discordInviteApp } from "./discord.js";
 export {
   languageDetector,
   fetchStatic,

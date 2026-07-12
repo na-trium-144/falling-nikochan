@@ -15,6 +15,7 @@ import {
   fetchStatic,
   getBrief,
   sentryBeforeSend,
+  discordInviteApp,
 } from "@falling-nikochan/route";
 import { Hono } from "hono";
 import { ImageResponse } from "@vercel/og";
@@ -65,6 +66,7 @@ app
   .route("/sitemap.xml", await sitemapApp({ dbMiddleware }))
   .route("/rss.xml", await rssApp({ dbMiddleware }))
   .route("/share", shareApp({ fetchBrief, fetchStatic }))
+  .route("/discord", discordInviteApp)
   .route("/", redirectApp({ fetchStatic }))
   .use(languageDetector())
   .onError(
