@@ -40,6 +40,10 @@
       "destination": "/api"
     },
     {
+      "source": "/discord",
+      "destination": "/api"
+    },
+    {
       "source": "/",
       "destination": "/api"
     },
