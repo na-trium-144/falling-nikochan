@@ -5,6 +5,7 @@ interface Props {
 }
 
 export function YouTubeLogo(props: Props) {
+  // icon-parkにもYouTubeのロゴはあるが、あちらは中央の再生マークが白で固定なため使いにくい
   // from https://commons.wikimedia.org/wiki/File:YouTube_light_icon_(2017).svg
   return (
     <>
