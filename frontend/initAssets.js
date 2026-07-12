@@ -30,6 +30,10 @@ for (const [name, file] of [
   ["merriweather", "merriweather-latin-400-normal.woff"],
   ["noto-sans", "noto-sans-latin-400-normal.woff"],
   ["noto-sans-jp", "noto-sans-jp-japanese-400-normal.woff"],
+  ["noto-sans", "noto-sans-latin-500-normal.woff"],
+  ["noto-sans-jp", "noto-sans-jp-japanese-500-normal.woff"],
+  ["noto-sans", "noto-sans-latin-600-normal.woff"],
+  ["noto-sans-jp", "noto-sans-jp-japanese-600-normal.woff"],
 ]) {
   var woff = Buffer.from(
     readFileSync(`${nodeModulesDir}/@fontsource/${name}/files/${file}`)

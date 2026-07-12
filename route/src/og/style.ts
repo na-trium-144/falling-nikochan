@@ -6,7 +6,8 @@ export const flexRow = {
   flexDirection: "row",
   alignItems: "baseline",
 } as const;
-export const slate800 = "rgb(29 41 61)";
+export const black = "rgb(0 0 0)"; // fg-bright
+export const slate800 = "rgb(29 41 61)"; // fg-base
 export const slate500 = "rgb(98, 116, 142)";
 export const slate400 = "rgb(144, 161, 185)";
 export const emerald500 = "rgb(0, 188, 125)";

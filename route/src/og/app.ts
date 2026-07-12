@@ -22,8 +22,10 @@ import { fetchError } from "../error.js";
 import { cache } from "hono/cache";
 import { etag } from "hono/etag";
 import { BaseLogger } from "@hono/structured-logger";
+import { DiscordInvite } from "./discord.js";
 
 const CACHE_MAX_AGE = 315360000;
+const DISCORD_CACHE_MAX_AGE = 3600;
 
 export interface ChartBriefMin {
   ytId: string;
@@ -286,6 +288,87 @@ const ogApp = (config: {
         new URL(`/og/share/${c.req.param("cid")}`, backendOrigin(c)),
         301
       )
-    );
+    )
+    .get("/discord", async (c) => {
+      const lang = c.req.query("lang") || "en"; // c.get("language");
+
+      const pFonts = (
+        [
+          {
+            name: "noto-sans",
+            file: "noto-sans-latin-400-normal.ttf",
+            weight: 400,
+            style: "normal",
+          },
+          {
+            name: "noto-sans-jp",
+            file: "noto-sans-jp-japanese-400-normal.ttf",
+            weight: 400,
+            style: "normal",
+          },
+          {
+            name: "noto-sans",
+            file: "noto-sans-latin-500-normal.ttf",
+            weight: 500,
+            style: "normal",
+          },
+          {
+            name: "noto-sans-jp",
+            file: "noto-sans-jp-japanese-500-normal.ttf",
+            weight: 500,
+            style: "normal",
+          },
+          {
+            name: "noto-sans",
+            file: "noto-sans-latin-600-normal.ttf",
+            weight: 600,
+            style: "normal",
+          },
+          // {
+          //   name: "noto-sans-jp",
+          //   file: "noto-sans-jp-japanese-600-normal.ttf",
+          //   weight: 600,
+          //   style: "normal",
+          // },
+        ] as const
+      ).map((f) => ({
+        ...f,
+        pData: config.fetchStatic(
+          env(c),
+          new URL(`/og-fonts/${f.file}`, backendOrigin(c))
+        ),
+      }));
+      const pAppIconBin = config
+        .fetchStatic(
+          env(c),
+          new URL("/assets/app-icon-any.svg", backendOrigin(c))
+        )
+        .then((bgImage) => bgImage.arrayBuffer())
+        .then((buf) => {
+          const bgImageBuf = new Uint8Array(buf);
+          let bgImageBin = "";
+          for (let i = 0; i < bgImageBuf.byteLength; i++) {
+            bgImageBin += String.fromCharCode(bgImageBuf[i]);
+          }
+          return bgImageBin;
+        });
+      const Image = DiscordInvite(lang, pAppIconBin);
+      const imRes = new config.ImageResponse(await Image!, {
+        width: 1200,
+        height: 630,
+        fonts: await Promise.all(
+          pFonts.map(async (f) => ({
+            name: f.name,
+            weight: f.weight,
+            style: f.style,
+            data: await (await f.pData).arrayBuffer(),
+          }))
+        ),
+      }) as Response;
+      return c.body(imRes.body!, imRes.status as 200, {
+        "Content-Type": imRes.headers.get("Content-Type") || "",
+        "Cache-Control": cacheControl(env(c), DISCORD_CACHE_MAX_AGE),
+      });
+    });
 
 export default ogApp;
