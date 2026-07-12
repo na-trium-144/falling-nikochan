@@ -6,8 +6,7 @@ export const flexRow = {
   flexDirection: "row",
   alignItems: "baseline",
 } as const;
-export const black = "rgb(0 0 0)"; // fg-bright
-export const slate800 = "rgb(29 41 61)"; // fg-base
+export const slate800 = "rgb(29 41 61)";
 export const slate500 = "rgb(98, 116, 142)";
 export const slate400 = "rgb(144, 161, 185)";
 export const emerald500 = "rgb(0, 188, 125)";
@@ -26,6 +25,19 @@ export const levelColors = [
   "rgb(187, 77, 0)", // amber-700
   "rgb(199, 0, 54)", // rose-700
 ] as const;
+
+// see the comment in globals.css
+export const discordBackgroundDark = "#2f3136";
+export const discordServerNameDark = "#ffffff";
+export const discordPresenceTextDark = "#b9bbbe";
+export const discordBackground = "#f2f3f5";
+export const discordServerName = "#060607";
+export const discordPresenceText = "#4f5660";
+export const discordJoinButtonBackground = "#3ba55c";
+export const discordJoinButtonHovered = "#2e854b";
+export const discordJoinButtonText = "#ffffff";
+export const discordOnline = "#3ba55c";
+export const discordMembers = "#747f8d";
 
 export function adjustColor(colorAdjusted: [number, number, number]) {
   // frontendの common/colorThief.ts に同じ処理がある

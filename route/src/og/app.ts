@@ -291,6 +291,7 @@ const ogApp = (config: {
     )
     .get("/discord", async (c) => {
       const lang = c.req.query("lang") || "en"; // c.get("language");
+      const theme = c.req.query("theme") || "dark";
 
       const pFonts = (
         [
@@ -341,7 +342,7 @@ const ogApp = (config: {
       const pAppIconBin = config
         .fetchStatic(
           env(c),
-          new URL("/assets/app-icon-any.svg", backendOrigin(c))
+          new URL("/assets/app-icon-512-any.png", backendOrigin(c))
         )
         .then((bgImage) => bgImage.arrayBuffer())
         .then((buf) => {
@@ -353,7 +354,7 @@ const ogApp = (config: {
           return bgImageBin;
         });
       const pMemberData = discordMembers(env(c));
-      const Image = DiscordInvite(lang, pAppIconBin, pMemberData);
+      const Image = DiscordInvite(lang, theme, pAppIconBin, pMemberData);
       const imRes = new config.ImageResponse(await Image!, {
         width: 1200,
         height: 630,

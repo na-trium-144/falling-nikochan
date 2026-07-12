@@ -71,6 +71,7 @@ function DiscordInvite(props: { socialData?: SocialData }) {
           "/assets/app-icon-any.svg" +
           process.env.ASSET_QUERY_ICON
         }
+        // 背景とアイコンが近い色なためborderがないと見づらい
         className="size-[4rem] rounded-[1rem] border border-gray-400/25"
       />
       <div
@@ -83,11 +84,11 @@ function DiscordInvite(props: { socialData?: SocialData }) {
           Falling Nikochan
         </div>
         <div className="flex items-center font-title text-sm">
-          <span className="w-2 h-2 rounded-full bg-[#3ba55c] mr-1" />
+          <span className="w-2 h-2 rounded-full bg-discord-online mr-1" />
           <span className="mr-2">
             {t("online", { num: props.socialData?.discord.online ?? "-" })}
           </span>
-          <span className="w-2 h-2 rounded-full bg-[#747f8d] mr-1" />
+          <span className="w-2 h-2 rounded-full bg-discord-members mr-1" />
           <span>
             {t("members", { num: props.socialData?.discord.member ?? "-" })}
           </span>
@@ -97,7 +98,7 @@ function DiscordInvite(props: { socialData?: SocialData }) {
         className={clsx(
           "z-4", // fn-highlightより前
           "cursor-pointer",
-          "px-4 py-2 bg-[#3ba55c] hover:bg-[#2e854b] rounded-lg",
+          "px-4 py-2 bg-discord-joinButtonBackground hover:bg-discord-joinButtonHovered rounded-lg",
           "text-base font-title font-medium dark fg-bright",
           "transition-colors duration-150"
         )}

@@ -25,6 +25,26 @@
     "Noto Sans", "Noto Sans Variable", "Noto Sans JP", "Noto Sans JP Variable",
     sans-serif;
   --default-font-family: var(--font-main-ui);
+
+  /* discord招待ボタンのテーマ
+  ブラウザ版Discord上の本物の招待ボタンや、公式招待リンクのUIを確認すると全部ちょっとずつ色が違い、またどうせアップデートで変わりうるので、
+  https://github.com/SwitchbladeBot/invidget/blob/master/src/InviteRenderer.js のものを使用し
+  あまりにも違和感が大きくならない限りdiscordの更新には追従しないことにした。
+
+  ただしbgとtextについてはnikochan側のテーマを使う。
+  route/og/discord.tsx で使うので参照しやすいようにコメントで残してある
+  */
+  /*--color-discord-background-dark: #2f3136;*/
+  /*--color-discord-serverName-dark: #ffffff;*/
+  /*--color-discord-presenceText-dark: #b9bbbe;*/
+  /*--color-discord-background: #f2f3f5;*/
+  /*--color-discord-serverName: #060607;*/
+  /*--color-discord-presenceText: #4f5660;*/
+  --color-discord-joinButtonBackground: #3ba55c;
+  --color-discord-joinButtonHovered: #2e854b; /*これはもとのソースにない、geminiがハルシネーションした色*/
+  /*--color-discord-joinButtonText: #ffffff;*/
+  --color-discord-online: #3ba55c;
+  --color-discord-members: #747f8d;
 }
 :root {
   --alpha-dim: 60%;

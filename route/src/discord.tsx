@@ -8,6 +8,10 @@ import { discordInvite, SOCIAL_CACHE_MAX_AGE } from "./api/social.js";
 import { env } from "hono/adapter";
 import { parse } from "node-html-parser";
 
+// import of jsx is needed when executing this file using tsx (pnpm run ldev)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { jsx } from "hono/jsx";
+
 const discordInviteApp = new Hono<{ Bindings: Bindings }>({
   strict: false,
 }).get("/", async (c) => {
@@ -56,14 +60,14 @@ const discordInviteApp = new Hono<{ Bindings: Bindings }>({
           <meta
             name="twitter:image"
             content={new URL(
-              `/og/discord?lang=${lang}`,
+              "/og/discord" + new URL(c.req.url).search,
               backendOrigin(c)
             ).toString()}
           />
           <meta
             property="og:image"
             content={new URL(
-              `/og/discord?lang=${lang}`,
+              "/og/discord" + new URL(c.req.url).search,
               backendOrigin(c)
             ).toString()}
           />
