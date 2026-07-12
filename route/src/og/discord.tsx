@@ -1,30 +1,10 @@
 import React from "react";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
-import {
-  discordBackground,
-  discordBackgroundDark,
-  discordJoinButtonBackground,
-  discordJoinButtonText,
-  discordMembers,
-  discordOnline,
-  discordPresenceText,
-  discordPresenceTextDark,
-  discordServerName,
-  discordServerNameDark,
-  flexCol,
-  flexRow,
-  fontTitle,
-} from "./style.js";
-import type { discordMembers as socialDiscordMembers } from "../api/social.js";
+import { black, flexCol, flexRow, fontTitle, slate800 } from "./style.js";
 
 // common/social.tsx とだいたいあわせる (ちょっとレイアウトが違う)
 // サイズをem単位で common/social.tsx や公式とほぼ同じにし、全体のfontSizeを調整することでサイズを変える
-export async function DiscordInvite(
-  lang: string,
-  theme: string,
-  appIconBin: Promise<string>,
-  data: ReturnType<typeof socialDiscordMembers>
-) {
+export async function DiscordInvite(lang: string, appIconBin: Promise<string>) {
   const t = await getTranslations(lang, "main.social.discord");
   return (
     <div
@@ -36,8 +16,7 @@ export async function DiscordInvite(
         height: "100%",
         fontSize: 64,
         gap: "1em",
-        background:
-          theme === "light" ? discordBackground : discordBackgroundDark,
+        background: "#f2f3f5",
       }}
     >
       <div
@@ -48,7 +27,7 @@ export async function DiscordInvite(
         }}
       >
         <img
-          src={`data:image/png;base64,${btoa(await appIconBin)}`}
+          src={`data:image/svg+xml;base64,${btoa(await appIconBin)}`}
           style={{
             width: "4em",
             height: "4em",
@@ -64,8 +43,7 @@ export async function DiscordInvite(
         >
           <div
             style={{
-              color:
-                theme === "light" ? discordServerName : discordServerNameDark,
+              color: black,
               fontFamily: fontTitle,
               fontWeight: 600,
               // text-lg
@@ -79,10 +57,7 @@ export async function DiscordInvite(
             style={{
               ...flexRow,
               alignItems: "center",
-              color:
-                theme === "light"
-                  ? discordPresenceText
-                  : discordPresenceTextDark,
+              color: slate800,
               fontFamily: fontTitle,
               fontWeight: 400,
               // text-sm
@@ -95,7 +70,7 @@ export async function DiscordInvite(
                 width: "0.571em", // 0.5rem /  0.875
                 height: "0.571em",
                 borderRadius: "100%",
-                background: discordOnline,
+                background: "#3ba55c",
                 marginRight: "0.286em", // 0.25rem / 0.875
               }}
             />
@@ -104,27 +79,27 @@ export async function DiscordInvite(
                 marginRight: "0.571em",
               }}
             >
-              {t("online", { num: (await data).online })}
+              {t("online", { num: 0 })}
             </span>
             <span
               style={{
                 width: "0.571em", // 0.5rem /  0.875
                 height: "0.571em",
                 borderRadius: "100%",
-                background: discordMembers,
+                background: "#747f8d",
                 marginRight: "0.286em", // 0.25rem / 0.875
               }}
             />
-            <span>{t("members", { num: (await data).member })}</span>
+            <span>{t("members", { num: 0 })}</span>
           </div>
         </div>
       </div>
       <button
         style={{
           padding: "0.5em 1em",
+          background: "#3ba55c",
           borderRadius: "0.5em",
-          background: discordJoinButtonBackground,
-          color: discordJoinButtonText,
+          color: "white",
           fontFamily: fontTitle,
           fontWeight: 500,
         }}

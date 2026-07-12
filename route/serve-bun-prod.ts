@@ -14,7 +14,6 @@ import {
   getBrief,
   sentryBeforeSend,
   finalRoutePath,
-  discordInviteApp,
 } from "./src/index.js";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
@@ -98,7 +97,6 @@ app
   .route("/sitemap.xml", await sitemapApp({ dbMiddleware }))
   .route("/rss.xml", await rssApp({ dbMiddleware }))
   .route("/share", shareApp({ fetchBrief, fetchStatic }))
-  .route("/discord", discordInviteApp)
   .route("/", redirectApp({ fetchStatic }))
   .use(
     "/*",

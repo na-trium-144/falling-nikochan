@@ -33,7 +33,6 @@
     "isbot": "catalog:",
     "moji": "^0.5.1",
     "mongodb": "catalog:",
-    "node-html-parser": "^9.0.0",
     "pino": "^10.3.1",
     "react": "catalog:react",
     "sitemap": "^9.0.1",

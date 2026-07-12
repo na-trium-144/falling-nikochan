@@ -23,9 +23,9 @@ import { cache } from "hono/cache";
 import { etag } from "hono/etag";
 import { BaseLogger } from "@hono/structured-logger";
 import { DiscordInvite } from "./discord.js";
-import { discordMembers, SOCIAL_CACHE_MAX_AGE } from "../api/social.js";
 
 const CACHE_MAX_AGE = 315360000;
+const DISCORD_CACHE_MAX_AGE = 3600;
 
 export interface ChartBriefMin {
   ytId: string;
@@ -291,7 +291,6 @@ const ogApp = (config: {
     )
     .get("/discord", async (c) => {
       const lang = c.req.query("lang") || "en"; // c.get("language");
-      const theme = c.req.query("theme") || "dark";
 
       const pFonts = (
         [
@@ -342,7 +341,7 @@ const ogApp = (config: {
       const pAppIconBin = config
         .fetchStatic(
           env(c),
-          new URL("/assets/app-icon-512-any.png", backendOrigin(c))
+          new URL("/assets/app-icon-any.svg", backendOrigin(c))
         )
         .then((bgImage) => bgImage.arrayBuffer())
         .then((buf) => {
@@ -353,8 +352,7 @@ const ogApp = (config: {
           }
           return bgImageBin;
         });
-      const pMemberData = discordMembers(env(c));
-      const Image = DiscordInvite(lang, theme, pAppIconBin, pMemberData);
+      const Image = DiscordInvite(lang, pAppIconBin);
       const imRes = new config.ImageResponse(await Image!, {
         width: 1200,
         height: 630,
@@ -369,7 +367,7 @@ const ogApp = (config: {
       }) as Response;
       return c.body(imRes.body!, imRes.status as 200, {
         "Content-Type": imRes.headers.get("Content-Type") || "",
-        "Cache-Control": cacheControl(env(c), SOCIAL_CACHE_MAX_AGE),
+        "Cache-Control": cacheControl(env(c), DISCORD_CACHE_MAX_AGE),
       });
     });
 
