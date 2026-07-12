@@ -5,9 +5,31 @@ import { ButtonHighlight } from "./button";
 import { XLogo } from "./x";
 import { YouTubeLogo } from "./youtubeLogo";
 import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import * as v from "valibot";
+import { fetchBackend } from "./fetch";
+
+const SocialDataSchema = () =>
+  v.object({
+    discord: v.object({
+      member: v.number(),
+      online: v.number(),
+    }),
+    youtube: v.object({
+      subscribers: v.number(),
+    }),
+  });
+type SocialData = v.InferOutput<ReturnType<typeof SocialDataSchema>>;
 
 export function SocialLinks() {
   const t = useTranslations("main.social");
+  const [socialData, setSocialData] = useState<SocialData>();
+
+  useEffect(() => {
+    fetchBackend()
+      .get("/api/social")
+      .json((json) => setSocialData(v.parse(SocialDataSchema(), json)));
+  }, []);
 
   return (
     <section
@@ -18,9 +40,9 @@ export function SocialLinks() {
       )}
     >
       <h2 className="fn-heading-sect text-3xl">{t("title")}</h2>
-      <DiscordInvite />
+      <DiscordInvite socialData={socialData} />
       <div className="flex flex-col main-wide:flex-row items-center justify-center gap-4">
-        <YouTubeBadge />
+        <YouTubeBadge socialData={socialData} />
         <XBadge />
       </div>
     </section>
@@ -28,7 +50,7 @@ export function SocialLinks() {
 }
 
 // inspired by https://github.com/SwitchbladeBot/invidget
-function DiscordInvite() {
+function DiscordInvite(props: { socialData?: SocialData }) {
   const t = useTranslations("main.social.discord");
   return (
     <a
@@ -62,9 +84,13 @@ function DiscordInvite() {
         </div>
         <div className="flex items-center font-title text-sm">
           <span className="w-2 h-2 rounded-full bg-[#3ba55c] mr-1" />
-          <span className="mr-2">{t("online", { num: 0 })}</span>
+          <span className="mr-2">
+            {t("online", { num: props.socialData?.discord.online ?? "-" })}
+          </span>
           <span className="w-2 h-2 rounded-full bg-[#747f8d] mr-1" />
-          <span>{t("members", { num: 0 })}</span>
+          <span>
+            {t("members", { num: props.socialData?.discord.member ?? "-" })}
+          </span>
         </div>
       </div>
       <button
@@ -82,7 +108,7 @@ function DiscordInvite() {
   );
 }
 
-function YouTubeBadge() {
+function YouTubeBadge(props: { socialData?: SocialData }) {
   return (
     <>
       <a
@@ -116,7 +142,7 @@ function YouTubeBadge() {
               "bg-white dark:bg-stone-700"
             )}
           />
-          0
+          {props.socialData?.youtube.subscribers ?? "-"}
         </div>
       </a>
     </>

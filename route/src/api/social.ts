@@ -37,7 +37,7 @@ async function youtubeSubscribers(logger: BaseLogger, e: Bindings) {
   ).catch(fetchError(e));
   const data: any = await res.json();
   logger.info({ ytData: data });
-  return { subscribers: data.items[0]?.statistics?.subscriberCount as number };
+  return { subscribers: Number(data.items[0]?.statistics?.subscriberCount) };
 }
 
 const socialApp = new Hono<{
