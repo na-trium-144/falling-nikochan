@@ -21,6 +21,9 @@ const SocialDataSchema = () =>
   });
 type SocialData = v.InferOutput<ReturnType<typeof SocialDataSchema>>;
 
+// discord招待リンクをハードコードしている場所は、ここと route/src/api/social.ts の2箇所ある
+export const discordInviteUrl = "https://discord.gg/BGQ6Vk9maA";
+
 export function SocialLinks() {
   const t = useTranslations("main.social");
   const [socialData, setSocialData] = useState<SocialData>();
@@ -54,7 +57,7 @@ function DiscordInvite(props: { socialData?: SocialData }) {
   const t = useTranslations("main.social.discord");
   return (
     <a
-      href="/discord"
+      href={discordInviteUrl}
       target="_blank"
       className={clsx(
         "fn-flat-button fn-selected fn-plain rounded-sq-box",
