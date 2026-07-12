@@ -57,7 +57,9 @@ function DiscordInvite() {
           "mb-4 main-wide:mb-0 main-wide:mr-8"
         )}
       >
-        <div className="font-title font-semibold text-lg fg-bright">Falling Nikochan</div>
+        <div className="font-title font-semibold text-lg fg-bright">
+          Falling Nikochan
+        </div>
         <div className="flex items-center font-title text-sm">
           <span className="w-2 h-2 rounded-full bg-[#3ba55c] mr-1" />
           <span className="mr-2">{t("online", { num: 0 })}</span>
