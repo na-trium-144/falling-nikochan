@@ -9,7 +9,7 @@ import { BaseLogger } from "@hono/structured-logger";
 export const SOCIAL_CACHE_MAX_AGE = 3600;
 
 export const discordInvite = "BGQ6Vk9maA";
-const channelId = "";
+const channelId = "UChAEFwUtjsbWmWwZSxYLXWQ";
 
 export async function discordMembers(e: Bindings) {
   const apiRes = await fetch(
