@@ -31,8 +31,8 @@
   https://github.com/SwitchbladeBot/invidget/blob/master/src/InviteRenderer.js のものを使用し
   あまりにも違和感が大きくならない限りdiscordの更新には追従しないことにした。
 
-  ただしbgとtextについてはnikochan側のテーマを使う。
-  route/og/discord.tsx で使うので参照しやすいようにコメントで残してある
+  ただしbgとtextについてはnikochan側のテーマを使うので、
+  結局joinボタンとonline/membersのdotの色だけ
   */
   /*--color-discord-background-dark: #2f3136;*/
   /*--color-discord-serverName-dark: #ffffff;*/

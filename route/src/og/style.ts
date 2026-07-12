@@ -26,19 +26,6 @@ export const levelColors = [
   "rgb(199, 0, 54)", // rose-700
 ] as const;
 
-// see the comment in globals.css
-export const discordBackgroundDark = "#2f3136";
-export const discordServerNameDark = "#ffffff";
-export const discordPresenceTextDark = "#b9bbbe";
-export const discordBackground = "#f2f3f5";
-export const discordServerName = "#060607";
-export const discordPresenceText = "#4f5660";
-export const discordJoinButtonBackground = "#3ba55c";
-export const discordJoinButtonHovered = "#2e854b";
-export const discordJoinButtonText = "#ffffff";
-export const discordOnline = "#3ba55c";
-export const discordMembers = "#747f8d";
-
 export function adjustColor(colorAdjusted: [number, number, number]) {
   // frontendの common/colorThief.ts に同じ処理がある
   let [r, g, b] = colorAdjusted;
