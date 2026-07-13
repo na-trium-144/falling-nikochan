@@ -30,7 +30,7 @@ catalog:
   hono-openapi: ^1.3.0
   isbot: ^5.1.40
   mongodb: ^7.2.0
-  next-intl: ^4.12.0
+  next-intl: ^4.13.2
   postcss: ^8.5.14
   valibot: ^1.3.1
   wasmoon: ^1.16.0
