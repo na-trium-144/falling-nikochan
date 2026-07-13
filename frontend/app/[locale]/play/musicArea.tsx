@@ -7,12 +7,12 @@ import { RefObject, useEffect, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
 import VolumeNotice from "@icon-park/react/lib/icons/VolumeNotice";
-import Youtube from "@icon-park/react/lib/icons/Youtube";
 import { useTranslations } from "next-intl";
 import { detectOS } from "@/common/pwaInstall";
 import Range from "@/common/range";
 import { useColorThief } from "@/common/colorThief";
 import { ButtonHighlight } from "@/common/button";
+import { YouTubeLogo } from "@/common/youtubeLogo";
 
 interface Props {
   ready: boolean;
@@ -422,7 +422,7 @@ export function MusicArea(props: Props) {
           />
         )}*/}
         <div className="flex flex-row items-center ">
-          <Youtube className="text-xl " />
+          <YouTubeLogo className="text-xl" />
           <span className="text-sm w-8 text-center ">{props.ytVolume}</span>
           <Range
             className="flex-1 mx-1 "

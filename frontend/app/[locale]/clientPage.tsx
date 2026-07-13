@@ -12,7 +12,6 @@ import { ChartList } from "./main/chartList.jsx";
 import { FestivalLink, useFestival } from "./common/festival.jsx";
 import { useSharePageModal } from "./common/sharePageModal.jsx";
 import { ButtonHighlight } from "./common/button.jsx";
-import Youtube from "@icon-park/react/lib/icons/Youtube.js";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight.js";
 import FormOne from "@icon-park/react/lib/icons/FormOne.js";
 import { ExternalLink } from "./common/extLink.js";
@@ -32,6 +31,8 @@ import { useRouter } from "next/navigation.js";
 import * as v from "valibot";
 import { CidSchema } from "@falling-nikochan/chart";
 import { fetchBackend } from "./common/fetch.js";
+import { SocialLinks } from "./common/social.js";
+import { YouTubeLogo } from "./common/youtubeLogo.js";
 
 interface Props {
   locale: string;
@@ -364,6 +365,7 @@ export default function TopPage(props: Props) {
       </div>
 
       <Features locale={locale} />
+      <SocialLinks />
       <hr className="fn-hr" />
       <PoliciesAndLinks locale={locale} />
 
@@ -488,12 +490,9 @@ export function Features({ locale }: { locale: string }) {
             <p>
               {t.rich("howToEdit.content2", {
                 youtube: (c) => (
-                  <span className="relative inline-block">
-                    <Youtube
-                      className="absolute left-0.5 bottom-1"
-                      theme="filled"
-                    />
-                    <span className="ml-5 mr-1">{c}</span>
+                  <span className="relative inline-block px-1 space-x-1">
+                    <YouTubeLogo />
+                    <span>{c}</span>
                   </span>
                 ),
               })}
@@ -545,7 +544,7 @@ export function YouTubeLink() {
   const t = useTranslations("main");
   return (
     <>
-      <Youtube className="inline-block align-middle mr-1" theme="filled" />
+      <YouTubeLogo className="mr-1" />
       <ExternalLink href="https://www.youtube.com/@nikochan144">
         <span className="no-mobile">{t("links.officialChannel")}</span>
         <span className="no-pc">{t("links.officialChannelShort")}</span>

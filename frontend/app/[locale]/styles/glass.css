@@ -114,4 +114,38 @@
       @apply inset-shadow-button inset-shadow-orange-300/50 dark:inset-shadow-sky-975/75;
     }
   }
+
+  /* ホバー時のみ色を上書きする (fn-plain を同時に指定して通常時はplain表示) */
+  .fn-social-youtube {
+    @variant hover, active, group-hover, group-active {
+      @apply bg-[#ff0000]/45 backdrop-blur-xs;
+      @apply inset-shadow-button inset-shadow-red-700/25;
+      @apply text-fg-bright-dark!;
+
+      > .fn-glass-1 {
+        @apply border-white/100 dark:border-red-300/50;
+        @apply mask-linear-to-50%;
+      }
+      > .fn-glass-2 {
+        @apply border-red-500/70;
+        @apply mask-linear-to-100%;
+      }
+    }
+  }
+  .fn-social-x {
+    @variant hover, active {
+      @apply bg-[#000000]/60 backdrop-blur-xs;
+      @apply inset-shadow-button inset-shadow-black/25;
+      @apply text-fg-bright-dark!;
+
+      > .fn-glass-1 {
+        @apply border-white/100 dark:border-stone-400/50;
+        @apply mask-linear-to-50%;
+      }
+      > .fn-glass-2 {
+        @apply border-black/80;
+        @apply mask-linear-to-100%;
+      }
+    }
+  }
 }

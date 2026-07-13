@@ -16,10 +16,10 @@ import {
   useSafariDetector,
 } from "@/common/pwaInstall.js";
 import { useRouter } from "next/navigation";
-import Youtube from "@icon-park/react/lib/icons/Youtube.js";
 import Caution from "@icon-park/react/lib/icons/Caution.js";
 import { captureAndWrap, fetchBackend, formatError } from "@/common/fetch.js";
 import { markAsExpected } from "@/common/apiError.js";
+import { YouTubeLogo } from "@/common/youtubeLogo.js";
 
 export default function EditTab({ locale }: { locale: string }) {
   const t = useTranslations("main.edit");
@@ -75,10 +75,7 @@ export default function EditTab({ locale }: { locale: string }) {
             className="mx-1"
             href="https://www.youtube.com/watch?v=hi9TY_78ETY"
           >
-            <Youtube
-              className="inline-block mr-1 align-middle"
-              theme="filled"
-            />
+            <YouTubeLogo className="mr-1" />
             <span className="text-sm">{t("howToVideo")}</span>
           </ExternalLink>
         </p>
