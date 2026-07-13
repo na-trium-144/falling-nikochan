@@ -1,6 +1,12 @@
-## ver. 16.24 - 2026/07/12
+## ver. 16.25 - 2026/07/13 [#1230](https://github.com/na-trium-144/falling-nikochan/pull/1230)
 
-* TailwindCSS4.3にアップデート、古いブラウザでの表示を修正 [#1104](https://github.com/na-trium-144/falling-nikochan/pull/1104)
+* Discordサーバーの招待リンク・YouTube,X公式アカウントリンクの表示を追加
+* /api/social APIを追加
+* icon-parkのyoutubeロゴをすべてsvgで置き換え
+
+## ver. 16.24 - 2026/07/12 [#1104](https://github.com/na-trium-144/falling-nikochan/pull/1104)
+
+* TailwindCSS4.3にアップデート、古いブラウザでの表示を修正
     * fn-buttonのcontent-center指定を削除し、padding-yでの高さ調整に置き換え
     * h-screen min-h-max はsafariで正しく動作しないので h-max min-h-screen に置き換え
 
