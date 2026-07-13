@@ -54,7 +54,7 @@
     "globals": "^17.6.0",
     "next": "catalog:next",
     "prettier": "^3.8.3",
-    "semver": "^7.7.4",
+    "semver": "^7.8.5",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.58.0",
