@@ -60,9 +60,9 @@ catalogs:
     react: ^19.2.6
     react-dom: ^19.2.6
   sentry:
-    "@sentry/browser": ^10.56.0
-    "@sentry/hono": ^10.56.0
-    "@sentry/nextjs": ^10.56.0
+    "@sentry/browser": ^10.65.0
+    "@sentry/hono": ^10.65.0
+    "@sentry/nextjs": ^10.65.0
   tailwindcss:
     "@tailwindcss/postcss": ^4.3.2
     tailwindcss: ^4.3.2
