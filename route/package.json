@@ -23,7 +23,7 @@
     "@hono/swagger-ui": "^0.6.1",
     "@msgpack/msgpack": "catalog:",
     "@scalar/hono-api-reference": "^0.10.14",
-    "@valibot/to-json-schema": "^1.6.0",
+    "@valibot/to-json-schema": "^1.7.1",
     "@vercel/og": "catalog:",
     "colorthief": "catalog:",
     "discord.js": "^14.26.4",
