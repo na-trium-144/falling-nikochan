@@ -22,7 +22,7 @@
     "@hono/structured-logger": "catalog:",
     "@hono/swagger-ui": "^0.6.1",
     "@msgpack/msgpack": "catalog:",
-    "@scalar/hono-api-reference": "^0.10.14",
+    "@scalar/hono-api-reference": "^0.11.9",
     "@valibot/to-json-schema": "^1.6.0",
     "@vercel/og": "catalog:",
     "colorthief": "catalog:",
