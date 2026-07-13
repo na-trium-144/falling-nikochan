@@ -26,7 +26,7 @@
     "@valibot/to-json-schema": "^1.6.0",
     "@vercel/og": "catalog:",
     "colorthief": "catalog:",
-    "discord.js": "^14.26.4",
+    "discord.js": "^14.26.5",
     "dotenv": "catalog:",
     "hono": "catalog:",
     "hono-openapi": "catalog:",
