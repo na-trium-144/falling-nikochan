@@ -4,6 +4,7 @@
 [![Staging Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fnikochan-staging.utcode.net%2FbuildVer.json&query=%24.version&prefix=v&label=Staging&color=%23441306)](https://nikochan-staging.utcode.net)
 [![GitHub License](https://img.shields.io/badge/License-AGPL--3.0-orange)](./LICENSE)
 
+[![Discord](https://img.shields.io/discord/1521135824928772176?style=social&logo=Discord)](https://discord.gg/BGQ6Vk9maA)
 [![YouTube Channel Subscribers](https://img.shields.io/youtube/channel/subscribers/UChAEFwUtjsbWmWwZSxYLXWQ?label=%40nikochan144)](https://www.youtube.com/@nikochan144)
 [![Twitter Follow](https://img.shields.io/twitter/follow/nikochan144)](https://x.com/nikochan144)
 
