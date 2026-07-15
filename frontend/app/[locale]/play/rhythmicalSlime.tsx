@@ -16,7 +16,7 @@ import { Signature } from "@falling-nikochan/chart";
 import { getSignatureState, getTimeSec } from "@falling-nikochan/chart";
 import { Step, stepAdd } from "@falling-nikochan/chart";
 import { useDisplayMode } from "@/scale.js";
-import { SlimeSVG } from "@/common/slime";
+import { SlimeAnimHandler, SlimeSVG } from "@/common/slime";
 
 interface Props {
   className?: string;
@@ -29,6 +29,7 @@ interface Props {
   playbackRate: number;
 }
 interface SlimeState {
+  id: string;
   // 対象の時刻の3/6ステップ前からしゃがむ
   // 対象の時刻の1/6ステップ前からジャンプしはじめ、
   // 対象の時刻の1/6ステップ後に最高点、
@@ -167,6 +168,7 @@ export default function RhythmicalSlime(props: Props) {
               newStates[i] = newStates[i].filter((s) => s.landingSec > now);
             }
             newStates[slimeIndex].push({
+              id: crypto.randomUUID(),
               preparingSec,
               jumpBeginSec,
               jumpMidSec,
@@ -246,38 +248,37 @@ function Slime(props: PropsS) {
     size = props.size;
     prevSize.current = size;
   }
-  const [firstFrame, setFirstFrame] = useState<boolean>(true);
-  useEffect(() => {
-    requestAnimationFrame(() => setFirstFrame(false));
-  }, []);
-  const prevJumpMid = useRef<number | null>(null);
-  const [jumpingMidDate, setJumpingMidDate] =
-    useState<DOMHighResTimeStamp | null>(null);
-  const durationSec = useRef<number>(0);
+  const prevStateId = useRef<string | null>(null);
   const { getCurrentTimeSec, state, playbackRate, startsJumping } = props;
   const randInterval = useRef(0);
+  const sRef = useRef<SlimeAnimHandler>(null);
   useEffect(() => {
     const now = getCurrentTimeSec();
     if (now === undefined || state === undefined) {
-      setJumpingMidDate(null);
-      prevJumpMid.current = null;
-    } else if (prevJumpMid.current !== state.jumpMidSec) {
-      prevJumpMid.current = state.jumpMidSec;
-      durationSec.current = state.animDuration / playbackRate;
-      setJumpingMidDate(
-        performance.now() + ((state.jumpMidSec - now) * 1000) / playbackRate
+      // sRef.current?.jumpAt(null);
+      prevStateId.current = null;
+    } else if (prevStateId.current !== state.id) {
+      prevStateId.current = state.id;
+      sRef.current?.jumpAt(
+        performance.now() + ((state.jumpMidSec - now) * 1000) / playbackRate,
+        state.animDuration / playbackRate
       );
     }
+  }, [getCurrentTimeSec, state, playbackRate]);
+  useEffect(() => {
     if (startsJumping !== null) {
       let i: ReturnType<typeof setInterval> | null = null;
       const t = setTimeout(() => {
-        durationSec.current = Math.random() * 0.2 + 0.1;
+        const durationSec = Math.random() * 0.2 + 0.1;
         randInterval.current = 0.15;
         i = setInterval(
           () => {
-            setJumpingMidDate(performance.now() + durationSec.current * 1000);
+            sRef.current?.jumpAt(
+              performance.now() + durationSec * 1000,
+              durationSec
+            );
           },
-          (randInterval.current + durationSec.current) * 1000
+          (randInterval.current + durationSec) * 1000
         );
       }, startsJumping - performance.now());
       return () => {
@@ -287,7 +288,7 @@ function Slime(props: PropsS) {
         clearTimeout(t);
       };
     }
-  }, [getCurrentTimeSec, state, playbackRate, startsJumping]);
+  }, [startsJumping]);
 
   return (
     <span
@@ -304,10 +305,9 @@ function Slime(props: PropsS) {
       <SlimeSVG
         className="absolute inset-x-0 bottom-0 "
         appearingAnim
-        hidden={firstFrame || !props.exists}
-        jumpingMid={jumpingMidDate}
-        duration={durationSec.current}
+        hidden={!props.exists}
         noLoop
+        ref={sRef}
       />
     </span>
   );

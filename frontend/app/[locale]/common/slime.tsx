@@ -1,17 +1,34 @@
 "use client";
-import { memo, useEffect, useId, useRef, useState } from "react";
+import {
+  memo,
+  Ref,
+  useCallback,
+  useEffect,
+  useId,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import clsx from "clsx/lite";
 
+export interface SlimeAnimHandler {
+  // noLoopの場合、 jumpingMidの時刻で最高点になるようジャンプを開始
+  jumpAt: (jumpingMid: DOMHighResTimeStamp, duration: number) => void;
+}
 interface Props {
   className?: string;
-  // appearingAnimがtrueの場合、hiddenを切り替えることで出現と消滅のアニメーションをする。
-  // falseの場合常時表示する
+  /**
+   * appearingAnimがtrueの場合、hiddenを切り替えることで出現と消滅のアニメーションをする。
+   * falseの場合常時表示する
+   */
   appearingAnim?: boolean;
   hidden?: boolean;
-  // noLoopの場合、 jumpingMidの時刻で最高点になるようジャンプを開始
-  jumpingMid?: DOMHighResTimeStamp | null;
-  duration?: number;
+  /**
+   * falseの場合(デフォルト)、何もしなくてもjumpアニメーションを無限ループする
+   * その場合durationは固定の値になる
+   */
   noLoop?: boolean;
+  ref?: Ref<SlimeAnimHandler>;
 }
 export function SlimeSVG(props: Props) {
   const [csr, setCSR] = useState<boolean>(false);
@@ -46,7 +63,7 @@ export function SlimeSVG(props: Props) {
 }
 const SlimeSVGInner = memo(function SlimeSVGInner(props: Props) {
   const id = useId();
-  const duration = props.duration || 0.8;
+  const [duration, setDuration] = useState(0.8);
   const smilAnimationParams = {
     dur: duration + "s",
     repeatCount: props.noLoop ? 1 : "indefinite",
@@ -68,8 +85,7 @@ const SlimeSVGInner = memo(function SlimeSVGInner(props: Props) {
   const p6tAnimRef = useRef<SVGAnimateTransformElement>(null!);
   const p9AnimRef = useRef<SVGAnimateElement>(null!);
   const p9tAnimRef = useRef<SVGAnimateTransformElement>(null!);
-  const prevJumpingMid = useRef<DOMHighResTimeStamp | null>(null);
-  useEffect(() => {
+  const doAnim = useCallback((jumpStart: number, duration?: number) => {
     const animRefs = [
       gtAnimRef,
       gt2AnimRef,
@@ -85,33 +101,33 @@ const SlimeSVGInner = memo(function SlimeSVGInner(props: Props) {
       p9AnimRef,
       p9tAnimRef,
     ];
-    if (props.noLoop) {
-      if (
-        props.jumpingMid &&
-        (prevJumpingMid.current === null ||
-          prevJumpingMid.current < props.jumpingMid)
-      ) {
-        prevJumpingMid.current = props.jumpingMid;
-        let jumpStart =
-          props.jumpingMid / 1000 -
-          (duration * 4) / 8 -
-          performance.now() / 1000;
-        if (jumpStart < 0) {
-          // return;
-          jumpStart = 0;
-        }
-        for (const ref of animRefs) {
-          ref.current.beginElementAt(jumpStart);
-        }
-      } else if (!props.jumpingMid) {
-        prevJumpingMid.current = null;
-      }
-    } else {
-      for (const ref of animRefs) {
-        ref.current.beginElementAt(0);
-      }
+    if (duration !== undefined) {
+      setDuration(duration);
     }
-  }, [props.jumpingMid, duration, props.noLoop]);
+    for (const ref of animRefs) {
+      if (duration !== undefined) {
+        // reactの再レンダリングを待たずに即座にdurを更新し、今のアニメーションに反映させる
+        ref.current.setAttribute("dur", duration + "s");
+      }
+      ref.current.beginElementAt(jumpStart);
+    }
+  }, []);
+  useEffect(() => {
+    if (!props.noLoop) {
+      doAnim(0);
+    }
+  }, [props.noLoop, doAnim]);
+  useImperativeHandle(props.ref, () => ({
+    jumpAt(jumpingMid, duration) {
+      let jumpStart =
+        jumpingMid / 1000 - (duration * 4) / 8 - performance.now() / 1000;
+      if (jumpStart < 0) {
+        // return;
+        jumpStart = 0;
+      }
+      doAnim(jumpStart, duration);
+    },
+  }));
   return (
     <svg viewBox="0 0 31.193595 27.9642" version="1.1">
       {/*width="117.89705" height="105.69147"*/}
