@@ -50,7 +50,7 @@ const SlimeSVGInner = memo(function SlimeSVGInner(props: Props) {
   const smilAnimationParams = {
     dur: duration + "s",
     repeatCount: props.noLoop ? 1 : "indefinite",
-    begin: props.noLoop ? "indefinite" : "0s",
+    begin: "indefinite",
     fill: "remove",
   } as const;
   const smilAnimationValues = (params: string[]) =>
@@ -70,38 +70,46 @@ const SlimeSVGInner = memo(function SlimeSVGInner(props: Props) {
   const p9tAnimRef = useRef<SVGAnimateTransformElement>(null!);
   const prevJumpingMid = useRef<DOMHighResTimeStamp | null>(null);
   useEffect(() => {
-    if (
-      props.noLoop &&
-      props.jumpingMid &&
-      (prevJumpingMid.current === null ||
-        prevJumpingMid.current < props.jumpingMid)
-    ) {
-      prevJumpingMid.current = props.jumpingMid;
-      let jumpStart =
-        props.jumpingMid / 1000 - (duration * 4) / 8 - performance.now() / 1000;
-      if (jumpStart < 0) {
-        // return;
-        jumpStart = 0;
+    const animRefs = [
+      gtAnimRef,
+      gt2AnimRef,
+      p1AnimRef,
+      p2AnimRef,
+      p2tAnimRef,
+      p3AnimRef,
+      p3tAnimRef,
+      p5AnimRef,
+      p5tAnimRef,
+      p6AnimRef,
+      p6tAnimRef,
+      p9AnimRef,
+      p9tAnimRef,
+    ];
+    if (props.noLoop) {
+      if (
+        props.jumpingMid &&
+        (prevJumpingMid.current === null ||
+          prevJumpingMid.current < props.jumpingMid)
+      ) {
+        prevJumpingMid.current = props.jumpingMid;
+        let jumpStart =
+          props.jumpingMid / 1000 -
+          (duration * 4) / 8 -
+          performance.now() / 1000;
+        if (jumpStart < 0) {
+          // return;
+          jumpStart = 0;
+        }
+        for (const ref of animRefs) {
+          ref.current.beginElementAt(jumpStart);
+        }
+      } else if (!props.jumpingMid) {
+        prevJumpingMid.current = null;
       }
-      for (const ref of [
-        gtAnimRef,
-        gt2AnimRef,
-        p1AnimRef,
-        p2AnimRef,
-        p2tAnimRef,
-        p3AnimRef,
-        p3tAnimRef,
-        p5AnimRef,
-        p5tAnimRef,
-        p6AnimRef,
-        p6tAnimRef,
-        p9AnimRef,
-        p9tAnimRef,
-      ]) {
-        ref.current.beginElementAt(jumpStart);
+    } else {
+      for (const ref of animRefs) {
+        ref.current.beginElementAt(0);
       }
-    } else if (!props.jumpingMid) {
-      prevJumpingMid.current = null;
     }
   }, [props.jumpingMid, duration, props.noLoop]);
   return (
