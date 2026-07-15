@@ -35,7 +35,7 @@
     "@falling-nikochan/route": "workspace:*",
     "@hono/structured-logger": "catalog:",
     "@sentry/hono": "catalog:sentry",
-    "@vercel/functions": "^3.6.2",
+    "@vercel/functions": "^3.7.5",
     "@vercel/og": "catalog:",
     "hono": "catalog:",
     "mongodb": "catalog:"
