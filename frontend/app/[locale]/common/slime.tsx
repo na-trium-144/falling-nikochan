@@ -1,5 +1,5 @@
 "use client";
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useId, useRef, useState } from "react";
 import clsx from "clsx/lite";
 
 interface Props {
@@ -14,9 +14,6 @@ interface Props {
   noLoop?: boolean;
 }
 export function SlimeSVG(props: Props) {
-  const [id, setId] = useState<number>(0);
-  useEffect(() => setId(Math.random()), []); // linearGradientのidが被らないようにする
-
   const [csr, setCSR] = useState<boolean>(false);
   useEffect(() => setCSR(true), []);
 
@@ -43,13 +40,12 @@ export function SlimeSVG(props: Props) {
           )
       )}
     >
-      {csr && <SlimeSVGInner {...props} id={id} />}
+      {csr && <SlimeSVGInner {...props} />}
     </span>
   );
 }
-const SlimeSVGInner = memo(function SlimeSVGInner(
-  props: Props & { id: number }
-) {
+const SlimeSVGInner = memo(function SlimeSVGInner(props: Props) {
+  const id = useId();
   const duration = props.duration || 0.8;
   const smilAnimationParams = {
     dur: duration + "s",
@@ -112,7 +108,7 @@ const SlimeSVGInner = memo(function SlimeSVGInner(
     <svg viewBox="0 0 31.193595 27.9642" version="1.1">
       {/*width="117.89705" height="105.69147"*/}
       <linearGradient
-        id={`slime-linearGradient-${props.id}`}
+        id={`slime-linearGradient-${id}`}
         x1="14.423388"
         y1="8.3200769"
         x2="14.423388"
@@ -158,7 +154,7 @@ const SlimeSVGInner = memo(function SlimeSVGInner(
         />
         <path
           style={{
-            fill: `url(#slime-linearGradient-${props.id})`,
+            fill: `url(#slime-linearGradient-${id})`,
             fillOpacity: 1,
             stroke: "#000000",
             strokeWidth: 0.79375,
