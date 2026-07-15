@@ -427,8 +427,8 @@ importers:
         specifier: workspace:*
         version: link:../i18n
       '@hono/node-server':
-        specifier: ^2.0.2
-        version: 2.0.2(hono@4.12.23)
+        specifier: ^2.0.8
+        version: 2.0.8(hono@4.12.23)
       '@hono/standard-validator':
         specifier: ^0.2.1
         version: 0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.23)
@@ -1321,8 +1321,8 @@ packages:
   '@gera2ld/tarjs@0.3.1':
     resolution: {integrity: sha512-ygcXngovMTj+zI3j2ZSjGiIziELuSCfk5tjUHBjUL/9/9dPLzIdNefW5cZZopB67Di/j/6H9BCGp/0o45qRefQ==}
 
-  '@hono/node-server@2.0.2':
-    resolution: {integrity: sha512-tXlTi1h/4V7sDe7i97IVP+9re9ZU7wXZZggnR5ucCRclf1+AX6YhGStrR5w8bLj+3Mlyl0pKfBh9gqTqqnGKfQ==}
+  '@hono/node-server@2.0.8':
+    resolution: {integrity: sha512-GuCWzLxwg218fy1JaHculFsdcuY12hxit83V+algozTPnwhNjLrRL/Alg9OYjLZLoUZ1rw/S4CdTMsnkSKCmFA==}
     engines: {node: '>=20'}
     peerDependencies:
       hono: ^4
@@ -6493,7 +6493,7 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.28.6
 
-  '@hono/node-server@2.0.2(hono@4.12.23)':
+  '@hono/node-server@2.0.8(hono@4.12.23)':
     dependencies:
       hono: 4.12.23
 
