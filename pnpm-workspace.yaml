@@ -39,6 +39,10 @@ catalog:
 
 catalogs:
   # 複数パッケージでバージョンを合わせる必要があるものをグループ化する
+  eslint:
+    eslint: ^9.39.5
+    "@eslint/js": ^9.39.5
+    "@eslint/eslintrc": ^3.3.6
   fontsource:
     "@fontsource-variable/noto-sans": 5.2.5
     "@fontsource-variable/noto-sans-jp": 5.2.5

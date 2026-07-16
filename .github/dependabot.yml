@@ -16,6 +16,11 @@ updates:
       - dependency-name: "@fontsource/*"
       - dependency-name: "@fontsource-variable/*"
     groups:
+      eslint:
+        patterns:
+          - "eslint"
+          - "@eslint/js"
+          - "@eslint/eslintrc"
       next:
         patterns:
           - "next"
