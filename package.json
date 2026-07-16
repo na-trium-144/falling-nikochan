@@ -41,7 +41,8 @@
     "mongodb": "catalog:"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.29.5",
+    "@babel/core": "catalog:babel",
+    "@babel/preset-env": "catalog:babel",
     "@eslint/config-helpers": "~0.4.2",
     "@eslint/eslintrc": "catalog:eslint",
     "@eslint/js": "catalog:eslint",
