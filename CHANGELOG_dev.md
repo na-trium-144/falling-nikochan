@@ -1,3 +1,9 @@
+## ver. 16.26 - 2026/07/17 [#1262](https://github.com/na-trium-144/falling-nikochan/pull/1262)
+
+* eslint, babelをcatalogでグループ化
+* strictPeerDependenciesを追加
+* savePrefixを指定、ほとんどのバージョン指定をexactに
+
 ## ver. 16.25 - 2026/07/13 [#1230](https://github.com/na-trium-144/falling-nikochan/pull/1230)
 
 * Discordサーバーの招待リンク・YouTube,X公式アカウントリンクの表示を追加

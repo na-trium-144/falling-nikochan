@@ -16,29 +16,38 @@ allowBuilds:
   sharp: true
   unrs-resolver: true
 
+# @types/, globals などバージョンが重要でないもの、dotenv,semverのように機能がシンプルなものは ^
+# 他は基本exact
 catalog:
-  "@gera2ld/tarjs": ^0.3.1
-  "@hono/structured-logger": ^0.1.0
-  "@msgpack/msgpack": ^3.1.3
+  "@gera2ld/tarjs": 0.3.1
+  "@hono/structured-logger": 0.1.0
+  "@msgpack/msgpack": 3.1.3
   "@types/chai": ^5.2.3
-  "@vercel/og": ^0.11.1
-  chai: ^6.2.2
-  colorthief: ^3.3.1
+  "@vercel/og": 0.11.1
+  chai: 6.2.2
+  colorthief: 3.4.0
   dotenv: ^16.6.1
-  fn-commands: ^1.0.0
-  hono: ^4.12.23
-  hono-openapi: ^1.3.0
-  isbot: ^5.1.40
-  mongodb: ^7.2.0
-  next-intl: ^4.12.0
-  postcss: ^8.5.14
-  valibot: ^1.3.1
-  wasmoon: ^1.16.0
+  fn-commands: 1.0.0
+  hono: 4.12.23
+  hono-openapi: 1.3.1
+  isbot: ~5.1.40
+  mongodb: 7.2.0
+  next-intl: 4.13.2
+  postcss: 8.5.17
+  valibot: 1.4.2
+  wasmoon: 1.16.0
 
 # catalogMode: strict  # not working until v11.5.2 https://github.com/pnpm/pnpm/issues/11570
 
 catalogs:
   # 複数パッケージでバージョンを合わせる必要があるものをグループ化する
+  babel:
+    "@babel/core": ^7.29.7
+    "@babel/preset-env": ^7.29.7
+  eslint:
+    eslint: 9.39.5
+    "@eslint/js": 9.39.5
+    "@eslint/eslintrc": ^3.3.6
   fontsource:
     "@fontsource-variable/noto-sans": 5.2.5
     "@fontsource-variable/noto-sans-jp": 5.2.5
@@ -60,12 +69,14 @@ catalogs:
     react: ^19.2.6
     react-dom: ^19.2.6
   sentry:
-    "@sentry/browser": ^10.56.0
-    "@sentry/hono": ^10.56.0
-    "@sentry/nextjs": ^10.56.0
+    "@sentry/browser": 10.65.0
+    "@sentry/bun": 10.65.0
+    "@sentry/cloudflare": 10.65.0
+    "@sentry/hono": 10.65.0
+    "@sentry/nextjs": 10.65.0
   tailwindcss:
-    "@tailwindcss/postcss": ^4.3.2
-    tailwindcss: ^4.3.2
+    "@tailwindcss/postcss": 4.3.2
+    tailwindcss: 4.3.2
 
 cleanupUnusedCatalogs: true
 dedupePeers: true
@@ -80,6 +91,8 @@ minimumReleaseAgeExclude:
 # change this to hoisted only when deploying to vercel
 nodeLinker: isolated
 
+savePrefix: ''
 strictDepBuilds: true
+strictPeerDependencies: true
 
 verifyDepsBeforeRun: warn

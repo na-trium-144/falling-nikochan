@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@msgpack/msgpack": "catalog:",
-    "eventemitter3": "^5.0.1",
+    "eventemitter3": "5.0.4",
     "hono-openapi": "catalog:",
     "valibot": "catalog:",
     "wasmoon": "catalog:"
@@ -23,6 +23,6 @@
     "@types/chai": "catalog:",
     "chai": "catalog:",
     "fn-commands": "catalog:",
-    "openapi-types": "^12.1.3"
+    "openapi-types": "12.1.3"
   }
 }
