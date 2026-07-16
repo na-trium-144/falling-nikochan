@@ -23,6 +23,8 @@
     "@hono/swagger-ui": "0.6.1",
     "@msgpack/msgpack": "catalog:",
     "@scalar/hono-api-reference": "0.11.9",
+    "@sentry/bun": "catalog:sentry",
+    "@sentry/cloudflare": "catalog:sentry",
     "@valibot/to-json-schema": "1.7.1",
     "@vercel/og": "catalog:",
     "colorthief": "catalog:",

@@ -131,6 +131,12 @@ catalogs:
     '@sentry/browser':
       specifier: 10.65.0
       version: 10.65.0
+    '@sentry/bun':
+      specifier: 10.65.0
+      version: 10.65.0
+    '@sentry/cloudflare':
+      specifier: 10.65.0
+      version: 10.65.0
     '@sentry/hono':
       specifier: 10.65.0
       version: 10.65.0
@@ -157,7 +163,7 @@ importers:
         version: 0.1.0(hono@4.12.23)
       '@sentry/hono':
         specifier: catalog:sentry
-        version: 10.65.0(@hono/node-server@2.0.8)(@sentry/node@10.65.0)(hono@4.12.23)
+        version: 10.65.0(@hono/node-server@2.0.8)(@sentry/bun@10.65.0)(@sentry/cloudflare@10.65.0)(@sentry/node@10.65.0)(hono@4.12.23)
       '@vercel/functions':
         specifier: 3.7.5
         version: 3.7.5(ws@8.20.1)
@@ -464,6 +470,12 @@ importers:
       '@scalar/hono-api-reference':
         specifier: 0.11.9
         version: 0.11.9(hono@4.12.23)
+      '@sentry/bun':
+        specifier: catalog:sentry
+        version: 10.65.0(@opentelemetry/core@2.9.0)
+      '@sentry/cloudflare':
+        specifier: catalog:sentry
+        version: 10.65.0(@opentelemetry/core@2.9.0)
       '@valibot/to-json-schema':
         specifier: 1.7.1
         version: 1.7.1(valibot@1.4.2)
@@ -2061,6 +2073,10 @@ packages:
     resolution: {integrity: sha512-XUDDsx0qxzeIlcOu1fDEqTcDl0eiOqghsgV+ReuuNP4jYjZ9kUQxE3rXWM5mlT1pBi4VaQ4FHqvQZZrRXy+oDw==}
     engines: {node: '>=18'}
 
+  '@sentry/bun@10.65.0':
+    resolution: {integrity: sha512-o4cFsD6e9Z3X+tKAwzkfCVbAq7CoSN/dmHZppm1PzNjF1cC26QmzfeJQk+DTUgkMAsL/nSLbeK448R8HKmay7g==}
+    engines: {node: '>=18'}
+
   '@sentry/bundler-plugin-core@5.3.0':
     resolution: {integrity: sha512-L5T60sWdAI3qWwdg3Ptwek/0TY59PERrxyqp4XMUkroayQvGd9r5dIW9Q1kSeXX9iJ442nXbFZKAOyCKV4Z13Q==}
     engines: {node: '>= 18'}
@@ -2116,6 +2132,15 @@ packages:
     resolution: {integrity: sha512-tavJ7yGUZV+z3Ct2/ZB6mg339i08sAk6HDkgqmSRuQEu2iLS5sl9HIvuXfM6xjv8fwlgFOSy++WNABNAcGHUbg==}
     engines: {node: '>= 10'}
     hasBin: true
+
+  '@sentry/cloudflare@10.65.0':
+    resolution: {integrity: sha512-IzSLb20r9nYdZg4oeNq5Rz3G125NYFMV9LMv2eQQ1q2I5QJSY4v2iCDmo5VljnlYEA2N7CqS+iM+J755Ni+dHg==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@cloudflare/workers-types': ^4.x
+    peerDependenciesMeta:
+      '@cloudflare/workers-types':
+        optional: true
 
   '@sentry/conventions@0.15.1':
     resolution: {integrity: sha512-ZLP8bRdMON3prWE2tJyImuYscCxdcJeIPIhrOs/rgyFm3C1nCh1B6gdvPj3AZ5zW08oSFFCsq7T+tYEW3h8MNA==}
@@ -7019,6 +7044,17 @@ snapshots:
       '@sentry/replay': 10.65.0
       '@sentry/replay-canvas': 10.65.0
 
+  '@sentry/bun@10.65.0(@opentelemetry/core@2.9.0)':
+    dependencies:
+      '@apm-js-collab/code-transformer-bundler-plugins': 0.5.0
+      '@sentry/core': 10.65.0
+      '@sentry/node': 10.65.0(@opentelemetry/core@2.9.0)
+      '@sentry/server-utils': 10.65.0
+    transitivePeerDependencies:
+      - '@opentelemetry/core'
+      - '@opentelemetry/exporter-trace-otlp-http'
+      - supports-color
+
   '@sentry/bundler-plugin-core@5.3.0':
     dependencies:
       '@babel/core': 7.29.7
@@ -7076,6 +7112,17 @@ snapshots:
       - encoding
       - supports-color
 
+  '@sentry/cloudflare@10.65.0(@opentelemetry/core@2.9.0)':
+    dependencies:
+      '@opentelemetry/api': 1.9.1
+      '@sentry/core': 10.65.0
+      '@sentry/node': 10.65.0(@opentelemetry/core@2.9.0)
+      '@sentry/server-utils': 10.65.0
+    transitivePeerDependencies:
+      - '@opentelemetry/core'
+      - '@opentelemetry/exporter-trace-otlp-http'
+      - supports-color
+
   '@sentry/conventions@0.15.1': {}
 
   '@sentry/core@10.65.0':
@@ -7086,13 +7133,15 @@ snapshots:
     dependencies:
       '@sentry/core': 10.65.0
 
-  '@sentry/hono@10.65.0(@hono/node-server@2.0.8)(@sentry/node@10.65.0)(hono@4.12.23)':
+  '@sentry/hono@10.65.0(@hono/node-server@2.0.8)(@sentry/bun@10.65.0)(@sentry/cloudflare@10.65.0)(@sentry/node@10.65.0)(hono@4.12.23)':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@sentry/core': 10.65.0
       hono: 4.12.23
     optionalDependencies:
       '@hono/node-server': 2.0.8(hono@4.12.23)
+      '@sentry/bun': 10.65.0(@opentelemetry/core@2.9.0)
+      '@sentry/cloudflare': 10.65.0(@opentelemetry/core@2.9.0)
       '@sentry/node': 10.65.0(@opentelemetry/core@2.9.0)
 
   '@sentry/nextjs@10.65.0(@opentelemetry/core@2.9.0)(@opentelemetry/sdk-trace-base@2.9.0)(next@16.1.7)(react@19.2.6)(webpack@5.108.4)':

@@ -70,6 +70,8 @@ catalogs:
     react-dom: ^19.2.6
   sentry:
     "@sentry/browser": 10.65.0
+    "@sentry/bun": 10.65.0
+    "@sentry/cloudflare": 10.65.0
     "@sentry/hono": 10.65.0
     "@sentry/nextjs": 10.65.0
   tailwindcss:
