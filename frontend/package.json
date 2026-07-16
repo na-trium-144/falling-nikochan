@@ -35,7 +35,7 @@
     "@next/mdx": "catalog:next",
     "@sentry/browser": "catalog:sentry",
     "@sentry/nextjs": "catalog:sentry",
-    "ace-builds": "^1.43.5",
+    "ace-builds": "^1.44.0",
     "clsx": "^2.1.1",
     "colorthief": "catalog:",
     "file-saver": "^2.0.5",
@@ -56,7 +56,7 @@
     "valibot": "catalog:",
     "wasmoon": "catalog:",
     "wretch": "^3.0.9",
-    "yaml": "^2.8.3"
+    "yaml": "^2.9.0"
   },
   "devDependencies": {
     "@gera2ld/tarjs": "catalog:",
@@ -64,13 +64,13 @@
     "@next/bundle-analyzer": "catalog:next",
     "@tailwindcss/postcss": "catalog:tailwindcss",
     "@types/file-saver": "^2.0.7",
-    "@types/mdx": "^2.0.13",
+    "@types/mdx": "^2.0.14",
     "@types/react": "catalog:react",
     "@types/react-dom": "catalog:react",
     "dotenv": "catalog:",
     "postcss": "catalog:",
-    "sass": "^1.98.0",
-    "svgo": "^4.0.1",
+    "sass": "^1.101.0",
+    "svgo": "^4.0.2",
     "tailwindcss": "catalog:tailwindcss",
     "woff2sfnt-sfnt2woff": "^1.0.0"
   }
