@@ -56,7 +56,7 @@
     "valibot": "catalog:",
     "wasmoon": "catalog:",
     "wretch": "^3.0.9",
-    "yaml": "^2.8.3"
+    "yaml": "^2.9.0"
   },
   "devDependencies": {
     "@gera2ld/tarjs": "catalog:",
