@@ -142,12 +142,6 @@
   z-index: 1;
 }
 /* これはFallingWindowの中にあるので、FallingWindowにzを設定すればローカルになる */
-@utility z-edit-trace {
-  z-index: -60;
-}
-@utility z-edit-trace-current {
-  z-index: -59;
-}
 @utility z-edit-target-line {
   z-index: -50;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { RefObject, useEffect, useRef, useState } from "react";
+import { RefObject, useCallback, useEffect, useRef, useState } from "react";
 import {
   targetY,
   bigScale,
@@ -17,6 +17,103 @@ import { DisplayNikochan } from "./displayNikochan";
 import { OffsetEstimator } from "./offsetEstimator";
 import { fetchAsset } from "@/common/fetch";
 import { useTheme } from "@/common/theme";
+
+export function useCanvasProps() {
+  const { width, height, ref } = useResizeDetector();
+  const boxSize: number | undefined =
+    width && height && Math.min(width, height);
+  // nikochanの座標系で(0, 0)を指す位置がFallingWindowの座標系で(marginX, marginY)
+  const marginX: number | undefined = width && boxSize && (width - boxSize) / 2;
+  const marginY: number | undefined =
+    height && boxSize && (height - boxSize) / 2;
+  const [canvasRect, setCanvasRect] = useState({
+    left: 0,
+    top: 0,
+    width: 0,
+    height: 0,
+  });
+  const [dpr, setDpr] = useState<number>(1);
+  useEffect(() => {
+    if (ref.current && marginX !== undefined && marginY !== undefined) {
+      const elementRect = (
+        ref.current as HTMLDivElement
+      ).getBoundingClientRect();
+      setCanvasRect({
+        left: -(elementRect.left + window.scrollX),
+        top: -(elementRect.top + window.scrollY),
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+      setDpr(window.devicePixelRatio || 1);
+    }
+  }, [ref, marginX, marginY]);
+  const canvasMarginX =
+    marginX !== undefined ? -canvasRect.left + marginX : undefined;
+  const canvasMarginY =
+    marginY !== undefined ? -canvasRect.top + marginY : undefined;
+
+  const { rem } = useDisplayMode();
+  const noteSize = Math.max(1.5 * rem, 0.06 * (boxSize || 0));
+
+  const fetchNikochanBitmap = useCallback(
+    (dpr: number) =>
+      // dprはwindow.devicePixelRatioとは異なる値にしたい場合があるので引数で取る
+      Promise.all(
+        [0, 1, 2, 3].map(async (i) => {
+          const svg = await fetchAsset()
+            .get(`/assets/nikochan${i}.svg` + process.env.ASSET_QUERY_NIKOCHAN)
+            .text();
+          // chromeではcreateImageBitmap()でsvgをきれいにresizeできるが、
+          // firefoxではbitmap化してから拡大縮小するようなので、svg自体をリサイズしてからbitmap化する必要がある
+          const svgResized = svg
+            .replace(/width="(\d+)(\w*)"/, `width="${noteSize * dpr}"`)
+            .replace(/height="(\d+)(\w*)"/, `height="${noteSize * dpr}"`);
+          const img = new Image();
+          img.src = `data:image/svg+xml;base64,${btoa(svgResized)}`;
+          const pBitmap = img.decode().then(() =>
+            createImageBitmap(img, {
+              resizeWidth: noteSize * dpr,
+              resizeHeight: noteSize * dpr,
+              resizeQuality: "high",
+            })
+          );
+          const svgResizedBig = svg
+            .replace(
+              /width="(\d+)(\w*)"/,
+              `width="${noteSize * bigScale(true) * dpr}"`
+            )
+            .replace(
+              /height="(\d+)(\w*)"/,
+              `height="${noteSize * bigScale(true) * dpr}"`
+            );
+          const imgBig = new Image();
+          imgBig.src = `data:image/svg+xml;base64,${btoa(svgResizedBig)}`;
+          const pBitmapBig = imgBig.decode().then(() =>
+            createImageBitmap(imgBig, {
+              resizeWidth: noteSize * bigScale(true) * dpr,
+              resizeHeight: noteSize * bigScale(true) * dpr,
+              resizeQuality: "high",
+            })
+          );
+          return Promise.all([pBitmap, pBitmapBig]);
+        })
+      ),
+    [noteSize]
+  );
+
+  return {
+    ref,
+    canvasRect,
+    canvasMarginX,
+    canvasMarginY,
+    marginX,
+    marginY,
+    noteSize,
+    boxSize,
+    dpr,
+    fetchNikochanBitmap,
+  };
+}
 
 type Props = {
   className?: string;
@@ -64,51 +161,30 @@ export default function FallingWindow(props: Props) {
     noClear,
     playbackRate,
   } = props;
-  const { width, height, ref } = useResizeDetector();
-  const boxSize: number | undefined =
-    width && height && Math.min(width, height);
-  // nikochanの座標系で(0, 0)を指す位置がFallingWindowの座標系で(marginX, marginY)
-  const marginX: number | undefined = width && boxSize && (width - boxSize) / 2;
-  const marginY: number | undefined =
-    height && boxSize && (height - boxSize) / 2;
   const tailsCanvasRef = useRef<HTMLCanvasElement>(null);
   const nikochanCanvasRef = useRef<HTMLCanvasElement>(null);
   const effectsCanvasRef = useRef<HTMLCanvasElement>(null);
-  const canvasLeft = useRef<number>(0);
-  const canvasTop = useRef<number>(0);
-  const canvasWidth = useRef<number>(0);
-  const canvasHeight = useRef<number>(0);
-  useEffect(() => {
-    if (ref.current && marginX !== undefined && marginY !== undefined) {
-      canvasLeft.current = -(
-        (ref.current as HTMLDivElement).getBoundingClientRect().left +
-        window.scrollX
-      );
-      canvasTop.current = -(
-        (ref.current as HTMLDivElement).getBoundingClientRect().top +
-        window.scrollY
-      );
-      canvasWidth.current = window.innerWidth;
-      canvasHeight.current = window.innerHeight;
-    }
-  }, [ref, marginX, marginY]);
-  const canvasMarginX =
-    marginX !== undefined ? -canvasLeft.current + marginX : undefined;
-  const canvasMarginY =
-    marginY !== undefined ? -canvasTop.current + marginY : undefined;
+
+  const {
+    ref,
+    canvasRect,
+    canvasMarginX,
+    canvasMarginY,
+    marginX,
+    marginY,
+    noteSize,
+    boxSize,
+    dpr,
+    fetchNikochanBitmap,
+  } = useCanvasProps();
 
   const { rem, playUIScale } = useDisplayMode();
   const { isDark } = useTheme();
-  const noteSize = Math.max(1.5 * rem, 0.06 * (boxSize || 0));
 
   // devicePixelRatioを無視するどころか、あえて小さくすることで、ぼかす
   const tailsCanvasDPR = Math.min(1, 6.5 / noteSize);
   const effectsCanvasDPR = 0.5;
-  const nikochanCanvasDPR = useRef<number>(1);
-  useEffect(() => {
-    nikochanCanvasDPR.current =
-      window.devicePixelRatio * (props.blur ? 0.17 : 1);
-  });
+  const nikochanCanvasDPR = dpr * (props.blur ? 0.17 : 1);
 
   const [rerenderIndex, setRerenderIndex] = useState<number>(0);
   const { realFps } = useRealFPS();
@@ -213,56 +289,10 @@ export default function FallingWindow(props: Props) {
 
   const nikochanBitmap = useRef<ImageBitmap[][] | null>(null); // nikochanBitmap.current[0-3][big:0|1]
   useEffect(() => {
-    Promise.all(
-      [0, 1, 2, 3].map(async (i) => {
-        const svg = await fetchAsset()
-          .get(`/assets/nikochan${i}.svg` + process.env.ASSET_QUERY_NIKOCHAN)
-          .text();
-        // chromeではcreateImageBitmap()でsvgをきれいにresizeできるが、
-        // firefoxではbitmap化してから拡大縮小するようなので、svg自体をリサイズしてからbitmap化する必要がある
-        const svgResized = svg
-          .replace(
-            /width="(\d+)(\w*)"/,
-            `width="${noteSize * nikochanCanvasDPR.current}"`
-          )
-          .replace(
-            /height="(\d+)(\w*)"/,
-            `height="${noteSize * nikochanCanvasDPR.current}"`
-          );
-        const img = new Image();
-        img.src = `data:image/svg+xml;base64,${btoa(svgResized)}`;
-        const pBitmap = img.decode().then(() =>
-          createImageBitmap(img, {
-            resizeWidth: noteSize * nikochanCanvasDPR.current,
-            resizeHeight: noteSize * nikochanCanvasDPR.current,
-            resizeQuality: "high",
-          })
-        );
-        const svgResizedBig = svg
-          .replace(
-            /width="(\d+)(\w*)"/,
-            `width="${noteSize * bigScale(true) * nikochanCanvasDPR.current}"`
-          )
-          .replace(
-            /height="(\d+)(\w*)"/,
-            `height="${noteSize * bigScale(true) * nikochanCanvasDPR.current}"`
-          );
-        const imgBig = new Image();
-        imgBig.src = `data:image/svg+xml;base64,${btoa(svgResizedBig)}`;
-        const pBitmapBig = imgBig.decode().then(() =>
-          createImageBitmap(imgBig, {
-            resizeWidth: noteSize * bigScale(true) * nikochanCanvasDPR.current,
-            resizeHeight: noteSize * bigScale(true) * nikochanCanvasDPR.current,
-            resizeQuality: "high",
-          })
-        );
-        return Promise.all([pBitmap, pBitmapBig]);
-      })
-    ).then((bitmaps) => {
+    fetchNikochanBitmap(nikochanCanvasDPR).then((bitmaps) => {
       nikochanBitmap.current = bitmaps;
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [noteSize, nikochanCanvasDPR.current]);
+  }, [fetchNikochanBitmap, nikochanCanvasDPR]);
 
   const displayNotes = useRef<DisplayNote[]>([]);
   const displayNikochan = useRef<(DisplayNikochan | null)[]>([]);
@@ -301,9 +331,6 @@ export default function FallingWindow(props: Props) {
         playbackRate,
         rem,
         now,
-        tailsCanvasDPR,
-        effectsCanvasDPR,
-        nikochanCanvasDPR: nikochanCanvasDPR.current,
         nikochanBitmap: nikochanBitmap.current,
         lastNow: lastNow.current,
         dark: isDark,
@@ -318,20 +345,20 @@ export default function FallingWindow(props: Props) {
         ectx.clearRect(
           0,
           0,
-          canvasWidth.current * effectsCanvasDPR,
-          canvasHeight.current * effectsCanvasDPR
+          canvasRect.width * effectsCanvasDPR,
+          canvasRect.height * effectsCanvasDPR
         );
         nctx.clearRect(
           0,
           0,
-          canvasWidth.current * nikochanCanvasDPR.current,
-          canvasHeight.current * nikochanCanvasDPR.current
+          canvasRect.width * nikochanCanvasDPR,
+          canvasRect.height * nikochanCanvasDPR
         );
         ctx.clearRect(
           0,
           0,
-          canvasWidth.current * tailsCanvasDPR,
-          canvasHeight.current * tailsCanvasDPR
+          canvasRect.width * tailsCanvasDPR,
+          canvasRect.height * tailsCanvasDPR
         );
         for (const dn of displayNotes.current) {
           if (!displayNikochan.current[dn.id]) {
@@ -344,10 +371,10 @@ export default function FallingWindow(props: Props) {
           const dns = displayNikochan.current[dn.id]!;
           dns.update(dn, c);
           shouldHideBPMSign ||= dns.shouldHideBPMSign;
-          dns.drawNikochan(nctx);
-          dns.drawTail(ctx);
-          dns.drawRipple(ectx);
-          dns.drawParticle(ectx);
+          dns.drawNikochan(nctx, nikochanCanvasDPR);
+          dns.drawTail(ctx, tailsCanvasDPR);
+          dns.drawRipple(ectx, effectsCanvasDPR);
+          dns.drawParticle(ectx, effectsCanvasDPR);
         }
         lastNow.current = now;
 
@@ -362,24 +389,24 @@ export default function FallingWindow(props: Props) {
           ctx.clearRect(
             0,
             0,
-            canvasWidth.current * tailsCanvasDPR,
-            canvasHeight.current * tailsCanvasDPR
+            canvasRect.width * tailsCanvasDPR,
+            canvasRect.height * tailsCanvasDPR
           );
         }
         if (nctx) {
           nctx.clearRect(
             0,
             0,
-            canvasWidth.current * nikochanCanvasDPR.current,
-            canvasHeight.current * nikochanCanvasDPR.current
+            canvasRect.width * nikochanCanvasDPR,
+            canvasRect.height * nikochanCanvasDPR
           );
         }
         if (ectx) {
           ectx.clearRect(
             0,
             0,
-            canvasWidth.current * effectsCanvasDPR,
-            canvasHeight.current * effectsCanvasDPR
+            canvasRect.width * effectsCanvasDPR,
+            canvasRect.height * effectsCanvasDPR
           );
         }
       }
@@ -427,38 +454,27 @@ export default function FallingWindow(props: Props) {
       <canvas
         ref={effectsCanvasRef}
         className="absolute z-fw-canvas-effects pointer-events-none dark:opacity-70 opacity-90"
-        style={{
-          left: canvasLeft.current,
-          top: canvasTop.current,
-          width: canvasWidth.current,
-          height: canvasHeight.current,
-        }}
-        width={canvasWidth.current * effectsCanvasDPR}
-        height={canvasHeight.current * effectsCanvasDPR}
+        style={{ ...canvasRect }}
+        width={canvasRect.width * effectsCanvasDPR}
+        height={canvasRect.height * effectsCanvasDPR}
       />
       {/* For nikochans tail */}
       <canvas
         ref={tailsCanvasRef}
         className="absolute z-fw-canvas-tail pointer-events-none"
         style={{
-          left: canvasLeft.current,
-          top: canvasTop.current,
-          width: canvasWidth.current,
-          height: canvasHeight.current,
+          ...canvasRect,
           opacity: 0.5,
         }}
-        width={canvasWidth.current * tailsCanvasDPR}
-        height={canvasHeight.current * tailsCanvasDPR}
+        width={canvasRect.width * tailsCanvasDPR}
+        height={canvasRect.height * tailsCanvasDPR}
       />
       {/* For nikochan */}
       <canvas
         ref={nikochanCanvasRef}
         className="absolute z-fw-canvas-nikochan pointer-events-none"
         style={{
-          left: canvasLeft.current,
-          top: canvasTop.current,
-          width: canvasWidth.current,
-          height: canvasHeight.current,
+          ...canvasRect,
           /*
           Android16のChrome147でトップページにレンダリングしたcanvasが真っ黒になる+GPUのアーチファクトが出るというバグに遭遇したが、
           opacityを設定するとその謎現象を回避できることを発見。
@@ -466,8 +482,8 @@ export default function FallingWindow(props: Props) {
           */
           opacity: 0.99,
         }}
-        width={canvasWidth.current * nikochanCanvasDPR.current}
-        height={canvasHeight.current * nikochanCanvasDPR.current}
+        width={canvasRect.width * nikochanCanvasDPR}
+        height={canvasRect.height * nikochanCanvasDPR}
       />
       {/* 判定線 */}
       {boxSize && marginY !== undefined && (

@@ -45,15 +45,13 @@ interface Context {
   canvasMarginX: number;
   canvasMarginY: number;
   marginY: number;
-  playbackRate: number;
+  playbackRate?: number;
   rem: number;
-  now: number;
-  tailsCanvasDPR: number;
-  effectsCanvasDPR: number;
-  nikochanCanvasDPR: number;
+  now?: number;
   nikochanBitmap: ImageBitmap[][];
-  lastNow: number;
+  lastNow?: number;
   dark: boolean;
+  noFadeIn?: boolean;
 }
 interface ParticleParams {
   deltaAngle: number;
@@ -81,7 +79,7 @@ export class DisplayNikochan {
 
     // 出現直後は100msのフェードインをする。
     // ただし最初から画面外にいるものについてはフェードインしない(開始時刻を-Infinityにすることで完了状態にする)
-    if (this.isOffScrean) {
+    if (this.isOffScrean || c.noFadeIn) {
       this.#fadeinStart = -Infinity;
     } else {
       this.#fadeinStart = this.#now;
@@ -100,7 +98,7 @@ export class DisplayNikochan {
     }
   }
 
-  drawNikochan(nctx: CanvasRenderingContext2D) {
+  drawNikochan(nctx: CanvasRenderingContext2D, dpr: number) {
     let dx = 0;
     let dy = 0;
     let scale = 1;
@@ -123,14 +121,17 @@ export class DisplayNikochan {
       this.#c.nikochanBitmap[this.#n.done <= 3 ? this.#n.done : 0][
         this.#n.big ? 1 : 0
       ],
-      (this.left - this.size / 2 + dx) * this.#c.nikochanCanvasDPR,
-      (this.top - this.size / 2 + dy) * this.#c.nikochanCanvasDPR,
-      this.size * this.#c.nikochanCanvasDPR * scale,
-      this.size * this.#c.nikochanCanvasDPR * scale
+      (this.left - this.size / 2 + dx) * dpr,
+      (this.top - this.size / 2 + dy) * dpr,
+      this.size * dpr * scale,
+      this.size * dpr * scale
     );
   }
 
-  drawTail(ctx: CanvasRenderingContext2D) {
+  drawTail(ctx: CanvasRenderingContext2D, dpr: number) {
+    if(this.#c.now === undefined || this.#c.lastNow === undefined){
+      throw new Error("now and lastNow must be defined for drawTail");
+    }
     const headSize = this.#c.noteSize * 1;
     const tailSize = this.#c.noteSize * 0.85;
     if (this.#n.done !== 0) {
@@ -179,7 +180,7 @@ export class DisplayNikochan {
 
     if (tailLength > this.#c.noteSize / 2 && tailOpacity > 0.5) {
       ctx.save();
-      ctx.scale(this.#c.tailsCanvasDPR, this.#c.tailsCanvasDPR);
+      ctx.scale(dpr, dpr);
       ctx.translate(this.left, this.top);
 
       ctx.rotate(velAngle);
@@ -204,7 +205,7 @@ export class DisplayNikochan {
       (tailLength > this.#c.noteSize / 2 && tailOpacity > 0.5)
     ) {
       ctx.save();
-      ctx.scale(this.#c.tailsCanvasDPR, this.#c.tailsCanvasDPR);
+      ctx.scale(dpr, dpr);
       ctx.translate(this.left, this.top);
 
       ctx.globalAlpha =
@@ -222,7 +223,7 @@ export class DisplayNikochan {
     }
   }
 
-  drawRipple(ctx: CanvasRenderingContext2D) {
+  drawRipple(ctx: CanvasRenderingContext2D, dpr: number) {
     if (this.#n.done !== 1) {
       return;
     }
@@ -247,7 +248,7 @@ export class DisplayNikochan {
       }
 
       ctx.save();
-      ctx.scale(this.#c.effectsCanvasDPR, this.#c.effectsCanvasDPR);
+      ctx.scale(dpr, dpr);
       ctx.translate(this.left, this.top);
       ctx.scale(scale, scale);
       ctx.globalAlpha = opacity;
@@ -285,7 +286,7 @@ export class DisplayNikochan {
     }
   }
 
-  drawParticle(ctx: CanvasRenderingContext2D) {
+  drawParticle(ctx: CanvasRenderingContext2D, dpr: number) {
     if (this.#dn.chain === undefined) {
       return;
     }
@@ -351,7 +352,7 @@ export class DisplayNikochan {
         }
 
         ctx.save();
-        ctx.scale(this.#c.effectsCanvasDPR, this.#c.effectsCanvasDPR);
+        ctx.scale(dpr, dpr);
         ctx.translate(this.left, this.top);
         ctx.rotate(
           ((this.#particleStartAngle +
@@ -416,6 +417,9 @@ export class DisplayNikochan {
     );
   }
   get shouldHideBPMSign() {
+    if(this.#c.now === undefined || this.#c.lastNow === undefined || this.#c.playbackRate === undefined){
+      throw new Error("now, lastNow and playbackRate must be defined for drawTail");
+    }
     // 実際のBPMSignのサイズ + 0.5rem くらい
     return (
       this.#c.marginY + targetY * this.#c.boxSize - this.size / 2 <
