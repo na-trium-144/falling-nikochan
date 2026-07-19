@@ -18,7 +18,7 @@ export function GoHomeButton({ goHome }: { goHome?: string }) {
 
   return (
     <div>
-      <a href="/" className="inline-block fn-button">
+      <a href="/" className="fn-button">
         <span className="fn-glass-1" />
         <span className="fn-glass-2" />
         <ButtonHighlight />

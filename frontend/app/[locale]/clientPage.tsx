@@ -255,7 +255,7 @@ export default function TopPage(props: Props) {
             </Link>
             <Link
               href={`/${locale}/main/play`}
-              className="fn-button fn-cta hidden demo-wide:inline-block"
+              className="fn-button fn-cta hidden demo-wide:inline-flex"
               prefetch={process.env.PREFETCH as "auto"}
             >
               <span className="fn-glass-1" />

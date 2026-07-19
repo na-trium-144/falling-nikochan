@@ -2,6 +2,7 @@
   .fn-button {
     @apply appearance-none;
     @apply relative m-0.5 min-h-10 py-1.5 px-2.5 min-w-max text-center cursor-pointer;
+    @apply inline-flex items-center justify-center;
     @apply rounded-xl;
     @apply bg-blue-50/75 bg-gradient-to-t from-blue-200/75 to-blue-50/75;
     @apply dark:bg-amber-800/75 dark:from-amber-950/75 dark:to-amber-800/75;
