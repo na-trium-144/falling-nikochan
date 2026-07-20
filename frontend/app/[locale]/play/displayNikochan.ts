@@ -71,6 +71,13 @@ export class DisplayNikochan {
   #particleStartAngle: number | null = null;
   #particleParams: ParticleParams[] = [];
 
+  get n() {
+    return this.#dn;
+  }
+  get dn() {
+    return this.#dn;
+  }
+
   constructor(n: NoteInGame, dn: DisplayNote, c: Context) {
     this.#n = n;
     this.#dn = dn;
@@ -128,8 +135,56 @@ export class DisplayNikochan {
     );
   }
 
+  drawCircle(ctx: CanvasRenderingContext2D, dpr: number, color: string) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(
+      this.left * dpr,
+      this.top * dpr,
+      (this.size * dpr) / 2,
+      0,
+      Math.PI * 2
+    );
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2 * dpr;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  drawTrail(ctx: CanvasRenderingContext2D, dpr: number, color: string) {
+    const x = (u: number) => this.#n.targetX + this.#n.vx * u;
+    const y = (u: number) => this.#n.vy * u - (this.#n.ay * u * u) / 2;
+    const vx = () => this.#n.vx;
+    const vy = (u: number) => this.#n.vy - this.#n.ay * u;
+    ctx.save();
+    ctx.beginPath();
+    ctx.scale(dpr, dpr);
+    ctx.translate(
+      this.#c.canvasMarginX,
+      this.#c.canvasMarginY + this.#c.boxSize - targetY * this.#c.boxSize
+    );
+    // ctx.scale(this.#c.boxSize, -this.#c.boxSize);
+    ctx.moveTo(
+      this.#c.boxSize * x(this.#n.uMin),
+      -this.#c.boxSize * y(this.#n.uMin)
+    );
+    ctx.quadraticCurveTo(
+      this.#c.boxSize *
+        (x(this.#n.uMin) + (vx() * (this.#n.uMax - this.#n.uMin)) / 2),
+      -this.#c.boxSize *
+        (y(this.#n.uMin) +
+          (vy(this.#n.uMin) * (this.#n.uMax - this.#n.uMin)) / 2),
+      this.#c.boxSize * x(this.#n.uMax),
+      -this.#c.boxSize * y(this.#n.uMax)
+    );
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+  }
+
   drawTail(ctx: CanvasRenderingContext2D, dpr: number) {
-    if(this.#c.now === undefined || this.#c.lastNow === undefined){
+    if (this.#c.now === undefined || this.#c.lastNow === undefined) {
       throw new Error("now and lastNow must be defined for drawTail");
     }
     const headSize = this.#c.noteSize * 1;
@@ -417,8 +472,14 @@ export class DisplayNikochan {
     );
   }
   get shouldHideBPMSign() {
-    if(this.#c.now === undefined || this.#c.lastNow === undefined || this.#c.playbackRate === undefined){
-      throw new Error("now, lastNow and playbackRate must be defined for drawTail");
+    if (
+      this.#c.now === undefined ||
+      this.#c.lastNow === undefined ||
+      this.#c.playbackRate === undefined
+    ) {
+      throw new Error(
+        "now, lastNow and playbackRate must be defined for drawTail"
+      );
     }
     // 実際のBPMSignのサイズ + 0.5rem くらい
     return (

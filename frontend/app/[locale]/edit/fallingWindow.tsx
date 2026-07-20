@@ -92,14 +92,22 @@ export default function FallingWindow(props: Props) {
         noFadeIn: true,
       };
       ctx.clearRect(0, 0, canvasRect.width * dpr, canvasRect.height * dpr);
-      for (const dn of displayNotesRef.current) {
-        const dns = new DisplayNikochan(currentLevel.seqNotes[dn.id], dn, c);
-        dns.drawNikochan(ctx, dpr);
-        if(dn.id === cur.noteIndex){
-          // dns.drawCircle(ctx, dpr, "red-400");
-        }
-        // dns.drawTrail() gray-300 or red-300
-      }
+      const displayNikochan = displayNotesRef.current.map(
+        (dn) => new DisplayNikochan(currentLevel.seqNotes[dn.id], dn, c)
+      );
+      displayNikochan.forEach((d) =>
+        d.drawTrail(
+          ctx,
+          dpr,
+          d.dn.id === cur.noteIndex
+            ? "oklch(80.8% 0.114 19.571)" // red-300
+            : "oklch(87.2% 0.01 258.338)" // gray-300
+        )
+      );
+      displayNikochan.forEach((d) => d.drawNikochan(ctx, dpr));
+      displayNikochan
+        .find((d) => d.dn.id === cur.noteIndex)
+        ?.drawCircle(ctx, dpr, "oklch(70.4% 0.191 22.216)"); // red-400
     }
   }, [
     canvasRect,
