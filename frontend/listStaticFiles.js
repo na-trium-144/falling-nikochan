@@ -26,8 +26,11 @@ const nextFiles = allFiles.filter((n) => n.startsWith("/_next"));
 const archiveFiles = allFiles
   .filter((n) => !n.startsWith("/_next"))
   .filter((n) => !n.startsWith("/og-"))
-  .filter((n) => !n.includes("ogTemplate"))
-  .filter((n) => !n.includes("app-icon-"))
+  .filter((n) => !n.includes("assets/ogTemplate"))
+  .filter((n) => !n.includes("assets/app-icon"))
+  .filter((n) => !n.includes("assets/lp-"))
+  .filter((n) => !n.includes("assets/nikochan"))
+  .filter((n) => !n.includes("assets/cloud"))
   .filter(
     (n) =>
       ![

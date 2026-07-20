@@ -105,6 +105,9 @@ async function clearOldCaches() {
   );
 }
 
+/**
+ * urlのoriginは無視し、pathnameは正規化し、searchはそのまま使用
+ */
 async function fetchStatic(_e: any, url: URL): Promise<Response> {
   const cache = await mainCache();
   let pathname = url.pathname;
@@ -115,18 +118,18 @@ async function fetchStatic(_e: any, url: URL): Promise<Response> {
     pathname = pathname.slice(0, -5);
   }
   pathname = pathname.replaceAll("[", "%5B").replaceAll("]", "%5D");
-  const res = await cache.match(pathname);
+  const res = await cache.match(pathname + url.search);
   if (res) {
     return res;
   } else {
     // 通常は全部cacheに入っているはずなのでここに来ることはほぼない
     // console.warn(`${url} is not in cache`);
     const res = await fetch(
-      (process.env.ASSET_PREFIX || self.origin) + url.pathname
+      (process.env.ASSET_PREFIX || self.origin) + url.pathname + url.search
     ).catch(fetchError(e));
     if (res.ok) {
       const returnRes = returnBody(res.body, res.headers);
-      await (await mainCache()).put(url.pathname, returnRes.clone());
+      await (await mainCache()).put(pathname + url.search, returnRes.clone());
       return returnRes;
     } else {
       return res;
@@ -373,7 +376,10 @@ async function initAssetsCache(config: {
       const keys = await cache.keys();
       await Promise.all(
         keys.map(async (req) => {
-          if (!allPathnames.includes(new URL(req.url).pathname)) {
+          if (
+            !allPathnames.includes(new URL(req.url).pathname) &&
+            !new URL(req.url).search.includes("v=")
+          ) {
             // console.warn(`delete ${req.url}`);
             await cache.delete(req);
           }
@@ -572,6 +578,16 @@ const app = new Hono({ strict: false })
       });
     }
 
+    // ?v= がつくリクエストの場合は、そのパラメータだけそのまま使う
+    // (以前のバージョンのキャッシュを返さないようにするため)
+    let reqPath = c.req.path;
+    if (new URL(c.req.url).search.includes("v=")) {
+      reqPath =
+        c.req.path +
+        "?v=" +
+        new URLSearchParams(new URL(c.req.url).search).get("v");
+    }
+
     if (
       !c.req.path.includes(".") ||
       c.req.path.endsWith(".txt") ||
@@ -584,7 +600,7 @@ const app = new Hono({ strict: false })
       const timeout = setTimeout(() => abortController.abort(), 1000);
       try {
         const remoteRes = await fetch(
-          (process.env.ASSET_PREFIX || self.origin) + c.req.path,
+          (process.env.ASSET_PREFIX || self.origin) + reqPath,
           { cache: "no-cache", signal: abortController.signal }
         ).catch(fetchError(e));
         clearTimeout(timeout);
@@ -595,7 +611,7 @@ const app = new Hono({ strict: false })
         // pass
       }
     }
-    return await fetchStatic(null, new URL(c.req.url));
+    return await fetchStatic(null, new URL(self.origin + reqPath));
   })
   .use(languageDetector)
   .onError(
