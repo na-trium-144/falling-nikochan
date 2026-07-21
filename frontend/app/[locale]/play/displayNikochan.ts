@@ -135,12 +135,7 @@ export class DisplayNikochan {
     );
   }
 
-  drawCircle(
-    ctx: CanvasRenderingContext2D,
-    dpr: number,
-    color: string | null,
-    fill: string | null
-  ) {
+  drawCircle(ctx: CanvasRenderingContext2D, dpr: number, color: string) {
     ctx.save();
     ctx.beginPath();
     ctx.arc(
@@ -150,15 +145,9 @@ export class DisplayNikochan {
       0,
       Math.PI * 2
     );
-    if (color) {
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 2 * dpr;
-      ctx.stroke();
-    }
-    if (fill) {
-      ctx.fillStyle = fill;
-      ctx.fill();
-    }
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2 * dpr;
+    ctx.stroke();
     ctx.restore();
   }
 
