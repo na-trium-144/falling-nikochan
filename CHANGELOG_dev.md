@@ -4,6 +4,8 @@
 * v=をクエリに含むアセットについて、キャッシュキーにvパラメータを含む
 * v=をクエリに含むアセットをキャッシュから消さない
 * asset_prefixへのリクエストが4xxの場合self.originにフォールバック
+* トップページデモの音符サイズがおかしいのを修正
+    * ver16.24 の変更以降FallingWindowの高さが100vhになっていなかった。
 
 ## ver. 16.26 - 2026/07/17 [#1262](https://github.com/na-trium-144/falling-nikochan/pull/1262)
 

@@ -209,7 +209,7 @@ export default function TopPage(props: Props) {
         id="top"
         className={clsx(
           "w-full h-max min-h-screen flex items-center justify-center",
-          "flex-col demo-wide:flex-row-reverse"
+          "flex-col demo-wide:flex-row-reverse demo-wide:items-stretch"
         )}
       >
         <div className="grow shrink-0 grid-centering px-3 demo-wide:px-9">
@@ -223,7 +223,7 @@ export default function TopPage(props: Props) {
           className={clsx(
             "relative w-full",
             "grow-2 basis-[max-content]",
-            "demo-wide:grow-1 demo-wide:basis-main demo-wide:min-w-0 demo-wide:h-full",
+            "demo-wide:grow-1 demo-wide:basis-main demo-wide:min-w-0",
             "demo-wide:flex demo-wide:items-center demo-wide:justify-end"
           )}
         >
