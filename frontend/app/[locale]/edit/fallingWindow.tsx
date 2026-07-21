@@ -104,10 +104,16 @@ export default function FallingWindow(props: Props) {
             : "oklch(87.2% 0.01 258.338)" // gray-300
         )
       );
-      displayNikochan.forEach((d) => d.drawNikochan(ctx, dpr));
-      displayNikochan
-        .find((d) => d.dn.id === cur.noteIndex)
-        ?.drawCircle(ctx, dpr, "oklch(70.4% 0.191 22.216)"); // red-400
+      displayNikochan.forEach((d) =>
+        d.drawCircle(
+          ctx,
+          dpr,
+          null,
+          d.dn.id === cur.noteIndex
+            ? "oklch(70.4% 0.191 22.216)" // red-400
+            : "oklch(85.2% 0.199 91.936)" // yellow-400
+        )
+      );
     }
   }, [
     canvasRect,
