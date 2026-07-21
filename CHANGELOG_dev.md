@@ -1,3 +1,10 @@
+## ver. 16.28 - 2026/07/22
+
+* lpをassetのアーカイブから除外
+* v=をクエリに含むアセットについて、キャッシュキーにvパラメータを含む
+* v=をクエリに含むアセットをキャッシュから消さない
+* asset_prefixへのリクエストが4xxの場合self.originにフォールバック
+
 ## ver. 16.26 - 2026/07/17 [#1262](https://github.com/na-trium-144/falling-nikochan/pull/1262)
 
 * eslint, babelをcatalogでグループ化
