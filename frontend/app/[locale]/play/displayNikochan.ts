@@ -251,8 +251,8 @@ export class DisplayNikochan {
 
       ctx.rotate(velAngle);
       const tailGrad = ctx.createLinearGradient(tailLength, 0, 0, 0);
-      tailGrad.addColorStop(0, "#facd0000");
-      tailGrad.addColorStop(1, "#facd00cc");
+      tailGrad.addColorStop(0, "rgba(250, 205, 0, 0)");
+      tailGrad.addColorStop(1, "rgba(250, 205, 0, 0.8)");
       ctx.beginPath();
       ctx.moveTo(tailLength, 0);
       ctx.lineTo(0, -tailWidth / 2);
@@ -260,7 +260,7 @@ export class DisplayNikochan {
       ctx.closePath();
       ctx.fillStyle = tailGrad;
       // ctx.shadowBlur = 10;
-      // ctx.shadowColor = "#facd0080";
+      // ctx.shadowColor = "rgba(250, 205, 0, 0.5)";
       ctx.globalAlpha = tailOpacity * this.globalAlpha;
       ctx.fill();
       ctx.restore();
@@ -280,9 +280,9 @@ export class DisplayNikochan {
       const headRadius = (headSize * bigScale(this.#n.big)) / 2;
       ctx.arc(0, 0, headRadius, 0, Math.PI * 2);
       const headGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, headRadius);
-      headGrad.addColorStop(0, "#ffe89dff");
-      headGrad.addColorStop(0.5, "#ffe89dcc");
-      headGrad.addColorStop(1, "#ffe89d00");
+      headGrad.addColorStop(0, "rgba(255, 232, 157, 1)");
+      headGrad.addColorStop(0.5, "rgba(255, 232, 157, 0.8)");
+      headGrad.addColorStop(1, "rgba(255, 232, 157, 0)");
       ctx.fillStyle = headGrad;
       ctx.fill();
       ctx.restore();
