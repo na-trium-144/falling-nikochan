@@ -118,22 +118,28 @@ async function fetchStatic(_e: any, url: URL): Promise<Response> {
     pathname = pathname.slice(0, -5);
   }
   pathname = pathname.replaceAll("[", "%5B").replaceAll("]", "%5D");
-  const res = await cache.match(pathname + url.search);
+  let res = await cache.match(pathname + url.search);
   if (res) {
     return res;
   } else {
     // 通常は全部cacheに入っているはずなのでここに来ることはほぼない
     // console.warn(`${url} is not in cache`);
-    const res = await fetch(
-      (process.env.ASSET_PREFIX || self.origin) + url.pathname + url.search
-    ).catch(fetchError(e));
-    if (res.ok) {
-      const returnRes = returnBody(res.body, res.headers);
-      await (await mainCache()).put(pathname + url.search, returnRes.clone());
-      return returnRes;
-    } else {
-      return res;
+    // ASSET_PREFIXへのリクエストが4xxの場合(通信エラー以外)はoriginで再試行
+    for (const origin of [process.env.ASSET_PREFIX, self.origin]) {
+      if (origin) {
+        res = await fetch(
+          (process.env.ASSET_PREFIX || self.origin) + url.pathname + url.search
+        ).catch(fetchError(e));
+        if (res.ok) {
+          const returnRes = returnBody(res.body, res.headers);
+          await (
+            await mainCache()
+          ).put(pathname + url.search, returnRes.clone());
+          return returnRes;
+        }
+      }
     }
+    return res!;
   }
 }
 async function fetchStaticWithThrow(_e: any, url: URL): Promise<ResponseOK> {
