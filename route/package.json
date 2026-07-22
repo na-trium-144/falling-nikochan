@@ -17,7 +17,7 @@
     "@axiomhq/pino": "1.8.0",
     "@falling-nikochan/chart": "workspace:*",
     "@falling-nikochan/i18n": "workspace:*",
-    "@hono/node-server": "2.0.8",
+    "@hono/node-server": "2.0.11",
     "@hono/standard-validator": "0.2.3",
     "@hono/structured-logger": "catalog:",
     "@hono/swagger-ui": "0.6.1",
