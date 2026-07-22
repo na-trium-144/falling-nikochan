@@ -57,8 +57,8 @@ catalogs:
       specifier: 4.13.2
       version: 4.13.2
     postcss:
-      specifier: 8.5.17
-      version: 8.5.17
+      specifier: 8.5.21
+      version: 8.5.21
     valibot:
       specifier: 1.4.2
       version: 1.4.2
@@ -421,7 +421,7 @@ importers:
         version: 16.6.1
       postcss:
         specifier: 'catalog:'
-        version: 8.5.17
+        version: 8.5.21
       sass:
         specifier: 1.101.0
         version: 1.101.0
@@ -4495,6 +4495,11 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
+  nanoid@3.3.16:
+    resolution: {integrity: sha512-bzlKTyNJ7+LdGIIwy8ijFpIqEQIvafahV7eYykJ8Cvh42EdJeODoJ6gUJXpQJvej1BddH8OqTXZNE/KfbWAu8Q==}
+    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
+    hasBin: true
+
   nanoid@5.1.16:
     resolution: {integrity: sha512-kVrnsrJqMR8+oLJnGEmSWw9BivK5mt7H3FZatVRjrc5wGqFYuBxX1yG7+A7Gi5AefkX6t/oCkizcQgpu0cY1dQ==}
     engines: {node: ^18 || >=20}
@@ -4740,8 +4745,8 @@ packages:
     resolution: {integrity: sha512-PS08Iboia9mts/2ygV3eLpY5ghnUcfLV/EXTOW1E2qYxJKGGBUtNjN76FYHnMs36RmARn41bC0AZmn+rR0OVpQ==}
     engines: {node: ^10 || ^12 || >=14}
 
-  postcss@8.5.17:
-    resolution: {integrity: sha512-J7EF+8X+CzRPaJPOv9Ck2wNWJvGnnl3PcNPAdGg6GTLjyVpyQ0yATMSXRFRV01BviT/9Gwuc3rjEyJbDJG9a4w==}
+  postcss@8.5.21:
+    resolution: {integrity: sha512-v4sDNP3fdNiWMfabO7OwOQdOX8TiQSztKyT1Wj0w+j7LDallJThJRBBBmzVGyYj0crMh7jlV4zepPkiNu9UwDQ==}
     engines: {node: ^10 || ^12 || >=14}
 
   prelude-ls@1.2.1:
@@ -6654,7 +6659,7 @@ snapshots:
       '@mdx-js/mdx': 3.1.1
       source-map: 0.7.6
     optionalDependencies:
-      webpack: 5.108.4(postcss@8.5.17)(webpack-cli@7.2.1)
+      webpack: 5.108.4(postcss@8.5.21)(webpack-cli@7.2.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -7241,7 +7246,7 @@ snapshots:
   '@sentry/webpack-plugin@5.3.0(webpack@5.108.4)':
     dependencies:
       '@sentry/bundler-plugin-core': 5.3.0
-      webpack: 5.108.4(postcss@8.5.17)(webpack-cli@7.2.1)
+      webpack: 5.108.4(postcss@8.5.21)(webpack-cli@7.2.1)
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -7402,7 +7407,7 @@ snapshots:
       '@alloc/quick-lru': 5.2.0
       '@tailwindcss/node': 4.3.2
       '@tailwindcss/oxide': 4.3.2
-      postcss: 8.5.17
+      postcss: 8.5.21
       tailwindcss: 4.3.2
 
   '@tsconfig/node23@23.0.4': {}
@@ -9640,15 +9645,15 @@ snapshots:
 
   minimist@1.2.8: {}
 
-  minimizer-webpack-plugin@5.6.1(postcss@8.5.17)(webpack@5.108.4):
+  minimizer-webpack-plugin@5.6.1(postcss@8.5.21)(webpack@5.108.4):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
       schema-utils: 4.3.3
       terser: 5.49.0
-      webpack: 5.108.4(postcss@8.5.17)(webpack-cli@7.2.1)
+      webpack: 5.108.4(postcss@8.5.21)(webpack-cli@7.2.1)
     optionalDependencies:
-      postcss: 8.5.17
+      postcss: 8.5.21
 
   minimizer-webpack-plugin@5.6.1(webpack@5.108.4):
     dependencies:
@@ -9682,6 +9687,8 @@ snapshots:
   ms@2.1.3: {}
 
   nanoid@3.3.12: {}
+
+  nanoid@3.3.16: {}
 
   nanoid@5.1.16: {}
 
@@ -9942,9 +9949,9 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  postcss@8.5.17:
+  postcss@8.5.21:
     dependencies:
-      nanoid: 3.3.12
+      nanoid: 3.3.16
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
@@ -10850,7 +10857,7 @@ snapshots:
 
   webpack-sources@3.5.1: {}
 
-  webpack@5.108.4(postcss@8.5.17)(webpack-cli@7.2.1):
+  webpack@5.108.4(postcss@8.5.21)(webpack-cli@7.2.1):
     dependencies:
       '@types/estree': 1.0.9
       '@types/json-schema': 7.0.15
@@ -10868,7 +10875,7 @@ snapshots:
       graceful-fs: 4.2.11
       loader-runner: 4.3.2
       mime-db: 1.54.0
-      minimizer-webpack-plugin: 5.6.1(postcss@8.5.17)(webpack@5.108.4)
+      minimizer-webpack-plugin: 5.6.1(postcss@8.5.21)(webpack@5.108.4)
       neo-async: 2.6.2
       schema-utils: 4.3.3
       tapable: 2.3.3
