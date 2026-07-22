@@ -27,6 +27,7 @@ import { compress } from "hono/compress";
 import { requestId } from "hono/request-id";
 import { structuredLogger } from "@hono/structured-logger";
 import pino from "pino";
+import { etag } from "hono/etag";
 
 const port = 8787;
 
@@ -100,6 +101,7 @@ app
   .route("/", redirectApp({ fetchStatic }))
   .use(
     "/*",
+    etag(),
     serveStatic({
       root: "./frontend/out",
       rewriteRequestPath: (path) => {
