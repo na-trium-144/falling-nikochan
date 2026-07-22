@@ -163,7 +163,7 @@ importers:
         version: 0.1.0(hono@4.12.23)
       '@sentry/hono':
         specifier: catalog:sentry
-        version: 10.65.0(@hono/node-server@2.0.8)(@sentry/bun@10.65.0)(@sentry/cloudflare@10.65.0)(@sentry/node@10.65.0)(hono@4.12.23)
+        version: 10.65.0(@hono/node-server@2.0.11)(@sentry/bun@10.65.0)(@sentry/cloudflare@10.65.0)(@sentry/node@10.65.0)(hono@4.12.23)
       '@vercel/functions':
         specifier: 3.7.5
         version: 3.7.5(ws@8.20.1)
@@ -453,8 +453,8 @@ importers:
         specifier: workspace:*
         version: link:../i18n
       '@hono/node-server':
-        specifier: 2.0.8
-        version: 2.0.8(hono@4.12.23)
+        specifier: 2.0.11
+        version: 2.0.11(hono@4.12.23)
       '@hono/standard-validator':
         specifier: 0.2.3
         version: 0.2.3(@standard-schema/spec@1.1.0)(hono@4.12.23)
@@ -1364,8 +1364,8 @@ packages:
   '@gera2ld/tarjs@0.3.1':
     resolution: {integrity: sha512-ygcXngovMTj+zI3j2ZSjGiIziELuSCfk5tjUHBjUL/9/9dPLzIdNefW5cZZopB67Di/j/6H9BCGp/0o45qRefQ==}
 
-  '@hono/node-server@2.0.8':
-    resolution: {integrity: sha512-GuCWzLxwg218fy1JaHculFsdcuY12hxit83V+algozTPnwhNjLrRL/Alg9OYjLZLoUZ1rw/S4CdTMsnkSKCmFA==}
+  '@hono/node-server@2.0.11':
+    resolution: {integrity: sha512-bjD221KPLoJTWUwso1J6fGKiTXEUFedG/s0visavY4zakFPkeGURMRNly+FhBHs7T8Dz4qHaZIMX9ZoJHSJtKA==}
     engines: {node: '>=20'}
     peerDependencies:
       hono: ^4
@@ -6493,7 +6493,7 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.28.6
 
-  '@hono/node-server@2.0.8(hono@4.12.23)':
+  '@hono/node-server@2.0.11(hono@4.12.23)':
     dependencies:
       hono: 4.12.23
 
@@ -7133,13 +7133,13 @@ snapshots:
     dependencies:
       '@sentry/core': 10.65.0
 
-  '@sentry/hono@10.65.0(@hono/node-server@2.0.8)(@sentry/bun@10.65.0)(@sentry/cloudflare@10.65.0)(@sentry/node@10.65.0)(hono@4.12.23)':
+  '@sentry/hono@10.65.0(@hono/node-server@2.0.11)(@sentry/bun@10.65.0)(@sentry/cloudflare@10.65.0)(@sentry/node@10.65.0)(hono@4.12.23)':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@sentry/core': 10.65.0
       hono: 4.12.23
     optionalDependencies:
-      '@hono/node-server': 2.0.8(hono@4.12.23)
+      '@hono/node-server': 2.0.11(hono@4.12.23)
       '@sentry/bun': 10.65.0(@opentelemetry/core@2.9.0)
       '@sentry/cloudflare': 10.65.0(@opentelemetry/core@2.9.0)
       '@sentry/node': 10.65.0(@opentelemetry/core@2.9.0)
