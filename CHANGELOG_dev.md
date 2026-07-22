@@ -1,3 +1,7 @@
+## ver. 16.29 - 2026/07/23 [#1277](https://github.com/na-trium-144/falling-nikochan/pull/1277)
+
+* /api/briefs APIを追加 (未使用)
+
 ## ver. 16.28 - 2026/07/22
 
 * lpをassetのアーカイブから除外

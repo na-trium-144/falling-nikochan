@@ -26,6 +26,7 @@ import { env } from "hono/adapter";
 import { Db } from "mongodb";
 import { etag } from "hono/etag";
 import socialApp from "./social.js";
+import briefMultiApp from "./briefs.js";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 export { getBrief } from "./brief.js";
@@ -98,6 +99,7 @@ const apiApp = async (config: {
     .use("/*", decompressMiddleware)
     .use("/*", config.dbMiddleware)
     .route("/brief", await briefApp())
+    .route("/briefs", await briefMultiApp())
     .route("/ytMeta", ytMetaApp)
     .route(
       "/chartFile",
