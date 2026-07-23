@@ -8,13 +8,14 @@ import {
   displayNote,
   ChartEditing,
   NoteCommandWithLua,
-  NoteInGame,
 } from "@falling-nikochan/chart";
-import { useResizeDetector } from "react-resize-detector";
 import Arrow from "./arrow.js";
 import DragHandle from "./dragHandle.js";
 import { useDisplayMode } from "@/scale.js";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useCanvasProps } from "@/play/fallingWindow.js";
+import { DisplayNikochan } from "@/play/displayNikochan.js";
+import { useTheme } from "@/common/theme.js";
 
 interface Props {
   className?: string;
@@ -29,80 +30,137 @@ export default function FallingWindow(props: Props) {
   const { chart, dragMode } = props;
   const currentLevel = chart?.currentLevel;
   const cur = currentLevel?.current;
-  const { width, height, ref } = useResizeDetector();
-  const boxSize: number | undefined =
-    width && height && Math.min(width, height);
-  const marginX: number | undefined = width && boxSize && (width - boxSize) / 2;
-  const marginY: number | undefined =
-    height && boxSize && (height - boxSize) / 2;
 
-  const { rem } = useDisplayMode();
-  const noteSize = Math.max(1.5 * rem, 0.06 * (boxSize || 0));
+  const {
+    ref,
+    canvasRect,
+    canvasMarginX,
+    canvasMarginY,
+    marginX,
+    marginY,
+    noteSize,
+    boxSize,
+    dpr,
+    fetchNikochanBitmap,
+  } = useCanvasProps();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { rem, playUIScale } = useDisplayMode();
+  const { isDark } = useTheme();
 
-  const [displayNotes, setDisplayNotes] = useState<
-    { current: DisplayNote; history: DisplayNote[] }[]
-  >([]);
-  useEffect(() => {
-    const updateDisplayNotes = () => {
-      const displayNotes: { current: DisplayNote; history: DisplayNote[] }[] =
-        [];
-      if (
-        marginX !== undefined &&
-        marginY !== undefined &&
-        boxSize &&
-        currentLevel &&
-        cur
-      ) {
-        for (let ni = 0; ni < currentLevel.seqNotes.length; ni++) {
-          const dn = {
-            current: displayNote(currentLevel.seqNotes[ni], cur.timeSec),
-            history: [] as DisplayNote[],
-          };
-          if (dn.current !== null) {
-            for (let dt = 0; dt < 5; dt += 0.3) {
-              const dn2 = displayNote(
-                currentLevel.seqNotes[ni],
-                cur.timeSec + dt
-              );
-              if (dn2 !== null) {
-                dn.history.push(dn2);
-              } else {
-                break;
-              }
-            }
-            for (let dt = 0; dt < 5; dt += 0.3) {
-              const dn2 = displayNote(
-                currentLevel.seqNotes[ni],
-                cur.timeSec - dt
-              );
-              if (dn2 !== null) {
-                dn.history.unshift(dn2);
-              } else {
-                break;
-              }
-            }
-            displayNotes.push({ current: dn.current, history: dn.history });
-          }
-        }
-      }
-      displayNotes.reverse();
-      setDisplayNotes(displayNotes);
-    };
-    updateDisplayNotes();
-    chart?.on("rerender", updateDisplayNotes);
-    return () => {
-      chart?.off("rerender", updateDisplayNotes);
-    };
-  }, [boxSize, marginX, marginY, cur, currentLevel, chart]);
+  // const [displayNotes, setDisplayNotes] = useState<DisplayNote[]>([]);
+  const displayNotesRef = useRef<DisplayNote[]>([]);
 
   const [pendingNoteUpdate, setPendingNoteUpdate] =
     useState<NoteCommandWithLua | null>(null);
   const currentNote: NoteCommandWithLua | undefined =
     pendingNoteUpdate || currentLevel?.currentNote;
 
+  const nikochanBitmap = useRef<ImageBitmap[][] | null>(null); // nikochanBitmap.current[0-3][big:0|1]
+  useEffect(() => {
+    fetchNikochanBitmap(dpr).then((bitmaps) => {
+      nikochanBitmap.current = bitmaps;
+    });
+  }, [fetchNikochanBitmap, dpr]);
+
+  const rerenderTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const rerenderCanvas = useCallback(() => {
+    rerenderTimeoutRef.current = null;
+    const ctx = canvasRef.current?.getContext("2d", {
+      alpha: true,
+      desynchronized: true,
+    });
+    if (
+      ctx &&
+      cur &&
+      currentLevel &&
+      marginY !== undefined &&
+      canvasMarginX !== undefined &&
+      canvasMarginY !== undefined &&
+      boxSize &&
+      nikochanBitmap.current
+    ) {
+      const c = {
+        noteSize,
+        boxSize,
+        playUIScale,
+        canvasMarginX,
+        canvasMarginY,
+        marginY,
+        rem,
+        nikochanBitmap: nikochanBitmap.current,
+        dark: isDark,
+        noFadeIn: true,
+      };
+      ctx.clearRect(0, 0, canvasRect.width * dpr, canvasRect.height * dpr);
+      const displayNikochan = displayNotesRef.current.map(
+        (dn) => new DisplayNikochan(currentLevel.seqNotes[dn.id], dn, c)
+      );
+      displayNikochan.forEach((d) =>
+        d.drawTrail(
+          ctx,
+          dpr,
+          d.dn.id === cur.noteIndex
+            ? "oklch(80.8% 0.114 19.571)" // red-300
+            : "oklch(87.2% 0.01 258.338)" // gray-300
+        )
+      );
+      displayNikochan.forEach((d) => d.drawNikochan(ctx, dpr));
+      displayNikochan
+        .find((d) => d.dn.id === cur.noteIndex)
+        ?.drawCircle(ctx, dpr, "oklch(70.4% 0.191 22.216)"); // red-400
+    }
+  }, [
+    canvasRect,
+    currentLevel,
+    cur,
+    dpr,
+    boxSize,
+    canvasMarginX,
+    canvasMarginY,
+    isDark,
+    marginY,
+    noteSize,
+    playUIScale,
+    rem,
+  ]);
+
+  useEffect(() => {
+    const updateDisplayNotes = () => {
+      const displayNotes: DisplayNote[] = [];
+      if (currentLevel && cur) {
+        for (let ni = 0; ni < currentLevel.seqNotes.length; ni++) {
+          const dn = displayNote(currentLevel.seqNotes[ni], cur.timeSec);
+          if (dn !== null) {
+            displayNotes.push(dn);
+          }
+        }
+      }
+      displayNotes.reverse();
+      // setDisplayNotes(displayNotes);
+      displayNotesRef.current = displayNotes;
+      if (rerenderTimeoutRef.current === null) {
+        rerenderTimeoutRef.current = setTimeout(rerenderCanvas, 30);
+      }
+    };
+    updateDisplayNotes();
+    chart?.on("rerender", updateDisplayNotes);
+    return () => {
+      chart?.off("rerender", updateDisplayNotes);
+    };
+  }, [boxSize, cur, currentLevel, chart, rerenderCanvas]);
+
   return (
     <div className={clsx(props.className)} style={props.style} ref={ref}>
       <div className="relative w-full h-full overflow-visible">
+        <canvas
+          ref={canvasRef}
+          className="absolute z-edit-nikochan pointer-events-none"
+          style={{
+            ...canvasRect,
+          }}
+          width={canvasRect.width * dpr}
+          height={canvasRect.height * dpr}
+        />
         {/* 判定線 */}
         {boxSize && marginY !== undefined && (
           <div
@@ -117,26 +175,6 @@ export default function FallingWindow(props: Props) {
               bottom: targetY * boxSize + marginY,
             }}
           />
-        )}
-        {displayNotes.map(
-          (d, di) =>
-            boxSize &&
-            marginX !== undefined &&
-            marginY !== undefined &&
-            currentLevel &&
-            cur &&
-            d.current.id < currentLevel.seqNotes.length && (
-              <NikochanAndTrace
-                key={di}
-                displayNote={d}
-                currentNoteIndex={cur.noteIndex}
-                boxSize={boxSize}
-                marginX={marginX}
-                marginY={marginY}
-                noteSize={noteSize}
-                notes={currentLevel.seqNotes}
-              />
-            )
         )}
         {currentNote &&
           boxSize &&
@@ -285,94 +323,5 @@ export default function FallingWindow(props: Props) {
           )}
       </div>
     </div>
-  );
-}
-
-interface NProps {
-  displayNote: { current: DisplayNote; history: DisplayNote[] };
-  currentNoteIndex: number | undefined;
-  boxSize: number;
-  marginX: number;
-  marginY: number;
-  noteSize: number;
-  notes: readonly NoteInGame[];
-}
-function NikochanAndTrace(props: NProps) {
-  const {
-    displayNote,
-    currentNoteIndex,
-    boxSize,
-    marginX,
-    marginY,
-    noteSize,
-    notes,
-  } = props;
-  return (
-    <>
-      {/* にこちゃん
-        currentNoteIndexと一致していたら赤色にする
-      */}
-      <div
-        className={clsx(
-          "absolute rounded-full z-edit-nikochan",
-          displayNote.current.id === currentNoteIndex
-            ? "bg-red-400"
-            : "bg-yellow-400"
-        )}
-        style={{
-          width: noteSize * bigScale(notes[displayNote.current.id].big),
-          height: noteSize * bigScale(notes[displayNote.current.id].big),
-          left:
-            displayNote.current.pos.x * boxSize -
-            (noteSize * bigScale(notes[displayNote.current.id].big)) / 2 +
-            marginX,
-          bottom:
-            displayNote.current.pos.y * boxSize +
-            targetY * boxSize -
-            (noteSize * bigScale(notes[displayNote.current.id].big)) / 2 +
-            marginY,
-        }}
-      />
-      {displayNote.history.slice(1).map((_, di) => (
-        /* 軌跡
-                  短い時間ごとに区切って位置を計算したものがd.historyで、
-                  width=displayNote.historyの2点間の距離, height=0のspanを用意し
-                  border-b でその長さの水平な線を引いて
-                  origin-bottom-left から displayNote.historyの2点のatan2だけ回転することで
-                  軌跡の線を引いている
-                  */
-        <span
-          key={di}
-          className={clsx(
-            "absolute border-b origin-bottom-left",
-            displayNote.history[di].id === currentNoteIndex
-              ? "border-red-300 z-edit-trace-current"
-              : "border-gray-300 z-edit-trace"
-          )}
-          style={{
-            width:
-              Math.sqrt(
-                Math.pow(
-                  displayNote.history[di].pos.x -
-                    displayNote.history[di + 1].pos.x,
-                  2
-                ) +
-                  Math.pow(
-                    displayNote.history[di].pos.y -
-                      displayNote.history[di + 1].pos.y,
-                    2
-                  )
-              ) * boxSize,
-            left: displayNote.history[di].pos.x * boxSize + marginX,
-            bottom:
-              (displayNote.history[di].pos.y + targetY) * boxSize + marginY,
-            transform: `rotate(${-Math.atan2(
-              displayNote.history[di + 1].pos.y - displayNote.history[di].pos.y,
-              displayNote.history[di + 1].pos.x - displayNote.history[di].pos.x
-            )}rad)`,
-          }}
-        />
-      ))}
-    </>
   );
 }
