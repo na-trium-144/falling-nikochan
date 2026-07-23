@@ -117,6 +117,7 @@ export default function OGTemplate() {
           playing={false}
           bpmChanges={[]}
           playbackRate={1}
+          startsJumping={null}
         />
         <div className="z-13 scale-150 absolute w-full h-full bottom-0 left-0 translate-y-4 origin-bottom-left">
           <BPMSign
