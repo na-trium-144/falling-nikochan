@@ -78,7 +78,7 @@ export async function OGResult(
         <div
           style={{
             paddingLeft: 20 * 4,
-            marginTop: 6 * 4,
+            marginTop: 7 * 4,
             width: 2147483647,
             ...flexRow,
           }}
@@ -110,7 +110,7 @@ export async function OGResult(
           style={{
             ...flexRow,
             paddingLeft: 20 * 4,
-            marginTop: 4 * 4,
+            marginTop: 5 * 4,
             width: 2147483647,
             ...text4xl,
             fontFamily: fontTitle,
@@ -130,8 +130,9 @@ export async function OGResult(
         <div
           style={{
             paddingLeft: 20 * 4,
-            marginTop: 2 * 4,
+            marginTop: 5 * 4,
             ...flexRow,
+            ...text4xl,
             width: 2147483647,
           }}
         >
@@ -145,7 +146,8 @@ export async function OGResult(
           <span
             style={{
               fontFamily: fontMainUi,
-              ...text4xl,
+              fontSize: "0.9em",
+              lineHeight: text4xl.lineHeight,
               color: levelColors[params.lvType],
             }}
           >
@@ -154,7 +156,8 @@ export async function OGResult(
           <span
             style={{
               fontFamily: fontMainUi,
-              ...text5xl,
+              fontSize: "1.2em",
+              lineHeight: text4xl.lineHeight / 1.2, // なぜかわからないけどこれで揃う
               color: levelColors[params.lvType],
             }}
           >

@@ -5,7 +5,7 @@ import Title from "@/common/titleLogo";
 import BPMSign from "@/play/bpmSign";
 import RhythmicalSlime from "@/play/rhythmicalSlime";
 import { useTranslations } from "next-intl";
-import { stepZero } from "@falling-nikochan/chart";
+import { levelTypes, stepZero } from "@falling-nikochan/chart";
 import { useEffect, useState } from "react";
 import {
   IrasutoyaLikeBgInner,
@@ -34,7 +34,7 @@ export default function OGTemplate() {
         className="absolute"
       />
       <Title
-        className="absolute top-0 left-0 h-25 scale-190 origin-top-left "
+        className="absolute top-0 left-0 h-22 scale-190 origin-top-left "
         anim={false}
       />
       <div
@@ -53,13 +53,27 @@ export default function OGTemplate() {
           Thumbnail Here
         </div>
       </div>
-      <div className="pl-20 mt-50 text-5xl ">
+      <div className="pl-20 mt-36 text-5xl ">
         <span className="inline-block w-24 ">ID:</span>
         <span className="inline-block ">{showDummyData && 444444}</span>
       </div>
       <div
         className={clsx(
-          "pl-20 mt-12 text-7xl font-title",
+          "pl-20 mt-6 font-title text-5xl",
+          "w-full whitespace-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
+          showDummyData || "invisible"
+        )}
+      >
+        <span className="font-main-ui text-4xl mr-5 ">
+          {t("chartCreator")}:
+        </span>
+        <span>
+          chartCreator譜面制作chartCreator譜面制作chartCreator譜面制作chartCreator譜面制作
+        </span>
+      </div>
+      <div
+        className={clsx(
+          "pl-20 mt-10 text-7xl font-title",
           "w-full whitespace-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
           showDummyData || "invisible"
         )}
@@ -77,16 +91,22 @@ export default function OGTemplate() {
       </div>
       <div
         className={clsx(
-          "pl-20 mt-4 font-title text-5xl",
+          "pl-50 mt-6 flex flex-row items-baseline",
           "w-full whitespace-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
           showDummyData || "invisible"
         )}
       >
-        <span className="font-main-ui text-4xl mr-5 ">
-          {t("chartCreator")}:
+        <span className="font-title text-5xl mr-4">LevelName</span>
+        {/* todo: fn-level-typeクラスの実装時にサイズが変わったが、 ogResult.tsx のほうに反映していない */}
+        <span className={clsx("text-5xl", "fn-level-type", levelTypes[0])}>
+          <span>{levelTypes[0]}-</span>
+          <span>44</span>
         </span>
-        <span>
-          chartCreator譜面制作chartCreator譜面制作chartCreator譜面制作chartCreator譜面制作
+        <span className="mx-3 text-4xl">/</span>
+        <span className="font-title text-5xl mr-4">LevelName</span>
+        <span className={clsx("text-5xl", "fn-level-type", levelTypes[1])}>
+          <span>{levelTypes[1]}-</span>
+          <span>44</span>
         </span>
       </div>
       <div className="absolute bottom-0 w-full h-6">
@@ -100,7 +120,7 @@ export default function OGTemplate() {
           classNameNear="absolute"
         />
         <RhythmicalSlime
-          className="z-14 absolute scale-165 origin-bottom-right "
+          className="z-14 absolute scale-150 origin-bottom-right "
           style={{
             bottom: "100%",
             right: "1rem",
