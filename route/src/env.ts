@@ -52,6 +52,9 @@ export function cacheControl(e: Bindings, age: number, private_?: boolean) {
     return `max-age=${age}, must-revalidate`;
   }
 }
+export function immutable() {
+  return "max-age=31536000, s-maxage=31536000, immutable";
+}
 
 export function backendOrigin(
   c:

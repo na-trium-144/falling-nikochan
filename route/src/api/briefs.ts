@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { cache } from "hono/cache";
 import { calcETag, ChartEntryCompressed, entryToBrief } from "./chart.js";
 import { Db } from "mongodb";
-import { backendOrigin, Bindings, cacheControl } from "../env.js";
+import { backendOrigin, Bindings, cacheControl, immutable } from "../env.js";
 import { env } from "hono/adapter";
 import { ArrayDoc, CidSchema, docRefs } from "@falling-nikochan/chart";
 import * as v from "valibot";
@@ -133,6 +133,7 @@ const briefMultiApp = async () =>
         cids.length !== sortedCids.length ||
         cids.some((cid, i) => cid !== sortedCids[i])
       ) {
+        c.header("cache-control", immutable());
         return c.redirect(
           new URL(
             c.req.path +

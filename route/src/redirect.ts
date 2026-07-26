@@ -2,6 +2,7 @@ import { Context, Hono } from "hono";
 import {
   backendOrigin,
   Bindings,
+  immutable,
   languageDetector,
   ResponseOK,
 } from "./env.js";
@@ -21,6 +22,7 @@ const redirectApp = (config: {
       const q = new URLSearchParams(new URL(c.req.url).search);
       const cid = c.req.param("cid");
       q.set("cid", cid);
+      c.header("cache-control", immutable());
       return c.redirect(new URL(`/edit?${q}`, backendOrigin(c)), 301);
     })
     .get("/:lang/main/:sort{latest|popular|recent}", (c) => {
@@ -29,6 +31,7 @@ const redirectApp = (config: {
       const lang = c.req.param("lang");
       const sort = c.req.param("sort");
       q.set("sort", sort);
+      c.header("cache-control", immutable());
       return c.redirect(
         new URL(`/${lang}/main/play?${q}`, backendOrigin(c)),
         301
@@ -42,17 +45,20 @@ const redirectApp = (config: {
       switch (page) {
         case 1:
         case 2:
+          c.header("cache-control", immutable());
           return c.redirect(
             new URL(`/${lang}?${q}#feature-play`, backendOrigin(c)),
             301
           );
         case 3:
+          c.header("cache-control", immutable());
           return c.redirect(
             new URL(`/${lang}?${q}#feature-edit`, backendOrigin(c)),
             301
           );
         case 4:
         case 5:
+          c.header("cache-control", immutable());
           return c.redirect(
             new URL(`/${lang}/main/about?${q}`, backendOrigin(c)),
             301
@@ -76,6 +82,7 @@ const redirectApp = (config: {
           "Cache-Control": "no-store",
         });
       }
+      c.header("cache-control", "no-store, private");
       return c.redirect(redirected, 307);
     });
 

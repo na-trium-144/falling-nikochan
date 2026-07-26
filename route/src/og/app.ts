@@ -1,5 +1,11 @@
 import { Hono } from "hono";
-import { backendOrigin, Bindings, cacheControl, ResponseOK } from "../env.js";
+import {
+  backendOrigin,
+  Bindings,
+  cacheControl,
+  immutable,
+  ResponseOK,
+} from "../env.js";
 // import { ImageResponse } from "@vercel/og";
 import { HTTPException } from "hono/http-exception";
 import {
@@ -23,7 +29,7 @@ import { cache } from "hono/cache";
 import { etag } from "hono/etag";
 import { BaseLogger } from "@hono/structured-logger";
 
-const CACHE_MAX_AGE = 315360000;
+const REDIRECT_CACHE_MAX_AGE = 86400;
 
 export interface ChartBriefMin {
   ytId: string;
@@ -114,6 +120,7 @@ const ogApp = (config: {
             .replaceAll("=", "")
         );
         ogQuery.set("v", packageJson.version);
+        c.header("cache-control", cacheControl(env(c), REDIRECT_CACHE_MAX_AGE));
         return c.redirect(
           new URL(`${c.req.path}?${ogQuery.toString()}`, backendOrigin(c)),
           307
@@ -303,15 +310,16 @@ const ogApp = (config: {
       }) as Response;
       return c.body(imRes.body!, imRes.status as 200, {
         "Content-Type": imRes.headers.get("Content-Type") || "",
-        "Cache-Control": cacheControl(env(c), CACHE_MAX_AGE),
+        "Cache-Control": immutable(),
       });
     })
-    .get("/:cid{[0-9]+}", (c) =>
+    .get("/:cid{[0-9]+}", (c) => {
       // deprecated (used until ver8.11)
-      c.redirect(
+      c.header("cache-control", immutable());
+      return c.redirect(
         new URL(`/og/share/${c.req.param("cid")}`, backendOrigin(c)),
         301
-      )
-    );
+      );
+    });
 
 export default ogApp;
