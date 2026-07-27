@@ -91,7 +91,7 @@ export default function OGTemplate() {
       </div>
       <div
         className={clsx(
-          "pl-50 mt-6 flex flex-row items-baseline",
+          "pl-56 mt-6 flex flex-row items-baseline",
           "w-full whitespace-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
           showDummyData || "invisible"
         )}

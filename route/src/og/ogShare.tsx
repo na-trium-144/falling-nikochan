@@ -77,7 +77,7 @@ export async function OGShare(
         style={{
           ...flexRow,
           paddingLeft: 20 * 4,
-          marginTop: 6 * 4,
+          marginTop: 7 * 4,
           width: 2147483647,
           ...text5xl,
           fontFamily: fontTitle,
@@ -97,7 +97,7 @@ export async function OGShare(
       <div
         style={{
           paddingLeft: 20 * 4,
-          marginTop: 10 * 4,
+          marginTop: 11 * 4,
           width: 2147483647,
           // 困ったことにellipsisが効かない
           // width: "100%",
@@ -114,7 +114,7 @@ export async function OGShare(
       <div
         style={{
           paddingLeft: 20 * 4,
-          marginTop: 4 * 4,
+          marginTop: 5 * 4,
           width: 2147483647,
           ...text5xl,
           fontFamily: fontTitle,
@@ -124,8 +124,8 @@ export async function OGShare(
       </div>
       <div
         style={{
-          paddingLeft: 50 * 4,
-          marginTop: 6 * 4,
+          paddingLeft: 56 * 4,
+          marginTop: 7 * 4,
           ...flexRow,
           width: 2147483647,
         }}
