@@ -97,7 +97,6 @@ export default function OGTemplate() {
         )}
       >
         <span className="font-title text-5xl mr-4">LevelName</span>
-        {/* todo: fn-level-typeクラスの実装時にサイズが変わったが、 ogResult.tsx のほうに反映していない */}
         <span className={clsx("text-5xl", "fn-level-type", levelTypes[0])}>
           <span>{levelTypes[0]}-</span>
           <span>44</span>
