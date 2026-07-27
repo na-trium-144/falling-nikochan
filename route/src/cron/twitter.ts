@@ -65,16 +65,32 @@ export async function postChart(
       .filter((lv) => !lv.unlisted)
       .map((lv) => `${lv.type}-${lv.difficulty}`)
       .join(", ") + (brief.levels.length > 3 ? ",…" : "");
+
+  const messageForDiscord = [
+    postType === "new"
+      ? `新しい譜面が公開されました!`
+      : `譜面が更新されました!`,
+    "\n",
+    `https://nikochan.utcode.net/share/${cid}\n\n`,
+    // `ID: ${cid}\n`,
+    messageAboutSong + "\n",
+    messageAboutLevel,
+  ]
+    .join("")
+    .replaceAll("@", "＠");
+  await announceToDiscord(env, messageForDiscord);
+
   const messageJoined = () =>
     [
       postType === "new"
-        ? `#fallingnikochan 新しい譜面が公開されました!`
-        : `#fallingnikochan 譜面が更新されました!`,
+        ? `新しい譜面が公開されました!`
+        : `譜面が更新されました!`,
       ` (${new Date().getUTCFullYear()}/${new Date().getUTCMonth() + 1}/${new Date().getUTCDate()})\n`,
       `誰でもこのURLから遊べます: https://nikochan.utcode.net/share/${cid}\n\n`,
       // `ID: ${cid}\n`,
-      messageAboutSong + "\n",
-      messageAboutLevel,
+      messageAboutSong + "\n\n",
+      // messageAboutLevel,
+      "#fallingnikochan #リズムゲーム #音ゲー",
     ]
       .join("")
       .replaceAll("@", "＠");
@@ -82,6 +98,7 @@ export async function postChart(
     messageAboutSong = messageAboutSong.slice(0, -2) + "…";
   }
   const message = messageJoined();
+
   try {
     if (
       twitterText.extractUrls(brief.title).length > 0 ||
@@ -115,7 +132,6 @@ export async function postChart(
     const adminMessage = `以下のメッセージをポストしてください: ${intentUrl}\noriginal message:\n${message}`;
     await reportToDiscord(env, adminMessage);
 
-    await announceToDiscord(env, message);
     return "ok";
   } catch (e) {
     if (String(e).includes("duplicate")) {
