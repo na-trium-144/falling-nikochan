@@ -19,13 +19,17 @@ export function useDisplayMode(): DisplayMode {
   const [size, setSize] = useState([1, 1]);
   const [rem, setRem] = useState<number>(16);
   useEffect(() => {
-    function updateSize() {
-      setSize([window.innerWidth, window.innerHeight]);
-      setRem(parseFloat(getComputedStyle(document.documentElement).fontSize));
+    if (window.location.pathname.includes("ogTemplate")) {
+      setSize([1200, 630]);
+    } else {
+      function updateSize() {
+        setSize([window.innerWidth, window.innerHeight]);
+        setRem(parseFloat(getComputedStyle(document.documentElement).fontSize));
+      }
+      window.addEventListener("resize", updateSize);
+      updateSize();
+      return () => window.removeEventListener("resize", updateSize);
     }
-    window.addEventListener("resize", updateSize);
-    updateSize();
-    return () => window.removeEventListener("resize", updateSize);
   }, []);
 
   const [width, height] = size;

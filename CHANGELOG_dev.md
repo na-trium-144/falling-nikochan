@@ -1,3 +1,20 @@
+## ver. 16.30 - 2026/07/27 [#1280](https://github.com/na-trium-144/falling-nikochan/pull/1280)
+
+* ogのbriefパラメータを更新、v=16.29以前のurlはurlを設定し直し再リダイレクト
+* ogShareにレベル表示を追加
+* share,resultのbpmsignとslimeのサイズを変更
+* ogShare,ogResultのレベル表示のフォントサイズを変更
+* なんか文字の高さがあわないので目視ででっちあげ
+* ogTemplate画像をchromeで撮り直す
+  * backdrop-blurが無いのはfirefoxのバグだった
+* すべてのリダイレクトにcache-controlを設定
+  * cloudflareがキャッシュをbypassしてしまうため。
+* /api/latest, popular はもう戻すことないので308でimmutableに変更
+* リダイレクトのパスを正規化
+  * `/` -> `/ja/?` になっていたのを `/ja` になるよう修正
+* /api/ytMetaで対象動画が存在しない場合に424エラーを返す
+* discordとxへのアナウンスメッセージを変更
+
 ## ver. 16.29 - 2026/07/23 [#1277](https://github.com/na-trium-144/falling-nikochan/pull/1277)
 
 * /api/briefs APIを追加 (未使用)

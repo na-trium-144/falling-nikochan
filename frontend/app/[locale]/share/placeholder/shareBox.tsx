@@ -118,6 +118,7 @@ export function ShareBox(props: Props) {
         .query({ lang: locale })
         .get()
         .notFound((e) => markAsExpected(e))
+        .error(424, (e) => markAsExpected(e))
         .json((res) => setYtMeta(v.parse(YtMetaSchema(), res)))
         .catch((e) => {
           captureAndWrap(e, { cid });

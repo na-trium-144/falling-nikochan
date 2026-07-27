@@ -33,6 +33,8 @@ export default {
       // 418
       noCORSCredentialsOnProd:
         "Cross-origin authentication using cookie is not allowed on the production server",
+      // 424
+      ytMetaNotFound: "Failed to get metadata from YouTube",
       // 429
       tooManyRequest: "Please wait a while and try again",
       // 500

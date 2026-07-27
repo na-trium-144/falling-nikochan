@@ -26,6 +26,7 @@ export async function announceToDiscord(env: Bindings, message: string) {
       console.warn(
         "DISCORD_ANNOUNCE_WEBHOOK_ID or DISCORD_ANNOUNCE_WEBHOOK_TOKEN is not set."
       );
+      console.log(message);
       return;
     }
     const webhook = new WebhookClient({

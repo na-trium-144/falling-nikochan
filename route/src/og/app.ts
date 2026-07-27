@@ -1,5 +1,11 @@
 import { Hono } from "hono";
-import { backendOrigin, Bindings, cacheControl, ResponseOK } from "../env.js";
+import {
+  backendOrigin,
+  Bindings,
+  cacheControl,
+  immutable,
+  ResponseOK,
+} from "../env.js";
 // import { ImageResponse } from "@vercel/og";
 import { HTTPException } from "hono/http-exception";
 import {
@@ -23,14 +29,18 @@ import { cache } from "hono/cache";
 import { etag } from "hono/etag";
 import { BaseLogger } from "@hono/structured-logger";
 
-const CACHE_MAX_AGE = 315360000;
+const REDIRECT_CACHE_MAX_AGE = 86400;
 
 export interface ChartBriefMin {
   ytId: string;
   title: string;
   composer: string;
   chartCreator: string;
-  lvType?: number; // 0, 1, 2
+  levels: {
+    name: string;
+    type: number; // 0, 1, 2
+    difficulty: number;
+  }[];
 }
 
 const ChartBriefMinArraySchema = v.tuple([
@@ -38,7 +48,13 @@ const ChartBriefMinArraySchema = v.tuple([
   v.string(), // title
   v.string(), // composer
   v.string(), // chartCreator,
-  v.undefinedable(v.picklist([0, 1, 2])), // lvType
+  v.array(
+    v.tuple([
+      v.string(),
+      v.picklist([0, 1, 2]), // lvType
+      v.number(),
+    ])
+  ),
 ]);
 
 const ogApp = (config: {
@@ -60,20 +76,32 @@ const ogApp = (config: {
     .get("/:type/:cid", async (c) => {
       const cid = c.req.param("cid");
 
+      const vMajor = Number(c.req.query("v")?.split(".")[0]);
+      const vMinor = Number(c.req.query("v")?.split(".")[1]);
+
       // /og/share/cid へのアクセスでは /og/share/cid?brief=表示する全情報&v=version へ301リダイレクトし、
       // /og/share/cid?brief=表示する全情報 で生成した画像を永久にキャッシュ
       // (vパラメータは /share でも追加されるけど)
-      if (!c.req.query("brief")) {
+      // ver16.30でbriefの仕様を変更したのでそれ以前は無視 (レベルの情報を追加)
+      if (
+        !c.req.query("brief") ||
+        !c.req.query("v") ||
+        vMajor < 16 ||
+        (vMajor === 16 && vMinor <= 29)
+      ) {
         const { brief } = await config.fetchBrief(env(c), cid);
-        const lvType = levelTypes.indexOf(
-          brief.levels.filter((l) => !l.unlisted).at(0)?.type || ""
-        );
         const sBrief = msgpack.encode([
           brief.ytId,
           brief.title,
           brief.composer,
           brief.chartCreator,
-          lvType >= 0 ? (lvType as 0 | 1 | 2) : undefined,
+          brief.levels
+            .filter((l) => !l.unlisted)
+            .map((l) => [
+              l.name,
+              levelTypes.indexOf(l.type) as 0 | 1 | 2,
+              l.difficulty,
+            ]),
         ] satisfies v.InferOutput<typeof ChartBriefMinArraySchema>);
         let sBriefBin = "";
         for (let i = 0; i < sBrief.length; i++) {
@@ -92,6 +120,7 @@ const ogApp = (config: {
             .replaceAll("=", "")
         );
         ogQuery.set("v", packageJson.version);
+        c.header("cache-control", cacheControl(env(c), REDIRECT_CACHE_MAX_AGE));
         return c.redirect(
           new URL(`${c.req.path}?${ogQuery.toString()}`, backendOrigin(c)),
           307
@@ -114,7 +143,11 @@ const ogApp = (config: {
         title: briefArr[1],
         composer: briefArr[2],
         chartCreator: briefArr[3],
-        lvType: briefArr[4],
+        levels: briefArr[4].map(([name, type, difficulty]) => ({
+          name,
+          type,
+          difficulty,
+        })),
       };
 
       const lang = c.req.query("lang") || "en"; // c.get("language");
@@ -277,15 +310,16 @@ const ogApp = (config: {
       }) as Response;
       return c.body(imRes.body!, imRes.status as 200, {
         "Content-Type": imRes.headers.get("Content-Type") || "",
-        "Cache-Control": cacheControl(env(c), CACHE_MAX_AGE),
+        "Cache-Control": immutable(),
       });
     })
-    .get("/:cid{[0-9]+}", (c) =>
+    .get("/:cid{[0-9]+}", (c) => {
       // deprecated (used until ver8.11)
-      c.redirect(
+      c.header("cache-control", immutable());
+      return c.redirect(
         new URL(`/og/share/${c.req.param("cid")}`, backendOrigin(c)),
         301
-      )
-    );
+      );
+    });
 
 export default ogApp;

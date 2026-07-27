@@ -89,12 +89,11 @@ export default function OGTemplate() {
         </div>
         <div
           className={clsx(
-            "ml-20 mt-2 flex flex-row items-baseline",
+            "ml-20 mt-4 flex flex-row items-baseline",
             showDummyData || "invisible"
           )}
         >
           <span className="font-title text-4xl mr-4">LevelName</span>
-          {/* todo: fn-level-typeクラスの実装時にサイズが変わったが、 ogResult.tsx のほうに反映していない */}
           <span className={clsx("text-4xl", "fn-level-type", levelTypes[0])}>
             <span>{levelTypes[0]}-</span>
             <span>44</span>
@@ -202,7 +201,7 @@ export default function OGTemplate() {
           classNameNear="absolute"
         />
         <RhythmicalSlime
-          className="z-14 absolute scale-165 origin-bottom-right "
+          className="z-14 absolute scale-150 origin-bottom-right "
           style={{
             bottom: "100%",
             right: "1rem",
