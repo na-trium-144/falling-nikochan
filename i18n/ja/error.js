@@ -33,6 +33,8 @@ export default {
       // 418
       noCORSCredentialsOnProd:
         "production サーバーで cookie を使ったクロスオリジンの認証はできません",
+      // 424
+      ytMetaNotFound: "YouTube から情報を取得できませんでした",
       // 429
       tooManyRequest: "しばらく待ってからやり直してください",
       // 500

@@ -3,6 +3,7 @@ import { Bindings } from "../env.js";
 import moji from "moji";
 import { fetchError } from "../error.js";
 import { BaseLogger } from "@hono/structured-logger";
+import { HTTPException } from "hono/http-exception";
 
 export interface YTDataEntry {
   ytId: string;
@@ -72,12 +73,10 @@ export async function getYTDataEntry(
             key: e.YOUTUBE_API_KEY,
           })
       ).catch(fetchError(e));
-      if (!res.ok) {
-        throw new Error(`Failed to fetch YT data (${res.status})`, {
-          cause: res,
-        });
-      }
       const data: any = await res.json();
+      if (data.items.length === 0) {
+        throw new HTTPException(424, { message: "ytMetaNotFound" });
+      }
       logger.info({ ytData: data });
       if (data.items.length !== 1) {
         throw new Error("items.length !== 1");
