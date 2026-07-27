@@ -152,7 +152,11 @@ async function fetchStaticWithThrow(_e: any, url: URL): Promise<ResponseOK> {
 }
 
 // serviceWorkerからクライアントに返すため、cache-controlを削除したresponseを作成
-function returnBody(body: string | ReadableStream | null, headers: Headers) {
+function returnBody(
+  body: string | ReadableStream | null,
+  headers: Headers,
+  status?: number
+) {
   return new Response(body, {
     headers: {
       ...(headers.has("Content-Type") && {
@@ -160,6 +164,7 @@ function returnBody(body: string | ReadableStream | null, headers: Headers) {
       }),
       "Cache-Control": "no-store",
     },
+    status,
   });
 }
 
@@ -538,10 +543,7 @@ const app = new Hono({ strict: false })
     const res = await fetchAPI(c.req.url, {
       credentials: "omit",
     });
-    return new Response(res.body, {
-      headers: res.headers,
-      status: res.status,
-    });
+    return returnBody(res.body, res.headers, res.status);
   })
   .get("/worker/checkUpdate", async (c) => {
     const result = await initAssetsCache({ clearOld: false });
