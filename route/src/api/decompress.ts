@@ -1,3 +1,4 @@
+import { fileMaxSize } from "@falling-nikochan/chart";
 import { createMiddleware } from "hono/factory";
 import { Blob } from "node:buffer";
 import { DecompressionStream } from "node:stream/web";
@@ -35,15 +36,26 @@ const decompressMiddleware = createMiddleware(async (c, next) => {
     // Content-Encoding is listed in the order applied, so decode in reverse order.
     for (const encoding of encodings.toReversed()) {
       switch (encoding) {
-        case "gzip":
-          bodyBuffer = Buffer.from(
-            await new Response(
-              new Blob([bodyBuffer])
-                .stream()
-                .pipeThrough(new DecompressionStream("gzip"))
-            ).arrayBuffer()
-          );
+        case "gzip": {
+          const stream = new Blob([bodyBuffer])
+            .stream()
+            .pipeThrough(new DecompressionStream("gzip"));
+          const reader = stream.getReader();
+          const chunks: Uint8Array[] = [];
+          let totalLength = 0;
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            totalLength += value.byteLength;
+            if (totalLength > fileMaxSize) {
+              await reader.cancel("Payload Too Large");
+              return c.json({ message: "tooLargeFile" }, 413);
+            }
+            chunks.push(value);
+          }
+          bodyBuffer = Buffer.concat(chunks);
           break;
+        }
       }
     }
   } catch {
