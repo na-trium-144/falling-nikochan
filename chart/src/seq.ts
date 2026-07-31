@@ -235,6 +235,7 @@ export type ChartSeqData = v.InferOutput<ReturnType<typeof ChartSeqDataSchema>>;
  * 時刻の情報を持たない
  *
  * ver14でvelを追加
+ * ver17でvisibleを追加 (falseの場合、隠す)
  */
 export interface DisplayNote {
   id: number;
@@ -246,6 +247,7 @@ export interface DisplayNote {
   chainBonus?: number;
   bigBonus?: number;
   chain?: number;
+  visible: boolean;
 }
 
 /**
@@ -545,6 +547,7 @@ export function displayNote(
       id: note.id,
       pos: note.hitPos || { x: -1, y: -1 },
       vel: { x: 0, y: 0 },
+      visible: true,
       done: note.done,
       bigDone: note.bigDone,
       chain: note.chain,
@@ -576,6 +579,7 @@ export function displayNote(
         x: note.vx * u_,
         y: note.vy * u_ - note.ay * u * u_,
       },
+      visible: u > note.uMin && u < note.uMax, // TODO: ver16以前は強制的にtrueにする
       done: note.done,
       bigDone: note.bigDone,
       chain: note.chain,

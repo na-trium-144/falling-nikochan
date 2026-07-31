@@ -109,6 +109,9 @@ export class DisplayNikochan {
     let dx = 0;
     let dy = 0;
     let scale = 1;
+    if (!this.#dn.visible) {
+      return;
+    }
     if (this.#n.done !== 0) {
       if (this.fadeoutFactor >= 1) {
         return;
@@ -136,6 +139,9 @@ export class DisplayNikochan {
   }
 
   drawCircle(ctx: CanvasRenderingContext2D, dpr: number, color: string) {
+    if (!this.#dn.visible) {
+      return;
+    }
     ctx.save();
     ctx.beginPath();
     ctx.arc(
@@ -186,6 +192,9 @@ export class DisplayNikochan {
   drawTail(ctx: CanvasRenderingContext2D, dpr: number) {
     if (this.#c.now === undefined || this.#c.lastNow === undefined) {
       throw new Error("now and lastNow must be defined for drawTail");
+    }
+    if (!this.#dn.visible) {
+      return;
     }
     const headSize = this.#c.noteSize * 1;
     const tailSize = this.#c.noteSize * 0.85;
