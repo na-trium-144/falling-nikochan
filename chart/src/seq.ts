@@ -25,6 +25,7 @@ import {
 } from "./legacy/chart15.js";
 import { docRefs, Schema } from "./docSchema.js";
 import { resolver } from "hono-openapi";
+import { Level17Play } from "./legacy/chart17.js";
 
 export const DisplayParamSchema = () =>
   v.object({
@@ -63,16 +64,11 @@ export const NoteSeqSchema = () =>
       vx: v.pipe(v.number(), v.description("1 / 4 of NoteCommand.vx")),
       vy: v.pipe(v.number(), v.description("1 / 4 of NoteCommand.vy")),
       ay: v.pipe(v.number(), v.description("always 1 / 4")),
-      uMin: v.pipe(
-        v.number(),
+      uRange: v.pipe(
+        v.optional(v.nullable(v.tuple([v.number(), v.number()]))),
         v.description(
-          "Value of parameter u in `display` when this note should disappear"
-        )
-      ),
-      uMax: v.pipe(
-        v.number(),
-        v.description(
-          "Value of parameter u in `display` when this note appears"
+          "When parameter u (in the description in `display`) is outside of this range [min, max], hide this note. " +
+            "On ver <= 16, this is null and the note shoule be always visible."
         )
       ),
       display: v.pipe(
@@ -281,7 +277,7 @@ function solveQuadEquation(
  * chartを読み込む
  */
 export function loadChart(
-  level: Level15Play | Level6Play | Chart6,
+  level: Level17Play | Level15Play | Level6Play | Chart6,
   levelIndex?: number
 ): ChartSeqData {
   if ("levels" in level) {
@@ -505,8 +501,7 @@ export function loadChart(
       vx,
       vy,
       ay,
-      uMin: uRangeMin,
-      uMax: uRangeMax,
+      uRange: level.ver >= 17 ? [uRangeMin, uRangeMax] : null,
     });
   }
   return {
@@ -579,7 +574,8 @@ export function displayNote(
         x: note.vx * u_,
         y: note.vy * u_ - note.ay * u * u_,
       },
-      visible: u > note.uMin && u < note.uMax, // TODO: ver16以前は強制的にtrueにする
+      // ver16以前はuRangeがnullで、強制的に表示する
+      visible: note.uRange ? u > note.uRange[0] && u < note.uRange[1] : true,
       done: note.done,
       bigDone: note.bigDone,
       chain: note.chain,

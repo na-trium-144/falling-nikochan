@@ -162,6 +162,9 @@ export class DisplayNikochan {
     const y = (u: number) => this.#n.vy * u - (this.#n.ay * u * u) / 2;
     const vx = () => this.#n.vx;
     const vy = (u: number) => this.#n.vy - this.#n.ay * u;
+    // verは最新のはずで、 this.#n.uRange は絶対に存在するはずなので、フォールバックいらないかも
+    const uMin = this.#n.uRange?.[0] ?? 0;
+    const uMax = this.#n.uRange?.[1] ?? (2 * this.#n.vy) / this.#n.ay;
     ctx.save();
     ctx.beginPath();
     ctx.scale(dpr, dpr);
@@ -170,18 +173,12 @@ export class DisplayNikochan {
       this.#c.canvasMarginY + this.#c.boxSize - targetY * this.#c.boxSize
     );
     // ctx.scale(this.#c.boxSize, -this.#c.boxSize);
-    ctx.moveTo(
-      this.#c.boxSize * x(this.#n.uMin),
-      -this.#c.boxSize * y(this.#n.uMin)
-    );
+    ctx.moveTo(this.#c.boxSize * x(uMin), -this.#c.boxSize * y(uMin));
     ctx.quadraticCurveTo(
-      this.#c.boxSize *
-        (x(this.#n.uMin) + (vx() * (this.#n.uMax - this.#n.uMin)) / 2),
-      -this.#c.boxSize *
-        (y(this.#n.uMin) +
-          (vy(this.#n.uMin) * (this.#n.uMax - this.#n.uMin)) / 2),
-      this.#c.boxSize * x(this.#n.uMax),
-      -this.#c.boxSize * y(this.#n.uMax)
+      this.#c.boxSize * (x(uMin) + (vx() * (uMax - uMin)) / 2),
+      -this.#c.boxSize * (y(uMin) + (vy(uMin) * (uMax - uMin)) / 2),
+      this.#c.boxSize * x(uMax),
+      -this.#c.boxSize * y(uMax)
     );
     ctx.strokeStyle = color;
     ctx.lineWidth = 1;
