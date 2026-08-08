@@ -125,3 +125,17 @@ export async function convertTo17(chart: ChartUntil15): Promise<Chart17> {
   chart satisfies Chart15;
   return { ...chart, ver: 17 };
 }
+export function convertToPlay17(chart: Chart17, lvIndex: number): Level17Play {
+  const levelMin = chart.levelsMeta.at(lvIndex);
+  const levelFreeze = chart.levelsFreeze.at(lvIndex);
+  return {
+    ver: 17,
+    offset: chart.offset,
+    notes: levelFreeze?.notes || [],
+    bpmChanges: levelFreeze?.bpmChanges || [],
+    speedChanges: levelFreeze?.speedChanges || [],
+    signature: levelFreeze?.signature || [],
+    ytBegin: levelMin?.ytBegin || 0,
+    ytEndSec: levelMin?.ytEndSec || 0,
+  };
+}

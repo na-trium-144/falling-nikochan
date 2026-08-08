@@ -32,14 +32,14 @@ import {
   SpeedChangeWithLua15,
   SignatureWithLua15,
   currentChartVer,
+  Chart17,
 } from "@falling-nikochan/chart";
 import * as v from "valibot";
-import { gzip, gunzip } from "node:zlib";
-import { promisify } from "node:util";
 import { Binary, Db, BSON } from "mongodb";
 import { HTTPException } from "hono/http-exception";
 import { randomBytes } from "node:crypto";
 import { normalizeEntry, YTDataEntry } from "./ytData.js";
+import * as msgpack from "@msgpack/msgpack";
 
 interface Passwd {
   bypass?: boolean;
@@ -118,7 +118,8 @@ export async function getChartEntry(
     | Chart11Edit
     | Chart13Edit
     | Chart14Edit
-    | Chart15;
+    | Chart15
+    | Chart17;
   etag: string;
 }> {
   const entryCompressed = await getChartEntryCompressed(db, cid, p);
@@ -155,10 +156,10 @@ export function getPServerHash(
  */
 export interface ChartEntryCompressed {
   cid: string;
-  levelsCompressed: Binary | null; // <- ChartLevelCore をjson化&gzip圧縮したもの
+  levelsCompressed: Binary | null; // <- ChartLevelCore をjson/msgpack化&gzip圧縮したもの
   deleted: boolean;
   published: boolean;
-  ver: 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
+  ver: 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17;
   offset: number;
   ytId: string;
   title: string;
@@ -272,7 +273,7 @@ export type ChartEntry = ChartEntryCompressed &
     | { ver: 11 | 12; levels: ChartLevelCore11[] }
     | { ver: 13; levels: ChartLevelCore13[] }
     | { ver: 14; levels: ChartLevelCore14[] }
-    | { ver: 15 | 16; levels: ChartLevelCore15[] }
+    | { ver: 15 | 16 | 17; levels: ChartLevelCore15[] }
   );
 
 export async function calcETag(entry: ChartEntryCompressed) {
@@ -309,8 +310,15 @@ export async function unzipEntry(
     throw new Error("levelsCompressed is null");
   }
   const decodedChart = entry.levelsCompressed.buffer;
-  const decompressedChart = await promisify(gunzip)(decodedChart);
-  const levels = JSON.parse(new TextDecoder().decode(decompressedChart));
+  const decompressedChart = new Response(
+    new Blob([decodedChart])
+      .stream()
+      .pipeThrough(new DecompressionStream("gzip"))
+  );
+  const levels =
+    entry.ver >= 17
+      ? msgpack.decode(await decompressedChart.arrayBuffer())
+      : JSON.parse(await decompressedChart.text());
   return {
     ...entry,
     levelsCompressed: null,
@@ -321,8 +329,16 @@ export async function unzipEntry(
 export async function zipEntry(
   entry: ChartEntry
 ): Promise<ChartEntryCompressed> {
-  const levelsCompressed: Buffer = await promisify(gzip)(
-    JSON.stringify(entry.levels)
+  const levelsEncoded =
+    entry.ver >= 17
+      ? msgpack.encode(entry.levels)
+      : JSON.stringify(entry.levels);
+  const levelsCompressed = Buffer.from(
+    await new Response(
+      new Blob([levelsEncoded])
+        .stream()
+        .pipeThrough(new DecompressionStream("gzip"))
+    ).arrayBuffer()
   );
   return {
     cid: entry.cid,
@@ -349,7 +365,7 @@ export async function zipEntry(
 
 export async function chartToEntry(
   // 過去2バージョンまで
-  chart: Chart14Edit | Chart15,
+  chart: Chart14Edit | Chart15 | Chart17,
   cid: string,
   updatedAt: number,
   addIp: string | null,
@@ -465,7 +481,8 @@ export function entryToChart(
   | Chart11Edit
   | Chart13Edit
   | Chart14Edit
-  | Chart15 {
+  | Chart15
+  | Chart17 {
   switch (entry.ver) {
     case 4:
       return {
@@ -674,6 +691,7 @@ export function entryToChart(
       } as Chart14Edit;
     case 15:
     case 16:
+    case 17:
       return {
         falling: "nikochan",
         ver: entry.ver,

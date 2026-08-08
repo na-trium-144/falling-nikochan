@@ -332,7 +332,7 @@ export async function hashLevel(
   );
 }
 
-export function numEvents(chart: Chart14Edit | ChartEdit): number {
+export function numEvents(chart: Chart14Edit | Chart15 | Chart17): number {
   return chart.levelsFreeze
     .map(
       (l) =>
