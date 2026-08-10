@@ -84,7 +84,6 @@ import {
   convertTo17,
   convertToPlay17,
   Level17Play,
-  LevelPlaySchema17,
 } from "./legacy/chart17.js";
 
 export const YoutubeIdSchema = () =>
@@ -194,7 +193,6 @@ export const lastIncompatibleVer = 16;
 export type ChartEdit = Chart17;
 export const ChartSchema = ChartSchema17;
 export type LevelPlay = Level17Play;
-export const LevelPlaySchema = LevelPlaySchema17;
 export type LevelMin = Level15Meta;
 export type LevelFreeze = Level15Freeze;
 export const convertToMin = convertToMin14;
