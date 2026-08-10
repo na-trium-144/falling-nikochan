@@ -1,13 +1,21 @@
 import * as v from "valibot";
-import { ChartBriefSchema, LevelPlaySchema15 } from "@falling-nikochan/chart";
+import {
+  ChartBriefSchema,
+  currentChartVer,
+  LevelPlaySchema15,
+  LevelPlaySchema17,
+} from "@falling-nikochan/chart";
 
 const SessionDataSchema = () =>
-  v.union([
+  v.variant("editing", [
     v.object({
       cid: v.optional(v.string()),
       lvIndex: v.number(),
       brief: ChartBriefSchema(),
-      level: LevelPlaySchema15(),
+      level:
+        (currentChartVer satisfies 17,
+        // 1バージョン前まで許可する
+        v.variant("ver", [LevelPlaySchema17(), LevelPlaySchema15()])),
       editing: v.literal(true),
     }),
     v.object({

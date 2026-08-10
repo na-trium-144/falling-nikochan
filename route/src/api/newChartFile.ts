@@ -6,9 +6,9 @@ import {
   chartMaxEvent,
   rateLimit,
   CidSchema,
-  Chart14Edit,
   Chart15,
   docRefs,
+  Chart17,
 } from "@falling-nikochan/chart";
 import { getIp, updateIp } from "./dbRateLimit.js";
 import { Db } from "mongodb";
@@ -46,7 +46,7 @@ const newChartFileApp = async (config: {
       description:
         "Create a new chart. " +
         "The chart data should be in MessagePack format, and " +
-        `must be the latest format (Chart15) or one version earlier (Chart14Edit). ` +
+        `must be the latest format (Chart17) or one version earlier (Chart15). ` +
         `The chart data may be compressed using ${supportedEncodings.join(", ")} (in that case Content-Encoding header must be set.) ` +
         "Returns the chart ID (cid) of the newly created chart. " +
         `This endpoint is rate limited to one request per ${rateLimit.newChartFile / 60} minutes. `,
@@ -56,7 +56,7 @@ const newChartFileApp = async (config: {
         required: true,
         content: {
           "application/vnd.msgpack": {
-            schema: docRefs("Chart15"),
+            schema: { anyOf: [docRefs("Chart17"), docRefs("Chart15")] },
           },
         },
       },
@@ -163,15 +163,13 @@ const newChartFileApp = async (config: {
         );
       }
 
-      let newChart: Chart14Edit | Chart15;
+      let newChart: Chart15 | Chart17;
       try {
-        newChart = msgpack.decode(chartBuf) as Chart14Edit | Chart15;
+        newChart = msgpack.decode(chartBuf) as Chart15 | Chart17;
         if (newChart.ver < currentChartVer - 1) {
           return c.json({ message: "oldChartVersion" }, 409);
         }
-        newChart = validateChartWithoutConvert(newChart) as
-          | Chart14Edit
-          | Chart15;
+        newChart = validateChartWithoutConvert(newChart) as Chart15 | Chart17;
       } catch (e) {
         throw new HTTPException(415, { message: "invalidChart", cause: e });
       }

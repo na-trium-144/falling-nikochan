@@ -16,6 +16,7 @@ import {
   convertTo15,
   convertToPlay15,
   docRefs,
+  convertToPlay17,
 } from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
@@ -154,6 +155,12 @@ const seqFileApp = new Hono<{
           throw new HTTPException(404, { message: "levelNotFound" });
         }
         seqData = loadChart(convertToPlay15(chart, lvIndex));
+        break;
+      case 17:
+        if (!chart.levelsMeta.at(lvIndex) || !chart.levelsFreeze.at(lvIndex)) {
+          throw new HTTPException(404, { message: "levelNotFound" });
+        }
+        seqData = loadChart(convertToPlay17(chart, lvIndex));
         break;
       default:
         chart satisfies never;

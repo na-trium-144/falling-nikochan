@@ -109,6 +109,9 @@ export class DisplayNikochan {
     let dx = 0;
     let dy = 0;
     let scale = 1;
+    if (!this.#dn.visible) {
+      return;
+    }
     if (this.#n.done !== 0) {
       if (this.fadeoutFactor >= 1) {
         return;
@@ -136,6 +139,9 @@ export class DisplayNikochan {
   }
 
   drawCircle(ctx: CanvasRenderingContext2D, dpr: number, color: string) {
+    if (!this.#dn.visible) {
+      return;
+    }
     ctx.save();
     ctx.beginPath();
     ctx.arc(
@@ -156,6 +162,9 @@ export class DisplayNikochan {
     const y = (u: number) => this.#n.vy * u - (this.#n.ay * u * u) / 2;
     const vx = () => this.#n.vx;
     const vy = (u: number) => this.#n.vy - this.#n.ay * u;
+    // verは最新のはずで、 this.#n.uRange は絶対に存在するはずなので、フォールバックいらないかも
+    const uMin = this.#n.uRange?.[0] ?? 0;
+    const uMax = this.#n.uRange?.[1] ?? (2 * this.#n.vy) / this.#n.ay;
     ctx.save();
     ctx.beginPath();
     ctx.scale(dpr, dpr);
@@ -164,18 +173,12 @@ export class DisplayNikochan {
       this.#c.canvasMarginY + this.#c.boxSize - targetY * this.#c.boxSize
     );
     // ctx.scale(this.#c.boxSize, -this.#c.boxSize);
-    ctx.moveTo(
-      this.#c.boxSize * x(this.#n.uMin),
-      -this.#c.boxSize * y(this.#n.uMin)
-    );
+    ctx.moveTo(this.#c.boxSize * x(uMin), -this.#c.boxSize * y(uMin));
     ctx.quadraticCurveTo(
-      this.#c.boxSize *
-        (x(this.#n.uMin) + (vx() * (this.#n.uMax - this.#n.uMin)) / 2),
-      -this.#c.boxSize *
-        (y(this.#n.uMin) +
-          (vy(this.#n.uMin) * (this.#n.uMax - this.#n.uMin)) / 2),
-      this.#c.boxSize * x(this.#n.uMax),
-      -this.#c.boxSize * y(this.#n.uMax)
+      this.#c.boxSize * (x(uMin) + (vx() * (uMax - uMin)) / 2),
+      -this.#c.boxSize * (y(uMin) + (vy(uMin) * (uMax - uMin)) / 2),
+      this.#c.boxSize * x(uMax),
+      -this.#c.boxSize * y(uMax)
     );
     ctx.strokeStyle = color;
     ctx.lineWidth = 1;
@@ -186,6 +189,9 @@ export class DisplayNikochan {
   drawTail(ctx: CanvasRenderingContext2D, dpr: number) {
     if (this.#c.now === undefined || this.#c.lastNow === undefined) {
       throw new Error("now and lastNow must be defined for drawTail");
+    }
+    if (!this.#dn.visible) {
+      return;
     }
     const headSize = this.#c.noteSize * 1;
     const tailSize = this.#c.noteSize * 0.85;

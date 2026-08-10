@@ -39,8 +39,8 @@ catalogs:
       specifier: ^16.6.1
       version: 16.6.1
     fn-commands:
-      specifier: 1.0.0
-      version: 1.0.0
+      specifier: 1.1.0
+      version: 1.1.0
     hono:
       specifier: 4.12.23
       version: 4.12.23
@@ -270,7 +270,7 @@ importers:
         version: 6.2.2
       fn-commands:
         specifier: 'catalog:'
-        version: 1.0.0
+        version: 1.1.0
       openapi-types:
         specifier: 12.1.3
         version: 12.1.3
@@ -339,7 +339,7 @@ importers:
         version: 2.0.5
       fn-commands:
         specifier: 'catalog:'
-        version: 1.0.0
+        version: 1.1.0
       isbot:
         specifier: 'catalog:'
         version: 5.1.40
@@ -3661,8 +3661,8 @@ packages:
   flatted@3.4.2:
     resolution: {integrity: sha512-PjDse7RzhcPkIJwy5t7KPWQSZ9cAbzQXcafsetQoD7sOJRQlGikNbx7yZp2OotDnJyrDcbyRq3Ttb18iYOqkxA==}
 
-  fn-commands@1.0.0:
-    resolution: {integrity: sha512-AsZWa9clnxLxeE5n+rf1z4f+04fcunk5OwKkOfG6GHrG93Lv5ZcipPHTqlZ3FWDG+6/Q2hXc3DQK0YMvgldSmA==}
+  fn-commands@1.1.0:
+    resolution: {integrity: sha512-HEsgXaWPfEOHjsFz98TODkLE9BE/9lQOes6FNA9+vjXaKmniqPhriKzl1MlU0WPtokFuDe95QwYw0YQAWY+tCw==}
 
   for-each@0.3.5:
     resolution: {integrity: sha512-dKx12eRCVIzqCxFGplyFKJMPvLEWgmNtUrpTiJIR5u97zEhRG8ySrtboPHZXx7daLxQVrl643cTzbab2tkQjxg==}
@@ -8741,7 +8741,7 @@ snapshots:
 
   flatted@3.4.2: {}
 
-  fn-commands@1.0.0: {}
+  fn-commands@1.1.0: {}
 
   for-each@0.3.5:
     dependencies:

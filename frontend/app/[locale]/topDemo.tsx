@@ -8,6 +8,7 @@ import {
   currentChartVer,
   Level15Play,
   Level6Play,
+  LevelPlay,
   loadChart,
 } from "@falling-nikochan/chart";
 import * as msgpack from "@msgpack/msgpack";
@@ -85,12 +86,14 @@ export function TopDemo(
       fetchBackend()
         .get(`/api/playFile/${props.cid}/${props.lvIndex}`)
         .arrayBuffer((buf) => {
-          currentChartVer satisfies 16; // update the code below when chart version is bumped
-          const playFile = msgpack.decode(buf) as Level6Play | Level15Play;
+          const playFile = msgpack.decode(buf) as
+            | Level6Play
+            | Level15Play
+            | LevelPlay;
           if (
             playFile.ver === 6 ||
             playFile.ver === 15 ||
-            playFile.ver === 16
+            playFile.ver === currentChartVer
           ) {
             const seq = loadChart(playFile);
             resetNotesAll(

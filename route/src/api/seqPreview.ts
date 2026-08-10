@@ -4,10 +4,10 @@ import { Hono } from "hono";
 import {
   ChartSeqData,
   loadChart,
-  LevelPlaySchema15,
-  Level15Play,
   docRefs,
   currentChartVer,
+  LevelPlaySchema17,
+  Level17Play,
 } from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
@@ -19,13 +19,13 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
   "/",
   describeRoute({
     description:
-      "Accepts MessagePack-encoded Level15Play data and returns chart sequence data in MessagePack format for preview purposes.",
+      "Accepts MessagePack-encoded Level17Play data and returns chart sequence data in MessagePack format for preview purposes.",
     requestBody: {
-      description: "MessagePack-encoded Level15Play data",
+      description: "MessagePack-encoded Level17Play data",
       required: true,
       content: {
         "application/vnd.msgpack": {
-          schema: docRefs("LevelPlay15"),
+          schema: docRefs("LevelPlay17"),
         },
       },
     },
@@ -89,7 +89,7 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
   async (c) => {
     const rawBody = await c.req.arrayBuffer();
 
-    let levelData: Level15Play;
+    let levelData: Level17Play;
     try {
       const decodedData = msgpack.decode(new Uint8Array(rawBody));
       if (
@@ -102,7 +102,7 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
           return c.json({ message: "oldChartVersion" }, 409);
         }
       }
-      levelData = v.parse(LevelPlaySchema15(), decodedData);
+      levelData = v.parse(LevelPlaySchema17(), decodedData);
     } catch (e) {
       throw new HTTPException(415, { message: "invalidChart", cause: e });
     }

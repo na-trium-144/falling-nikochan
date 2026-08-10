@@ -1,6 +1,6 @@
 import { test, describe } from "node:test";
 import { expect } from "chai";
-import { app, dummyLevel15, dummyLevel6, initDb } from "./init";
+import { app, dummyLevel15, dummyLevel17, dummyLevel6, initDb } from "./init";
 import {
   currentChartVer,
   Level15Play,
@@ -19,7 +19,7 @@ describe("GET /api/playFile/:cid/:lvIndex", () => {
     const res = await app.request("/api/playFile/100000/0");
     expect(res.status).to.equal(200);
     const level = msgpack.decode(await res.arrayBuffer()) as Level15Play;
-    expect(level).to.deep.equal(dummyLevel15());
+    expect(level).to.deep.equal(dummyLevel17());
   });
   test("should return ETag calculated by calcETag()", async () => {
     await initDb();
@@ -67,84 +67,28 @@ describe("GET /api/playFile/:cid/:lvIndex", () => {
     expect(res.status).to.equal(412);
     expect(await res.json()).to.deep.equal({ message: "etagMismatch" });
   });
-  currentChartVer satisfies 16; // edit tests below when chart version is bumped
-  test("should return Level15Play if chart version is 15", async () => {
-    await initDb();
-    const res = await app.request("/api/playFile/100015/0");
-    expect(res.status).to.equal(200);
-    const level = msgpack.decode(await res.arrayBuffer()) as Level15Play;
-    expect(level).to.deep.include(dummyLevel15());
-  });
-  test("should return Level15Play if chart version is 14", async () => {
-    await initDb();
-    const res = await app.request("/api/playFile/100014/0");
-    expect(res.status).to.equal(200);
-    const level = msgpack.decode(await res.arrayBuffer()) as Level15Play;
-    expect(level).to.deep.include(dummyLevel15());
-  });
-  test("should return Level15Play if chart version is 13", async () => {
-    await initDb();
-    const res = await app.request("/api/playFile/100013/0");
-    expect(res.status).to.equal(200);
-    const level = msgpack.decode(await res.arrayBuffer()) as Level15Play;
-    expect(level).to.deep.include(dummyLevel15());
-  });
-  test("should return Level15Play if chart version is 12", async () => {
-    await initDb();
-    const res = await app.request("/api/playFile/100012/0");
-    expect(res.status).to.equal(200);
-    const level = msgpack.decode(await res.arrayBuffer()) as Level15Play;
-    expect(level).to.deep.include(dummyLevel15());
-  });
-  test("should return Level15Play if chart version is 11", async () => {
-    await initDb();
-    const res = await app.request("/api/playFile/100011/0");
-    expect(res.status).to.equal(200);
-    const level = msgpack.decode(await res.arrayBuffer()) as Level15Play;
-    expect(level).to.deep.include(dummyLevel15());
-  });
-  test("should return Level15Play if chart version is 10", async () => {
-    await initDb();
-    const res = await app.request("/api/playFile/100010/0");
-    expect(res.status).to.equal(200);
-    const level = msgpack.decode(await res.arrayBuffer()) as Level15Play;
-    expect(level).to.deep.include(dummyLevel15());
-  });
-  test("should return Level15Play if chart version is 9", async () => {
-    await initDb();
-    const res = await app.request("/api/playFile/100009/0");
-    expect(res.status).to.equal(200);
-    const level = msgpack.decode(await res.arrayBuffer()) as Level15Play;
-    expect(level).to.deep.include(dummyLevel15());
-  });
-  test("should return Level15Play if chart version is 8", async () => {
-    await initDb();
-    const res = await app.request("/api/playFile/100008/0");
-    expect(res.status).to.equal(200);
-    const level = msgpack.decode(await res.arrayBuffer()) as Level15Play;
-    expect(level).to.deep.include(dummyLevel15());
-  });
-  test("should return Level15Play if chart version is 7", async () => {
-    await initDb();
-    const res = await app.request("/api/playFile/100007/0");
-    expect(res.status).to.equal(200);
-    const level = msgpack.decode(await res.arrayBuffer()) as Level15Play;
-    expect(level).to.deep.include(dummyLevel15());
-  });
-  test("should return Level6Play if chart version is 6", async () => {
-    await initDb();
-    const res = await app.request("/api/playFile/100006/0");
-    expect(res.status).to.equal(200);
-    const level = msgpack.decode(await res.arrayBuffer()) as Level6Play;
-    expect(level).to.deep.include(dummyLevel6());
-  });
-  test("should return Level6Play if chart version is 5", async () => {
-    await initDb();
-    const res = await app.request("/api/playFile/100005/0");
-    expect(res.status).to.equal(200);
-    const level = msgpack.decode(await res.arrayBuffer()) as Level6Play;
-    expect(level).to.deep.include(dummyLevel6());
-  });
+  currentChartVer satisfies 17; // edit tests below when chart version is bumped
+  // for (const ver of []) {
+  //   test("should return Level17Play if chart version is " + ver, async () => {});
+  // }
+  for (const ver of [16, 15, 14, 13, 12, 11, 10, 9, 8, 7]) {
+    test("should return Level15Play if chart version is " + ver, async () => {
+      await initDb();
+      const res = await app.request(`/api/playFile/${100000 + ver}/0`);
+      expect(res.status).to.equal(200);
+      const level = msgpack.decode(await res.arrayBuffer()) as Level15Play;
+      expect(level).to.deep.include(dummyLevel15());
+    });
+  }
+  for (const ver of [6, 5]) {
+    test("should return Level6Play if chart version is " + ver, async () => {
+      await initDb();
+      const res = await app.request(`/api/playFile/${100000 + ver}/0`);
+      expect(res.status).to.equal(200);
+      const level = msgpack.decode(await res.arrayBuffer()) as Level6Play;
+      expect(level).to.deep.include(dummyLevel6());
+    });
+  }
   test("should return Level6Play if chart version is 4", async () => {
     await initDb();
     const res = await app.request("/api/playFile/100004/0");
