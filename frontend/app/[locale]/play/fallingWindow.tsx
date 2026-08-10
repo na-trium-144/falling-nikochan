@@ -1,11 +1,10 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { memo, RefObject, useEffect, useRef, useState } from "react";
+import { RefObject, useCallback, useEffect, useRef, useState } from "react";
 import {
   targetY,
   bigScale,
-  bonusMax,
   DisplayNote,
   displayNote,
   NoteInGame,
@@ -17,6 +16,104 @@ import { useRealFPS } from "@/common/fpsCalculator";
 import { DisplayNikochan } from "./displayNikochan";
 import { OffsetEstimator } from "./offsetEstimator";
 import { fetchAsset } from "@/common/fetch";
+import { useTheme } from "@/common/theme";
+
+export function useCanvasProps() {
+  const { width, height, ref } = useResizeDetector();
+  const boxSize: number | undefined =
+    width && height && Math.min(width, height);
+  // nikochanの座標系で(0, 0)を指す位置がFallingWindowの座標系で(marginX, marginY)
+  const marginX: number | undefined = width && boxSize && (width - boxSize) / 2;
+  const marginY: number | undefined =
+    height && boxSize && (height - boxSize) / 2;
+  const [canvasRect, setCanvasRect] = useState({
+    left: 0,
+    top: 0,
+    width: 0,
+    height: 0,
+  });
+  const [dpr, setDpr] = useState<number>(1);
+  useEffect(() => {
+    if (ref.current && marginX !== undefined && marginY !== undefined) {
+      const elementRect = (
+        ref.current as HTMLDivElement
+      ).getBoundingClientRect();
+      setCanvasRect({
+        left: -(elementRect.left + window.scrollX),
+        top: -(elementRect.top + window.scrollY),
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+      setDpr(window.devicePixelRatio || 1);
+    }
+  }, [ref, marginX, marginY]);
+  const canvasMarginX =
+    marginX !== undefined ? -canvasRect.left + marginX : undefined;
+  const canvasMarginY =
+    marginY !== undefined ? -canvasRect.top + marginY : undefined;
+
+  const { rem } = useDisplayMode();
+  const noteSize = Math.max(1.5 * rem, 0.06 * (boxSize || 0));
+
+  const fetchNikochanBitmap = useCallback(
+    (dpr: number) =>
+      // dprはwindow.devicePixelRatioとは異なる値にしたい場合があるので引数で取る
+      Promise.all(
+        [0, 1, 2, 3].map(async (i) => {
+          const svg = await fetchAsset()
+            .get(`/assets/nikochan${i}.svg` + process.env.ASSET_QUERY_NIKOCHAN)
+            .text();
+          // chromeではcreateImageBitmap()でsvgをきれいにresizeできるが、
+          // firefoxではbitmap化してから拡大縮小するようなので、svg自体をリサイズしてからbitmap化する必要がある
+          const svgResized = svg
+            .replace(/width="(\d+)(\w*)"/, `width="${noteSize * dpr}"`)
+            .replace(/height="(\d+)(\w*)"/, `height="${noteSize * dpr}"`);
+          const img = new Image();
+          img.src = `data:image/svg+xml;base64,${btoa(svgResized)}`;
+          const pBitmap = img.decode().then(() =>
+            createImageBitmap(img, {
+              resizeWidth: noteSize * dpr,
+              resizeHeight: noteSize * dpr,
+              resizeQuality: "high",
+            })
+          );
+          const svgResizedBig = svg
+            .replace(
+              /width="(\d+)(\w*)"/,
+              `width="${noteSize * bigScale(true) * dpr}"`
+            )
+            .replace(
+              /height="(\d+)(\w*)"/,
+              `height="${noteSize * bigScale(true) * dpr}"`
+            );
+          const imgBig = new Image();
+          imgBig.src = `data:image/svg+xml;base64,${btoa(svgResizedBig)}`;
+          const pBitmapBig = imgBig.decode().then(() =>
+            createImageBitmap(imgBig, {
+              resizeWidth: noteSize * bigScale(true) * dpr,
+              resizeHeight: noteSize * bigScale(true) * dpr,
+              resizeQuality: "high",
+            })
+          );
+          return Promise.all([pBitmap, pBitmapBig]);
+        })
+      ),
+    [noteSize]
+  );
+
+  return {
+    ref,
+    canvasRect,
+    canvasMarginX,
+    canvasMarginY,
+    marginX,
+    marginY,
+    noteSize,
+    boxSize,
+    dpr,
+    fetchNikochanBitmap,
+  };
+}
 
 type Props = {
   className?: string;
@@ -64,48 +161,30 @@ export default function FallingWindow(props: Props) {
     noClear,
     playbackRate,
   } = props;
-  const { width, height, ref } = useResizeDetector();
-  const boxSize: number | undefined =
-    width && height && Math.min(width, height);
-  // nikochanの座標系で(0, 0)を指す位置がFallingWindowの座標系で(marginX, marginY)
-  const marginX: number | undefined = width && boxSize && (width - boxSize) / 2;
-  const marginY: number | undefined =
-    height && boxSize && (height - boxSize) / 2;
   const tailsCanvasRef = useRef<HTMLCanvasElement>(null);
   const nikochanCanvasRef = useRef<HTMLCanvasElement>(null);
-  const canvasLeft = useRef<number>(0);
-  const canvasTop = useRef<number>(0);
-  const canvasWidth = useRef<number>(0);
-  const canvasHeight = useRef<number>(0);
-  useEffect(() => {
-    if (ref.current && marginX !== undefined && marginY !== undefined) {
-      canvasLeft.current = -(
-        (ref.current as HTMLDivElement).getBoundingClientRect().left +
-        window.scrollX
-      );
-      canvasTop.current = -(
-        (ref.current as HTMLDivElement).getBoundingClientRect().top +
-        window.scrollY
-      );
-      canvasWidth.current = window.innerWidth;
-      canvasHeight.current = window.innerHeight;
-    }
-  }, [ref, marginX, marginY]);
-  const canvasMarginX =
-    marginX !== undefined ? -canvasLeft.current + marginX : undefined;
-  const canvasMarginY =
-    marginY !== undefined ? -canvasTop.current + marginY : undefined;
+  const effectsCanvasRef = useRef<HTMLCanvasElement>(null);
+
+  const {
+    ref,
+    canvasRect,
+    canvasMarginX,
+    canvasMarginY,
+    marginX,
+    marginY,
+    noteSize,
+    boxSize,
+    dpr,
+    fetchNikochanBitmap,
+  } = useCanvasProps();
 
   const { rem, playUIScale } = useDisplayMode();
-  const noteSize = Math.max(1.5 * rem, 0.06 * (boxSize || 0));
+  const { isDark } = useTheme();
 
   // devicePixelRatioを無視するどころか、あえて小さくすることで、ぼかす
   const tailsCanvasDPR = Math.min(1, 6.5 / noteSize);
-  const nikochanCanvasDPR = useRef<number>(1);
-  useEffect(() => {
-    nikochanCanvasDPR.current =
-      window.devicePixelRatio * (props.blur ? 0.17 : 1);
-  });
+  const effectsCanvasDPR = 0.5;
+  const nikochanCanvasDPR = dpr * (props.blur ? 0.17 : 1);
 
   const [rerenderIndex, setRerenderIndex] = useState<number>(0);
   const { realFps } = useRealFPS();
@@ -203,59 +282,17 @@ export default function FallingWindow(props: Props) {
     alpha: true,
     desynchronized: true,
   });
+  const ectx = effectsCanvasRef.current?.getContext("2d", {
+    alpha: true,
+    desynchronized: true,
+  });
 
   const nikochanBitmap = useRef<ImageBitmap[][] | null>(null); // nikochanBitmap.current[0-3][big:0|1]
   useEffect(() => {
-    Promise.all(
-      [0, 1, 2, 3].map(async (i) => {
-        const svg = await fetchAsset()
-          .get(`/assets/nikochan${i}.svg` + process.env.ASSET_QUERY_NIKOCHAN)
-          .text();
-        // chromeではcreateImageBitmap()でsvgをきれいにresizeできるが、
-        // firefoxではbitmap化してから拡大縮小するようなので、svg自体をリサイズしてからbitmap化する必要がある
-        const svgResized = svg
-          .replace(
-            /width="(\d+)(\w*)"/,
-            `width="${noteSize * nikochanCanvasDPR.current}"`
-          )
-          .replace(
-            /height="(\d+)(\w*)"/,
-            `height="${noteSize * nikochanCanvasDPR.current}"`
-          );
-        const img = new Image();
-        img.src = `data:image/svg+xml;base64,${btoa(svgResized)}`;
-        const pBitmap = img.decode().then(() =>
-          createImageBitmap(img, {
-            resizeWidth: noteSize * nikochanCanvasDPR.current,
-            resizeHeight: noteSize * nikochanCanvasDPR.current,
-            resizeQuality: "high",
-          })
-        );
-        const svgResizedBig = svg
-          .replace(
-            /width="(\d+)(\w*)"/,
-            `width="${noteSize * bigScale(true) * nikochanCanvasDPR.current}"`
-          )
-          .replace(
-            /height="(\d+)(\w*)"/,
-            `height="${noteSize * bigScale(true) * nikochanCanvasDPR.current}"`
-          );
-        const imgBig = new Image();
-        imgBig.src = `data:image/svg+xml;base64,${btoa(svgResizedBig)}`;
-        const pBitmapBig = imgBig.decode().then(() =>
-          createImageBitmap(imgBig, {
-            resizeWidth: noteSize * bigScale(true) * nikochanCanvasDPR.current,
-            resizeHeight: noteSize * bigScale(true) * nikochanCanvasDPR.current,
-            resizeQuality: "high",
-          })
-        );
-        return Promise.all([pBitmap, pBitmapBig]);
-      })
-    ).then((bitmaps) => {
+    fetchNikochanBitmap(nikochanCanvasDPR).then((bitmaps) => {
       nikochanBitmap.current = bitmaps;
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [noteSize, nikochanCanvasDPR.current]);
+  }, [fetchNikochanBitmap, nikochanCanvasDPR]);
 
   const displayNotes = useRef<DisplayNote[]>([]);
   const displayNikochan = useRef<(DisplayNikochan | null)[]>([]);
@@ -294,10 +331,9 @@ export default function FallingWindow(props: Props) {
         playbackRate,
         rem,
         now,
-        tailsCanvasDPR,
-        nikochanCanvasDPR: nikochanCanvasDPR.current,
         nikochanBitmap: nikochanBitmap.current,
         lastNow: lastNow.current,
+        dark: isDark,
       };
 
       displayNotes.current = notes
@@ -305,18 +341,24 @@ export default function FallingWindow(props: Props) {
         .filter((n) => n !== null);
       displayNotes.current.reverse(); // 奥に表示されるものが最初
 
-      if (nctx && ctx) {
+      if (ectx && nctx && ctx) {
+        ectx.clearRect(
+          0,
+          0,
+          canvasRect.width * effectsCanvasDPR,
+          canvasRect.height * effectsCanvasDPR
+        );
         nctx.clearRect(
           0,
           0,
-          canvasWidth.current * nikochanCanvasDPR.current,
-          canvasHeight.current * nikochanCanvasDPR.current
+          canvasRect.width * nikochanCanvasDPR,
+          canvasRect.height * nikochanCanvasDPR
         );
         ctx.clearRect(
           0,
           0,
-          canvasWidth.current * tailsCanvasDPR,
-          canvasHeight.current * tailsCanvasDPR
+          canvasRect.width * tailsCanvasDPR,
+          canvasRect.height * tailsCanvasDPR
         );
         for (const dn of displayNotes.current) {
           if (!displayNikochan.current[dn.id]) {
@@ -329,8 +371,10 @@ export default function FallingWindow(props: Props) {
           const dns = displayNikochan.current[dn.id]!;
           dns.update(dn, c);
           shouldHideBPMSign ||= dns.shouldHideBPMSign;
-          dns.drawNikochan(nctx);
-          dns.drawTail(ctx);
+          dns.drawNikochan(nctx, nikochanCanvasDPR);
+          dns.drawTail(ctx, tailsCanvasDPR);
+          dns.drawRipple(ectx, effectsCanvasDPR);
+          dns.drawParticle(ectx, effectsCanvasDPR);
         }
         lastNow.current = now;
 
@@ -345,16 +389,24 @@ export default function FallingWindow(props: Props) {
           ctx.clearRect(
             0,
             0,
-            canvasWidth.current * tailsCanvasDPR,
-            canvasHeight.current * tailsCanvasDPR
+            canvasRect.width * tailsCanvasDPR,
+            canvasRect.height * tailsCanvasDPR
           );
         }
         if (nctx) {
           nctx.clearRect(
             0,
             0,
-            canvasWidth.current * nikochanCanvasDPR.current,
-            canvasHeight.current * nikochanCanvasDPR.current
+            canvasRect.width * nikochanCanvasDPR,
+            canvasRect.height * nikochanCanvasDPR
+          );
+        }
+        if (ectx) {
+          ectx.clearRect(
+            0,
+            0,
+            canvasRect.width * effectsCanvasDPR,
+            canvasRect.height * effectsCanvasDPR
           );
         }
       }
@@ -364,21 +416,6 @@ export default function FallingWindow(props: Props) {
       }
     }
   }
-
-  const particleAssets = useRef<string[]>([]);
-  useEffect(() => {
-    Promise.all(
-      Array.from(new Array(13)).map((_, i) =>
-        [4, 6, 8, 10, 12].includes(i)
-          ? fetchAsset()
-              .get(`/assets/particle${i}.svg`)
-              .text((text) => `data:image/svg+xml;base64,${btoa(text)}`)
-          : ""
-      )
-    ).then((urls) => {
-      particleAssets.current = urls;
-    });
-  }, []);
 
   const filteredStartTimeStampSample = useRef<number | null>(null);
   const rawStartTimeStampSample = useRef<number | null>(null);
@@ -413,29 +450,31 @@ export default function FallingWindow(props: Props) {
       style={props.style}
       ref={ref}
     >
+      {/* For effects */}
+      <canvas
+        ref={effectsCanvasRef}
+        className="absolute z-fw-canvas-effects pointer-events-none dark:opacity-70 opacity-90"
+        style={{ ...canvasRect }}
+        width={canvasRect.width * effectsCanvasDPR}
+        height={canvasRect.height * effectsCanvasDPR}
+      />
       {/* For nikochans tail */}
       <canvas
         ref={tailsCanvasRef}
         className="absolute z-fw-canvas-tail pointer-events-none"
         style={{
-          left: canvasLeft.current,
-          top: canvasTop.current,
-          width: canvasWidth.current,
-          height: canvasHeight.current,
+          ...canvasRect,
           opacity: 0.5,
         }}
-        width={canvasWidth.current * tailsCanvasDPR}
-        height={canvasHeight.current * tailsCanvasDPR}
+        width={canvasRect.width * tailsCanvasDPR}
+        height={canvasRect.height * tailsCanvasDPR}
       />
       {/* For nikochan */}
       <canvas
         ref={nikochanCanvasRef}
         className="absolute z-fw-canvas-nikochan pointer-events-none"
         style={{
-          left: canvasLeft.current,
-          top: canvasTop.current,
-          width: canvasWidth.current,
-          height: canvasHeight.current,
+          ...canvasRect,
           /*
           Android16のChrome147でトップページにレンダリングしたcanvasが真っ黒になる+GPUのアーチファクトが出るというバグに遭遇したが、
           opacityを設定するとその謎現象を回避できることを発見。
@@ -443,8 +482,8 @@ export default function FallingWindow(props: Props) {
           */
           opacity: 0.99,
         }}
-        width={canvasWidth.current * nikochanCanvasDPR.current}
-        height={canvasHeight.current * nikochanCanvasDPR.current}
+        width={canvasRect.width * nikochanCanvasDPR}
+        height={canvasRect.height * nikochanCanvasDPR}
       />
       {/* 判定線 */}
       {boxSize && marginY !== undefined && (
@@ -460,18 +499,6 @@ export default function FallingWindow(props: Props) {
           left={0}
           right="-100%"
           bottom={targetY * boxSize + marginY}
-        />
-      )}
-      {boxSize && marginX !== undefined && marginY !== undefined && (
-        <NikochansMemo
-          blur={!!props.blur}
-          displayNotes={displayNotes.current}
-          notes={notes}
-          noteSize={noteSize}
-          boxSize={boxSize}
-          marginX={marginX}
-          marginY={marginY}
-          particleAssets={particleAssets}
         />
       )}
       {boxSize && marginY !== undefined && props.showTSOffset && (
@@ -568,258 +595,6 @@ export default function FallingWindow(props: Props) {
             </tr>
           </tbody>
         </table>
-      )}
-    </div>
-  );
-}
-
-interface MProps {
-  displayNotes: DisplayNote[];
-  notes: NoteInGame[];
-  noteSize: number;
-  boxSize: number;
-  marginX: number;
-  marginY: number;
-  particleAssets: RefObject<string[]>;
-  blur: boolean;
-}
-const NikochansMemo = memo(function Nikochans(props: MProps) {
-  return props.displayNotes.map((d) => (
-    <Nikochan
-      key={d.id}
-      displayNote={d}
-      note={props.notes[d.id]}
-      noteSize={props.noteSize}
-      marginX={props.marginX}
-      marginY={props.marginY}
-      boxSize={props.boxSize}
-      particleAssets={props.particleAssets}
-      blur={props.blur}
-    />
-  ));
-});
-
-interface NProps {
-  displayNote: DisplayNote;
-  noteSize: number;
-  note: NoteInGame;
-  marginX: number;
-  marginY: number;
-  boxSize: number;
-  particleAssets: RefObject<string[]>;
-  blur: boolean;
-}
-function Nikochan(props: NProps) {
-  /* にこちゃん
-  d.done に応じて画像と動きを変える
-  0: 通常
-  1〜3: good, ok, bad
-  4: miss は画像が0と同じ
-  */
-  const { displayNote, noteSize, marginX, marginY, boxSize, note } = props;
-  return (
-    <>
-      {[1].includes(displayNote.done) && (
-        <Ripple
-          noteSize={noteSize}
-          left={note.targetX * boxSize + marginX}
-          bottom={targetY * boxSize + marginY}
-          big={displayNote.bigDone}
-          chain={displayNote.chain || 0}
-          blur={props.blur}
-        />
-      )}
-      {displayNote.chain && [1, 2].includes(displayNote.done) && (
-        <Particle
-          particleNum={
-            // 6,8,10,12
-            6 + Math.floor(3 * Math.min(1, displayNote.chain / bonusMax)) * 2
-          }
-          left={note.targetX * boxSize + marginX}
-          bottom={targetY * boxSize + marginY}
-          noteSize={noteSize}
-          big={!!displayNote.bigBonus}
-          chain={displayNote.chain || 0}
-          particleAssets={props.particleAssets}
-          blur={props.blur}
-        />
-      )}
-    </>
-  );
-}
-
-interface RProps {
-  noteSize: number;
-  left: number;
-  bottom: number;
-  big: boolean;
-  chain: number;
-  blur: boolean;
-}
-function Ripple(props: RProps) {
-  const ref = useRef<HTMLDivElement>(null!);
-  const ref2 = useRef<HTMLDivElement>(null!);
-  const animateDone = useRef<boolean>(false);
-  const { noteSize } = props;
-  const rippleWidth = noteSize * 2.5 * (props.big ? 1.5 : 1);
-  const rippleHeight = rippleWidth * 0.7;
-  useEffect(() => {
-    if (!animateDone.current) {
-      [ref, ref2].forEach((r, i) => {
-        r.current.animate(
-          [
-            { transform: "scale(0)", opacity: 0.5 },
-            { transform: "scale(0.8)", opacity: 0.5, offset: 0.8 },
-            { transform: `scale(1)`, opacity: 0 },
-          ],
-          {
-            duration: 350 - 200 * i,
-            delay: 200 * i,
-            fill: "forwards",
-            easing: "ease-out",
-          }
-        );
-      });
-    }
-    animateDone.current = true;
-  }, [noteSize]);
-  return (
-    <div
-      className={clsx(
-        "absolute z-fw-ripple dark:opacity-70 opacity-90",
-        props.blur && "blur-2xs"
-      )}
-      style={{
-        width: 1,
-        height: 1,
-        left: props.left,
-        bottom: props.bottom,
-      }}
-    >
-      {[ref, ref2].map((r, i) => (
-        <div
-          key={i}
-          ref={r}
-          className={clsx(
-            "absolute origin-center opacity-0",
-            props.chain >= bonusMax
-              ? "bg-amber-300 border-amber-400/70 dark:bg-yellow-500 dark:border-yellow-400/70"
-              : "bg-yellow-200 border-yellow-300/70 dark:bg-amber-600 dark:border-amber-500/70"
-          )}
-          style={{
-            borderWidth: rippleWidth / 20,
-            borderRadius: "50%",
-            width: rippleWidth,
-            height: rippleHeight,
-            left: -rippleWidth / 2,
-            bottom: -rippleHeight / 2,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-interface PProps {
-  particleNum: number;
-  left: number;
-  bottom: number;
-  noteSize: number;
-  big: boolean;
-  chain: number;
-  particleAssets: RefObject<string[]>;
-  blur: boolean;
-}
-function Particle(props: PProps) {
-  const ref = useRef<HTMLImageElement>(null!);
-  const refBig = useRef<HTMLImageElement | null>(null);
-  const animateDone = useRef<boolean>(false);
-  const bigAnimateDone = useRef<boolean>(false);
-  const { noteSize, particleNum } = props;
-  const maxSize = noteSize * 2;
-  const bigSize = noteSize * 3.5;
-  useEffect(() => {
-    if (!animateDone.current) {
-      const angle = Math.random() * 360;
-      const angleVel = Math.random() * 120 - 60;
-      ref.current.animate(
-        [
-          { transform: `scale(0.3) rotate(${angle}deg)`, opacity: 0 },
-          {
-            transform: `scale(0.8) rotate(${angle + angleVel * 0.8}deg)`,
-            opacity: 0.8,
-            offset: 0.8,
-          },
-          { transform: `scale(1) rotate(${angle + angleVel}deg)`, opacity: 0 },
-        ],
-        { duration: 500, fill: "forwards", easing: "ease-out" }
-      );
-      animateDone.current = true;
-    }
-    if (props.big && refBig.current && !bigAnimateDone.current) {
-      const angleBig = Math.random() * 360;
-      const angleVel = Math.random() * 120 - 60;
-      refBig.current?.animate(
-        [
-          { transform: `scale(0.3) rotate(${angleBig}deg)`, opacity: 0 },
-          {
-            transform: `scale(0.8) rotate(${angleBig + angleVel * 0.8}deg)`,
-            opacity: 0.6,
-            offset: 0.8,
-          },
-          {
-            transform: `scale(1) rotate(${angleBig + angleVel}deg)`,
-            opacity: 0,
-          },
-        ],
-        { duration: 500, fill: "forwards", easing: "ease-out" }
-      );
-      bigAnimateDone.current = true;
-    }
-  }, [props.big]);
-
-  return (
-    <div
-      className={clsx(
-        "absolute z-fw-particle dark:opacity-70 opacity-90",
-        props.blur && "blur-2xs"
-      )}
-      style={{
-        width: 1,
-        height: 1,
-        left: props.left,
-        bottom: props.bottom,
-      }}
-    >
-      <img
-        decoding="async"
-        src={props.particleAssets.current[particleNum]}
-        ref={ref}
-        className="absolute opacity-0"
-        style={{
-          left: -maxSize / 2,
-          bottom: -maxSize / 2,
-          width: maxSize,
-          minWidth: maxSize, // なぜかこれがないとwidthが0になってしまう...
-          height: maxSize,
-          minHeight: maxSize,
-        }}
-      />
-      {props.big && (
-        <img
-          decoding="async"
-          src={props.particleAssets.current[particleNum - 2]}
-          ref={refBig}
-          className="absolute opacity-0"
-          style={{
-            left: -bigSize / 2,
-            bottom: -bigSize / 2,
-            width: bigSize,
-            minWidth: bigSize,
-            height: bigSize,
-            minHeight: bigSize,
-          }}
-        />
       )}
     </div>
   );

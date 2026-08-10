@@ -737,7 +737,7 @@ function InputSig(props: PropsS) {
 export function BeatSlime(props: { size: 4 | 8 | 16 }) {
   return (
     <img
-      src={process.env.ASSET_PREFIX + "/assets/slime2.svg"}
+      src={process.env.ASSET_PREFIX + "/assets/slime-2-closed.svg"}
       className="inline-block"
       style={{
         width:

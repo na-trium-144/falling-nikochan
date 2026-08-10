@@ -1,3 +1,17 @@
+## ver. 17.0 - 2026/08/11
+
+* uMin/uMaxの範囲外の音符を隠す [#1285](https://github.com/na-trium-144/falling-nikochan/pull/1285)
+* データベースの保存形式をmsgpackに変更 [#1285](https://github.com/na-trium-144/falling-nikochan/pull/1285)
+* slime周りのリファクタ & 新画像 & 新アニメーション [#1207](https://github.com/na-trium-144/falling-nikochan/pull/1207)
+    * リザルト表示時にRhythmicalSlimeがぴょんぴょんするアニメーション
+    * slimeのidをランダムstateからuseIdに置き換え
+    * 通常のloop版slimeのアニメーショントリガーをbegin:0sではなくuseEffectで行う
+    * RhythmicalSlimeのジャンプトリガーの実装をImperativeHandleで作り直す
+    * slimeの画像を作り直した
+* playのripple,particle, editのtrailをcanvasに移植 [#1228](https://github.com/na-trium-144/falling-nikochan/pull/1228)
+    * particleはver9.3以前のものを再現
+    * editの音符をplayと統一(ver14以降の音符画像)
+
 ## ver. 16.30 - 2026/07/27 [#1280](https://github.com/na-trium-144/falling-nikochan/pull/1280)
 
 * ogのbriefパラメータを更新、v=16.29以前のurlはurlを設定し直し再リダイレクト

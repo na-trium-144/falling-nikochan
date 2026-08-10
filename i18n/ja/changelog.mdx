@@ -6,6 +6,17 @@ import { TranslateIcon, SunIcon, HelpIcon } from "@/common/mdxIcons.js";
 import { XLogo } from "@/common/x.js";
 import { Hidden } from "@/common/mdxHiddenPart.js";
 
+## ver. 17.0 - 2026/08/11
+
+- 譜面速度がマイナスのとき、音符の出現位置設定で「上から」降るよう設定しているにも関わらず下に行って戻ってくる動きをする場合があるのを修正しました。
+  - ver.16以前からサーバーに保存されている譜面については今までどおりの仕様で表示します。これ以降に上書き保存したもののみ新しい仕様になります。
+- スライムの画像を差し替えました (<img src={process.env.ASSET_PREFIX + "/assets/slime-closed.svg"} className="inline-block w-6 "/> → <img src={process.env.ASSET_PREFIX + "/assets/slime-2-closed.svg"} className="inline-block w-6 "/>)
+- リザルト表示時に右下のスライムがぴょんぴょんするアニメーションを追加
+- 譜面編集の音符の表示をプレイ時と統一しました (ver.14以降の音符画像)
+- プレイ時の音符エフェクトの表示をver.9.3以前のような表示に戻しました
+
+<Hidden>
+
 ## ver. 16.30 - 2026/07/27
 
 - 譜面をURLで共有した際のプレビュー画像にレベル表示を追加しました
@@ -23,8 +34,6 @@ import { Hidden } from "@/common/mdxHiddenPart.js";
 
 - トップページに検索ボックスを追加しました
 - 検索ボックスに譜面IDを入れた場合、検索結果を待たずにその譜面の情報を表示するようにしました
-
-<Hidden>
 
 ## ver. 16.17 - 2026/06/13
 
@@ -371,7 +380,7 @@ import { Hidden } from "@/common/mdxHiddenPart.js";
   />
   に加えて
   <img
-    src={process.env.ASSET_PREFIX + "/assets/slime2.svg"}
+    src={process.env.ASSET_PREFIX + "/assets/slime-closed.svg"}
     className="inline-block w-6 "
   />
   の画像を追加し、アニメーションするようにした

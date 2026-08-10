@@ -26,14 +26,17 @@ import {
   SpeedChangeSeqDoc,
 } from "./seq.js";
 import { SignatureBarSchema } from "./signature.js";
+import { Chart17Doc, LevelPlay17Doc } from "./legacy/chart17.js";
 
 export type Schema = OpenAPIV3_1.SchemaObject;
 export type Reference = OpenAPIV3_1.ReferenceObject;
 
 export const docSchemas = async () => ({
+  Chart17: await Chart17Doc(),
   Chart15: await Chart15Doc(),
   LevelMeta15: await LevelMeta15Doc(),
   LevelFreeze15: await LevelFreeze15Doc(),
+  LevelPlay17: await LevelPlay17Doc(),
   LevelPlay15: await LevelPlay15Doc(),
   ChartBrief: (await resolver(ChartBriefSchema()).toOpenAPISchema()).schema,
   EmptyObj: (await resolver(EmptyObj()).toOpenAPISchema()).schema,

@@ -9,9 +9,9 @@ import {
   rateLimit,
   convertToLatest,
   validateChartWithoutConvert,
-  Chart14Edit,
   Chart15,
   docRefs,
+  Chart17,
 } from "@falling-nikochan/chart";
 import { Db } from "mongodb";
 import {
@@ -148,8 +148,8 @@ const chartFileApp = async (config: {
       describeRoute({
         description:
           "Get a raw chart file in MessagePack format. Requires a password (either p/ph query or Authorization header). " +
-          "The chart data format can be either Chart4, Chart5, Chart6, Chart7, Chart8Edit, Chart9Edit, Chart11Edit, Chart13Edit or Chart14Edit, " +
-          `while this documentation only describes Chart15 format. ` +
+          "The chart data format can be either Chart4, Chart5, Chart6, Chart7, Chart8Edit, Chart9Edit, Chart11Edit, Chart13Edit, Chart14Edit, Chart15 or Chart17, " +
+          `while this documentation only describes the latest format. ` +
           `The chart editor can import chart data from the API.`,
         parameters: [passwdHeaderDoc, ifNoneMatchHeaderDoc, ifMatchHeaderDoc],
         responses: {
@@ -157,7 +157,7 @@ const chartFileApp = async (config: {
             description: "Successful response",
             content: {
               "application/vnd.msgpack": {
-                schema: docRefs("Chart15"),
+                schema: docRefs("Chart17"),
               },
             },
             headers: {
@@ -322,7 +322,7 @@ const chartFileApp = async (config: {
       describeRoute({
         description:
           "Update a chart file with new data in MessagePack format. " +
-          `The chart data format must be the latest format (Chart15) or one version earlier (Chart14Edit). ` +
+          `The chart data format must be the latest format (Chart17) or one version earlier (Chart15). ` +
           `The chart data may be compressed using ${supportedEncodings.join(", ")} (in that case Content-Encoding header must be set.) ` +
           "The previous password is required (either p/ph query or Authorization header). If the posted chart data has a different password, it will be used next time.",
         requestBody: {
@@ -330,7 +330,9 @@ const chartFileApp = async (config: {
           required: true,
           content: {
             "application/vnd.msgpack": {
-              schema: docRefs("Chart15"),
+              schema: {
+                anyOf: [docRefs("Chart17"), docRefs("Chart15")],
+              },
             },
           },
         },
@@ -456,21 +458,19 @@ const chartFileApp = async (config: {
 
         const chartBuf = await c.req.arrayBuffer();
 
-        let newChart: Chart14Edit | Chart15;
+        let newChart: Chart15 | Chart17;
         try {
-          newChart = msgpack.decode(chartBuf) as Chart14Edit | Chart15;
+          newChart = msgpack.decode(chartBuf) as Chart15 | Chart17;
           if (newChart.ver < currentChartVer - 1) {
             // 過去2バージョンまでサポート
             return c.json({ message: "oldChartVersion" }, 409);
           }
-          newChart = validateChartWithoutConvert(newChart) as
-            | Chart14Edit
-            | Chart15;
+          newChart = validateChartWithoutConvert(newChart) as Chart15 | Chart17;
         } catch (e) {
           throw new HTTPException(415, { message: "invalidChart", cause: e });
         }
 
-        if (numEvents(newChart as Chart14Edit | Chart15) > chartMaxEvent) {
+        if (numEvents(newChart) > chartMaxEvent) {
           throw new HTTPException(413, {
             message: "tooManyEvent",
             // message: `Chart too large (number of events is ${numEvents(
@@ -497,20 +497,12 @@ const chartFileApp = async (config: {
         for (let i = 0; i < prevHashes.length; i++) {
           savedHashesMap[prevHashes[i].hash] = entry.levelBrief[i].hash;
         }
-        const newHashes: LevelHash[] =
-          newChart.ver === 14
-            ? await Promise.all(
-                newChart.levelsMin.map(async (level, i) => ({
-                  unlisted: level.unlisted,
-                  hash: await hashLevel(newChart.levelsFreeze[i]),
-                }))
-              )
-            : await Promise.all(
-                newChart.levelsMeta.map(async (min, i) => ({
-                  unlisted: min.unlisted,
-                  hash: await hashLevel(newChart.levelsFreeze[i]),
-                }))
-              );
+        const newHashes: LevelHash[] = await Promise.all(
+          newChart.levelsMeta.map(async (min, i) => ({
+            unlisted: min.unlisted,
+            hash: await hashLevel(newChart.levelsFreeze[i]),
+          }))
+        );
         const prevHashesFiltered = prevHashes.filter((l) => !l.unlisted);
         const newHashesFiltered = newHashes.filter((l) => !l.unlisted);
         let updatedAt = entry.updatedAt;

@@ -29,6 +29,7 @@ import {
   ChartSeqData,
   Level15Play,
   RecordGetSummarySchema,
+  LevelPlay,
 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
@@ -131,13 +132,15 @@ export function InitPlay({ locale }: { locale: string }) {
           markAsExpected(e);
         })
         .arrayBuffer((buf) => {
-          currentChartVer satisfies 16; // update the code below when chart version is bumped
-          const playFile = msgpack.decode(buf) as Level6Play | Level15Play;
+          const playFile = msgpack.decode(buf) as
+            | Level6Play
+            | Level15Play
+            | LevelPlay;
           console.log("playFile.ver", playFile.ver);
           if (
             playFile.ver === 6 ||
             playFile.ver === 15 ||
-            playFile.ver === 16
+            playFile.ver === currentChartVer
           ) {
             addRecent("play", session.cid ?? "");
             updatePlayCountForReview();
@@ -1278,6 +1281,7 @@ function Play(props: Props) {
             playing={chartPlaying}
             bpmChanges={chartSeq?.bpmChanges}
             playbackRate={playbackRate}
+            startsJumping={showResult && !showReady ? exitable : null}
           />
         )}
         <BPMSign

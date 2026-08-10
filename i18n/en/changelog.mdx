@@ -4,6 +4,17 @@ import { TranslateIcon, SunIcon, HelpIcon } from "@/common/mdxIcons.js";
 import { XLogo } from "@/common/x.js";
 import { Hidden } from "@/common/mdxHiddenPart.js";
 
+## ver. 17.0 - 08/11/2026
+
+- Fixed an issue where, when the chart speed was set to a negative value, notes configured to fall "from top" would sometimes move downwards before returning to the top.
+  - Charts saved to the server prior to ver. 16 will continue to display using the previous behavior; the new behavior applies only to charts overwritten and saved from this version onwards.
+- Replaced the slime image. (<img src={process.env.ASSET_PREFIX + "/assets/slime-closed.svg"} className="inline-block w-6 "/> → <img src={process.env.ASSET_PREFIX + "/assets/slime-2-closed.svg"} className="inline-block w-6 "/>)
+- Added an animation where the slime in the bottom-right corner hops around when the results screen is displayed.
+- Standardized the appearance of notes in the chart editor to match gameplay (using the note images introduced in ver. 14).
+- Reverted the note effects in gameplay to the style used in ver. 9.3 and earlier.
+
+<Hidden>
+
 ## ver. 16.30 - 07/27/2026
 
 - Added a display of the levels to the preview image when sharing charts with URL.
@@ -21,8 +32,6 @@ import { Hidden } from "@/common/mdxHiddenPart.js";
 
 - Added a search box to the top page.
 - When a chart ID is entered in the search box, the information for that chart will be displayed without waiting for search results.
-
-<Hidden>
 
 ## ver. 16.17 - 06/13/2026
 
@@ -275,7 +284,7 @@ import { Hidden } from "@/common/mdxHiddenPart.js";
   - The smaller the frame rate, the lighter the operation becomes.
   - On devices where the screen frame rate exceeds 60fps, it is set to a value below 60fps by default.
     - If you have a high-performance environment such as a PC, you can manually change it to a higher value.
-  
+
 ## ver. 10.5 - 04/02/2025
 
 - The UI has been changed for vertical displays such as smartphones.
@@ -285,7 +294,7 @@ import { Hidden } from "@/common/mdxHiddenPart.js";
 
 - Falling Nikochan can now be installed as a PWA app.
   - On Android, you can install it by tapping the "Add to Home Screen" button displayed on the Falling Nikochan top page
-  (or the [What is Falling Nikochan?](/main/about/1) overview page).
+    (or the [What is Falling Nikochan?](/main/about/1) overview page).
   - On iOS, you can install it by selecting "Add to Home Screen" from the share button in Safari.
   - When launched as an app from the home screen, the browser toolbar will be hidden, allowing you to play comfortably in full screen.
   - (Also, when launched as an app, the entire app is downloaded before launching, so the page loads faster in slow internet environments.)
@@ -295,7 +304,7 @@ import { Hidden } from "@/common/mdxHiddenPart.js";
   - You can choose on/off in the options screen before playing.
   - On Windows, Linux, MacOS (except Safari) and Android, the judgement timing is automatically adjusted by the delay in audio output.
   - On MacOS (Safari) and iOS, the audio output delay cannot be detected, so you may need to manually adjust the judgment offset.
-  Therefore, the tap sound is off by default.
+    Therefore, the tap sound is off by default.
 - You can now adjust the YouTube playback volume and tap sound volume during play.
 - Added a stop button at the top of the screen during play.
 
@@ -357,7 +366,7 @@ import { Hidden } from "@/common/mdxHiddenPart.js";
 
 ## ver. 7.15 - 02/21/2025
 
-- Added an image of <img src={process.env.ASSET_PREFIX + "/assets/slime2.svg"} className="inline-block w-6 " /> in addition to <img src={process.env.ASSET_PREFIX + "/assets/slime.svg"} className="inline-block w-6 " /> , and made it animate.
+- Added an image of <img src={process.env.ASSET_PREFIX + "/assets/slime-closed.svg"} className="inline-block w-6 " /> in addition to <img src={process.env.ASSET_PREFIX + "/assets/slime.svg"} className="inline-block w-6 " /> , and made it animate.
 
 ## ver. 7.11 - 02/14/2025
 

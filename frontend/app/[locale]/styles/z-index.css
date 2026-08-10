@@ -109,11 +109,8 @@
 @utility z-fw-canvas-tail {
   z-index: -7;
 }
-@utility z-fw-particle {
+@utility z-fw-canvas-effects {
   z-index: -10;
-}
-@utility z-fw-ripple {
-  z-index: -20;
 }
 /*cloudもisolateではある*/
 @utility z-disp-chain-big {
@@ -145,12 +142,6 @@
   z-index: 1;
 }
 /* これはFallingWindowの中にあるので、FallingWindowにzを設定すればローカルになる */
-@utility z-edit-trace {
-  z-index: -60;
-}
-@utility z-edit-trace-current {
-  z-index: -59;
-}
 @utility z-edit-target-line {
   z-index: -50;
 }

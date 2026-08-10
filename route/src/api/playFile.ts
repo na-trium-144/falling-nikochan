@@ -16,6 +16,8 @@ import {
   convertToPlay15,
   Level15Play,
   docRefs,
+  Level17Play,
+  convertToPlay17,
 } from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
@@ -36,15 +38,15 @@ const playFileApp = new Hono<{
   describeRoute({
     description:
       "Gets level data in MessagePack format, which is only used for playing the chart, not for editing. " +
-      "Note that the level data is either in Level6Play or Level15Play format, " +
-      `while this documentation only describes Level15Play format. `,
+      "Note that the level data is either in Level6Play, Level15Play or Level17Play format, " +
+      `while this documentation only describes Level15Play and later. `,
     parameters: [ifNoneMatchHeaderDoc, ifMatchHeaderDoc],
     responses: {
       200: {
         description: "chart file in MessagePack format.",
         content: {
           "application/vnd.msgpack": {
-            schema: docRefs("LevelPlay15"),
+            schema: { anyOf: [docRefs("LevelPlay17"), docRefs("LevelPlay15")] },
           },
         },
         headers: {
@@ -109,7 +111,7 @@ const playFileApp = new Hono<{
       c.req.header("X-If-Match") ?? c.req.header("If-Match")
     );
 
-    let level: Level6Play | Level15Play;
+    let level: Level6Play | Level15Play | Level17Play;
     switch (chart.ver) {
       case 4:
       case 5:
@@ -156,6 +158,12 @@ const playFileApp = new Hono<{
           throw new HTTPException(404, { message: "levelNotFound" });
         }
         level = convertToPlay15(chart, lvIndex);
+        break;
+      case 17:
+        if (!chart.levelsMeta.at(lvIndex) || !chart.levelsFreeze.at(lvIndex)) {
+          throw new HTTPException(404, { message: "levelNotFound" });
+        }
+        level = convertToPlay17(chart, lvIndex);
         break;
       default:
         chart satisfies never;
