@@ -22,7 +22,7 @@ import {
   convertToLatest,
   updateBpmTimeSec,
   updateBarNum,
-  ChartSchema15,
+  ChartSchema,
 } from "@falling-nikochan/chart";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as msgpack from "@msgpack/msgpack";
@@ -75,7 +75,7 @@ const EditSessionSchema = () =>
       ph: v.nullable(v.string()),
       pbypass: v.nullable(v.string()),
     }),
-    chart: ChartSchema15(),
+    chart: ChartSchema(),
     convertedFrom: v.number(),
     currentLevelIndex: v.optional(v.number()),
     hasChange: v.boolean(),

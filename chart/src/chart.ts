@@ -48,7 +48,6 @@ import {
   Chart14Min,
   ChartEditSchema14,
   ChartMinSchema14,
-  ChartUntil14,
   convertTo14Min,
   convertToMin14,
 } from "./legacy/chart14.js";
@@ -72,16 +71,21 @@ import {
   Chart15,
   ChartSchema15,
   ChartUntil15,
-  ChartUntil15Min,
-  convertTo15,
-  convertToPlay15,
   Level15Freeze,
   Level15Meta,
-  Level15Play,
 } from "./legacy/chart15.js";
 import { docRefs, Reference, Schema } from "./docSchema.js";
 import { maxLv, minLv } from "./apiConfig.js";
-import { Chart17, ChartSchema17, ChartUntil17, ChartUntil17Min, convertTo17, convertToPlay17, Level17Play, LevelPlaySchema17 } from "./legacy/chart17.js";
+import {
+  Chart17,
+  ChartSchema17,
+  ChartUntil17,
+  ChartUntil17Min,
+  convertTo17,
+  convertToPlay17,
+  Level17Play,
+  LevelPlaySchema17,
+} from "./legacy/chart17.js";
 
 export const YoutubeIdSchema = () =>
   v.pipe(
@@ -188,6 +192,7 @@ export const currentChartVer = 17;
 // ローカルファイル読み込みの場合、14以前のyml,mpkファイルはチェックされるが、15以降のluaファイルのバージョンはチェックしていない。
 export const lastIncompatibleVer = 16;
 export type ChartEdit = Chart17;
+export const ChartSchema = ChartSchema17;
 export type LevelPlay = Level17Play;
 export const LevelPlaySchema = LevelPlaySchema17;
 export type LevelMin = Level15Meta;
@@ -196,8 +201,7 @@ export const convertToMin = convertToMin14;
 export const convertToPlay = convertToPlay17;
 
 export async function convertToLatest(chart: ChartUntil17): Promise<ChartEdit> {
-  if (chart.ver !== 17)
-    chart = await convertTo17(chart as ChartUntil15);
+  if (chart.ver !== 17) chart = await convertTo17(chart as ChartUntil15);
   return chart;
 }
 /*
@@ -211,16 +215,16 @@ export async function validateChart(chart: ChartUntil17): Promise<ChartEdit> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   chart = await convertToLatest(chart);
   chart satisfies Chart17;
-  chart = v.parse(ChartSchema17(), chart);
+  chart = v.parse(ChartSchema(), chart);
   return { ...chart, ver: currentChartVer };
 }
 export function validateChartWithoutConvert(chart: ChartUntil17): ChartUntil17 {
   chart = JSON.parse(JSON.stringify(chart));
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   switch (chart.ver) {
-  case 17:
-    chart satisfies Chart17;
-      return v.parse(ChartSchema17(), chart);
+    case 17:
+      chart satisfies Chart17;
+      return v.parse(ChartSchema(), chart);
     case 16:
     case 15:
       chart satisfies Chart15;
@@ -241,9 +245,9 @@ export async function validateChartMin(
   chart = JSON.parse(JSON.stringify(chart));
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart.ver >= 15) {
-    if(chart.ver !== 17) chart = await convertTo17(chart as ChartUntil15);
+    if (chart.ver !== 17) chart = await convertTo17(chart as ChartUntil15);
     chart satisfies Chart17;
-    chart = v.parse(ChartSchema17(), chart);
+    chart = v.parse(ChartSchema(), chart);
     return { ...chart, ver: currentChartVer };
   } else {
     if (chart.ver !== 14)

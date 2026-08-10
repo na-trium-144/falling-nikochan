@@ -1,8 +1,7 @@
 import { test, describe } from "node:test";
 import { expect } from "chai";
 import {
-  ChartSchema15,
-  ChartSchema17,
+  ChartSchema,
   chartToLuaTableCode,
   currentChartVer,
   findLuaLevelCode,
@@ -34,7 +33,7 @@ describe("luaTable", () => {
     const result = await lua.doString(code);
     console.log(result);
     currentChartVer satisfies 17;
-    v.parse(ChartSchema17(), { ...result, lua: dummyChartData.lua });
+    v.parse(ChartSchema(), { ...result, lua: dummyChartData.lua });
   });
   test("should restore original lua code with findLuaLevelCode()", () => {
     const code = chartToLuaTableCode(dummyChartData, fnCommandsVer);

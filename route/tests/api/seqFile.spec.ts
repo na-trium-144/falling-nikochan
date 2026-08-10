@@ -1,7 +1,11 @@
 import { test, describe } from "node:test";
 import { expect } from "chai";
 import { app, dummyLevel15, dummyLevel17, dummyLevel6, initDb } from "./init";
-import { ChartSeqData, currentChartVer, loadChart } from "@falling-nikochan/chart";
+import {
+  ChartSeqData,
+  currentChartVer,
+  loadChart,
+} from "@falling-nikochan/chart";
 import msgpack from "@msgpack/msgpack";
 import {
   calcETag,
