@@ -184,6 +184,8 @@ export function emptyBrief(): ChartBrief {
   };
 }
 export const currentChartVer = 17;
+// これ以前の譜面データがサーバーにアップロードされている場合に警告を出す。
+// ローカルファイル読み込みの場合、14以前のyml,mpkファイルはチェックされるが、15以降のluaファイルのバージョンはチェックしていない。
 export const lastIncompatibleVer = 16;
 export type ChartEdit = Chart17;
 export type LevelPlay = Level17Play;
