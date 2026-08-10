@@ -81,7 +81,7 @@ import {
 } from "./legacy/chart15.js";
 import { docRefs, Reference, Schema } from "./docSchema.js";
 import { maxLv, minLv } from "./apiConfig.js";
-import { Chart17, ChartSchema17, ChartUntil17, ChartUntil17Min, convertTo17, Level17Play } from "./legacy/chart17.js";
+import { Chart17, ChartSchema17, ChartUntil17, ChartUntil17Min, convertTo17, convertToPlay17, Level17Play, LevelPlaySchema17 } from "./legacy/chart17.js";
 
 export const YoutubeIdSchema = () =>
   v.pipe(
@@ -189,10 +189,11 @@ export const currentChartVer = 17;
 export const lastIncompatibleVer = 16;
 export type ChartEdit = Chart17;
 export type LevelPlay = Level17Play;
+export const LevelPlaySchema = LevelPlaySchema17;
 export type LevelMin = Level15Meta;
 export type LevelFreeze = Level15Freeze;
 export const convertToMin = convertToMin14;
-export const convertToPlay = convertToPlay15;
+export const convertToPlay = convertToPlay17;
 
 export async function convertToLatest(chart: ChartUntil17): Promise<ChartEdit> {
   if (chart.ver !== 17)
