@@ -1,6 +1,6 @@
 import { test, describe } from "node:test";
 import { expect } from "chai";
-import { app, dummyLevel15, dummyLevel6, initDb } from "./init";
+import { app, dummyLevel15, dummyLevel17, dummyLevel6, initDb } from "./init";
 import { ChartSeqData, loadChart } from "@falling-nikochan/chart";
 import msgpack from "@msgpack/msgpack";
 import {
@@ -15,7 +15,7 @@ describe("GET /api/seqFile/:cid/:lvIndex", () => {
     const res = await app.request("/api/seqFile/100000/0");
     expect(res.status).to.equal(200);
     const seqData = msgpack.decode(await res.arrayBuffer()) as ChartSeqData;
-    expect(seqData.notes).to.deep.equal(loadChart(dummyLevel15()).notes);
+    expect(seqData.notes).to.deep.equal(loadChart(dummyLevel17()).notes);
   });
   test("should return ETag calculated by calcETag()", async () => {
     await initDb();
@@ -63,30 +63,39 @@ describe("GET /api/seqFile/:cid/:lvIndex", () => {
     expect(res.status).to.equal(412);
     expect(await res.json()).to.deep.equal({ message: "etagMismatch" });
   });
-  test("should return ChartSeqData without upgrading to latest ChartPlay if chart version is 6", async () => {
-    await initDb();
-    const res = await app.request("/api/seqFile/100006/0");
-    expect(res.status).to.equal(200);
-    const seqData = msgpack.decode(await res.arrayBuffer()) as ChartSeqData;
-    expect(seqData.notes).to.deep.equal(loadChart(dummyLevel6()).notes);
-    expect(seqData.notes).to.not.deep.equal(loadChart(dummyLevel15()).notes);
-  });
-  test("should return ChartSeqData without upgrading to latest ChartPlay if chart version is 5", async () => {
-    await initDb();
-    const res = await app.request("/api/seqFile/100005/0");
-    expect(res.status).to.equal(200);
-    const seqData = msgpack.decode(await res.arrayBuffer()) as ChartSeqData;
-    expect(seqData.notes).to.deep.equal(loadChart(dummyLevel6()).notes);
-    expect(seqData.notes).to.not.deep.equal(loadChart(dummyLevel15()).notes);
-  });
-  test("should return ChartSeqData without upgrading to latest ChartPlay if chart version is 4", async () => {
-    await initDb();
-    const res = await app.request("/api/seqFile/100004/0");
-    expect(res.status).to.equal(200);
-    const seqData = msgpack.decode(await res.arrayBuffer()) as ChartSeqData;
-    expect(seqData.notes).to.deep.equal(loadChart(dummyLevel6()).notes);
-    expect(seqData.notes).to.not.deep.equal(loadChart(dummyLevel15()).notes);
-  });
+  for (const ver of [16, 15, 14, 13, 12, 11, 10, 9, 8, 7]) {
+    test(
+      "should return ChartSeqData without upgrading to latest ChartPlay if chart version is " +
+        ver,
+      async () => {
+        await initDb();
+        const res = await app.request(`/api/seqFile/${100000 + ver}/0`);
+        expect(res.status).to.equal(200);
+        const seqData = msgpack.decode(await res.arrayBuffer()) as ChartSeqData;
+        expect(seqData.notes).to.deep.equal(loadChart(dummyLevel15()).notes);
+        expect(seqData.notes).to.not.deep.equal(
+          loadChart(dummyLevel17()).notes
+        );
+        expect(seqData.notes).to.not.deep.equal(loadChart(dummyLevel6()).notes);
+      }
+    );
+  }
+  for (const ver of [6, 5, 4]) {
+    test(
+      "should return ChartSeqData without upgrading to latest ChartPlay if chart version is " +
+        ver,
+      async () => {
+        await initDb();
+        const res = await app.request(`/api/seqFile/${100000 + ver}/0`);
+        expect(res.status).to.equal(200);
+        const seqData = msgpack.decode(await res.arrayBuffer()) as ChartSeqData;
+        expect(seqData.notes).to.deep.equal(loadChart(dummyLevel6()).notes);
+        expect(seqData.notes).to.not.deep.equal(
+          loadChart(dummyLevel15()).notes
+        );
+      }
+    );
+  }
   test("should return 404 for nonexistent cid", async () => {
     await initDb();
     const res = await app.request("/api/seqFile/100002/0");
