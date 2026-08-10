@@ -16,18 +16,20 @@ import { Signature } from "@falling-nikochan/chart";
 import { getSignatureState, getTimeSec } from "@falling-nikochan/chart";
 import { Step, stepAdd } from "@falling-nikochan/chart";
 import { useDisplayMode } from "@/scale.js";
-import { SlimeSVG } from "@/common/slime";
+import { SlimeAnimHandler, SlimeSVG } from "@/common/slime";
 
 interface Props {
   className?: string;
   style?: object;
   getCurrentTimeSec: () => number | undefined;
   playing: boolean;
+  startsJumping: DOMHighResTimeStamp | null;
   bpmChanges?: BPMChange[] | BPMChange1[];
   signature: Signature[] | Signature5[];
   playbackRate: number;
 }
 interface SlimeState {
+  id: string;
   // 対象の時刻の3/6ステップ前からしゃがむ
   // 対象の時刻の1/6ステップ前からジャンプしはじめ、
   // 対象の時刻の1/6ステップ後に最高点、
@@ -39,7 +41,13 @@ interface SlimeState {
   animDuration: number;
 }
 export default function RhythmicalSlime(props: Props) {
-  const { playing, getCurrentTimeSec, bpmChanges, playbackRate } = props;
+  const {
+    playing,
+    getCurrentTimeSec,
+    bpmChanges,
+    playbackRate,
+    startsJumping,
+  } = props;
   const step = useRef<Step | null>(null);
   const prevSS = useRef<SignatureState | null>(null);
   const lastPreparingSec = useRef<number | null>(null);
@@ -160,6 +168,7 @@ export default function RhythmicalSlime(props: Props) {
               newStates[i] = newStates[i].filter((s) => s.landingSec > now);
             }
             newStates[slimeIndex].push({
+              id: crypto.randomUUID(),
               preparingSec,
               jumpBeginSec,
               jumpMidSec,
@@ -213,6 +222,7 @@ export default function RhythmicalSlime(props: Props) {
           playUIScale={playUIScale}
           rem={rem}
           playbackRate={playbackRate}
+          startsJumping={startsJumping}
         />
       ))}
     </div>
@@ -227,6 +237,7 @@ interface PropsS {
   playUIScale: number;
   rem: number;
   playbackRate: number;
+  startsJumping: DOMHighResTimeStamp | null;
 }
 function Slime(props: PropsS) {
   const prevSize = useRef<4 | 8 | 16 | null>(null);
@@ -237,28 +248,48 @@ function Slime(props: PropsS) {
     size = props.size;
     prevSize.current = size;
   }
-  const [firstFrame, setFirstFrame] = useState<boolean>(true);
-  useEffect(() => {
-    requestAnimationFrame(() => setFirstFrame(false));
-  }, []);
-  const prevJumpMid = useRef<number | null>(null);
-  const [jumpingMidDate, setJumpingMidDate] =
-    useState<DOMHighResTimeStamp | null>(null);
-  const durationSec = useRef<number>(0);
-  const { getCurrentTimeSec, state, playbackRate } = props;
+  const prevStateId = useRef<string | null>(null);
+  const { getCurrentTimeSec, state, playbackRate, startsJumping } = props;
+  const randInterval = useRef(0);
+  const sRef = useRef<SlimeAnimHandler>(null);
   useEffect(() => {
     const now = getCurrentTimeSec();
     if (now === undefined || state === undefined) {
-      setJumpingMidDate(null);
-      prevJumpMid.current = null;
-    } else if (prevJumpMid.current !== state.jumpMidSec) {
-      prevJumpMid.current = state.jumpMidSec;
-      durationSec.current = state.animDuration / playbackRate;
-      setJumpingMidDate(
-        performance.now() + ((state.jumpMidSec - now) * 1000) / playbackRate
+      // sRef.current?.jumpAt(null);
+      prevStateId.current = null;
+    } else if (prevStateId.current !== state.id) {
+      prevStateId.current = state.id;
+      sRef.current?.jumpAt(
+        performance.now() + ((state.jumpMidSec - now) * 1000) / playbackRate,
+        state.animDuration / playbackRate
       );
     }
   }, [getCurrentTimeSec, state, playbackRate]);
+  useEffect(() => {
+    if (startsJumping !== null) {
+      let i: ReturnType<typeof setInterval> | null = null;
+      const t = setTimeout(() => {
+        const durationSec = Math.random() * 0.2 + 0.1;
+        randInterval.current = 0.15;
+        i = setInterval(
+          () => {
+            sRef.current?.jumpAt(
+              performance.now() + durationSec * 1000,
+              durationSec
+            );
+          },
+          (randInterval.current + durationSec) * 1000
+        );
+      }, startsJumping - performance.now());
+      return () => {
+        if (i !== null) {
+          clearInterval(i);
+        }
+        clearTimeout(t);
+      };
+    }
+  }, [startsJumping]);
+
   return (
     <span
       className="relative transition-all ease-in-out duration-150 "
@@ -274,10 +305,9 @@ function Slime(props: PropsS) {
       <SlimeSVG
         className="absolute inset-x-0 bottom-0 "
         appearingAnim
-        hidden={firstFrame || !props.exists}
-        jumpingMid={jumpingMidDate}
-        duration={durationSec.current}
+        hidden={!props.exists}
         noLoop
+        ref={sRef}
       />
     </span>
   );

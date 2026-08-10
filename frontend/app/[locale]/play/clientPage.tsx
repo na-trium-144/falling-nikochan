@@ -1278,6 +1278,7 @@ function Play(props: Props) {
             playing={chartPlaying}
             bpmChanges={chartSeq?.bpmChanges}
             playbackRate={playbackRate}
+            startsJumping={showResult && !showReady ? exitable : null}
           />
         )}
         <BPMSign
