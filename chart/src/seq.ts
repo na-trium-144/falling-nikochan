@@ -63,6 +63,18 @@ export const NoteSeqSchema = () =>
       vx: v.pipe(v.number(), v.description("1 / 4 of NoteCommand.vx")),
       vy: v.pipe(v.number(), v.description("1 / 4 of NoteCommand.vy")),
       ay: v.pipe(v.number(), v.description("always 1 / 4")),
+      uMin: v.pipe(
+        v.number(),
+        v.description(
+          "Value of parameter u in `display` when this note should disappear"
+        )
+      ),
+      uMax: v.pipe(
+        v.number(),
+        v.description(
+          "Value of parameter u in `display` when this note appears"
+        )
+      ),
       display: v.pipe(
         v.array(DisplayParamSchema()),
         v.description(
@@ -491,6 +503,8 @@ export function loadChart(
       vx,
       vy,
       ay,
+      uMin: uRangeMin,
+      uMax: uRangeMax,
     });
   }
   return {
