@@ -1,7 +1,7 @@
 import { test, describe } from "node:test";
 import { expect } from "chai";
 import { app, dummyLevel15, dummyLevel17, dummyLevel6, initDb } from "./init";
-import { ChartSeqData, loadChart } from "@falling-nikochan/chart";
+import { ChartSeqData, currentChartVer, loadChart } from "@falling-nikochan/chart";
 import msgpack from "@msgpack/msgpack";
 import {
   calcETag,
@@ -63,6 +63,10 @@ describe("GET /api/seqFile/:cid/:lvIndex", () => {
     expect(res.status).to.equal(412);
     expect(await res.json()).to.deep.equal({ message: "etagMismatch" });
   });
+  currentChartVer satisfies 17; // edit tests below when chart version is bumped
+  // for (const ver of []) {
+  //   test("should return ChartSeqData without upgrading to latest ChartPlay if chart version is " + ver, async () => {});
+  // }
   for (const ver of [16, 15, 14, 13, 12, 11, 10, 9, 8, 7]) {
     test(
       "should return ChartSeqData without upgrading to latest ChartPlay if chart version is " +
