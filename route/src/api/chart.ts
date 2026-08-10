@@ -337,7 +337,7 @@ export async function zipEntry(
     await new Response(
       new Blob([levelsEncoded])
         .stream()
-        .pipeThrough(new DecompressionStream("gzip"))
+        .pipeThrough(new CompressionStream("gzip"))
     ).arrayBuffer()
   );
   return {
