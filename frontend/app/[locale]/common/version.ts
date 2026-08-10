@@ -1,8 +1,8 @@
 import * as v from "valibot";
 
 const versionKey = "lastVisited";
-const latestChangelogMajor = 16;
-const latestChangelogMinor = 30;
+const latestChangelogMajor = 17;
+const latestChangelogMinor = 0;
 export function lastVisitedOld(): boolean {
   try {
     if (localStorage.getItem(versionKey)) {
