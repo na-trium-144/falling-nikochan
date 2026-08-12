@@ -3,7 +3,6 @@ import { cors } from "hono/cors";
 import briefApp from "./brief.js";
 import { backendOrigin, Bindings, immutable } from "../env.js";
 import chartFileApp from "./chartFile.js";
-import newChartFileApp from "./newChartFile.js";
 import playFileApp from "./playFile.js";
 import seqFileApp from "./seqFile.js";
 import seqPreviewApp from "./seqPreview.js";
@@ -103,9 +102,8 @@ const apiApp = async (config: {
       "/chartFile",
       await chartFileApp({ getConnInfo: config.getConnInfo })
     )
-    .route(
-      "/newChartFile",
-      await newChartFileApp({ getConnInfo: config.getConnInfo })
+    .all("/newChartFile", (c) =>
+      c.redirect(new URL("/api/chartFile", backendOrigin(c)), 307)
     )
     .route("/seqFile", seqFileApp)
     .route("/seqPreview", seqPreviewApp)

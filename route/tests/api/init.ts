@@ -42,6 +42,8 @@ import { createMiddleware } from "hono/factory";
 import { Db } from "mongodb";
 import { before, after } from "node:test";
 import { structuredLogger } from "@hono/structured-logger";
+import { etag } from "hono/etag";
+import { methodNotAllowed } from "hono/method-not-allowed";
 inspect.defaultOptions.depth = null;
 
 if (typeof process.env.MONGODB_URI !== "string") {
@@ -78,7 +80,18 @@ const fetchBrief = (_e: Bindings, cid: string) => getBrief(db!, cid);
 
 export { db };
 
-export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
+export const app = new Hono<{ Bindings: Bindings }>({ strict: false });
+app
+  .use(etag())
+  .use((c, next) =>
+    methodNotAllowed({
+      app,
+      onMethodNotAllowed: (c, methods) =>
+        c.json({ message: "methodNotAllowed" }, 405, {
+          Allow: methods.join(", "),
+        }),
+    })(c, next)
+  )
   .use(
     structuredLogger({
       createLogger: () => console,

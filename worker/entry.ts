@@ -458,7 +458,6 @@ async function fetchAPI(input: string | URL | Request, init?: RequestInit) {
     (res.status >= 500 || res.status === 403) &&
     process.env.BACKEND_ALT_PREFIX &&
     !inputUrl.pathname.startsWith("/api/chartFile") &&
-    !inputUrl.pathname.startsWith("/api/newChartFile") &&
     !inputUrl.pathname.startsWith("/api/hashPasswd")
   ) {
     const altReq = new Request(
@@ -497,11 +496,9 @@ app
     methodNotAllowed({
       app,
       onMethodNotAllowed: (c, methods) =>
-        c.json(
-          { message: "methodNotAllowed" },
-          405,
-          { Allow: methods.join(", ") }
-        ),
+        c.json({ message: "methodNotAllowed" }, 405, {
+          Allow: methods.join(", "),
+        }),
     })(c, next)
   )
   .use(

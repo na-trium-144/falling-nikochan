@@ -289,7 +289,7 @@ export function useChartState(props: Props) {
       };
       if (chartState.chart.cid === undefined) {
         await fetchBackend()
-          .url(`/api/newChartFile`)
+          .url(`/api/chartFile`)
           .headers(requestHeaders)
           .body(requestBody)
           .options({
@@ -321,7 +321,7 @@ export function useChartState(props: Props) {
           })
           .headers(xCredentialsHeader)
           .auth(chartAuthorization(chartState.chart.currentPasswd) ?? "")
-          .post()
+          .put()
           .unauthorized(markAsExpected)
           .notFound(markAsExpected)
           .error(409, markAsExpected)

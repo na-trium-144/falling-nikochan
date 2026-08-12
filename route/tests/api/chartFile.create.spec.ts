@@ -20,7 +20,7 @@ import {
 import * as msgpack from "@msgpack/msgpack";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
 
-describe("POST /api/newChartFile", () => {
+describe("POST /api/chartFile", () => {
   test(
     "should return 429 for too many requests",
     {
@@ -29,7 +29,7 @@ describe("POST /api/newChartFile", () => {
     },
     async () => {
       await initDb();
-      const res1 = await app.request("/api/newChartFile", {
+      const res1 = await app.request("/api/chartFile", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
         body: msgpack.encode({
@@ -39,7 +39,7 @@ describe("POST /api/newChartFile", () => {
       });
       expect(res1.status).to.equal(200);
 
-      const res2 = await app.request("/api/newChartFile", {
+      const res2 = await app.request("/api/chartFile", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
         body: msgpack.encode({
@@ -55,7 +55,7 @@ describe("POST /api/newChartFile", () => {
   test("should create chart and return cid", async () => {
     await initDb();
     const dateBefore = new Date();
-    const res = await app.request("/api/newChartFile", {
+    const res = await app.request("/api/chartFile", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
       body: msgpack.encode({
@@ -78,7 +78,7 @@ describe("POST /api/newChartFile", () => {
   });
   test("should save ip address", async () => {
     await initDb();
-    const res = await app.request("/api/newChartFile", {
+    const res = await app.request("/api/chartFile", {
       method: "POST",
       headers: {
         "Content-Type": "application/vnd.msgpack",
@@ -100,7 +100,7 @@ describe("POST /api/newChartFile", () => {
   });
   test("should return 400 is passwd is not set", async () => {
     await initDb();
-    const res = await app.request("/api/newChartFile", {
+    const res = await app.request("/api/chartFile", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
       body: msgpack.encode(dummyChart()),
@@ -111,7 +111,7 @@ describe("POST /api/newChartFile", () => {
   });
   test("should return 413 for large file", async () => {
     await initDb();
-    const res = await app.request("/api/newChartFile", {
+    const res = await app.request("/api/chartFile", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
       body: new ArrayBuffer(fileMaxSize + 1),
@@ -126,7 +126,7 @@ describe("POST /api/newChartFile", () => {
     chart.levelsFreeze[0].rest = new Array(chartMaxEvent + 1).fill(
       chart.levelsFreeze[0].rest[0]
     );
-    const res = await app.request("/api/newChartFile", {
+    const res = await app.request("/api/chartFile", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
       body: msgpack.encode(chart),
@@ -139,7 +139,7 @@ describe("POST /api/newChartFile", () => {
     currentChartVer satisfies 17; // edit this test when chart version is bumped
     test("version 14", async () => {
       await initDb();
-      const res = await app.request("/api/newChartFile", {
+      const res = await app.request("/api/chartFile", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
         body: msgpack.encode({ ...dummyChart14() }),
@@ -150,7 +150,7 @@ describe("POST /api/newChartFile", () => {
     });
     test("version 13", async () => {
       await initDb();
-      const res = await app.request("/api/newChartFile", {
+      const res = await app.request("/api/chartFile", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
         body: msgpack.encode({ ...dummyChart13() }),
@@ -161,7 +161,7 @@ describe("POST /api/newChartFile", () => {
     });
     test("version 12", async () => {
       await initDb();
-      const res = await app.request("/api/newChartFile", {
+      const res = await app.request("/api/chartFile", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
         body: msgpack.encode({ ...dummyChart12() }),
@@ -172,7 +172,7 @@ describe("POST /api/newChartFile", () => {
     });
     test("version 4", async () => {
       await initDb();
-      const res = await app.request("/api/newChartFile", {
+      const res = await app.request("/api/chartFile", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
         body: msgpack.encode({ ...dummyChart4() }),
@@ -186,7 +186,7 @@ describe("POST /api/newChartFile", () => {
     currentChartVer satisfies 17; // edit this test when chart version is bumped
     await initDb();
     const dateBefore = new Date();
-    const res = await app.request("/api/newChartFile", {
+    const res = await app.request("/api/chartFile", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
       body: msgpack.encode({
@@ -210,12 +210,21 @@ describe("POST /api/newChartFile", () => {
 
   test("should return 415 for invalid chart", async () => {
     await initDb();
-    const res = await app.request("/api/newChartFile", {
+    const res = await app.request("/api/chartFile", {
       method: "POST",
       body: "invalid",
     });
     expect(res.status).to.equal(415);
     const body = await res.json();
     expect(body.message).to.equal("invalidChart");
+  });
+
+  test("should redirect /api/newChartFile to /api/chartFile with 307", async () => {
+    await initDb();
+    const res = await app.request("/api/newChartFile", {
+      method: "POST",
+    });
+    expect(res.status).to.equal(307);
+    expect(res.headers.get("Location")).to.include("/api/chartFile");
   });
 });

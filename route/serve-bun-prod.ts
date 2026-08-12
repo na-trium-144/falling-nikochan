@@ -77,11 +77,9 @@ app
     methodNotAllowed({
       app,
       onMethodNotAllowed: (c, methods) =>
-        c.json(
-          { message: "methodNotAllowed" },
-          405,
-          { Allow: methods.join(", ") }
-        ),
+        c.json({ message: "methodNotAllowed" }, 405, {
+          Allow: methods.join(", "),
+        }),
     })(c, next)
   )
   .use(requestId())
