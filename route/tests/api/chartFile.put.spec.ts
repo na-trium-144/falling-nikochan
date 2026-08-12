@@ -452,7 +452,7 @@ describe("PUT /api/chartFile/:cid", () => {
     });
   });
 
-  test("should support legacy POST method for update via compatibility middleware", async () => {
+  test("should support legacy POST method for backward compatibility", async () => {
     await initDb();
     const res = await requestChartFile("/api/chartFile/100000", {
       method: "POST",

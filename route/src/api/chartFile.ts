@@ -317,15 +317,16 @@ const chartFileApp = async (config: {
         return c.body(null, 204);
       }
     )
-    .on(
-      ["PUT", "POST"],
+    .post("/:cid", describeRoute({ hide: true }))
+    .put(
       "/:cid",
       describeRoute({
         description:
           "Update a chart file with new data in MessagePack format. " +
           `The chart data format must be the latest format (Chart17) or one version earlier (Chart15). ` +
           `The chart data may be compressed using ${supportedEncodings.join(", ")} (in that case Content-Encoding header must be set.) ` +
-          "The previous password is required (either p/ph query or Authorization header). If the posted chart data has a different password, it will be used next time.",
+          "The previous password is required (either p/ph query or Authorization header). If the posted chart data has a different password, it will be used next time. " +
+          "POST is also allowed for backward compatibility.",
         requestBody: {
           description: "Chart data in MessagePack format.",
           required: true,
@@ -449,106 +450,106 @@ const chartFileApp = async (config: {
             },
           },
         },
-      }),
-      async (c) => {
-        const cid = c.get("cid");
-        const ip = c.get("ip");
-        const entry = c.get("entry");
-        const db = await c.get("db")();
-        const pSecretSalt = c.get("pSecretSalt");
+      })
+    )
+    .on(["PUT", "POST"], "/:cid", async (c) => {
+      const cid = c.get("cid");
+      const ip = c.get("ip");
+      const entry = c.get("entry");
+      const db = await c.get("db")();
+      const pSecretSalt = c.get("pSecretSalt");
 
-        const chartBuf = await c.req.arrayBuffer();
+      const chartBuf = await c.req.arrayBuffer();
 
-        let newChart: Chart15 | Chart17;
-        try {
-          newChart = msgpack.decode(chartBuf) as Chart15 | Chart17;
-          if (newChart.ver < currentChartVer - 1) {
-            // 過去2バージョンまでサポート
-            return c.json({ message: "oldChartVersion" }, 409);
-          }
-          newChart = validateChartWithoutConvert(newChart) as Chart15 | Chart17;
-        } catch (e) {
-          throw new HTTPException(415, { message: "invalidChart", cause: e });
+      let newChart: Chart15 | Chart17;
+      try {
+        newChart = msgpack.decode(chartBuf) as Chart15 | Chart17;
+        if (newChart.ver < currentChartVer - 1) {
+          // 過去2バージョンまでサポート
+          return c.json({ message: "oldChartVersion" }, 409);
         }
+        newChart = validateChartWithoutConvert(newChart) as Chart15 | Chart17;
+      } catch (e) {
+        throw new HTTPException(415, { message: "invalidChart", cause: e });
+      }
 
-        if (numEvents(newChart) > chartMaxEvent) {
-          throw new HTTPException(413, {
-            message: "tooManyEvent",
-            // message: `Chart too large (number of events is ${numEvents(
-            //   newChart
-            // )} / ${chartMaxEvent})`,
-          });
-        }
-
-        // update Time
-        // Convert existing chart to latest version before comparing hashes
-        // This allows preserving play records when overwriting with same content from older versions
-        const upgradedChart = await convertToLatest(c.get("chart"));
-        interface LevelHash {
-          hash: string;
-          unlisted: boolean;
-        }
-        const prevHashes: LevelHash[] = await Promise.all(
-          upgradedChart.levelsMeta.map(async (min, i) => ({
-            unlisted: min.unlisted,
-            hash: await hashLevel(upgradedChart.levelsFreeze[i]),
-          }))
-        );
-        const savedHashesMap: Record<string, string> = {};
-        for (let i = 0; i < prevHashes.length; i++) {
-          savedHashesMap[prevHashes[i].hash] = entry.levelBrief[i].hash;
-        }
-        const newHashes: LevelHash[] = await Promise.all(
-          newChart.levelsMeta.map(async (min, i) => ({
-            unlisted: min.unlisted,
-            hash: await hashLevel(newChart.levelsFreeze[i]),
-          }))
-        );
-        const prevHashesFiltered = prevHashes.filter((l) => !l.unlisted);
-        const newHashesFiltered = newHashes.filter((l) => !l.unlisted);
-        let updatedAt = entry.updatedAt;
-        // unlistedでない譜面のハッシュまたはunlistedフラグそのものが1つでも変わっている場合更新日時を更新
-        if (
-          prevHashesFiltered.length !== newHashesFiltered.length ||
-          !newHashesFiltered.every(
-            (l, i) => l.hash === prevHashesFiltered[i].hash
-          ) ||
-          (!entry.published && newChart.published)
-        ) {
-          updatedAt = new Date().getTime();
-        }
-        // 既存のハッシュに一致するものがあるならそれを再利用し、なければ新しいハッシュで保存
-        const newSaveHashes = newHashes.map(
-          (l) => savedHashesMap[l.hash] ?? l.hash
-        );
-
-        await db.collection<ChartEntryCompressed>("chart").updateOne(
-          { cid },
-          {
-            $set: await zipEntry(
-              await chartToEntry(
-                newChart,
-                cid,
-                updatedAt,
-                ip,
-                await getYTDataEntry(
-                  c.var.logger,
-                  env(c),
-                  db,
-                  newChart.ytId
-                ).catch(() => undefined),
-                pSecretSalt,
-                entry,
-                newSaveHashes
-              )
-            ),
-          }
-        );
-        const newEntry = await getChartEntryCompressed(db, cid, null);
-        return c.body(null, 204, {
-          "ETag": await calcETag(newEntry),
+      if (numEvents(newChart) > chartMaxEvent) {
+        throw new HTTPException(413, {
+          message: "tooManyEvent",
+          // message: `Chart too large (number of events is ${numEvents(
+          //   newChart
+          // )} / ${chartMaxEvent})`,
         });
       }
-    );
+
+      // update Time
+      // Convert existing chart to latest version before comparing hashes
+      // This allows preserving play records when overwriting with same content from older versions
+      const upgradedChart = await convertToLatest(c.get("chart"));
+      interface LevelHash {
+        hash: string;
+        unlisted: boolean;
+      }
+      const prevHashes: LevelHash[] = await Promise.all(
+        upgradedChart.levelsMeta.map(async (min, i) => ({
+          unlisted: min.unlisted,
+          hash: await hashLevel(upgradedChart.levelsFreeze[i]),
+        }))
+      );
+      const savedHashesMap: Record<string, string> = {};
+      for (let i = 0; i < prevHashes.length; i++) {
+        savedHashesMap[prevHashes[i].hash] = entry.levelBrief[i].hash;
+      }
+      const newHashes: LevelHash[] = await Promise.all(
+        newChart.levelsMeta.map(async (min, i) => ({
+          unlisted: min.unlisted,
+          hash: await hashLevel(newChart.levelsFreeze[i]),
+        }))
+      );
+      const prevHashesFiltered = prevHashes.filter((l) => !l.unlisted);
+      const newHashesFiltered = newHashes.filter((l) => !l.unlisted);
+      let updatedAt = entry.updatedAt;
+      // unlistedでない譜面のハッシュまたはunlistedフラグそのものが1つでも変わっている場合更新日時を更新
+      if (
+        prevHashesFiltered.length !== newHashesFiltered.length ||
+        !newHashesFiltered.every(
+          (l, i) => l.hash === prevHashesFiltered[i].hash
+        ) ||
+        (!entry.published && newChart.published)
+      ) {
+        updatedAt = new Date().getTime();
+      }
+      // 既存のハッシュに一致するものがあるならそれを再利用し、なければ新しいハッシュで保存
+      const newSaveHashes = newHashes.map(
+        (l) => savedHashesMap[l.hash] ?? l.hash
+      );
+
+      await db.collection<ChartEntryCompressed>("chart").updateOne(
+        { cid },
+        {
+          $set: await zipEntry(
+            await chartToEntry(
+              newChart,
+              cid,
+              updatedAt,
+              ip,
+              await getYTDataEntry(
+                c.var.logger,
+                env(c),
+                db,
+                newChart.ytId
+              ).catch(() => undefined),
+              pSecretSalt,
+              entry,
+              newSaveHashes
+            )
+          ),
+        }
+      );
+      const newEntry = await getChartEntryCompressed(db, cid, null);
+      return c.body(null, 204, {
+        "ETag": await calcETag(newEntry),
+      });
+    });
 
 export default chartFileApp;
