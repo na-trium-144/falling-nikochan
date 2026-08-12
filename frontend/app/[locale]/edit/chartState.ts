@@ -293,6 +293,7 @@ export function useChartState(props: Props) {
           .headers(requestHeaders)
           .body(requestBody)
           .options({
+            // no-cacheでも動作はするが、セキュリティのために保存しない
             cache: "no-store",
             credentials,
           })

@@ -245,7 +245,7 @@ async function initAssetsCache(config: {
   try {
     const remoteRes = await fetch(
       (process.env.ASSET_PREFIX || self.origin) + "/buildVer.json",
-      { cache: "no-store" }
+      { cache: "no-cache" }
     ).catch(fetchError(e));
     if (!remoteRes.ok) {
       return sendInitState("failed");
@@ -278,7 +278,7 @@ async function initAssetsCache(config: {
     const downloadTarAssets = async (): Promise<string[]> => {
       const tarRes = await fetch(
         (process.env.ASSET_PREFIX || self.origin) + "/staticFiles.tar.gz",
-        { cache: "no-store" }
+        { cache: "no-cache" }
       ).catch(fetchError(e));
       if (!tarRes.ok) {
         throw new Error(`failed to fetch staticFiles.tar.gz: ${tarRes.status}`);
@@ -310,7 +310,7 @@ async function initAssetsCache(config: {
     const downloadNextAssets = async (): Promise<string[]> => {
       const nextFilesRes = await fetch(
         (process.env.ASSET_PREFIX || self.origin) + "/nextFiles.txt",
-        { cache: "no-store" }
+        { cache: "no-cache" }
       ).catch(fetchError(e));
       if (!nextFilesRes.ok) {
         throw new Error(

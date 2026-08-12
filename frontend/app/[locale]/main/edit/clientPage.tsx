@@ -37,7 +37,7 @@ export default function EditTab({ locale }: { locale: string }) {
     await fetchBackend()
       .url(`/api/brief/${cid}`)
       .options({
-        cache: "no-store",
+        cache: "no-cache",
       })
       .get()
       .notFound(markAsExpected)
