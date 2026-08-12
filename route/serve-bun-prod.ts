@@ -28,6 +28,7 @@ import { requestId } from "hono/request-id";
 import { structuredLogger } from "@hono/structured-logger";
 import pino from "pino";
 import { etag } from "hono/etag";
+import { methodNotAllowed } from "hono/method-not-allowed";
 
 const port = 8787;
 
@@ -71,6 +72,18 @@ const fetchBrief = (_e: Bindings, cid: string) => getBrief(db!, cid);
 const app = new Hono<{ Bindings: Bindings }>({ strict: false });
 app.use(sentryMiddleware(app));
 app
+  .use(etag())
+  .use((c, next) =>
+    methodNotAllowed({
+      app,
+      onMethodNotAllowed: (c, methods) =>
+        c.json(
+          { message: "methodNotAllowed" },
+          405,
+          { Allow: methods.join(", ") }
+        ),
+    })(c, next)
+  )
   .use(requestId())
   .use(
     structuredLogger({
@@ -101,7 +114,6 @@ app
   .route("/", redirectApp({ fetchStatic }))
   .use(
     "/*",
-    etag(),
     serveStatic({
       root: "./frontend/out",
       rewriteRequestPath: (path) => {

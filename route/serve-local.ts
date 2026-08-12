@@ -22,6 +22,8 @@ import { Db, MongoClient } from "mongodb";
 import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 import { structuredLogger } from "@hono/structured-logger";
+import { etag } from "hono/etag";
+import { methodNotAllowed } from "hono/method-not-allowed";
 
 const port = 8787;
 
@@ -52,7 +54,20 @@ const fetchBrief = (_e: Bindings, cid: string) => getBrief(db!, cid);
 
 console.log(`Server is running on http://localhost:${port}`);
 
-const app = new Hono<{ Bindings: Bindings }>({ strict: false })
+const app = new Hono<{ Bindings: Bindings }>({ strict: false });
+app
+  .use(etag())
+  .use((c, next) =>
+    methodNotAllowed({
+      app,
+      onMethodNotAllowed: (c, methods) =>
+        c.json(
+          { message: "methodNotAllowed" },
+          405,
+          { Allow: methods.join(", ") }
+        ),
+    })(c, next)
+  )
   .use(
     structuredLogger({
       createLogger: () => console,

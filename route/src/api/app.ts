@@ -24,7 +24,6 @@ import oembedApp from "./oembed.js";
 import decompressMiddleware from "./decompress.js";
 import { env } from "hono/adapter";
 import { Db } from "mongodb";
-import { etag } from "hono/etag";
 import socialApp from "./social.js";
 import briefMultiApp from "./briefs.js";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
@@ -86,7 +85,6 @@ const apiApp = async (config: {
         }
       }
     })
-    .use(etag())
     .use(
       "/*",
       bodyLimit({

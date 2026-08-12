@@ -14,6 +14,8 @@ import { TarFileType, TarReader } from "@gera2ld/tarjs";
 import cfBeaconHtml from "./beacon.html?raw";
 import { getMimeType, mimes } from "hono/utils/mime";
 import { structuredLogger } from "@hono/structured-logger";
+import { etag } from "hono/etag";
+import { methodNotAllowed } from "hono/method-not-allowed";
 
 const e: Bindings = {
   MONGODB_URI: "",
@@ -488,7 +490,20 @@ async function fetchAPI(input: string | URL | Request, init?: RequestInit) {
   }
   return res;
 }
-const app = new Hono({ strict: false })
+const app = new Hono({ strict: false });
+app
+  .use(etag())
+  .use((c, next) =>
+    methodNotAllowed({
+      app,
+      onMethodNotAllowed: (c, methods) =>
+        c.json(
+          { message: "methodNotAllowed" },
+          405,
+          { Allow: methods.join(", ") }
+        ),
+    })(c, next)
+  )
   .use(
     structuredLogger({
       createLogger: () => console,

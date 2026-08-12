@@ -22,6 +22,8 @@ import { MongoClient } from "mongodb";
 import { createMiddleware } from "hono/factory";
 import { compress } from "hono/compress";
 import { structuredLogger } from "@hono/structured-logger";
+import { etag } from "hono/etag";
+import { methodNotAllowed } from "hono/method-not-allowed";
 
 const fetchStatic = (e, url) => e.ASSETS.fetch(url);
 const sentryConfig = (env) => ({
@@ -69,6 +71,18 @@ const fetchBrief = async (e, cid) => {
 const app = new Hono({ strict: false });
 app.use(Sentry.sentry(app, sentryHonoConfig));
 app
+  .use(etag())
+  .use((c, next) =>
+    methodNotAllowed({
+      app,
+      onMethodNotAllowed: (c, methods) =>
+        c.json(
+          { message: "methodNotAllowed" },
+          405,
+          { Allow: methods.join(", ") }
+        ),
+    })(c, next)
+  )
   .use(structuredLogger({ createLogger: () => console }))
   .use(async (c, next) => {
     await next();
