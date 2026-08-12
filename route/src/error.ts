@@ -126,6 +126,7 @@ export const onError =
       const messageFallbacks: Record<number, string> = {
         400: "badRequest",
         404: "notFound",
+        405: "methodNotAllowed",
         500: "unknownApiError",
       };
       message = message || messageFallbacks[status] || "";

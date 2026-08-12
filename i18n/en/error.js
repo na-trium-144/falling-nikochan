@@ -14,6 +14,7 @@ export default {
       chartIdNotFound: "The specified chart ID does not exist",
       levelNotFound: "The specified level does not exist",
       // 405
+      methodNotAllowed: "Method not allowed",
       readonlyOnDev:
         "Modification to the production database is not allowed on the development server",
       // 409
