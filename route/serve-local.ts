@@ -14,6 +14,7 @@ import {
   fetchStatic,
   cronTestApp,
   getBrief,
+  methodNotAllowed,
 } from "./src/index.js";
 import { Hono } from "hono";
 import { ImageResponse } from "@vercel/og";
@@ -23,7 +24,6 @@ import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 import { structuredLogger } from "@hono/structured-logger";
 import { etag } from "hono/etag";
-import { methodNotAllowed } from "hono/method-not-allowed";
 
 const port = 8787;
 
@@ -56,22 +56,14 @@ console.log(`Server is running on http://localhost:${port}`);
 
 const app = new Hono<{ Bindings: Bindings }>({ strict: false });
 app
-  .use(etag())
-  .use((c, next) =>
-    methodNotAllowed({
-      app,
-      onMethodNotAllowed: (c, methods) =>
-        c.json({ message: "methodNotAllowed" }, 405, {
-          Allow: methods.join(", "),
-        }),
-    })(c, next)
-  )
   .use(
     structuredLogger({
       createLogger: () => console,
       onRequest: () => undefined,
     })
   )
+  .use(etag())
+  .use(methodNotAllowed(app))
   .route("/api", await apiApp({ getConnInfo, dbMiddleware }))
   .route("/og", ogApp({ ImageResponse, fetchBrief, fetchStatic }))
   .route("/cron", cronTestApp)

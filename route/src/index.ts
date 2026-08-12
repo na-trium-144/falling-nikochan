@@ -7,6 +7,7 @@ export { default as sitemapApp } from "./sitemap.js";
 export { default as rssApp } from "./rss.js";
 export {
   languageDetector,
+  methodNotAllowed,
   fetchStatic,
   sentryBeforeSend,
   type ResponseOK,

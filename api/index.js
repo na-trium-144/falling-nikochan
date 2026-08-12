@@ -15,6 +15,7 @@ import {
   fetchStatic,
   getBrief,
   sentryBeforeSend,
+  methodNotAllowed,
 } from "@falling-nikochan/route";
 import { Hono } from "hono";
 import { ImageResponse } from "@vercel/og";
@@ -27,7 +28,6 @@ import { createMiddleware } from "hono/factory";
 import { attachDatabasePool } from "@vercel/functions";
 import { structuredLogger } from "@hono/structured-logger";
 import { etag } from "hono/etag";
-import { methodNotAllowed } from "hono/method-not-allowed";
 
 // export const config = {
 //   runtime: "nodejs",
@@ -60,18 +60,10 @@ const fetchBrief = (_e, cid) => getBrief(db, cid);
 const app = new Hono({ strict: false });
 app.use(sentryMiddleware(app));
 app
-  .use(etag())
-  .use((c, next) =>
-    methodNotAllowed({
-      app,
-      onMethodNotAllowed: (c, methods) =>
-        c.json({ message: "methodNotAllowed" }, 405, {
-          Allow: methods.join(", "),
-        }),
-    })(c, next)
-  )
   .use(structuredLogger({ createLogger: () => console }))
   .use(compress())
+  .use(etag())
+  .use(methodNotAllowed(app))
   .route("/api", await apiApp({ getConnInfo, dbMiddleware }))
   .route("/og", ogApp({ ImageResponse, fetchBrief, fetchStatic }))
   .route("/sitemap.xml", await sitemapApp({ dbMiddleware }))

@@ -14,6 +14,7 @@ import {
   getBrief,
   sentryBeforeSend,
   finalRoutePath,
+  methodNotAllowed,
 } from "./src/index.js";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
@@ -28,7 +29,6 @@ import { requestId } from "hono/request-id";
 import { structuredLogger } from "@hono/structured-logger";
 import pino from "pino";
 import { etag } from "hono/etag";
-import { methodNotAllowed } from "hono/method-not-allowed";
 
 const port = 8787;
 
@@ -72,16 +72,6 @@ const fetchBrief = (_e: Bindings, cid: string) => getBrief(db!, cid);
 const app = new Hono<{ Bindings: Bindings }>({ strict: false });
 app.use(sentryMiddleware(app));
 app
-  .use(etag())
-  .use((c, next) =>
-    methodNotAllowed({
-      app,
-      onMethodNotAllowed: (c, methods) =>
-        c.json({ message: "methodNotAllowed" }, 405, {
-          Allow: methods.join(", "),
-        }),
-    })(c, next)
-  )
   .use(requestId())
   .use(
     structuredLogger({
@@ -104,6 +94,8 @@ app
   )
   .use(logger())
   .use(compress())
+  .use(etag())
+  .use(methodNotAllowed(app))
   .route("/api", await apiApp({ getConnInfo, dbMiddleware }))
   .route("/og", ogApp({ ImageResponse, fetchBrief, fetchStatic }))
   .route("/sitemap.xml", await sitemapApp({ dbMiddleware }))
