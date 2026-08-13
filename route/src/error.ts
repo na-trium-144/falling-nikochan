@@ -9,9 +9,22 @@ import { ContentfulStatusCode } from "hono/utils/http-status";
 import type { captureException } from "@sentry/hono/node";
 import { BaseLogger } from "@hono/structured-logger";
 
-export function notFound(): never {
-  throw new HTTPException(404);
-}
+const messageFallbacks: Record<number, string> = {
+  400: "badRequest",
+  404: "notFound",
+  405: "methodNotAllowed",
+  500: "unknownApiError",
+};
+
+export const notFound =
+  (config: { fetchStatic: (e: Bindings, url: URL) => Promise<ResponseOK> }) =>
+  (c: Context) =>
+    errorResponse(c, config.fetchStatic, 404, messageFallbacks[404], {});
+
+/**
+ * await fetch(...).then(fetchError) とすることで、
+ * fetch失敗時のTypeErrorはServiceWorkerでは499,それ以外では502に変換される
+ */
 export function fetchError(e: Bindings) {
   return (err: unknown) => {
     if (e.IS_SERVICE_WORKER) {
@@ -75,13 +88,12 @@ export const onError =
     captureException: typeof captureException | null;
     setTransactionName: ((name: string) => undefined) | null;
   }) =>
-  async (err: unknown, c: Context) => {
+  async (err: unknown, c: Context): Promise<Response> => {
     const route = finalRoutePath(c);
     if (route && config.setTransactionName) {
       config.setTransactionName(`${route.method} ${route.path}`);
     }
     try {
-      const lang = c.get("language") || "en";
       let status: ContentfulStatusCode = 500;
       let message: string = "";
       let others: object = {}; // レスポンスに含まれる
@@ -123,11 +135,6 @@ export const onError =
         }
       }
 
-      const messageFallbacks: Record<number, string> = {
-        400: "badRequest",
-        404: "notFound",
-        500: "unknownApiError",
-      };
       message = message || messageFallbacks[status] || "";
 
       if (status >= 500) {
@@ -141,35 +148,13 @@ export const onError =
         });
       }
 
-      if (c.req.path.startsWith("/api") || c.req.path.startsWith("/og")) {
-        return c.json(
-          {
-            message,
-            ...others,
-          },
-          status
-        );
-      } else {
-        if (/\/errorPlaceholder/.test(c.req.path)) {
-          // エラーハンドラーがfetchに失敗して無限ループになるのを防ぐ
-          c.var.logger.warn("Fallback to plain error placeholder message.");
-          return c.text("Error PLACEHOLDER_STATUS: PLACEHOLDER_MESSAGE");
-        } else {
-          return c.body(
-            await errorResponse(
-              config.fetchStatic,
-              c.var.logger,
-              env(c),
-              backendOrigin(c),
-              lang,
-              status,
-              message
-            ),
-            status,
-            { "Content-Type": "text/html; charset=utf-8" }
-          );
-        }
-      }
+      return await errorResponse(
+        c,
+        config.fetchStatic,
+        status,
+        message,
+        others
+      );
     } catch (e) {
       c.var.logger.error(e);
       config.captureException?.(e, { extra: { err: String(err) } });
@@ -178,40 +163,65 @@ export const onError =
   };
 
 async function errorResponse(
+  c: Context<{ Bindings: Bindings; Variables: { logger: BaseLogger } }>,
   fetchStatic: (e: Bindings, url: URL) => Promise<ResponseOK>,
-  logger: BaseLogger,
-  e: Bindings,
-  origin: string,
-  lang: string,
   status: number,
-  message: string
-) {
-  const t = await getTranslations(lang, "error");
-  return await fetchStatic(e, new URL(`/${lang}/errorPlaceholder`, origin))
-    .then(
-      (res) => res.text(),
-      (e) => {
-        logger.error(e);
-        logger.warn("Fallback to plain error placeholder message.");
-        return "Error PLACEHOLDER_STATUS: PLACEHOLDER_MESSAGE";
-      }
-    )
-    .then((text) =>
-      text
-        .replaceAll("PLACEHOLDER_STATUS", String(status))
-        .replaceAll(
-          "PLACEHOLDER_MESSAGE",
-          t.has("api." + message)
-            ? t("api." + message)
-            : status === 400
-              ? t("api.badRequest")
-              : status === 404
-                ? t("api.notFound")
-                : message || t("unknownApiError")
-        )
-        .replaceAll("PLACEHOLDER_TITLE", status == 404 ? "Not Found" : "Error")
+  message: string,
+  others: object
+): Promise<Response> {
+  if (c.req.path.startsWith("/api") || c.req.path.startsWith("/og")) {
+    return c.json(
+      {
+        message,
+        ...others,
+      },
+      status as ContentfulStatusCode
     );
-  // _next/static/chunks/errorPlaceholder のほうには置き換え処理するべきものはなさそう
+  } else {
+    if (/\/errorPlaceholder/.test(c.req.path)) {
+      // エラーハンドラーがfetchに失敗して無限ループになるのを防ぐ
+      c.var.logger.warn("Fallback to plain error placeholder message.");
+      return c.text("Error PLACEHOLDER_STATUS: PLACEHOLDER_MESSAGE");
+    } else {
+      const lang = c.get("language") || "en";
+      const t = await getTranslations(lang, "error");
+      return c.body(
+        await fetchStatic(
+          env(c),
+          new URL(`/${lang}/errorPlaceholder`, backendOrigin(c))
+        )
+          .then(
+            (res) => res.text(),
+            (e) => {
+              c.var.logger.error(e);
+              c.var.logger.warn("Fallback to plain error placeholder message.");
+              return "Error PLACEHOLDER_STATUS: PLACEHOLDER_MESSAGE";
+            }
+          )
+          .then((text) =>
+            text
+              .replaceAll("PLACEHOLDER_STATUS", String(status))
+              .replaceAll(
+                "PLACEHOLDER_MESSAGE",
+                t.has("api." + message)
+                  ? t("api." + message)
+                  : status === 400
+                    ? t("api.badRequest")
+                    : status === 404
+                      ? t("api.notFound")
+                      : message || t("unknownApiError")
+              )
+              .replaceAll(
+                "PLACEHOLDER_TITLE",
+                status == 404 ? "Not Found" : "Error"
+              )
+          ),
+        status as ContentfulStatusCode,
+        { "Content-Type": "text/html; charset=utf-8" }
+      );
+      // _next/static/chunks/errorPlaceholder のほうには置き換え処理するべきものはなさそう
+    }
+  }
 }
 
 export async function errorLiteral(...message: string[]) {

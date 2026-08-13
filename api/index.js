@@ -15,6 +15,7 @@ import {
   fetchStatic,
   getBrief,
   sentryBeforeSend,
+  methodNotAllowed,
 } from "@falling-nikochan/route";
 import { Hono } from "hono";
 import { ImageResponse } from "@vercel/og";
@@ -26,6 +27,7 @@ import { MongoClient } from "mongodb";
 import { createMiddleware } from "hono/factory";
 import { attachDatabasePool } from "@vercel/functions";
 import { structuredLogger } from "@hono/structured-logger";
+import { etag } from "hono/etag";
 
 // export const config = {
 //   runtime: "nodejs",
@@ -60,6 +62,8 @@ app.use(sentryMiddleware(app));
 app
   .use(structuredLogger({ createLogger: () => console }))
   .use(compress())
+  .use(etag())
+  .use(methodNotAllowed(app))
   .route("/api", await apiApp({ getConnInfo, dbMiddleware }))
   .route("/og", ogApp({ ImageResponse, fetchBrief, fetchStatic }))
   .route("/sitemap.xml", await sitemapApp({ dbMiddleware }))
@@ -75,9 +79,10 @@ app
         void Sentry.getCurrentScope().setTransactionName(name),
     })
   )
-  .notFound(notFound);
+  .notFound(notFound({ fetchStatic }));
 
 export const GET = handle(app);
 export const POST = handle(app);
+export const PUT = handle(app);
 export const DELETE = handle(app);
 export const OPTIONS = handle(app);

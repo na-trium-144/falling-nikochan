@@ -26,7 +26,6 @@ import { adjustColor } from "./style.js";
 import * as v from "valibot";
 import { fetchError } from "../error.js";
 import { cache } from "hono/cache";
-import { etag } from "hono/etag";
 import { BaseLogger } from "@hono/structured-logger";
 
 const REDIRECT_CACHE_MAX_AGE = 86400;
@@ -66,7 +65,6 @@ const ogApp = (config: {
     strict: false,
   })
     .use("/*", cors({ origin: "*" }))
-    .use(etag())
     .use(
       "/*",
       cache({

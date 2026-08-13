@@ -8,6 +8,7 @@ import {
   redirectApp,
   ResponseOK,
   shareApp,
+  methodNotAllowed,
 } from "@falling-nikochan/route";
 import { locales } from "@falling-nikochan/i18n/staticMin.js";
 import { TarFileType, TarReader } from "@gera2ld/tarjs";
@@ -244,7 +245,7 @@ async function initAssetsCache(config: {
   try {
     const remoteRes = await fetch(
       (process.env.ASSET_PREFIX || self.origin) + "/buildVer.json",
-      { cache: "no-store" }
+      { cache: "no-cache" }
     ).catch(fetchError(e));
     if (!remoteRes.ok) {
       return sendInitState("failed");
@@ -277,7 +278,7 @@ async function initAssetsCache(config: {
     const downloadTarAssets = async (): Promise<string[]> => {
       const tarRes = await fetch(
         (process.env.ASSET_PREFIX || self.origin) + "/staticFiles.tar.gz",
-        { cache: "no-store" }
+        { cache: "no-cache" }
       ).catch(fetchError(e));
       if (!tarRes.ok) {
         throw new Error(`failed to fetch staticFiles.tar.gz: ${tarRes.status}`);
@@ -309,7 +310,7 @@ async function initAssetsCache(config: {
     const downloadNextAssets = async (): Promise<string[]> => {
       const nextFilesRes = await fetch(
         (process.env.ASSET_PREFIX || self.origin) + "/nextFiles.txt",
-        { cache: "no-store" }
+        { cache: "no-cache" }
       ).catch(fetchError(e));
       if (!nextFilesRes.ok) {
         throw new Error(
@@ -456,7 +457,6 @@ async function fetchAPI(input: string | URL | Request, init?: RequestInit) {
     (res.status >= 500 || res.status === 403) &&
     process.env.BACKEND_ALT_PREFIX &&
     !inputUrl.pathname.startsWith("/api/chartFile") &&
-    !inputUrl.pathname.startsWith("/api/newChartFile") &&
     !inputUrl.pathname.startsWith("/api/hashPasswd")
   ) {
     const altReq = new Request(
@@ -488,7 +488,8 @@ async function fetchAPI(input: string | URL | Request, init?: RequestInit) {
   }
   return res;
 }
-const app = new Hono({ strict: false })
+const app = new Hono<{ Bindings: undefined }>({ strict: false });
+app
   .use(
     structuredLogger({
       createLogger: () => console,
@@ -496,6 +497,7 @@ const app = new Hono({ strict: false })
       onResponse: () => undefined,
     })
   )
+  .use(methodNotAllowed(app))
   .use(async (c, next) => {
     await next();
     if (c.res.headers.get("Content-Type")?.includes("text/html")) {
@@ -629,7 +631,7 @@ const app = new Hono({ strict: false })
       setTransactionName: null,
     })
   )
-  .notFound(notFound);
+  .notFound(notFound({ fetchStatic: fetchStaticWithThrow }));
 
 self.addEventListener("install", () => {
   console.log("service worker install");

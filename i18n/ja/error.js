@@ -14,6 +14,7 @@ export default {
       chartIdNotFound: "指定した譜面IDのデータはありません",
       levelNotFound: "指定したレベルのデータはありません",
       // 405
+      methodNotAllowed: "許可されていないリクエストメソッドです",
       readonlyOnDev:
         "development サーバーで production データベースに変更を加えることはできません",
       // 409

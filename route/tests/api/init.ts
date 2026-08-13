@@ -42,6 +42,7 @@ import { createMiddleware } from "hono/factory";
 import { Db } from "mongodb";
 import { before, after } from "node:test";
 import { structuredLogger } from "@hono/structured-logger";
+import { etag } from "hono/etag";
 inspect.defaultOptions.depth = null;
 
 if (typeof process.env.MONGODB_URI !== "string") {
@@ -78,7 +79,8 @@ const fetchBrief = (_e: Bindings, cid: string) => getBrief(db!, cid);
 
 export { db };
 
-export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
+export const app = new Hono<{ Bindings: Bindings }>({ strict: false });
+app
   .use(
     structuredLogger({
       createLogger: () => console,
@@ -86,6 +88,7 @@ export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
       onResponse: () => undefined,
     })
   )
+  .use(etag())
   .route("/api", await apiApp({ getConnInfo: () => null, dbMiddleware }))
   .route("/share", shareApp({ fetchBrief, fetchStatic }))
   .route("/", redirectApp({ fetchStatic }))
@@ -98,7 +101,7 @@ export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
       setTransactionName: null,
     })
   )
-  .notFound(notFound);
+  .notFound(notFound({ fetchStatic }));
 
 export const dummyCid = "100000";
 export const dummyDate = new Date(2025, 0, 1);

@@ -14,6 +14,7 @@ import {
   getBrief,
   sentryBeforeSend,
   finalRoutePath,
+  methodNotAllowed,
 } from "./src/index.js";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
@@ -93,6 +94,8 @@ app
   )
   .use(logger())
   .use(compress())
+  .use(etag())
+  .use(methodNotAllowed(app))
   .route("/api", await apiApp({ getConnInfo, dbMiddleware }))
   .route("/og", ogApp({ ImageResponse, fetchBrief, fetchStatic }))
   .route("/sitemap.xml", await sitemapApp({ dbMiddleware }))
@@ -101,7 +104,6 @@ app
   .route("/", redirectApp({ fetchStatic }))
   .use(
     "/*",
-    etag(),
     serveStatic({
       root: "./frontend/out",
       rewriteRequestPath: (path) => {
@@ -128,7 +130,7 @@ app
         void Sentry.getCurrentScope().setTransactionName(name),
     })
   )
-  .notFound(notFound);
+  .notFound(notFound({ fetchStatic }));
 
 export default {
   port: port,

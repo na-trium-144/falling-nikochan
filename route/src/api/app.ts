@@ -24,7 +24,6 @@ import oembedApp from "./oembed.js";
 import decompressMiddleware from "./decompress.js";
 import { env } from "hono/adapter";
 import { Db } from "mongodb";
-import { etag } from "hono/etag";
 import socialApp from "./social.js";
 import briefMultiApp from "./briefs.js";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
@@ -86,7 +85,6 @@ const apiApp = async (config: {
         }
       }
     })
-    .use(etag())
     .use(
       "/*",
       bodyLimit({
@@ -106,8 +104,11 @@ const apiApp = async (config: {
       await chartFileApp({ getConnInfo: config.getConnInfo })
     )
     .route(
-      "/newChartFile",
+      "/chartFile",
       await newChartFileApp({ getConnInfo: config.getConnInfo })
+    )
+    .all("/newChartFile", (c) =>
+      c.redirect(new URL("/api/chartFile", backendOrigin(c)), 307)
     )
     .route("/seqFile", seqFileApp)
     .route("/seqPreview", seqPreviewApp)
