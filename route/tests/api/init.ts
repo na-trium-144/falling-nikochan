@@ -101,7 +101,7 @@ app
       setTransactionName: null,
     })
   )
-  .notFound(notFound);
+  .notFound(notFound({ fetchStatic }));
 
 export const dummyCid = "100000";
 export const dummyDate = new Date(2025, 0, 1);

@@ -130,7 +130,7 @@ app
         void Sentry.getCurrentScope().setTransactionName(name),
     })
   )
-  .notFound(notFound);
+  .notFound(notFound({ fetchStatic }));
 
 export default {
   port: port,

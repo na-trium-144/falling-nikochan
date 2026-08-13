@@ -631,7 +631,7 @@ app
       setTransactionName: null,
     })
   )
-  .notFound(notFound);
+  .notFound(notFound({ fetchStatic: fetchStaticWithThrow }));
 
 self.addEventListener("install", () => {
   console.log("service worker install");

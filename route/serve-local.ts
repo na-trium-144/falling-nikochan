@@ -94,7 +94,7 @@ app
   .onError(
     onError({ fetchStatic, captureException: null, setTransactionName: null })
   )
-  .notFound(notFound);
+  .notFound(notFound({ fetchStatic }));
 
 serve({
   fetch: app.fetch,

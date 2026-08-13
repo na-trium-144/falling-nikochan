@@ -109,7 +109,7 @@ app
         void Sentry.getCurrentScope().setTransactionName(name),
     })
   )
-  .notFound(notFound);
+  .notFound(notFound({ fetchStatic }));
 
 export default Sentry.withSentry(sentryConfig, {
   async fetch(request, env, ctx) {
