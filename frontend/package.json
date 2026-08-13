@@ -49,7 +49,7 @@
     "pretty-checkbox": "3.0.3",
     "pretty-checkbox-react": "3.2.0",
     "react": "catalog:react",
-    "react-ace": "14.0.1",
+    "react-ace": "15.0.0",
     "react-dom": "catalog:react",
     "react-range": "1.10.0",
     "react-resize-detector": "12.3.0",
