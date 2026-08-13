@@ -71,7 +71,7 @@ app
   .route("/rss.xml", await rssApp({ dbMiddleware }))
   .route("/share", shareApp({ fetchBrief, fetchStatic }))
   .route("/", redirectApp({ fetchStatic }))
-  .get(
+  .use(
     "/*",
     serveStatic({
       root: "../frontend/out",
