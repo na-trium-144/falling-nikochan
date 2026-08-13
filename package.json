@@ -43,7 +43,7 @@
   "devDependencies": {
     "@babel/core": "catalog:babel",
     "@babel/preset-env": "catalog:babel",
-    "@eslint/config-helpers": "~0.4.2",
+    "@eslint/config-helpers": "~0.7.0",
     "@eslint/eslintrc": "catalog:eslint",
     "@eslint/js": "catalog:eslint",
     "@tsconfig/node23": "^23.0.4",
