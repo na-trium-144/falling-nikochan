@@ -233,10 +233,10 @@ importers:
         version: 8.63.0(eslint@9.39.5)(typescript@5.9.3)
       webpack:
         specifier: 5.108.4
-        version: 5.108.4(webpack-cli@7.2.1)
+        version: 5.108.4(webpack-cli@7.2.2)
       webpack-cli:
-        specifier: 7.2.1
-        version: 7.2.1(js-yaml@4.3.0)(json5@2.2.3)(webpack-bundle-analyzer@4.10.1)(webpack@5.108.4)
+        specifier: 7.2.2
+        version: 7.2.2(js-yaml@4.3.0)(json5@2.2.3)(webpack-bundle-analyzer@4.10.1)(webpack@5.108.4)
       webpack-license-plugin:
         specifier: 4.5.1
         version: 4.5.1(webpack@5.108.4)
@@ -5417,8 +5417,8 @@ packages:
     engines: {node: '>= 10.13.0'}
     hasBin: true
 
-  webpack-cli@7.2.1:
-    resolution: {integrity: sha512-YwSGbcZdfz12DM8JIseVPr3oBb09IgVCVc4vY3oDvZnI/mALTGPAP1QiqOi4/bBLSJrRHaqDIXeHcNA0+G38aw==}
+  webpack-cli@7.2.2:
+    resolution: {integrity: sha512-lD0pALneslq8FfV+rwvm1BMW0AFAJrHHhNupAGN4asYjMvqrtRsenU4iKpiBo09gS4ntMxKGUxl9jhTEzVt0oA==}
     engines: {node: '>=20.9.0'}
     hasBin: true
     peerDependencies:
@@ -6654,7 +6654,7 @@ snapshots:
       '@mdx-js/mdx': 3.1.1
       source-map: 0.7.6
     optionalDependencies:
-      webpack: 5.108.4(postcss@8.5.17)(webpack-cli@7.2.1)
+      webpack: 5.108.4(postcss@8.5.17)(webpack-cli@7.2.2)
     transitivePeerDependencies:
       - supports-color
 
@@ -7241,7 +7241,7 @@ snapshots:
   '@sentry/webpack-plugin@5.3.0(webpack@5.108.4)':
     dependencies:
       '@sentry/bundler-plugin-core': 5.3.0
-      webpack: 5.108.4(postcss@8.5.17)(webpack-cli@7.2.1)
+      webpack: 5.108.4(postcss@8.5.17)(webpack-cli@7.2.2)
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -7908,7 +7908,7 @@ snapshots:
       '@babel/core': 7.29.7
       find-up: 5.0.0
     optionalDependencies:
-      webpack: 5.108.4(webpack-cli@7.2.1)
+      webpack: 5.108.4(webpack-cli@7.2.2)
 
   babel-plugin-polyfill-corejs2@0.4.17(@babel/core@7.29.7):
     dependencies:
@@ -9646,7 +9646,7 @@ snapshots:
       jest-worker: 27.5.1
       schema-utils: 4.3.3
       terser: 5.49.0
-      webpack: 5.108.4(postcss@8.5.17)(webpack-cli@7.2.1)
+      webpack: 5.108.4(postcss@8.5.17)(webpack-cli@7.2.2)
     optionalDependencies:
       postcss: 8.5.17
 
@@ -9656,7 +9656,7 @@ snapshots:
       jest-worker: 27.5.1
       schema-utils: 4.3.3
       terser: 5.49.0
-      webpack: 5.108.4(webpack-cli@7.2.1)
+      webpack: 5.108.4(webpack-cli@7.2.2)
 
   minipass@7.1.3: {}
 
@@ -10817,7 +10817,7 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  webpack-cli@7.2.1(js-yaml@4.3.0)(json5@2.2.3)(webpack-bundle-analyzer@4.10.1)(webpack@5.108.4):
+  webpack-cli@7.2.2(js-yaml@4.3.0)(json5@2.2.3)(webpack-bundle-analyzer@4.10.1)(webpack@5.108.4):
     dependencies:
       '@discoveryjs/json-ext': 1.1.0
       commander: 14.0.3
@@ -10826,7 +10826,7 @@ snapshots:
       import-local: 3.2.0
       interpret: 3.1.1
       rechoir: 0.8.0
-      webpack: 5.108.4(webpack-cli@7.2.1)
+      webpack: 5.108.4(webpack-cli@7.2.2)
       webpack-merge: 6.0.1
     optionalDependencies:
       js-yaml: 4.3.0
@@ -10839,7 +10839,7 @@ snapshots:
       lodash: 4.18.1
       needle: 3.3.1
       spdx-expression-validate: 2.0.0
-      webpack: 5.108.4(webpack-cli@7.2.1)
+      webpack: 5.108.4(webpack-cli@7.2.2)
       webpack-sources: 3.5.1
 
   webpack-merge@6.0.1:
@@ -10850,7 +10850,7 @@ snapshots:
 
   webpack-sources@3.5.1: {}
 
-  webpack@5.108.4(postcss@8.5.17)(webpack-cli@7.2.1):
+  webpack@5.108.4(postcss@8.5.17)(webpack-cli@7.2.2):
     dependencies:
       '@types/estree': 1.0.9
       '@types/json-schema': 7.0.15
@@ -10875,7 +10875,7 @@ snapshots:
       watchpack: 2.5.2
       webpack-sources: 3.5.1
     optionalDependencies:
-      webpack-cli: 7.2.1(js-yaml@4.3.0)(json5@2.2.3)(webpack-bundle-analyzer@4.10.1)(webpack@5.108.4)
+      webpack-cli: 7.2.2(js-yaml@4.3.0)(json5@2.2.3)(webpack-bundle-analyzer@4.10.1)(webpack@5.108.4)
     transitivePeerDependencies:
       - '@minify-html/node'
       - '@swc/core'
@@ -10890,7 +10890,7 @@ snapshots:
       - postcss
       - uglify-js
 
-  webpack@5.108.4(webpack-cli@7.2.1):
+  webpack@5.108.4(webpack-cli@7.2.2):
     dependencies:
       '@types/estree': 1.0.9
       '@types/json-schema': 7.0.15
@@ -10915,7 +10915,7 @@ snapshots:
       watchpack: 2.5.2
       webpack-sources: 3.5.1
     optionalDependencies:
-      webpack-cli: 7.2.1(js-yaml@4.3.0)(json5@2.2.3)(webpack-bundle-analyzer@4.10.1)(webpack@5.108.4)
+      webpack-cli: 7.2.2(js-yaml@4.3.0)(json5@2.2.3)(webpack-bundle-analyzer@4.10.1)(webpack@5.108.4)
     transitivePeerDependencies:
       - '@minify-html/node'
       - '@swc/core'
