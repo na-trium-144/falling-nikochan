@@ -1,3 +1,12 @@
+## ver. 17.1 - 2026/08/13 [#1310](https://github.com/na-trium-144/falling-nikochan/pull/1310)
+
+* hono4.13で追加されたmethodNotAllowedミドルウェアを使用
+* etagが404などを正しく処理するようになったので、ルートごとに使用するのをやめてグローバルにetagミドルウェアを使う
+* POST /api/chartFile/cid -> PUT
+* POST /api/newChartFile -> POST /api/chartFile
+* 可能な限りno-storeではなくno-cacheでフェッチする
+* notFound()でthrowせず直接404レスポンスを返すよう修正
+
 ## ver. 17.0 - 2026/08/11
 
 * uMin/uMaxの範囲外の音符を隠す [#1285](https://github.com/na-trium-144/falling-nikochan/pull/1285)
