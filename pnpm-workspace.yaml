@@ -46,7 +46,7 @@ catalogs:
     "@babel/preset-env": ^7.29.7
   eslint:
     eslint: 9.39.5
-    "@eslint/js": 9.39.5
+    "@eslint/js": 10.0.1
     "@eslint/eslintrc": ^3.3.6
   fontsource:
     "@fontsource-variable/noto-sans": 5.2.5
