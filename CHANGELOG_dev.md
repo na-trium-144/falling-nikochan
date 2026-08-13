@@ -1,3 +1,13 @@
+## ver. 17.3 - 2026/08/14
+
+* openapiドキュメントの修正
+    * offsetの説明を追加
+    * ignoring offset の意味を明確に
+    * time in seconds が動画基準か譜面基準かを明確に
+    * changePasswdはPUTにも適用される
+    * BPMChange,SpeedChangeはNoteSeqに適用済み
+    * レスポンスでEmptyObjが返ることはない
+
 ## ver. 17.2 - 2026/08/14
 
 * service workerを経由した際404エラーに言語設定が反映されないのを修正

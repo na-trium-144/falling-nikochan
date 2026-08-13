@@ -20,6 +20,7 @@ import { Signature5 } from "./legacy/chart5.js";
 import { Chart6, Level6Play } from "./legacy/chart6.js";
 import {
   Level15Play,
+  OffsetSchema15,
   YTBeginSchema15,
   YTEndSecSchema15,
 } from "./legacy/chart15.js";
@@ -49,7 +50,7 @@ export const NoteSeqSchema = () =>
       big: v.pipe(v.boolean(), v.description("whether the note is big")),
       hitTimeSec: v.pipe(
         v.number(),
-        v.description("hit judgement time, ignoring offset")
+        v.description("hit judgement time in seconds (from chart start)")
       ),
       appearTimeSec: v.pipe(
         v.number(),
@@ -115,12 +116,15 @@ export const BPMChangeSeqSchema = () =>
       timeSec: v.pipe(
         v.number(),
         v.description(
-          "the timestamp when the bpm change happens, ignoring offset"
+          "the time in second (from chart start) when the bpm change happens."
         )
       ),
       bpm: v.number(),
     }),
-    v.description("BPM change command data with timestamp.")
+    v.description(
+      "BPM change command data with timestamp. " +
+        "This is already applied to the NoteSeq properties, so there is no need to take this into account when displaying the notes."
+    )
   );
 export async function BPMChangeSeqDoc(): Promise<Schema> {
   const schema = (await resolver(BPMChangeSeqSchema()).toOpenAPISchema())
@@ -140,7 +144,7 @@ export const SpeedChangeSeqSchema = () =>
       bpm: v.pipe(
         v.number(),
         v.description(
-          "the timestamp when the speed change happens, ignoring offset"
+          "the time in seconds (from chart start) when the speed change happens"
         )
       ),
       interp: v.pipe(
@@ -152,7 +156,8 @@ export const SpeedChangeSeqSchema = () =>
       timeSec: v.pipe(v.number(), v.minValue(0)),
     }),
     v.description(
-      "Speed change command with timestamp, where bpm is the speed multiplier."
+      "Speed change command with timestamp, where bpm is the speed multiplier. " +
+        "This is already applied to the NoteSeq properties, so there is no need to take this into account when displaying the notes."
     )
   );
 export async function SpeedChangeSeqDoc(): Promise<Schema> {
@@ -203,7 +208,7 @@ export const ChartSeqDataSchema = () =>
     bpmChanges: v.array(BPMChangeSeqSchema()),
     speedChanges: v.array(SpeedChangeSeqSchema()),
     signature: v.array(SignatureSeqSchema()),
-    offset: v.number(),
+    offset: OffsetSchema15(),
     ytBegin: YTBeginSchema15(),
     ytEndSec: YTEndSecSchema15(),
   });
@@ -218,6 +223,7 @@ export async function ChartSeqDataDoc(): Promise<Schema> {
       bpmChanges: docRefs("BPMChangeSeq"),
       speedChanges: docRefs("SpeedChangeSeq"),
       signature: docRefs("SignatureSeq"),
+      offset: docRefs("Offset15"),
       ytBegin: docRefs("YTBegin15"),
       ytEndSec: docRefs("YTEndSec15"),
     },

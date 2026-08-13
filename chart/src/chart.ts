@@ -100,7 +100,8 @@ export const EmptyObj = <
     v.strictObject({}),
     v.transform(() => [] as v.InferOutput<T>[]),
     v.description(
-      "accept empty object instead of empty array for Lua compatibility"
+      "In request schema, the server also accepts empty object instead of empty array for Lua compatibility. " +
+        "You can ignore this schema when specified as the response type in OpenAPI Spec, as the server will always normalize this to an empty array."
     )
   );
 export const ArrayOrEmptyObj = <

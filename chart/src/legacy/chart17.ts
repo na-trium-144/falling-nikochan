@@ -11,6 +11,7 @@ import {
   LevelFreezeSchema15,
   LevelMetaSchema15,
   NoteCommandSchema15,
+  OffsetSchema15,
   SignatureSchema15,
   SpeedChangeSchema15,
   YTBeginSchema15,
@@ -24,7 +25,7 @@ import { ChartUntil13 } from "./chart13.js";
 export const LevelPlaySchema17 = () =>
   v.object({
     ver: v.union([v.literal(17)]),
-    offset: v.pipe(v.number(), v.minValue(0)),
+    offset: OffsetSchema15(),
     notes: v.array(NoteCommandSchema15()),
     bpmChanges: v.array(BPMChangeSchema15()),
     speedChanges: v.array(SpeedChangeSchema15()),
@@ -38,6 +39,7 @@ export async function LevelPlay17Doc(): Promise<Schema> {
     ...schema,
     properties: {
       ...schema.properties,
+      offset: docRefs("Offset15"),
       notes: ArrayDoc(docRefs("NoteCommand15")),
       bpmChanges: ArrayDoc(docRefs("BPMChange15")),
       speedChanges: ArrayDoc(docRefs("SpeedChange15")),
@@ -52,7 +54,7 @@ export const ChartSchema17 = () =>
     v.object({
       falling: v.literal("nikochan"),
       ver: v.union([v.literal(17)]),
-      offset: v.pipe(v.number(), v.minValue(0)),
+      offset: OffsetSchema15(),
       ytId: v.string(),
       title: v.string(),
       composer: v.string(),
@@ -87,7 +89,7 @@ export const ChartSchema17 = () =>
           null
         ),
         v.description(
-          "When this field is not null on POST request, " +
+          "When this field is not null on POST/PUT request, " +
             "the server changes the chart passwd to this value."
         )
       ),
@@ -108,6 +110,7 @@ export async function Chart17Doc(): Promise<Schema> {
     ...schema,
     properties: {
       ...schema.properties,
+      offset: docRefs("Offset15"),
       copyBuffer: docRefs("CopyBuffer"),
       levelsMeta: ArrayOrEmptyObjDoc(docRefs("LevelMeta15")),
       levelsFreeze: ArrayOrEmptyObjDoc(docRefs("LevelFreeze15")),

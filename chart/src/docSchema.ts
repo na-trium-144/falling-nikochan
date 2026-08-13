@@ -8,6 +8,7 @@ import {
   LevelMeta15Doc,
   LevelPlay15Doc,
   NoteCommand15Doc,
+  OffsetSchema15,
   Rest15Doc,
   Signature15Doc,
   SpeedChange15Doc,
@@ -51,6 +52,7 @@ export const docSchemas = async () => ({
   YTBegin15: (await resolver(YTBeginSchema15()).toOpenAPISchema()).schema,
   YTEnd15: (await resolver(YTEndSchema15()).toOpenAPISchema()).schema,
   YTEndSec15: (await resolver(YTEndSecSchema15()).toOpenAPISchema()).schema,
+  Offset15: (await resolver(OffsetSchema15()).toOpenAPISchema()).schema,
   CopyBufferEntry: (await resolver(CopyBufferEntrySchema()).toOpenAPISchema())
     .schema,
   CopyBuffer: await CopyBufferDoc(),
