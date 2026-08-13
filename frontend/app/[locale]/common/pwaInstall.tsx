@@ -237,11 +237,7 @@ interface InitAssetsState {
   progressSize?: number;
 }
 type InitAssetsResult =
-  | "done"
-  | "failed"
-  | "updating"
-  | "noUpdate"
-  | "inProgress";
+  "done" | "failed" | "updating" | "noUpdate" | "inProgress";
 export function PWAInstallProvider(props: { children: ReactNode }) {
   const [dismissed, setDismissed] = useState<boolean>(false);
   const [detectedOS, setDetectedOS] = useState<"android" | "ios" | null>(null);
