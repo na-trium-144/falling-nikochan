@@ -15,6 +15,8 @@ import { TarFileType, TarReader } from "@gera2ld/tarjs";
 import cfBeaconHtml from "./beacon.html?raw";
 import { getMimeType, mimes } from "hono/utils/mime";
 import { structuredLogger } from "@hono/structured-logger";
+import { HTTPException } from "hono/http-exception";
+import { ContentfulStatusCode } from "hono/utils/http-status";
 
 const e: Bindings = {
   MONGODB_URI: "",
@@ -123,6 +125,7 @@ async function fetchStatic(_e: any, url: URL): Promise<Response> {
   if (res) {
     return res;
   } else {
+    res satisfies undefined;
     // 通常は全部cacheに入っているはずなのでここに来ることはほぼない
     // console.warn(`${url} is not in cache`);
     // ASSET_PREFIXへのリクエストが4xxの場合(通信エラー以外)はoriginで再試行
@@ -140,7 +143,10 @@ async function fetchStatic(_e: any, url: URL): Promise<Response> {
         }
       }
     }
-    return res!;
+    // res is not ok and not undefined here
+    throw new HTTPException(res!.status as ContentfulStatusCode, {
+      cause: res,
+    });
   }
 }
 async function fetchStaticWithThrow(_e: any, url: URL): Promise<ResponseOK> {

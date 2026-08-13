@@ -1,3 +1,7 @@
+## ver. 17.2 - 2026/08/14
+
+* service workerを経由した際404エラーに言語設定が反映されないのを修正
+
 ## ver. 17.1 - 2026/08/13 [#1310](https://github.com/na-trium-144/falling-nikochan/pull/1310)
 
 * hono4.13で追加されたmethodNotAllowedミドルウェアを使用
