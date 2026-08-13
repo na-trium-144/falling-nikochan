@@ -505,7 +505,8 @@ app
     if (c.res.headers.get("Content-Type")?.includes("text/html")) {
       c.res = returnBody(
         (await c.res.text()).replace("</body>", cfBeaconHtml + "</body>"),
-        c.res.headers
+        c.res.headers,
+        c.res.status
       );
     }
   })

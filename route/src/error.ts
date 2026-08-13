@@ -181,7 +181,10 @@ async function errorResponse(
     if (/\/errorPlaceholder/.test(c.req.path)) {
       // エラーハンドラーがfetchに失敗して無限ループになるのを防ぐ
       c.var.logger.warn("Fallback to plain error placeholder message.");
-      return c.text("Error PLACEHOLDER_STATUS: PLACEHOLDER_MESSAGE");
+      return c.text(
+        "Error PLACEHOLDER_STATUS: PLACEHOLDER_MESSAGE",
+        status as ContentfulStatusCode
+      );
     } else {
       const lang = c.get("language") || "en";
       const t = await getTranslations(lang, "error");
