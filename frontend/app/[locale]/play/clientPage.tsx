@@ -133,9 +133,7 @@ export function InitPlay({ locale }: { locale: string }) {
         })
         .arrayBuffer((buf) => {
           const playFile = msgpack.decode(buf) as
-            | Level6Play
-            | Level15Play
-            | LevelPlay;
+            Level6Play | Level15Play | LevelPlay;
           console.log("playFile.ver", playFile.ver);
           if (
             playFile.ver === 6 ||
