@@ -4,8 +4,10 @@
 [![Staging Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fnikochan-staging.utcode.net%2FbuildVer.json&query=%24.version&prefix=v&label=Staging&color=%23441306)](https://nikochan-staging.utcode.net)
 [![GitHub License](https://img.shields.io/badge/License-AGPL--3.0-orange)](./LICENSE)
 
+<!--[![YouTube Channel Subscribers](https://img.shields.io/youtube/channel/subscribers/UChAEFwUtjsbWmWwZSxYLXWQ?label=%40nikochan144)](https://www.youtube.com/@nikochan144)-->
 [![Discord](https://img.shields.io/discord/1521135824928772176?style=social&logo=Discord)](https://discord.gg/BGQ6Vk9maA)
-[![YouTube Channel Subscribers](https://img.shields.io/youtube/channel/subscribers/UChAEFwUtjsbWmWwZSxYLXWQ?label=%40nikochan144)](https://www.youtube.com/@nikochan144)
+[![YouTube Channel Subscribers](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fnikochan.utcode.net%2Fapi%2Fsocial&query=youtube.subscribers&style=social&logo=youtube&label=%40nikochan144
+)](https://www.youtube.com/@nikochan144)
 [![Twitter Follow](https://img.shields.io/twitter/follow/nikochan144)](https://x.com/nikochan144)
 
 * Simple and cute rhythm game. Playable on web browsers such as PC, tablet, and smartphone.
