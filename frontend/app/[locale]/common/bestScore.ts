@@ -14,6 +14,7 @@ const ResultDataSchema = () =>
     inputType: v.optional(v.nullable(v.number())),
     date: v.optional(v.number()),
     levelHash: v.optional(v.string()),
+    sign: v.optional(v.string()),
   });
 export type ResultData = v.InferOutput<ReturnType<typeof ResultDataSchema>>;
 
@@ -40,6 +41,7 @@ export function toResultParams(
     bigCount: data.bigCount !== undefined ? data.bigCount : false,
     inputType: data.inputType !== undefined ? data.inputType : null,
     playbackRate4: 4, // x1以外の記録は保存されないので
+    auto: false,
   };
 }
 

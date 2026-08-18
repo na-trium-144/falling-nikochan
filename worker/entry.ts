@@ -235,7 +235,11 @@ function sendInitState(
 let initInProgress = false;
 
 type InitAssetsResult =
-  "done" | "failed" | "updating" | "noUpdate" | "inProgress";
+  | "done"
+  | "failed"
+  | "updating"
+  | "noUpdate"
+  | "inProgress";
 async function initAssetsCache(config: {
   clearOld: boolean;
 }): Promise<InitAssetsResult> {

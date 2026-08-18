@@ -63,6 +63,8 @@ MONGODB_URI="mongodb://localhost:27017"
 BACKEND_PREFIX="http://localhost:8787"
 API_ENV="development"
 API_NO_RATELIMIT="1"
+RESULT_SECRET_PRIVATE_KEY="MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgBTprjvGEw5NxQyMEH1mJo-0VWkElb21JYf7PJdimK82hRANCAARMKK90_rWc26cNZVZa-BV9tuRMzRhqtcC6zzPn6zYbv1e0JMdZPcHAK6kiRQTHcMEPvPTeHVe6zSOgMoEiF2-i"
+RESULT_SECRET_PUBLIC_KEY="BEwor3T-tZzbpw1lVlr4FX225EzNGGq1wLrPM-frNhu_V7Qkx1k9wcArqSJFBMdwwQ-89N4dV7rNI6AygSIXb6I"
 ```
 
 Alternatively, if you are only working on the frontend, you can access all public charts with:
@@ -247,6 +249,8 @@ The service worker ([`worker/entry.ts`](worker/entry.ts), bundled into `/sw.js`)
 | `API_ENV` |  |  | DO NOT SET | if set to `development`, development-specific behaviors such as password bypass will be enabled |
 | `API_NO_RATELIMIT` |  |  | DO NOT SET | |
 | `SECRET_SALT` |  |  | required | any string |
+| `RESULT_SECRET_PRIVATE_KEY` |  |  | required | ECDSA P-256 private key in base64url PKCS#8 format |
+| `RESULT_SECRET_PUBLIC_KEY` |  |  | required | ECDSA P-256 public key in base64url raw format |
 | `VERCEL_PROTECTION_BYPASS_SECRET` |  |  | optional | needed only when deploy to vercel as preview |
 | `API_CACHE_EDGE` |  |  | optional | `1` or unset, if set `s-maxage` is added to response cache-control |
 | `ASSET_PREFIX` | vars.`PRODUCTION_ASSET_PREFIX`, `STAGING_ASSET_PREFIX` | optional | optional | `https://domain-of-your-assets` or unset, if you want to use different domain for assets |

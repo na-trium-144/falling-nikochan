@@ -14,6 +14,7 @@ import {
   deserializeResultParams,
   levelTypes,
   ResultParams,
+  verifyResultParam,
 } from "@falling-nikochan/chart";
 import packageJson from "../package.json" with { type: "json" };
 import { env } from "hono/adapter";
@@ -48,10 +49,18 @@ const shareApp = (config: {
       const cid = c.req.param("cid");
       // c.req.param("cid_txt").slice(0, -4) for /share/:cid_txt{[0-9]+.txt}
       const qResult = c.req.query("result");
+      const qSign = c.req.query("sign");
       let resultParams: ResultParams | null = null;
       if (qResult) {
         try {
-          resultParams = deserializeResultParams(qResult);
+          const isValid = await verifyResultParam(
+            qResult,
+            qSign,
+            env(c).RESULT_SECRET_PUBLIC_KEY!
+          );
+          if (isValid) {
+            resultParams = deserializeResultParams(qResult);
+          }
         } catch (e) {
           c.var.logger.error(e);
           // throw new HTTPException(400, { message: "invalidResultParam" });
@@ -137,7 +146,10 @@ const shareApp = (config: {
       // キャッシュが正しく動作するように、クエリパラメータの順番が常に一定である必要がある
       const ogQuery = new URLSearchParams();
       ogQuery.set("lang", qLang);
-      if (resultParams) ogQuery.set("result", qResult!);
+      if (resultParams) {
+        ogQuery.set("result", qResult!);
+        if (qSign) ogQuery.set("sign", qSign);
+      }
       ogQuery.set("v", packageJson.version);
       let replacedBody = (await res.text())
         .replaceAll('/share/placeholder\\"', `/share/${cid}\\"`) // for canonical URL in script tag

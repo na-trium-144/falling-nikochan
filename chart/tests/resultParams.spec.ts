@@ -21,10 +21,18 @@ const expectedParams = {
   bigCount: 50,
   inputType: 1,
   playbackRate4: 8,
+  auto: false,
 } as const satisfies ResultParams;
 
 describe("resultParams", () => {
   test("should parse current result params", async () => {
+    // current version (version 4)
+    const serialized = serializeResultParams(expectedParams);
+    const deserialized = deserializeResultParams(serialized);
+    expect(deserialized).to.be.deep.equal(expectedParams);
+  });
+
+  test("should parse result params version 4", async () => {
     const serialized = serializeResultParams(expectedParams);
     const deserialized = deserializeResultParams(serialized);
     expect(deserialized).to.be.deep.equal(expectedParams);
@@ -56,12 +64,14 @@ describe("resultParams", () => {
       .replaceAll("/", "_")
       .replaceAll("=", "");
 
-    // current version
-    expect(serializedBase64).to.be.equal(serializeResultParams(expectedParams));
-
     const deserialized = deserializeResultParams(serializedBase64);
     expect(deserialized).to.be.deep.equal({
       ...expectedParams,
+      date: new Date(
+        expectedParams.date.getFullYear(),
+        expectedParams.date.getMonth(),
+        expectedParams.date.getDate()
+      ),
     } satisfies ResultParams);
   });
   test("should parse result params version 2", async () => {

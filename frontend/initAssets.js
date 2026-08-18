@@ -71,3 +71,36 @@ writeFileSync(
   Write({ size: 24, fill: slate500 }),
   "utf8"
 );
+
+function bytesToBase64Url(bytes) {
+  let bin = "";
+  for (let i = 0; i < bytes.length; i++) {
+    bin += String.fromCharCode(bytes[i]);
+  }
+  return btoa(bin)
+    .replaceAll("+", "-")
+    .replaceAll("/", "_")
+    .replaceAll("=", "");
+}
+
+// Generate ephemeral BuildKey for this build
+const buildKeyPair = await crypto.subtle.generateKey(
+  { name: "ECDSA", namedCurve: "P-256" },
+  true,
+  ["sign", "verify"]
+);
+const pubRawBuild = new Uint8Array(
+  await crypto.subtle.exportKey("raw", buildKeyPair.publicKey)
+);
+const privPkcs8Build = new Uint8Array(
+  await crypto.subtle.exportKey("pkcs8", buildKeyPair.privateKey)
+);
+const buildPublicKeyStr = bytesToBase64Url(pubRawBuild);
+const buildPrivateKeyStr = bytesToBase64Url(privPkcs8Build);
+
+writeFileSync("public/buildKey.pub", buildPublicKeyStr, "utf8");
+const buildKeyJson = JSON.stringify({
+  privateKeyStr: buildPrivateKeyStr,
+  publicKeyStr: buildPublicKeyStr,
+});
+writeFileSync(".buildKey.json", buildKeyJson, "utf8");
