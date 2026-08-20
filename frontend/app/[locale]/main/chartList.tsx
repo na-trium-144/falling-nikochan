@@ -334,9 +334,11 @@ export function ChartList(props: Props) {
   }, [briefs, props.type]);
 
   const filteredBriefs:
-    ChartLineBrief[] | Error | undefined | "loading" | "empty" = Array.isArray(
-    briefs
-  )
+    | ChartLineBrief[]
+    | Error
+    | undefined
+    | "loading"
+    | "empty" = Array.isArray(briefs)
     ? fetchAll
       ? briefs.filter((b) => b !== null)
       : briefs.filter((b) => b !== null).slice(0, maxRow)

@@ -37,6 +37,7 @@ interface Props extends ResultParams {
   exit: () => void;
   largeResult: boolean;
   record: RecordGetSummary | Error | undefined;
+  sign?: string | null;
 }
 export default function Result(props: Props) {
   const t = useTranslations("play.result");
@@ -68,7 +69,8 @@ export default function Result(props: Props) {
     props.brief,
     props.lang,
     serializedParam,
-    props.date ? props.date.getTime() : null
+    props.date ? props.date.getTime() : null,
+    props.sign
   );
   useEffect(() => {
     setSerializedParam(serializeResultParams(props));

@@ -16,6 +16,8 @@ export interface Bindings {
   API_ENV?: "development";
   API_NO_RATELIMIT?: "1";
   SECRET_SALT?: string;
+  RESULT_SECRET_PRIVATE_KEY?: string;
+  RESULT_SECRET_PUBLIC_KEY?: string;
   API_CACHE_EDGE?: "1";
   ASSET_PREFIX?: string;
   BACKEND_PREFIX?: string;
@@ -34,7 +36,7 @@ export interface Bindings {
   IS_SERVICE_WORKER?: string;
 }
 
-export function secretSalt(e: Bindings) {
+export function secretSalt(e: Bindings): string {
   if (e.SECRET_SALT) {
     return e.SECRET_SALT!;
   } else if (e.API_ENV === "development") {

@@ -87,7 +87,9 @@ export function TopDemo(
         .get(`/api/playFile/${props.cid}/${props.lvIndex}`)
         .arrayBuffer((buf) => {
           const playFile = msgpack.decode(buf) as
-            Level6Play | Level15Play | LevelPlay;
+            | Level6Play
+            | Level15Play
+            | LevelPlay;
           if (
             playFile.ver === 6 ||
             playFile.ver === 15 ||

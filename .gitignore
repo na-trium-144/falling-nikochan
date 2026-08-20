@@ -12,3 +12,5 @@
 .vite
 /frontend/.babelrc
 /worker/entry.js
+*.buildKey.json
+*/.buildKey.json

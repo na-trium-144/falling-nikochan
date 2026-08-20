@@ -17,8 +17,6 @@ import clsx from "clsx/lite";
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
 import {
-  bigScoreRate,
-  chainScoreRate,
   levelTypes,
   RecordGetSummary,
   RecordPost,
@@ -30,7 +28,14 @@ import {
   Level15Play,
   RecordGetSummarySchema,
   LevelPlay,
+  generateKeyPair,
+  signData,
+  importPrivateKey,
+  serializeDate4,
+  PlaySessionPost,
+  ResultSerialized,
 } from "@falling-nikochan/chart";
+import { sign as signJwt } from "hono/jwt";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
 import RhythmicalSlime from "./rhythmicalSlime.js";
@@ -133,7 +138,9 @@ export function InitPlay({ locale }: { locale: string }) {
         })
         .arrayBuffer((buf) => {
           const playFile = msgpack.decode(buf) as
-            Level6Play | Level15Play | LevelPlay;
+            | Level6Play
+            | Level15Play
+            | LevelPlay;
           console.log("playFile.ver", playFile.ver);
           if (
             playFile.ver === 6 ||
@@ -244,6 +251,57 @@ function Play(props: Props) {
     setAutoOffset_(v);
     localStorage.setItem("autoOffset", v ? "1" : "0");
   }, []);
+  const [playSession, setPlaySession] = useState<{
+    sessionPrivateKey: CryptoKey;
+    sessionPublicKey: string;
+    token: string;
+  } | null>(null);
+  const [resultSign, setResultSign] = useState<string | null>(null);
+
+  useEffect(() => {
+    let canceled = false;
+    async function initPlaySession() {
+      try {
+        const sessionKeyPair = await generateKeyPair();
+        const buildPrivateKeyStr = process.env.BUILD_KEY_PRIVATE;
+        if (!buildPrivateKeyStr) {
+          console.warn("BUILD_KEY_PRIVATE not found");
+          return;
+        }
+        const buildPrivKey = await importPrivateKey(buildPrivateKeyStr);
+        const buildToken = await signJwt(
+          {
+            sessionPublicKey: sessionKeyPair.publicKeyStr,
+            exp: Math.floor(Date.now() / 1000) + 300,
+          },
+          buildPrivKey,
+          "ES256"
+        );
+        const res = await fetchBackend()
+          .url("/api/playSession")
+          .json({
+            token: buildToken,
+          } satisfies PlaySessionPost)
+          .post()
+          .json<{ token: string }>();
+
+        if (!canceled && res?.token) {
+          setPlaySession({
+            sessionPrivateKey: sessionKeyPair.privateKey,
+            sessionPublicKey: sessionKeyPair.publicKeyStr,
+            token: res.token,
+          });
+        }
+      } catch (e) {
+        console.warn("Failed to init play session:", e);
+      }
+    }
+    void initPlaySession();
+    return () => {
+      canceled = true;
+    };
+  }, []);
+
   const [userOffset, setUserOffset_] = useState<number>(0);
   useEffect(() => {
     if (cid) {
@@ -477,8 +535,10 @@ function Play(props: Props) {
   // result画面を表示する
   const [showResult, setShowResult] = useState<boolean>(false);
   const [resultDate, setResultDate] = useState<Date>();
-
-  const reset = useCallback(() => setShowReady(true), []);
+  const reset = useCallback(() => {
+    setShowReady(true);
+    setResultSign(null);
+  }, []);
   const start = useCallback(() => {
     // Space(スタートボタン)が押されたとき
     switch (ytPlayer.current?.getPlayerState()) {
@@ -673,37 +733,86 @@ function Play(props: Props) {
         }
         const t = setTimeout(() => {
           setShowResult(true);
-          if (
-            cid &&
-            userBegin === null &&
-            playbackRate === 1 &&
-            chartBrief?.levels.at(lvIndex)
-          ) {
+          if (cid && userBegin === null && chartBrief?.levels.at(lvIndex)) {
             try {
               const factor = updateRecordFactor(
                 cid,
                 chartBrief.levels[lvIndex].hash,
                 auto
               );
-              fetchBackend()
-                .url(`/api/record/${cid}`)
-                .json({
-                  lvHash: chartBrief.levels[lvIndex].hash,
-                  auto,
-                  score,
-                  baseScore,
-                  chainScore,
-                  bigScore,
-                  fc: chainScore === chainScoreRate,
-                  fb: bigScore === bigScoreRate,
-                  editing,
-                  factor,
-                } satisfies RecordPost)
-                .post()
-                .notFound(() => undefined)
-                .error(429, () => undefined)
-                .res()
-                .catch((e: unknown) => captureAndWrap(e, { cid }));
+              const resultSerialized: ResultSerialized = [
+                4,
+                serializeDate4(newResultDate),
+                chartBrief.levels[lvIndex].name,
+                levelTypes.indexOf(chartBrief.levels[lvIndex].type) as
+                  | 0
+                  | 1
+                  | 2,
+                chartBrief.levels[lvIndex].difficulty,
+                Math.floor(baseScore * 100),
+                Math.floor(chainScore * 100),
+                Math.floor(bigScore * 100),
+                Math.floor(score * 100),
+                judgeCount.slice(0, 4) as [number, number, number, number],
+                bigCount,
+                hitType,
+                playbackRate * 4,
+                auto,
+              ];
+
+              const sendRecord = async () => {
+                if (!playSession) return;
+                const resultBytes = msgpack.encode(resultSerialized);
+                const sign = await signData(
+                  playSession.sessionPrivateKey,
+                  resultBytes
+                );
+                return fetchBackend()
+                  .url(`/api/record/${cid}`)
+                  .headers({
+                    Authorization: `Bearer ${playSession.token}`,
+                  })
+                  .json({
+                    result: resultSerialized,
+                    sign,
+                    lvHash: chartBrief.levels[lvIndex].hash,
+                    editing,
+                    factor,
+                  } satisfies RecordPost)
+                  .post()
+                  .notFound(() => undefined)
+                  .error(429, () => undefined)
+                  .json<{ sign: string | null }>()
+                  .then((res) => {
+                    if (res?.sign) {
+                      setResultSign(res.sign);
+                      if (
+                        !auto &&
+                        userBegin === null &&
+                        playbackRate === 1 &&
+                        score > bestScoreState
+                      ) {
+                        setBestScore(cid, chartBrief.levels[lvIndex].hash, {
+                          date: newResultDate.getTime(),
+                          baseScore,
+                          chainScore,
+                          bigScore,
+                          judgeCount: judgeCount.slice(0, 4) as [
+                            number,
+                            number,
+                            number,
+                            number,
+                          ],
+                          bigCount: bigCount,
+                          inputType: hitType,
+                          sign: res.sign,
+                        });
+                      }
+                    }
+                  })
+                  .catch((e: unknown) => captureAndWrap(e, { cid }));
+              };
+              void sendRecord();
             } catch {
               // ignore errors from updateRecordFactor
             }
@@ -1231,6 +1340,7 @@ function Play(props: Props) {
               record={record}
               inputType={hitType}
               playbackRate4={oldPlaybackRate * 4}
+              sign={resultSign}
             />
           )}
           {showStopped && (

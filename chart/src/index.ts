@@ -1,4 +1,5 @@
 export * from "./apiConfig.js";
+export * from "./auth.js";
 export * from "./bpm.js";
 export * from "./chart.js";
 export * from "./command.js";
@@ -6,9 +7,11 @@ export * from "./difficulty.js";
 export * from "./docSchema.js";
 export * from "./gameConstant.js";
 export * from "./luaTable.js";
+export * from "./playSession.js";
 export * from "./rank.js";
 export * from "./record.js";
 export * from "./resultParams.js";
+export * from "./resultPublicKey.js";
 export * from "./seq.js";
 export * from "./signature.js";
 export * from "./step.js";
