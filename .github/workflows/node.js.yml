@@ -61,7 +61,7 @@ jobs:
         cache: 'pnpm'
     - uses: oven-sh/setup-bun@v2
       with:
-        bun-version: latest
+        bun-version: 1.4.x
     - run: pnpm install --frozen-lockfile
     - run: pnpm run t
     - run: pnpm run mongo-docker
