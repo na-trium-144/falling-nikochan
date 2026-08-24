@@ -73,8 +73,8 @@ export async function getChartEntryCompressed(
   if (
     p === null ||
     p.bypass ||
-    (entryCompressed.pServerHash === null &&
-      entryCompressed.pRandomSalt === null) ||
+    // ver6以前のパスワードなし譜面にはアクセスできないようにする
+    // (entryCompressed.pServerHash === null && entryCompressed.pRandomSalt === null) ||
     (entryCompressed.pServerHash !== null &&
       entryCompressed.pRandomSalt !== null &&
       ((p.rawPasswd !== undefined &&
