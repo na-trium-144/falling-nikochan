@@ -170,7 +170,7 @@ const ogApp = (config: {
         resultParams?.lvName ?? "",
       ]
         .flat()
-        .join("\n");
+        .join("");
 
       // UIのフォントは見た目を固定することが重要なのでバージョン固定したfontsourceのフォントを静的に保持
       // (過去にMerriweatherが予告なく別物に置き換わった事例があるため)
