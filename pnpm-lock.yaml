@@ -77,21 +77,15 @@ catalogs:
       version: 9.39.5
   fontsource:
     '@fontsource-variable/noto-sans':
-      specifier: 5.2.5
-      version: 5.2.5
+      specifier: ~5.3
+      version: 5.3.0
     '@fontsource-variable/noto-sans-jp':
-      specifier: 5.2.5
-      version: 5.2.5
+      specifier: ~5.3
+      version: 5.3.0
     '@fontsource/kaisei-opti':
       specifier: 5.2.5
       version: 5.2.5
     '@fontsource/merriweather':
-      specifier: 5.2.5
-      version: 5.2.5
-    '@fontsource/noto-sans':
-      specifier: 5.2.5
-      version: 5.2.5
-    '@fontsource/noto-sans-jp':
       specifier: 5.2.5
       version: 5.2.5
   iconpark:
@@ -288,20 +282,14 @@ importers:
         version: link:../route
       '@fontsource-variable/noto-sans':
         specifier: catalog:fontsource
-        version: 5.2.5
+        version: 5.3.0
       '@fontsource-variable/noto-sans-jp':
         specifier: catalog:fontsource
-        version: 5.2.5
+        version: 5.3.0
       '@fontsource/kaisei-opti':
         specifier: catalog:fontsource
         version: 5.2.5
       '@fontsource/merriweather':
-        specifier: catalog:fontsource
-        version: 5.2.5
-      '@fontsource/noto-sans':
-        specifier: catalog:fontsource
-        version: 5.2.5
-      '@fontsource/noto-sans-jp':
         specifier: catalog:fontsource
         version: 5.2.5
       '@icon-park/react':
@@ -1331,23 +1319,17 @@ packages:
     resolution: {integrity: sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@fontsource-variable/noto-sans-jp@5.2.5':
-    resolution: {integrity: sha512-+ieDlugS+FCva2eLahVgybiaPMs1xLcBYByflzw1WghvFPFNJzsQHw85N+dadXzaqccVTiVDGYW4E0bMv4CHAQ==}
+  '@fontsource-variable/noto-sans-jp@5.3.0':
+    resolution: {integrity: sha512-XVL9GfGBRjj523v9w3Bctu4mNq7E5rUa+AMZm8DK1EM3LAGlKC3DZMvuqkLn4DB4TwwoAjcsJUCiRpUTDzzOkw==}
 
-  '@fontsource-variable/noto-sans@5.2.5':
-    resolution: {integrity: sha512-eH6AxZEtLAq7AaqDK642UnIu/dsfNPkgUdDxX8aGGFOhw4h+J1MpWxk03sehzQvxgXw2lCprmoz0AFfvSpYNYQ==}
+  '@fontsource-variable/noto-sans@5.3.0':
+    resolution: {integrity: sha512-e3ZuxzY9AL2psXPZlhwhnYrHUHv6PMoyK9MQ7croF0CUgURLqu9EMjW7q2FgVLwij1tjLsIHQrnwQ8aUcg4BiA==}
 
   '@fontsource/kaisei-opti@5.2.5':
     resolution: {integrity: sha512-Ttd/KTtKEB1M+CAD52R5dQs/qlP4csMtJVwhydlza175rd+WBwT+EQiI6IrBPjFPVZjIruVG2bTMa8gluYkXNQ==}
 
   '@fontsource/merriweather@5.2.5':
     resolution: {integrity: sha512-5LHr2QYcpovXZc3iLsD2BLqpuwDUNxOSH6hDLDatferd++7xTEHPLHRPheyBECUU+KiXv/CBFs+amz9eh8U+Bw==}
-
-  '@fontsource/noto-sans-jp@5.2.5':
-    resolution: {integrity: sha512-ISoJUQlsuSo4y56P+eJD+g022BRAF1BC2uCyEFGRsob0g8VvQAoWNMlWh+P0VQw68QzZHHj41zRzeRFpzAdA7w==}
-
-  '@fontsource/noto-sans@5.2.5':
-    resolution: {integrity: sha512-g3hWgsQayHQGVXgQKjbHKpS7YQFQY8azwXFCi3ZkhgCK5fZXe3udeQYrZJJ4PMswGkNhoDPRR9OJZBlMjzZAEQ==}
 
   '@formatjs/fast-memoize@3.1.5':
     resolution: {integrity: sha512-KLi3fan6WnCHmigd9pmEEN8Hid0v4wiFBW576M/d07KMWYecf1CvyMI3n34vCmHT4AoVqG2n702kiHbXjzZX2A==}
@@ -6437,17 +6419,13 @@ snapshots:
       '@eslint/core': 0.17.0
       levn: 0.4.1
 
-  '@fontsource-variable/noto-sans-jp@5.2.5': {}
+  '@fontsource-variable/noto-sans-jp@5.3.0': {}
 
-  '@fontsource-variable/noto-sans@5.2.5': {}
+  '@fontsource-variable/noto-sans@5.3.0': {}
 
   '@fontsource/kaisei-opti@5.2.5': {}
 
   '@fontsource/merriweather@5.2.5': {}
-
-  '@fontsource/noto-sans-jp@5.2.5': {}
-
-  '@fontsource/noto-sans@5.2.5': {}
 
   '@formatjs/fast-memoize@3.1.5': {}
 
