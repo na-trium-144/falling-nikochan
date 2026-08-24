@@ -159,6 +159,22 @@ const ogApp = (config: {
           throw new HTTPException(400, { message: "invalidResultParam" });
         }
       }
+
+      // font-title(NotoSans)でレンダリングする対象となるテキスト
+      const renderedText = [
+        brief.chartCreator,
+        brief.title,
+        brief.composer,
+        "/",
+        brief.levels.map((l) => l.name),
+        resultParams?.lvName ?? "",
+      ]
+        .flat()
+        .join("\n");
+
+      // UIのフォントは見た目を固定することが重要なのでバージョン固定したfontsourceのフォントを静的に保持
+      // (過去にMerriweatherが予告なく別物に置き換わった事例があるため)
+      // 一方タイトルなどに使うNotoSansに関してはわりとどうでもいいので最新版のサブセットをfetch
       const pFonts = (
         [
           {
@@ -173,26 +189,33 @@ const ogApp = (config: {
             weight: 400,
             style: "normal",
           },
+        ] as const
+      ).map(async (f) => ({
+        ...f,
+        data: await (
+          await config.fetchStatic(
+            env(c),
+            new URL(`/og-fonts/${f.file}`, backendOrigin(c))
+          )
+        ).arrayBuffer(),
+      }));
+      const pGoogleFonts = (
+        [
           {
             name: "noto-sans",
-            file: "noto-sans-latin-400-normal.ttf",
+            data: loadGoogleFont("Noto Sans", renderedText),
             weight: 400,
             style: "normal",
           },
           {
             name: "noto-sans-jp",
-            file: "noto-sans-jp-japanese-400-normal.ttf",
+            data: loadGoogleFont("Noto Sans JP", renderedText),
             weight: 400,
             style: "normal",
           },
         ] as const
-      ).map((f) => ({
-        ...f,
-        pData: config.fetchStatic(
-          env(c),
-          new URL(`/og-fonts/${f.file}`, backendOrigin(c))
-        ),
-      }));
+      ).map(async (f) => ({ ...f, data: await f.data }));
+
       let imagePath: string;
       switch (c.req.param("type")) {
         case "share":
@@ -274,16 +297,16 @@ const ogApp = (config: {
           return `rgb(${colorAdjusted[0]}, ${colorAdjusted[1]}, ${colorAdjusted[2]})`;
         });
 
-      let Image: Promise<React.ReactElement>;
+      let Image: React.ReactElement;
       switch (c.req.param("type")) {
         case "share":
-          Image = OGShare(cid, lang, brief, pBgImageBin, pColorThief);
+          Image = await OGShare(cid, lang, brief, pBgImageBin, pColorThief);
           break;
         case "result":
           if (!resultParams) {
             throw new HTTPException(400, { message: "missingResultParam" });
           }
-          Image = OGResult(
+          Image = await OGResult(
             cid,
             lang,
             brief,
@@ -294,17 +317,13 @@ const ogApp = (config: {
           );
           break;
       }
-      const imRes = new config.ImageResponse(await Image!, {
+      const imRes = new config.ImageResponse(Image!, {
         width: 1200,
         height: 630,
-        fonts: await Promise.all(
-          pFonts.map(async (f) => ({
-            name: f.name,
-            weight: f.weight,
-            style: f.style,
-            data: await (await f.pData).arrayBuffer(),
-          }))
-        ),
+        fonts: [
+          ...(await Promise.all(pFonts)),
+          ...(await Promise.all(pGoogleFonts)),
+        ],
       }) as Response;
       return c.body(imRes.body!, imRes.status as 200, {
         "Content-Type": imRes.headers.get("Content-Type") || "",
@@ -319,5 +338,30 @@ const ogApp = (config: {
         301
       );
     });
+
+async function loadGoogleFont(
+  fontFamily: string,
+  text: string
+): Promise<ArrayBuffer> {
+  // User-Agentを指定せずにリクエストするとwoff2ではなく単一のttfで返ってくる
+  const url = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(
+    fontFamily
+  )}:wght@400&text=${encodeURIComponent(text)}`;
+  const css = await (await fetch(url)).text();
+  const resource = css.match(
+    /src: url\((.+)\) format\('(opentype|truetype)'\)/
+  );
+  if (resource) {
+    return await (await fetch(resource[1])).arrayBuffer();
+  }
+  const e = new Error("failed to fetch font data") as Error &
+    Record<string, unknown>;
+  // もしエラーが起きた場合にSentryに送るコンテキストデータ
+  e.url = url;
+  e.fontFamily = fontFamily;
+  e.css = css;
+  e.resource = resource;
+  throw e;
+}
 
 export default ogApp;
