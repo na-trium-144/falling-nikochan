@@ -70,6 +70,7 @@ export async function OGResult(
             paddingLeft: (124 + 16) * 4,
             marginTop: 12 * 4,
             ...text4xl,
+            height: 40,
             fontFamily: fontMainUi,
           }}
         >
@@ -78,8 +79,9 @@ export async function OGResult(
         <div
           style={{
             paddingLeft: 20 * 4,
-            marginTop: 7 * 4,
+            marginTop: 6 * 4,
             width: 2147483647,
+            height: 48.5,
             ...flexRow,
           }}
         >
@@ -110,9 +112,10 @@ export async function OGResult(
           style={{
             ...flexRow,
             paddingLeft: 20 * 4,
-            marginTop: 5 * 4,
+            marginTop: 4 * 4,
             width: 2147483647,
             ...text4xl,
+            height: 41.5,
             fontFamily: fontTitle,
           }}
         >
@@ -130,9 +133,9 @@ export async function OGResult(
         <div
           style={{
             paddingLeft: 20 * 4,
-            marginTop: 5 * 4,
+            marginTop: 4 * 4,
             ...flexRow,
-            ...text4xl,
+            height: 48,
             width: 2147483647,
           }}
         >
@@ -146,7 +149,7 @@ export async function OGResult(
           <span
             style={{
               fontFamily: fontMainUi,
-              fontSize: "0.9em",
+              fontSize: text4xl.fontSize * 0.9,
               lineHeight: text4xl.lineHeight,
               color: levelColors[params.lvType],
             }}
@@ -156,8 +159,11 @@ export async function OGResult(
           <span
             style={{
               fontFamily: fontMainUi,
-              fontSize: "1.2em",
-              lineHeight: text4xl.lineHeight / 1.2, // なぜかわからないけどこれで揃う
+              fontSize: text4xl.fontSize * 1.2,
+              lineHeight: text4xl.lineHeight,
+              // https://github.com/vercel/satori/issues/691
+              // align-items: baseline で揃わないので微調整する
+              transform: "translateY(3px)",
               color: levelColors[params.lvType],
             }}
           >
@@ -220,6 +226,7 @@ export async function OGResult(
                     ...flexRow,
                     width: "100%",
                     marginBottom: 2 * 4,
+                    height: 48.5,
                     color:
                       name === "bigNoteBonus" && params.bigCount === null
                         ? slate400
@@ -312,7 +319,10 @@ export async function OGResult(
         }}
       >
         {["good", "ok", "bad", "miss"].map((name, ji) => (
-          <div key={ji} style={{ ...flexRow, marginBottom: 1.5 * 4 }}>
+          <div
+            key={ji}
+            style={{ ...flexRow, marginBottom: 1.5 * 4, height: 40 }}
+          >
             <span style={{ ...text2xl, flexGrow: 1, marginLeft: 8 * 4 }}>
               {ts(name)}
             </span>

@@ -14,6 +14,10 @@ import {
 import { ChartBriefMin } from "./app.js";
 import { levelTypes } from "@falling-nikochan/chart";
 
+// heightはogTemplateのほうの実測。
+// ただしogTemplateを表示する際のページの拡大率によって正確なpx数が変わりうるので注意
+// (macOSのchromeにて100%でスクリーンショットを撮り100%での実測値を書いている)
+
 export async function OGShare(
   cid: string,
   lang: string,
@@ -41,6 +45,131 @@ export async function OGShare(
       />
       <div
         style={{
+          paddingLeft: (20 + 24) * 4,
+          marginTop: 36 * 4,
+          ...text5xl,
+          height: 48,
+          fontFamily: fontMainUi,
+        }}
+      >
+        {cid}
+      </div>
+      <div
+        style={{
+          ...flexRow,
+          paddingLeft: 20 * 4,
+          marginTop: 6 * 4,
+          width: 2147483647,
+          ...text5xl,
+          height: 50,
+          fontFamily: fontTitle,
+        }}
+      >
+        <span
+          style={{
+            ...text4xl,
+            marginRight: 5 * 4,
+            fontFamily: fontMainUi,
+          }}
+        >
+          {t("chartCreator")}:
+        </span>
+        <span>{brief.chartCreator}</span>
+      </div>
+      <div
+        style={{
+          paddingLeft: 20 * 4,
+          marginTop: 10 * 4,
+          width: 2147483647,
+          // 困ったことにellipsisが効かない
+          // width: "100%",
+          // textWrap: "nowrap",
+          // textOverflow: "ellipsis",
+          // overflowX: "clip",
+          // overflowY: "visible",
+          ...text7xl,
+          height: 72,
+          fontFamily: fontTitle,
+        }}
+      >
+        {brief.title}
+      </div>
+      <div
+        style={{
+          paddingLeft: 20 * 4,
+          marginTop: 4 * 4,
+          width: 2147483647,
+          ...text5xl,
+          height: 48,
+          fontFamily: fontTitle,
+        }}
+      >
+        {brief.composer}
+      </div>
+      <div
+        style={{
+          paddingLeft: 56 * 4,
+          marginTop: 6 * 4,
+          ...flexRow,
+          height: 57.6,
+          width: 2147483647,
+        }}
+      >
+        {...brief.levels
+          .map((l, i) => [
+            // <> </> だとなぜか高さがおかしくなる
+            i >= 1 && (
+              <span
+                style={{
+                  marginLeft: 3 * 4,
+                  marginRight: 3 * 4,
+                  ...text4xl,
+                  fontFamily: fontTitle,
+                }}
+              >
+                /
+              </span>
+            ),
+            !!l.name && (
+              <span
+                style={{
+                  fontFamily: fontTitle,
+                  ...text5xl,
+                  marginRight: 4 * 4,
+                }}
+              >
+                {l.name}
+              </span>
+            ),
+            <span
+              style={{
+                fontFamily: fontMainUi,
+                fontSize: text5xl.fontSize * 0.9,
+                lineHeight: 1,
+                color: levelColors[l.type],
+              }}
+            >
+              {levelTypes[l.type]}-
+            </span>,
+            <span
+              style={{
+                fontFamily: fontMainUi,
+                fontSize: text5xl.fontSize * 1.2,
+                lineHeight: 1,
+                // https://github.com/vercel/satori/issues/691
+                // align-items: baseline で揃わないので微調整する
+                transform: "translateY(3px)",
+                color: levelColors[l.type],
+              }}
+            >
+              {l.difficulty}
+            </span>,
+          ])
+          .flat()}
+      </div>
+      {/* zIndexが効かなさそうなので代わりに順番を変えて解決 */}
+      <div
+        style={{
           position: "absolute",
           top: 0,
           right: 0,
@@ -63,127 +192,6 @@ export async function OGShare(
           `https://i.ytimg.com/vi/${brief.ytId}/mqdefault.jpg`
         }
       />
-      <div
-        style={{
-          paddingLeft: (20 + 24) * 4,
-          marginTop: 36 * 4,
-          ...text5xl,
-          fontFamily: fontMainUi,
-        }}
-      >
-        {cid}
-      </div>
-      <div
-        style={{
-          ...flexRow,
-          paddingLeft: 20 * 4,
-          marginTop: 7 * 4,
-          width: 2147483647,
-          ...text5xl,
-          fontFamily: fontTitle,
-        }}
-      >
-        <span
-          style={{
-            ...text4xl,
-            marginRight: 5 * 4,
-            fontFamily: fontMainUi,
-          }}
-        >
-          {t("chartCreator")}:
-        </span>
-        <span>{brief.chartCreator}</span>
-      </div>
-      <div
-        style={{
-          paddingLeft: 20 * 4,
-          marginTop: 11 * 4,
-          width: 2147483647,
-          // 困ったことにellipsisが効かない
-          // width: "100%",
-          // textWrap: "nowrap",
-          // textOverflow: "ellipsis",
-          // overflowX: "clip",
-          // overflowY: "visible",
-          ...text7xl,
-          fontFamily: fontTitle,
-        }}
-      >
-        {brief.title}
-      </div>
-      <div
-        style={{
-          paddingLeft: 20 * 4,
-          marginTop: 5 * 4,
-          width: 2147483647,
-          ...text5xl,
-          fontFamily: fontTitle,
-        }}
-      >
-        {brief.composer}
-      </div>
-      <div
-        style={{
-          paddingLeft: 56 * 4,
-          marginTop: 7 * 4,
-          ...flexRow,
-          width: 2147483647,
-        }}
-      >
-        {brief.levels.map((l, i) => (
-          // <> </> だとなぜか高さがおかしくなる
-          <div
-            style={{
-              ...flexRow,
-              ...text5xl,
-            }}
-          >
-            {i >= 1 && (
-              <span
-                style={{
-                  marginLeft: 3 * 4,
-                  marginRight: 3 * 4,
-                  ...text4xl,
-                  fontFamily: fontTitle,
-                }}
-              >
-                /
-              </span>
-            )}
-            {l.name && (
-              <span
-                style={{
-                  fontFamily: fontTitle,
-                  ...text5xl,
-                  marginRight: 4 * 4,
-                }}
-              >
-                {l.name}
-              </span>
-            )}
-            <span
-              style={{
-                fontFamily: fontMainUi,
-                fontSize: "0.9em",
-                lineHeight: text5xl.lineHeight,
-                color: levelColors[l.type],
-              }}
-            >
-              {levelTypes[l.type]}-
-            </span>
-            <span
-              style={{
-                fontFamily: fontMainUi,
-                fontSize: "1.2em",
-                lineHeight: text5xl.lineHeight / 1.2, // なぜかわからないけどこれで揃う
-                color: levelColors[l.type],
-              }}
-            >
-              {l.difficulty}
-            </span>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
