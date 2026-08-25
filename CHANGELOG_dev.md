@@ -1,3 +1,14 @@
+## ver. 17.4 - 2026/08/26
+
+* ver8以前のパスワードなし譜面にはアクセスできないようにする [#1321](https://github.com/na-trium-144/falling-nikochan/pull/1321)
+* og画像の修正 [#1322](https://github.com/na-trium-144/falling-nikochan/pull/1322)
+    * ogレンダリング時にNotoSansJPのサブセットをGoogleFontsから動的に取得
+    * fontsource/noto-sansを削除、fontsource-variable/noto-sansをアップデート
+    * タイトルの有無で高さが変わるのを修正
+    * 背景画像を新slime画像に更新
+* iOS26でのアイコンの表示位置ずれを修正 [#1324](https://github.com/na-trium-144/falling-nikochan/pull/1324)
+* Bun 1.4 [#1318](https://github.com/na-trium-144/falling-nikochan/pull/1318)
+
 ## ver. 17.3 - 2026/08/14
 
 * openapiドキュメントの修正
