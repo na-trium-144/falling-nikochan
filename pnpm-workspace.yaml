@@ -49,12 +49,10 @@ catalogs:
     "@eslint/js": 9.39.5
     "@eslint/eslintrc": ^3.3.6
   fontsource:
-    "@fontsource-variable/noto-sans": 5.2.5
-    "@fontsource-variable/noto-sans-jp": 5.2.5
+    "@fontsource-variable/noto-sans": ~5.3
+    "@fontsource-variable/noto-sans-jp": ~5.3
     "@fontsource/kaisei-opti": 5.2.5
     "@fontsource/merriweather": 5.2.5
-    "@fontsource/noto-sans": 5.2.5
-    "@fontsource/noto-sans-jp": 5.2.5
   iconpark:
     "@icon-park/react": ^1.4.2
     "@icon-park/svg": ^1.4.2
