@@ -167,7 +167,10 @@ export default function OGTemplate() {
         {["good", "ok", "bad", "miss"].map((name, ji) => (
           <div key={ji} className="flex flex-row items-baseline ">
             <span className="flex-1">
-              <JudgeIcon index={ji} className="inline-block w-8 text-2xl translate-y-1" />
+              <JudgeIcon
+                index={ji}
+                className="inline-block w-8 text-2xl translate-y-1"
+              />
               <span className={clsx("text-2xl", showDummyData || "invisible")}>
                 {ts(name)}
               </span>
