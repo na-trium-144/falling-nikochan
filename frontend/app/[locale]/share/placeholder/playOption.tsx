@@ -340,9 +340,7 @@ function SelectedLevelInfo(props: {
         </div>
         <span className="mx-3 no-mobile">/</span>
         <div>
-          <span className="inline-block w-5 translate-y-0.5">
-            <Timer />
-          </span>
+          <Timer className="inline-block w-5 translate-y-0.5" />
           <span className="text-lg">
             {Math.floor(
               Math.round(props.brief.levels[props.selectedLevel]?.length) / 60
@@ -357,9 +355,7 @@ function SelectedLevelInfo(props: {
         </div>
         <span className="mx-3 no-mobile">/</span>
         <div>
-          <span className="inline-block w-5 translate-y-0.5">
-            <SmilingFace />
-          </span>
+          <SmilingFace className="inline-block w-5 translate-y-0.5" />
           <span className="mr-1">✕</span>
           <span className="text-lg">
             {props.brief.levels[props.selectedLevel]?.noteCount}

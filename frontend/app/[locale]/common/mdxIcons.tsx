@@ -17,9 +17,7 @@ export function SunIcon() {
 }
 export function HelpIcon() {
   return (
-    <span className="inline-block align-middle text-xl text-sky-300 dark:text-orange-900">
-      <Help />
-    </span>
+    <Help className="inline-block align-middle text-xl text-sky-300 dark:text-orange-900" />
   );
 }
 export function MoveIcon() {
