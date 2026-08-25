@@ -147,9 +147,7 @@ export function SharedResultBox(props: Props) {
         <div className={clsx("w-32 flex flex-col justify-center", "text-dim")}>
           {["good", "ok", "bad", "miss"].map((name, ji) => (
             <div key={ji} className="flex flex-row items-baseline ">
-              <span className="inline-block text-sm w-4 translate-y-0.5">
-                <JudgeIcon index={ji} />
-              </span>
+              <JudgeIcon index={ji} className="inline-block text-sm w-4 translate-y-0.5" />
               <span className="flex-1 text-xs ">{ts(name)}</span>
               <span className="text-base ">{props.result.judgeCount[ji]}</span>
             </div>

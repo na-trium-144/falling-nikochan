@@ -242,23 +242,21 @@ function StatusIcon(props: { index: number }) {
       className="inline-block relative "
       style={{ width: "1.25em", fontSize: "1.25em" }}
     >
-      <span className="absolute bottom-0 left-0 translate-y-0.5 ">
-        <JudgeIcon index={props.index} />
-      </span>
+      <JudgeIcon index={props.index} className="absolute bottom-0 left-0 translate-y-0.5" />
     </span>
   );
 }
-export function JudgeIcon(props: { index: number }) {
+export function JudgeIcon(props: { index: number; className?: string }) {
   return (
     <>
       {props.index === 0 ? (
-        <GrinningFaceWithTightlyClosedEyesOpenMouth />
+        <GrinningFaceWithTightlyClosedEyesOpenMouth className={props.className} />
       ) : props.index === 1 ? (
-        <SmilingFace />
+        <SmilingFace className={props.className} />
       ) : props.index === 2 ? (
-        <DisappointedFace />
+        <DisappointedFace className={props.className} />
       ) : (
-        <DistraughtFace />
+        <DistraughtFace className={props.className} />
       )}
     </>
   );

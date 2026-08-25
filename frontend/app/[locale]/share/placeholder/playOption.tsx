@@ -471,9 +471,7 @@ function SelectedLevelInfo(props: {
             <span className="inline-block ml-2 mr-2 space-x-2 ">
               {selectedBestScore?.judgeCount.map((j, i) => (
                 <span key={i} className="inline-block">
-                  <span className="inline-block w-5 translate-y-0.5 ">
-                    <JudgeIcon index={i} />
-                  </span>
+                  <JudgeIcon index={i} className="inline-block w-5 translate-y-0.5" />
                   <span className="text-lg ">{j}</span>
                 </span>
               ))}
