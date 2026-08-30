@@ -12,3 +12,5 @@
 .vite
 /frontend/.babelrc
 /worker/entry.js
+*/public/resultBuildKey.json
+*/.resultBuildPrivKey.json
