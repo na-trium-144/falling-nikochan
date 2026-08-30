@@ -60,7 +60,6 @@ export async function sendRecord(
     .catch((e: unknown) => captureAndWrap(e, { cid }));
 }
 export async function sendResultSerialized(
-  cid: string,
   resultSerialized: string,
   sessionKeyPair: CryptoKeyPair,
   playSessionToken: string,
@@ -82,5 +81,5 @@ export async function sendResultSerialized(
     .notFound(() => undefined)
     .error(429, () => undefined)
     .json(({ sign }) => setSign(sign))
-    .catch((e: unknown) => captureAndWrap(e, { cid }));
+    .catch((e: unknown) => captureAndWrap(e));
 }
