@@ -36,6 +36,7 @@ const archiveFiles = allFiles
       ![
         "/sw.js",
         "/buildVer.json",
+        "/resultBuildKey.json",
         "/nextFiles.txt",
         "/staticFiles.tar.gz",
       ].includes(n)
