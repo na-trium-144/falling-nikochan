@@ -16,6 +16,8 @@ export interface Bindings {
   API_ENV?: "development";
   API_NO_RATELIMIT?: "1";
   SECRET_SALT?: string;
+  RESULT_SECRET_PRIVATE_KEY?: string;
+  RESULT_SECRET_PUBLIC_KEY?: string;
   API_CACHE_EDGE?: "1";
   ASSET_PREFIX?: string;
   BACKEND_PREFIX?: string;
@@ -42,6 +44,49 @@ export function secretSalt(e: Bindings) {
   } else {
     throw new Error("SECRET_SALT not set in production environment!");
   }
+}
+
+export async function resultSecretPubKey(e: Bindings) {
+  let keyBase64: string;
+  if (e.RESULT_SECRET_PUBLIC_KEY) {
+    keyBase64 = e.RESULT_SECRET_PUBLIC_KEY;
+  } else if (e.API_ENV === "development") {
+    // This is an example key pair that can be used for development. In production, a different key is used.
+    keyBase64 =
+      "BEwor3T-tZzbpw1lVlr4FX225EzNGGq1wLrPM-frNhu_V7Qkx1k9wcArqSJFBMdwwQ-89N4dV7rNI6AygSIXb6I";
+  } else {
+    throw new Error(
+      "RESULT_SECRET_PUBLIC_KEY not set in production environment!"
+    );
+  }
+  return await crypto.subtle.importKey(
+    "raw",
+    Buffer.from(keyBase64, "base64url"),
+    { name: "ECDSA", namedCurve: "P-256" },
+    true,
+    ["verify"]
+  );
+}
+export async function resultSecretPrivKey(e: Bindings) {
+  let keyBase64: string;
+  if (e.RESULT_SECRET_PRIVATE_KEY) {
+    keyBase64 = e.RESULT_SECRET_PRIVATE_KEY;
+  } else if (e.API_ENV === "development") {
+    // This is an example key pair that can be used for development. In production, a different key is used.
+    keyBase64 =
+      "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgBTprjvGEw5NxQyMEH1mJo-0VWkElb21JYf7PJdimK82hRANCAARMKK90_rWc26cNZVZa-BV9tuRMzRhqtcC6zzPn6zYbv1e0JMdZPcHAK6kiRQTHcMEPvPTeHVe6zSOgMoEiF2-i";
+  } else {
+    throw new Error(
+      "RESULT_SECRET_PRIVATE_KEY not set in production environment!"
+    );
+  }
+  return await crypto.subtle.importKey(
+    "pkcs8",
+    Buffer.from(keyBase64, "base64url"),
+    { name: "ECDSA", namedCurve: "P-256" },
+    true,
+    ["sign"]
+  );
 }
 
 export function cacheControl(e: Bindings, age: number, private_?: boolean) {

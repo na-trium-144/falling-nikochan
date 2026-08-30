@@ -64,7 +64,7 @@ app
   )
   .use(etag())
   .use(methodNotAllowed(app))
-  .route("/api", await apiApp({ getConnInfo, dbMiddleware }))
+  .route("/api", await apiApp({ getConnInfo, dbMiddleware, fetchStatic }))
   .route("/og", ogApp({ ImageResponse, fetchBrief, fetchStatic }))
   .route("/cron", cronTestApp)
   .route("/sitemap.xml", await sitemapApp({ dbMiddleware }))
