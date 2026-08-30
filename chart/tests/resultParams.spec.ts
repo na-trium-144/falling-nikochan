@@ -21,10 +21,19 @@ const expectedParams = {
   bigCount: 50,
   inputType: 1,
   playbackRate4: 8,
+  auto: false,
+  cid: "123456",
 } as const satisfies ResultParams;
 
 describe("resultParams", () => {
   test("should parse current result params", async () => {
+    // current version (version 4)
+    const serialized = serializeResultParams(expectedParams);
+    const deserialized = deserializeResultParams(serialized);
+    expect(deserialized).to.be.deep.equal(expectedParams);
+  });
+
+  test("should parse result params version 4", async () => {
     const serialized = serializeResultParams(expectedParams);
     const deserialized = deserializeResultParams(serialized);
     expect(deserialized).to.be.deep.equal(expectedParams);
@@ -56,12 +65,15 @@ describe("resultParams", () => {
       .replaceAll("/", "_")
       .replaceAll("=", "");
 
-    // current version
-    expect(serializedBase64).to.be.equal(serializeResultParams(expectedParams));
-
     const deserialized = deserializeResultParams(serializedBase64);
     expect(deserialized).to.be.deep.equal({
       ...expectedParams,
+      date: new Date(
+        expectedParams.date.getFullYear(),
+        expectedParams.date.getMonth(),
+        expectedParams.date.getDate()
+      ),
+      cid: "",
     } satisfies ResultParams);
   });
   test("should parse result params version 2", async () => {
@@ -93,6 +105,7 @@ describe("resultParams", () => {
     expect(deserialized).to.be.deep.equal({
       ...expectedParams,
       playbackRate4: 4,
+      cid: "",
     } satisfies ResultParams);
   });
   test("should parse result params version 1", async () => {
@@ -124,6 +137,7 @@ describe("resultParams", () => {
       ...expectedParams,
       inputType: null,
       playbackRate4: 4,
+      cid: "",
     } satisfies ResultParams);
   });
 });

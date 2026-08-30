@@ -12,7 +12,6 @@ import {
   rankStr,
   RecordGetSummary,
   ResultParams,
-  serializeResultParams,
 } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { useShareLink } from "@/common/shareLinkAndImage";
@@ -37,6 +36,8 @@ interface Props extends ResultParams {
   exit: () => void;
   largeResult: boolean;
   record: RecordGetSummary | Error | undefined;
+  resultSerialized?: string;
+  resultSign?: string;
 }
 export default function Result(props: Props) {
   const t = useTranslations("play.result");
@@ -62,31 +63,14 @@ export default function Result(props: Props) {
 
   const messageRandom = useRef<number>(Math.random());
 
-  const [serializedParam, setSerializedParam] = useState<string>("");
   const shareLink = useShareLink(
     props.cid,
     props.brief,
     props.lang,
-    serializedParam,
+    props.resultSerialized,
+    props.resultSign,
     props.date ? props.date.getTime() : null
   );
-  useEffect(() => {
-    setSerializedParam(serializeResultParams(props));
-    /* eslint-disable react-hooks/exhaustive-deps */
-  }, [
-    props.date,
-    props.lvName,
-    props.lvType,
-    props.lvDifficulty,
-    props.baseScore100,
-    props.chainScore100,
-    props.bigScore100,
-    props.score100,
-    ...props.judgeCount,
-    props.bigCount,
-    props.playbackRate4,
-    /* eslint-enable react-hooks/exhaustive-deps */
-  ]);
 
   const [showing, setShowing] = useState<number>(0);
   useEffect(() => {

@@ -313,7 +313,8 @@ function SelectedLevelInfo(props: {
     props.brief,
     props.locale,
     serializedParam.at(props.selectedLevel) || "",
-    selectedBestScore?.date
+    selectedBestScore?.date,
+    selectedBestScore?.sign
   );
 
   return (

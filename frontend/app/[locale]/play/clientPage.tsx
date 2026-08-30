@@ -14,11 +14,9 @@ const exampleResult = {
 } as const;
 
 import clsx from "clsx/lite";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
 import {
-  bigScoreRate,
-  chainScoreRate,
   levelTypes,
   RecordGetSummary,
   RecordPost,
@@ -30,7 +28,10 @@ import {
   Level15Play,
   RecordGetSummarySchema,
   LevelPlay,
+  ResultParams,
+  serializeResultParams,
 } from "@falling-nikochan/chart";
+import { sign as signJwt } from "hono/jwt";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
 import RhythmicalSlime from "./rhythmicalSlime.js";
@@ -72,6 +73,11 @@ import { markAsExpected } from "@/common/apiError.js";
 import * as Sentry from "@sentry/nextjs";
 import { useDisplayMode } from "@/scale.js";
 import { refreshBrief } from "@/common/briefCache.js";
+import {
+  initPlaySession,
+  sendRecord,
+  sendResultSerialized,
+} from "./playSessionAuth.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -133,7 +139,9 @@ export function InitPlay({ locale }: { locale: string }) {
         })
         .arrayBuffer((buf) => {
           const playFile = msgpack.decode(buf) as
-            Level6Play | Level15Play | LevelPlay;
+            | Level6Play
+            | Level15Play
+            | LevelPlay;
           console.log("playFile.ver", playFile.ver);
           if (
             playFile.ver === 6 ||
@@ -244,6 +252,32 @@ function Play(props: Props) {
     setAutoOffset_(v);
     localStorage.setItem("autoOffset", v ? "1" : "0");
   }, []);
+  const [playSessionKeyPair, setPlaySessionKeyPair] =
+    useState<CryptoKeyPair | null>(null);
+  const [playSessionToken, setPlaySessionToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    let canceled = false;
+    if (cid) {
+      initPlaySession(
+        cid,
+        (key) => {
+          if (!canceled) {
+            setPlaySessionKeyPair(key);
+          }
+        },
+        (token) => {
+          if (!canceled) {
+            setPlaySessionToken(token);
+          }
+        }
+      );
+      return () => {
+        canceled = true;
+      };
+    }
+  }, [cid]);
+
   const [userOffset, setUserOffset_] = useState<number>(0);
   useEffect(() => {
     if (cid) {
@@ -477,8 +511,10 @@ function Play(props: Props) {
   // result画面を表示する
   const [showResult, setShowResult] = useState<boolean>(false);
   const [resultDate, setResultDate] = useState<Date>();
-
-  const reset = useCallback(() => setShowReady(true), []);
+  const reset = useCallback(() => {
+    setShowReady(true);
+    setResultSign(null);
+  }, []);
   const start = useCallback(() => {
     // Space(スタートボタン)が押されたとき
     switch (ytPlayer.current?.getPlayerState()) {
@@ -632,6 +668,57 @@ function Play(props: Props) {
       return () => clearInterval(t);
     }
   }, [chartPlaying, chartSeq, endSecPassed, getCurrentTimeSec]);
+
+  const result = useMemo<Omit<ResultParams, "date">>(
+    () =>
+      ({
+        // date: resultDate,
+        lvName: chartBrief?.levels.at(lvIndex || 0)?.name || "",
+        lvType: levelTypes.indexOf(
+          chartBrief?.levels.at(lvIndex || 0)?.type || ""
+        ),
+        lvDifficulty: chartBrief?.levels.at(lvIndex || 0)?.difficulty || 0,
+        baseScore100: queryOptions.result
+          ? exampleResult.baseScore100
+          : Math.floor(baseScore * 100),
+        chainScore100: queryOptions.result
+          ? exampleResult.chainScore100
+          : Math.floor(chainScore * 100),
+        bigScore100: queryOptions.result
+          ? exampleResult.bigScore100
+          : Math.floor(bigScore * 100),
+        score100: queryOptions.result
+          ? exampleResult.score100
+          : Math.floor(score * 100),
+        judgeCount: queryOptions.result
+          ? exampleResult.judgeCount
+          : (judgeCount.slice(0, 4) as [number, number, number, number]),
+        bigCount: queryOptions.result ? exampleResult.bigCount : bigCount,
+        inputType: hitType,
+        playbackRate4: oldPlaybackRate * 4,
+        cid,
+        auto: wasAutoPlay,
+      }) satisfies Omit<ResultParams, "date">,
+    [
+      cid,
+      wasAutoPlay,
+      chartBrief,
+      queryOptions,
+      hitType,
+      oldPlaybackRate,
+      baseScore,
+      chainScore,
+      bigScore,
+      score,
+      judgeCount,
+      bigCount,
+      lvIndex,
+    ]
+  );
+  const [resultSerialized, setResultSerialized] = useState<string | undefined>(
+    undefined
+  );
+  const [resultSign, setResultSign] = useState<string | undefined>(undefined);
   useEffect(() => {
     if (chartPlaying && chartEnd && endSecPassed) {
       if (!showResult) {
@@ -673,41 +760,6 @@ function Play(props: Props) {
         }
         const t = setTimeout(() => {
           setShowResult(true);
-          if (
-            cid &&
-            userBegin === null &&
-            playbackRate === 1 &&
-            chartBrief?.levels.at(lvIndex)
-          ) {
-            try {
-              const factor = updateRecordFactor(
-                cid,
-                chartBrief.levels[lvIndex].hash,
-                auto
-              );
-              fetchBackend()
-                .url(`/api/record/${cid}`)
-                .json({
-                  lvHash: chartBrief.levels[lvIndex].hash,
-                  auto,
-                  score,
-                  baseScore,
-                  chainScore,
-                  bigScore,
-                  fc: chainScore === chainScoreRate,
-                  fb: bigScore === bigScoreRate,
-                  editing,
-                  factor,
-                } satisfies RecordPost)
-                .post()
-                .notFound(() => undefined)
-                .error(429, () => undefined)
-                .res()
-                .catch((e: unknown) => captureAndWrap(e, { cid }));
-            } catch {
-              // ignore errors from updateRecordFactor
-            }
-          }
           setResultDate(newResultDate);
           setExitable((ex) =>
             Math.max(
@@ -716,6 +768,59 @@ function Play(props: Props) {
             )
           );
           stop();
+          if (
+            cid &&
+            playSessionKeyPair &&
+            playSessionToken &&
+            chartBrief?.levels.at(lvIndex) &&
+            !queryOptions.result
+          ) {
+            if (oldUserBegin === null && oldPlaybackRate === 1) {
+              // こっちはautoは含む
+              try {
+                const factor = updateRecordFactor(
+                  cid,
+                  chartBrief.levels[lvIndex].hash,
+                  auto
+                );
+                sendRecord(
+                  cid,
+                  {
+                    lvHash: chartBrief.levels[lvIndex].hash,
+                    auto,
+                    score,
+                    baseScore,
+                    chainScore,
+                    bigScore,
+                    fc: chainScore === chainScoreRate,
+                    fb: bigScore === bigScoreRate,
+                    editing,
+                    factor,
+                  },
+                  playSessionKeyPair,
+                  playSessionToken
+                );
+              } catch {
+                // ignore errors from updateRecordFactor
+              }
+            }
+            if (!wasAutoPlay && oldUserBegin === null) {
+              // こっちはplaybackRate変更を含む
+              const resultSerialized = serializeResultParams({
+                ...result,
+                date: newResultDate,
+              });
+              sendResultSerialized(
+                resultSerialized,
+                playSessionKeyPair,
+                playSessionToken,
+                (sign) => {
+                  setResultSerialized(resultSerialized);
+                  setResultSign(sign);
+                }
+              );
+            }
+          }
         }, 1000);
         return () => clearTimeout(t);
       }
@@ -1177,39 +1282,6 @@ function Play(props: Props) {
               date={resultDate || new Date(2025, 6, 1)}
               cid={cid || ""}
               brief={chartBrief || emptyBrief()}
-              lvName={chartBrief?.levels.at(lvIndex || 0)?.name || ""}
-              lvType={levelTypes.indexOf(
-                chartBrief?.levels.at(lvIndex || 0)?.type || ""
-              )}
-              lvDifficulty={
-                chartBrief?.levels.at(lvIndex || 0)?.difficulty || 0
-              }
-              baseScore100={
-                queryOptions.result
-                  ? exampleResult.baseScore100
-                  : Math.floor(baseScore * 100)
-              }
-              chainScore100={
-                queryOptions.result
-                  ? exampleResult.chainScore100
-                  : Math.floor(chainScore * 100)
-              }
-              bigScore100={
-                queryOptions.result
-                  ? exampleResult.bigScore100
-                  : Math.floor(bigScore * 100)
-              }
-              score100={
-                queryOptions.result
-                  ? exampleResult.score100
-                  : Math.floor(score * 100)
-              }
-              judgeCount={
-                queryOptions.result
-                  ? exampleResult.judgeCount
-                  : (judgeCount.slice(0, 4) as [number, number, number, number])
-              }
-              bigCount={queryOptions.result ? exampleResult.bigCount : bigCount}
               reset={reset}
               exit={exit}
               isTouch={isTouch}
@@ -1229,8 +1301,9 @@ function Play(props: Props) {
               }
               largeResult={largeResult}
               record={record}
-              inputType={hitType}
-              playbackRate4={oldPlaybackRate * 4}
+              {...result}
+              resultSerialized={resultSerialized}
+              resultSign={resultSign}
             />
           )}
           {showStopped && (

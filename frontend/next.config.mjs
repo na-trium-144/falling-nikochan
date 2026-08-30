@@ -99,6 +99,9 @@ const env = {
       : process.env.SENTRY_TUNNEL || "",
   // Sentry release name: "<buildVersion>-<buildCommit>"
   SENTRY_RELEASE: commit ? `${buildVersion}-${commit}` : buildVersion,
+  BUILD_KEY_PRIVATE: JSON.parse(
+    readFileSync(join(process.cwd(), ".buildKey.json"), "utf8")
+  ).privateKeyStr,
 };
 console.log("NODE_ENV:", process.env.NODE_ENV);
 console.log("env: ", env);
@@ -124,7 +127,13 @@ let nextConfig = {
   assetPrefix: process.env.ASSET_PREFIX || undefined,
   output: "export",
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
-  env,
+  env: {
+    ...env,
+    // Do not show this in console
+    // TODO: obfuscation
+    RESULT_BUILD_PRIVATE_JWK: readFileSync(".resultBuildPrivKey.json", "utf8"),
+    RESULT_BUILD_PUBLIC_JWK: readFileSync("public/resultBuildKey.json", "utf8"),
+  },
   sassOptions: {
     // pretty-checkbox と keyboard-css が出すwarning
     silenceDeprecations: [

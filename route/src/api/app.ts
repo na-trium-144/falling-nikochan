@@ -9,6 +9,7 @@ import seqFileApp from "./seqFile.js";
 import seqPreviewApp from "./seqPreview.js";
 import hashPasswdApp from "./hashPasswd.js";
 import recordApp from "./record.js";
+import playSessionApp from "./playSession.js";
 import { join, dirname } from "node:path";
 import dotenv from "dotenv";
 import searchApp from "./search.js";
@@ -26,6 +27,7 @@ import { env } from "hono/adapter";
 import { Db } from "mongodb";
 import socialApp from "./social.js";
 import briefMultiApp from "./briefs.js";
+import { ResponseOK } from "../env.js";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 export { getBrief } from "./brief.js";
@@ -33,6 +35,7 @@ export { getBrief } from "./brief.js";
 const apiApp = async (config: {
   getConnInfo: (c: Context) => ConnInfo | null;
   dbMiddleware: MiddlewareHandler;
+  fetchStatic: (e: Bindings, url: URL) => Promise<ResponseOK>;
 }) => {
   const prodCors = cors({
     origin: "*",
@@ -130,6 +133,10 @@ const apiApp = async (config: {
     .route("/search", searchApp)
     .route("/hashPasswd", hashPasswdApp)
     .route("/record", await recordApp({ getConnInfo: config.getConnInfo }))
+    .route(
+      "/playSession",
+      await playSessionApp({ fetchStatic: config.fetchStatic })
+    )
     .route("/ip", forwardCheckApp({ getConnInfo: config.getConnInfo }))
     .route("/oembed", oembedApp)
     .route("/social", socialApp)

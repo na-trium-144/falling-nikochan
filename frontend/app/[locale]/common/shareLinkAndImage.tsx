@@ -27,6 +27,7 @@ export function useShareLink(
   brief: ChartUntil17Min | ChartBrief | undefined | null,
   lang?: string,
   resultParam?: string,
+  sign?: string,
   date?: number | null
 ) {
   const [origin, setOrigin] = useState<string>("");
@@ -36,6 +37,7 @@ export function useShareLink(
   // /route/src/share.ts 内で指定しているクエリパラメータと順番をあわせる
   searchParams.set("lang", lang || "en");
   if (resultParam) searchParams.set("result", resultParam);
+  if (resultParam && sign) searchParams.set("sign", sign);
   // use encodeURIComponent to silence CodeQL false positive alert
   const sharePath = `/share/${encodeURIComponent(cid || "")}`;
   const shareParams = searchParams.toString();

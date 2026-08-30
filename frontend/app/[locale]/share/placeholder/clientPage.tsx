@@ -8,6 +8,7 @@ import {
   RecordGetSummary,
   RecordGetSummarySchema,
   ResultParams,
+  verifyResultParam,
 } from "@falling-nikochan/chart";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
@@ -97,13 +98,27 @@ export default function ShareChart(props: Props) {
       .catch((e: unknown) => captureAndWrap(e, { cid }))
       .then((record) => setRecord(record));
     if (searchParams.get("result")) {
-      try {
-        setSharedResult(deserializeResultParams(searchParams.get("result")!));
-      } catch (e) {
-        console.error(e);
-        Sentry.captureException(e);
-        // TODO: show error message?
-      }
+      const qResult = searchParams.get("result")!;
+      const qSign = searchParams.get("sign");
+      void fetchBackend()
+        .get("/api/resultPublicKey")
+        .json<{ publicKey: string }>()
+        .then((res) => verifyResultParam(qResult, qSign, res.publicKey))
+        .then((isValid) => {
+          if (isValid) {
+            try {
+              setSharedResult(deserializeResultParams(qResult));
+            } catch (e) {
+              console.error(e);
+              Sentry.captureException(e);
+            }
+          } else {
+            console.warn("Invalid result signature");
+          }
+        })
+        .catch((e) => {
+          console.error("Failed to verify result param:", e);
+        });
     }
     return () => clearInterval(titleUpdate);
   }, [t]);
