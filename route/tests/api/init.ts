@@ -79,6 +79,28 @@ const fetchBrief = (_e: Bindings, cid: string) => getBrief(db!, cid);
 
 export { db };
 
+import { readFileSync } from "node:fs";
+
+const testFetchStatic = async (e: Bindings, url: URL): Promise<ResponseOK> => {
+  if (url.pathname === "/buildKey.pub") {
+    let pub = "";
+    for (const p of [
+      "frontend/public/buildKey.pub",
+      "../frontend/public/buildKey.pub",
+      "public/buildKey.pub",
+    ]) {
+      try {
+        pub = readFileSync(p, "utf8");
+        break;
+      } catch {
+        // continue
+      }
+    }
+    return new Response(pub, { status: 200 }) as ResponseOK;
+  }
+  return fetchStatic(e, url);
+};
+
 export const app = new Hono<{ Bindings: Bindings }>({ strict: false });
 app
   .use(
@@ -89,7 +111,14 @@ app
     })
   )
   .use(etag())
-  .route("/api", await apiApp({ getConnInfo: () => null, dbMiddleware }))
+  .route(
+    "/api",
+    await apiApp({
+      getConnInfo: () => null,
+      dbMiddleware,
+      fetchStatic: testFetchStatic,
+    })
+  )
   .route("/share", shareApp({ fetchBrief, fetchStatic }))
   .route("/", redirectApp({ fetchStatic }))
   .use(languageDetector())

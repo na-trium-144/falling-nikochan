@@ -14,6 +14,7 @@ import {
   inputTypes,
   levelTypes,
   ResultParams,
+  verifyResultParam,
 } from "@falling-nikochan/chart";
 import { OGShare } from "./ogShare.js";
 import { OGResult } from "./ogResult.js";
@@ -110,6 +111,7 @@ const ogApp = (config: {
         ogQuery.set("lang", c.req.query("lang") || "en");
         if (c.req.query("result"))
           ogQuery.set("result", c.req.query("result")!);
+        if (c.req.query("sign")) ogQuery.set("sign", c.req.query("sign")!);
         ogQuery.set(
           "brief",
           btoa(sBriefBin)
@@ -150,8 +152,17 @@ const ogApp = (config: {
 
       const lang = c.req.query("lang") || "en"; // c.get("language");
       const qResult = c.req.query("result");
+      const qSign = c.req.query("sign");
       let resultParams: ResultParams | null = null;
       if (qResult) {
+        const isValid = await verifyResultParam(
+          qResult,
+          qSign,
+          env(c).RESULT_SECRET_PUBLIC_KEY!
+        );
+        if (!isValid) {
+          throw new HTTPException(400, { message: "invalidResultParam" });
+        }
         try {
           resultParams = deserializeResultParams(qResult);
         } catch (e) {

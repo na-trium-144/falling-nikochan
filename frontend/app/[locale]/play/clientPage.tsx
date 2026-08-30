@@ -17,8 +17,6 @@ import clsx from "clsx/lite";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
 import {
-  bigScoreRate,
-  chainScoreRate,
   levelTypes,
   RecordGetSummary,
   RecordPost,
@@ -33,6 +31,7 @@ import {
   ResultParams,
   serializeResultParams,
 } from "@falling-nikochan/chart";
+import { sign as signJwt } from "hono/jwt";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
 import RhythmicalSlime from "./rhythmicalSlime.js";
@@ -140,7 +139,9 @@ export function InitPlay({ locale }: { locale: string }) {
         })
         .arrayBuffer((buf) => {
           const playFile = msgpack.decode(buf) as
-            Level6Play | Level15Play | LevelPlay;
+            | Level6Play
+            | Level15Play
+            | LevelPlay;
           console.log("playFile.ver", playFile.ver);
           if (
             playFile.ver === 6 ||
@@ -510,8 +511,10 @@ function Play(props: Props) {
   // result画面を表示する
   const [showResult, setShowResult] = useState<boolean>(false);
   const [resultDate, setResultDate] = useState<Date>();
-
-  const reset = useCallback(() => setShowReady(true), []);
+  const reset = useCallback(() => {
+    setShowReady(true);
+    setResultSign(null);
+  }, []);
   const start = useCallback(() => {
     // Space(スタートボタン)が押されたとき
     switch (ytPlayer.current?.getPlayerState()) {

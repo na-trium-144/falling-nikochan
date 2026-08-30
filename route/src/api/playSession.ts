@@ -1,8 +1,12 @@
 import { Hono } from "hono";
-import { Bindings, ResponseOK, resultSecretPubKey } from "../env.js";
+import { backendOrigin, Bindings, fetchStatic, ResponseOK } from "../env.js";
 import { env } from "hono/adapter";
-import { describeRoute, resolver } from "hono-openapi";
+import { describeRoute, resolver, validator } from "hono-openapi";
+import { sValidatorHook, validationErrorSchema } from "../error.js";
+import { sign, verify } from "hono/jwt";
 import * as v from "valibot";
+import { JsonWebKey } from "crypto";
+import { base64UrlToBytes } from "@falling-nikochan/chart";
 
 const playSessionApp = async (config: {
   fetchStatic: (e: Bindings, url: URL) => Promise<ResponseOK>;
@@ -37,10 +41,55 @@ const playSessionApp = async (config: {
             },
           },
         },
-      }),
-      async (c) => {}
-    )
-    .get(
+        400: {
+          description: "Invalid signature or request body",
+          content: {
+            "application/json": {
+              schema: resolver(await validationErrorSchema()),
+            },
+          },
+        },
+      },
+    }),
+    async (c) => {
+      const token = await c.req.text();
+
+      const buildPubKey = await crypto.subtle.importKey(
+        "jwk",
+        (await (
+          await config.fetchStatic(
+            env(c),
+            new URL("/buildKey.json", backendOrigin(c))
+          )
+        ).json()) as JsonWebKey,
+        { name: "ECDSA", namedCurve: "P-256" },
+        true,
+        ["verify"]
+      );
+
+      let sessionPubKey: Record<string, unknown>;
+      try {
+        sessionPubKey = await verify(token, buildPubKey, "ES256");
+      } catch {
+        return c.json({ message: "badRequest" }, 400);
+      }
+
+      // Sign sessionPublicKey using ResultSecret into JWT
+      const resultSecretPriv = await crypto.subtle.importKey(
+        "pkcs8",
+        base64UrlToBytes(env(c).RESULT_SECRET_PRIVATE_KEY!),
+        { name: "ECDSA", namedCurve: "P-256" },
+        true,
+        ["sign"]
+      );
+      const sessionToken = await sign(sessionPubKey, resultSecretPriv, "ES256");
+
+      return c.text(sessionToken, 200, {
+        "Content-Type": "application/jwt",
+      });
+    }
+  )
+      .get(
       "/publicKey",
       describeRoute({
         description:
@@ -71,5 +120,6 @@ const playSessionApp = async (config: {
         );
       }
     );
+
 
 export default playSessionApp;
