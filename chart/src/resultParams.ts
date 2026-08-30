@@ -1,6 +1,7 @@
 import * as msgpack from "@msgpack/msgpack";
 import { decodeBase64Url, encodeBase64Url } from "hono/utils/encode";
 import * as v from "valibot";
+import { CidSchema } from "./chart.js";
 
 const dateBase = new Date(2025, 2, 1);
 export function serializeDate3(date: Date): number {
@@ -15,6 +16,14 @@ export function serializeDate3(date: Date): number {
 }
 function deserializeDate3(diffDays: number): Date {
   return new Date(dateBase.getTime() + diffDays * (1000 * 60 * 60 * 24));
+}
+export function serializeDate4(date: Date): number {
+  const diffTime = date.getTime() - dateBase.getTime();
+  const diffMinutes = Math.floor(diffTime / (1000 * 60));
+  return diffMinutes;
+}
+export function deserializeDate4(diffMinutes: number): Date {
+  return new Date(dateBase.getTime() + diffMinutes * (1000 * 60));
 }
 
 export interface ResultParams {
@@ -31,6 +40,8 @@ export interface ResultParams {
   bigCount: number | null | false; // null: 存在しない(max=0), false: データがない、不明
   inputType: number | null;
   playbackRate4: number; // 4倍して整数にする
+  auto: boolean;
+  cid: string;
 }
 export const inputTypes = {
   keyboard: 1,
@@ -102,15 +113,43 @@ export const ResultSerializedSchema = () =>
       v.nullable(v.pipe(v.number(), v.integer(), v.minValue(1))), // [11] inputType
       v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(8)), // [12] playbackRate4
     ]),
+    v.tuple([
+      v.literal(4),
+      v.nullable(
+        v.pipe(
+          v.number(),
+          v.integer(),
+          v.minValue(0),
+          v.maxValue(serializeDate4(new Date(2099, 11, 31, 23, 59, 59)))
+        )
+      ), // [1] serializeDate4 (分単位)
+      v.string(), // [2] lvName
+      v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2)), // [3] lvType 0,1,2
+      v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(20)), // [4] lvDifficulty 0-20
+      v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(8000)), // [5] baseScore100
+      v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2000)), // [6] chainScore100
+      v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2000)), // [7] bigScore100
+      v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(12000)), // [8] score100
+      v.pipe(v.array(v.pipe(v.number(), v.integer())), v.length(4)), // [9] judgeCount
+      v.nullable(
+        v.union([
+          v.literal(false),
+          v.pipe(v.number(), v.integer(), v.minValue(0)),
+        ])
+      ), // [10] bigCount
+      v.nullable(v.pipe(v.number(), v.integer(), v.minValue(1))), // [11] inputType
+      v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(8)), // [12] playbackRate4
+      v.boolean(), // [13] auto
+      CidSchema(), // [14] cid
+    ]),
   ]);
 export type ResultSerialized = v.InferOutput<
   ReturnType<typeof ResultSerializedSchema>
 >;
 export function serializeResultParams(params: ResultParams): string {
   const serialized = msgpack.encode([
-    3,
-    // params.date !== null ? params.date.getTime() - dateBase.getTime() : null,
-    params.date !== null ? serializeDate3(params.date) : null,
+    4,
+    params.date !== null ? serializeDate4(params.date) : null,
     params.lvName,
     params.lvType,
     params.lvDifficulty,
@@ -122,6 +161,8 @@ export function serializeResultParams(params: ResultParams): string {
     params.bigCount,
     params.inputType,
     params.playbackRate4,
+    params.auto ?? false,
+    params.cid,
   ] satisfies ResultSerialized);
   return encodeBase64Url(serialized.buffer);
 }
@@ -150,6 +191,8 @@ export function deserializeResultParams(serialized: string): ResultParams {
         bigCount: deserialized[10],
         inputType: deserialized[11] || null,
         playbackRate4: 4,
+        auto: false,
+        cid: "",
       };
     case 3:
       return {
@@ -166,6 +209,26 @@ export function deserializeResultParams(serialized: string): ResultParams {
         bigCount: deserialized[10],
         inputType: deserialized[11] || null,
         playbackRate4: deserialized[12],
+        auto: false,
+        cid: "",
+      };
+    case 4:
+      return {
+        date:
+          deserialized[1] !== null ? deserializeDate4(deserialized[1]) : null,
+        lvName: deserialized[2],
+        lvType: deserialized[3],
+        lvDifficulty: deserialized[4],
+        baseScore100: deserialized[5],
+        chainScore100: deserialized[6],
+        bigScore100: deserialized[7],
+        score100: deserialized[8],
+        judgeCount: deserialized[9] as [number, number, number, number],
+        bigCount: deserialized[10],
+        inputType: deserialized[11] || null,
+        playbackRate4: deserialized[12],
+        auto: deserialized[13],
+        cid: deserialized[14],
       };
     default:
       throw new Error("Invalid version");

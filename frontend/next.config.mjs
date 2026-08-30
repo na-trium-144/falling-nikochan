@@ -99,6 +99,9 @@ const env = {
       : process.env.SENTRY_TUNNEL || "",
   // Sentry release name: "<buildVersion>-<buildCommit>"
   SENTRY_RELEASE: commit ? `${buildVersion}-${commit}` : buildVersion,
+  BUILD_KEY_PRIVATE: JSON.parse(
+    readFileSync(join(process.cwd(), ".buildKey.json"), "utf8")
+  ).privateKeyStr,
 };
 console.log("NODE_ENV:", process.env.NODE_ENV);
 console.log("env: ", env);

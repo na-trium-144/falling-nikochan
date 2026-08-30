@@ -1,4 +1,5 @@
 export * from "./apiConfig.js";
+export * from "./auth.js";
 export * from "./bpm.js";
 export * from "./chart.js";
 export * from "./command.js";
