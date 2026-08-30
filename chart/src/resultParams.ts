@@ -1,4 +1,5 @@
 import * as msgpack from "@msgpack/msgpack";
+import { decodeBase64Url, encodeBase64Url } from "hono/utils/encode";
 import * as v from "valibot";
 
 const dateBase = new Date(2025, 2, 1);
@@ -122,23 +123,10 @@ export function serializeResultParams(params: ResultParams): string {
     params.inputType,
     params.playbackRate4,
   ] satisfies ResultSerialized);
-  let serializedBin = "";
-  for (let i = 0; i < serialized.length; i++) {
-    serializedBin += String.fromCharCode(serialized[i]);
-  }
-  return btoa(serializedBin)
-    .replaceAll("+", "-")
-    .replaceAll("/", "_")
-    .replaceAll("=", "");
+  return encodeBase64Url(serialized.buffer);
 }
 export function deserializeResultParams(serialized: string): ResultParams {
-  const serializedBin = atob(
-    serialized.replaceAll("-", "+").replaceAll("_", "/")
-  );
-  const serializedArr = new Uint8Array(serializedBin.length);
-  for (let i = 0; i < serializedBin.length; i++) {
-    serializedArr[i] = serializedBin.charCodeAt(i);
-  }
+  const serializedArr = decodeBase64Url(serialized);
   const deserialized = v.parse(
     ResultSerializedSchema(),
     msgpack.decode(serializedArr)

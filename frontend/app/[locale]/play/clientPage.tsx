@@ -72,6 +72,7 @@ import { markAsExpected } from "@/common/apiError.js";
 import * as Sentry from "@sentry/nextjs";
 import { useDisplayMode } from "@/scale.js";
 import { refreshBrief } from "@/common/briefCache.js";
+import { initPlaySession } from "./playSessionAuth.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -244,6 +245,32 @@ function Play(props: Props) {
     setAutoOffset_(v);
     localStorage.setItem("autoOffset", v ? "1" : "0");
   }, []);
+  const [playSessionKeyPair, setPlaySessionKeyPair] =
+    useState<CryptoKeyPair | null>(null);
+  const [playSessionToken, setPlaySessionToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    let canceled = false;
+    if (cid) {
+      initPlaySession(
+        cid,
+        (key) => {
+          if (!canceled) {
+            setPlaySessionKeyPair(key);
+          }
+        },
+        (token) => {
+          if (!canceled) {
+            setPlaySessionToken(token);
+          }
+        }
+      );
+      return () => {
+        canceled = true;
+      };
+    }
+  }, [cid]);
+
   const [userOffset, setUserOffset_] = useState<number>(0);
   useEffect(() => {
     if (cid) {

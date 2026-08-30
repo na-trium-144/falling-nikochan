@@ -129,6 +129,7 @@ let nextConfig = {
     // Do not show this in console
     // TODO: obfuscation
     RESULT_BUILD_PRIVATE_JWK: readFileSync(".resultBuildPrivKey.json", "utf8"),
+    RESULT_BUILD_PUBLIC_JWK: readFileSync("public/resultBuildKey.json", "utf8"),
   },
   sassOptions: {
     // pretty-checkbox と keyboard-css が出すwarning
