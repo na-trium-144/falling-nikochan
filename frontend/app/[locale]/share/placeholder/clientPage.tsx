@@ -52,6 +52,7 @@ interface Props {
 }
 export default function ShareChart(props: Props) {
   const t = useTranslations("share");
+  const te = useTranslations("error");
   const { locale } = props;
   const [cid, setCId] = useState<string>("");
   // const { res, brief } = await getBrief(cid, true);
@@ -59,7 +60,9 @@ export default function ShareChart(props: Props) {
     null
   );
   const [record, setRecord] = useState<RecordGetSummary[] | Error | null>(null);
-  const [sharedResult, setSharedResult] = useState<ResultParams | null>(null);
+  const [sharedResult, setSharedResult] = useState<
+    ResultParams | string | null
+  >(null);
 
   useEffect(() => {
     const cid = window.location.pathname.split("/").pop()!;
@@ -101,12 +104,11 @@ export default function ShareChart(props: Props) {
         setSharedResult(deserializeResultParams(searchParams.get("result")!));
       } catch (e) {
         console.error(e);
-        Sentry.captureException(e);
-        // TODO: show error message?
+        setSharedResult(te("api.invalidResultParam"));
       }
     }
     return () => clearInterval(titleUpdate);
-  }, [t]);
+  }, [t, te]);
 
   return (
     <main
