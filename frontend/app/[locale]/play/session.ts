@@ -55,7 +55,7 @@ export function initSession(
  * sessionIdがあればlocalStorageからsessionを取得し、sessionStorageにも保存
  * なければsessionStorageから取得
  * それもなければnull
- * 
+ *
  * エラーハンドリングはあえて行わず、 error.tsx に任せる。
  */
 export function getSession(sessionId?: number): SessionData | null {
