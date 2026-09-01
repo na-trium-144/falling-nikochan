@@ -481,7 +481,8 @@ export async function createBrief(
         bpmMax: levelsFreeze[i].bpmChanges
           .map((b) => b.bpm)
           .reduce((a, b) => Math.max(a, b)),
-        length: "ytBegin" in level ? level.ytEndSec - level.ytBegin : 0,
+        length:
+          "ytBegin" in level ? Math.max(level.ytEndSec - level.ytBegin, 0) : 0,
       }) satisfies ChartBrief["levels"][number]
   );
   return {
