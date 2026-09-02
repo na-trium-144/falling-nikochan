@@ -52,7 +52,7 @@
     "eslint": "catalog:eslint",
     "eslint-config-next": "catalog:next",
     "eslint-config-prettier": "10.1.8",
-    "globals": "^17.10.0",
+    "globals": "^17.12.0",
     "next": "catalog:next",
     "prettier": "3.9.6",
     "semver": "^7.8.5",
