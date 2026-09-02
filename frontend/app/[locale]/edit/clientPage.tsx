@@ -549,7 +549,7 @@ export default function Edit(props: {
         )}
       >
         <MobileHeader
-          className="flex-1 "
+          className="flex-1 edit-wide:hidden"
           noBackButton={!standalone && !insideFrame}
         >
           {t("titleShort")} ID: {chart?.cid}
