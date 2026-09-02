@@ -217,7 +217,7 @@ export class ChartEditing extends EventEmitter<EventType> {
         ...this.levels.slice(0, idx - 1),
         this.levels[idx],
         this.levels[idx - 1],
-        ...this.levels.slice(idx),
+        ...this.levels.slice(idx + 1),
       ]);
       this.#currentLevelIndex = idx - 1;
       this.emit("rerender");
@@ -235,7 +235,7 @@ export class ChartEditing extends EventEmitter<EventType> {
         ...this.levels.slice(0, idx),
         this.levels[idx + 1],
         this.levels[idx],
-        ...this.levels.slice(idx + 1),
+        ...this.levels.slice(idx + 2),
       ]);
       this.#currentLevelIndex = idx + 1;
       this.emit("rerender");
