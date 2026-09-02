@@ -63,9 +63,9 @@ catalogs:
     next: 16.1.7
   react:
     "@types/react": ^19.2.18
-    "@types/react-dom": ^19.2.3
+    "@types/react-dom": ^19.2.5
     react: ^19.2.8
-    react-dom: ^19.2.6
+    react-dom: ^19.2.8
   sentry:
     "@sentry/browser": 10.65.0
     "@sentry/bun": 10.65.0
