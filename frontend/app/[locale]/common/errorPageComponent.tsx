@@ -6,6 +6,7 @@ import { ButtonHighlight } from "@/common/button";
 import { Box, WarningBox } from "./box";
 import { useEffect, useState } from "react";
 import { ContactFormLink, GitHubLink, XLink } from "@/clientPage";
+import * as v from "valibot";
 
 // IntlProvider内の場合はuseTranslationsで取得する。
 // IntlProvider外で使う場合はサーバーサイドでerror.errorPage.goHomeに相当するメッセージを取得してpropsに渡す。
@@ -94,6 +95,7 @@ export function ErrorMessage({
   } catch {
     // pass
   }
+  const flattenedIssues = v.isValiError(error) ? v.flatten(error.issues) : null;
   if (error) {
     return (
       <>
@@ -106,7 +108,24 @@ export function ErrorMessage({
         >
           <span className="fn-glass-1" />
           <span className="fn-glass-2" />
-          {String(error)}
+          {flattenedIssues ? (
+            <ul>
+              {flattenedIssues?.root && (
+                <li>root: {flattenedIssues.root.join(", ")}</li>
+              )}
+              {flattenedIssues?.nested &&
+                Object.entries(flattenedIssues.nested).map(([key, issues]) => (
+                  <li key={key}>
+                    {key}: {issues?.join(", ")}
+                  </li>
+                ))}
+              {flattenedIssues?.other && (
+                <li>other: {flattenedIssues.other.join(", ")}</li>
+              )}
+            </ul>
+          ) : (
+            String(error)
+          )}
           {eventId && <div className="text-dim mt-1">EventID={eventId}</div>}
         </pre>
         {t &&
