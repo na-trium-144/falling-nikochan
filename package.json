@@ -46,7 +46,7 @@
     "@eslint/config-helpers": "~0.4.2",
     "@eslint/eslintrc": "catalog:eslint",
     "@eslint/js": "catalog:eslint",
-    "@tsconfig/node23": "^23.0.4",
+    "@tsconfig/node23": "^23.0.5",
     "@types/node": "^22.19.7",
     "core-js": "3.49.0",
     "eslint": "catalog:eslint",
