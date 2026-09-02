@@ -1,3 +1,17 @@
+## ver. 17.5 - 2026/09/03
+
+* levelの長さが負になった場合のエラーを修正 [#1346](https://github.com/na-trium-144/falling-nikochan/pull/1346)
+    * エラーコンポーネントでvalierrorをflattenして表示
+    * sessionのパースエラーをcatchせずerrorBoundaryに投げる
+    * ChartBriefでlengthが負にならないようにする
+* resultのパースエラー時の挙動の改善 [#1347](https://github.com/na-trium-144/falling-nikochan/pull/1347)
+    * resultにbase64デコードできない文字が含まれる場合、無視する
+    * resultのパースエラー時にメッセージを表示
+* レベルの増殖を修正 [#1361](https://github.com/na-trium-144/falling-nikochan/pull/1361)
+    * レベルの増殖を修正
+    * #1324 によるレベル選択の位置ずれを修正
+    * 画面幅が48〜50remのときヘッダーが消えるのを修正
+
 ## ver. 17.4 - 2026/08/26
 
 * ver8以前のパスワードなし譜面にはアクセスできないようにする [#1321](https://github.com/na-trium-144/falling-nikochan/pull/1321)

@@ -2,7 +2,7 @@ import * as v from "valibot";
 
 const versionKey = "lastVisited";
 const latestChangelogMajor = 17;
-const latestChangelogMinor = 0;
+const latestChangelogMinor = 5;
 export function lastVisitedOld(): boolean {
   try {
     if (localStorage.getItem(versionKey)) {
