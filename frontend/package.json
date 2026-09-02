@@ -67,7 +67,7 @@
     "@types/react-dom": "catalog:react",
     "dotenv": "catalog:",
     "postcss": "catalog:",
-    "sass": "1.102.0",
+    "sass": "1.103.1",
     "svgo": "4.0.2",
     "tailwindcss": "catalog:tailwindcss",
     "woff2sfnt-sfnt2woff": "^1.0.0"
