@@ -14,7 +14,7 @@
     "dev": "tsx watch serve-local.ts"
   },
   "dependencies": {
-    "@axiomhq/pino": "1.8.0",
+    "@axiomhq/pino": "2.0.0",
     "@falling-nikochan/chart": "workspace:*",
     "@falling-nikochan/i18n": "workspace:*",
     "@hono/node-server": "2.0.8",
