@@ -27,7 +27,7 @@ export function IndexMain(props: Props) {
 
   return (
     <main className="relative flex flex-col w-full h-full items-center">
-      <MobileHeader noBackButton={props.noBackButtonMobile}>
+      <MobileHeader className="no-pc" noBackButton={props.noBackButtonMobile}>
         {props.title}
       </MobileHeader>
       <PCHeader locale={locale} />

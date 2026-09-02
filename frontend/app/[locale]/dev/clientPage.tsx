@@ -45,7 +45,7 @@ export function DevPage(props: { locale: string }) {
   return (
     <main className="w-full h-full overflow-clip ">
       <div className="flex flex-col w-full h-full items-center ">
-        <MobileHeader>{t("title")}</MobileHeader>
+        <MobileHeader className="no-pc">{t("title")}</MobileHeader>
         <div
           className={clsx(
             "flex-1 min-h-0 w-full px-6 main-wide:pt-3 main-wide:px-6",
