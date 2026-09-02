@@ -25,55 +25,54 @@ export function SharedResultBox(props: Props) {
   const th = useTranslations("share");
   const t = useTranslations("play.result");
   const ts = useTranslations("play.status");
+  const { result } = props;
   const [resultDate, setResultDate] = useState<string>("");
   useEffect(() => {
-    if (typeof props.result === "object" && props.result.date) {
-      setResultDate(new Date(props.result.date).toLocaleDateString());
+    if (typeof result === "object" && result.date) {
+      setResultDate(new Date(result.date).toLocaleDateString());
     }
-  }, [props.result]);
+  }, [result]);
   return (
     <Box classNameOuter="w-max max-w-full mx-auto py-4 px-6 mt-4">
       <p className="fn-heading-box">&lt; {th("sharedResult")} &gt;</p>
-      {typeof props.result === "string" ? (
+      {typeof result === "string" ? (
         // error message
-        <p className="text-center ">{props.result}</p>
+        <p className="text-center ">{result}</p>
       ) : (
         <>
           <p className="text-center ">
-            {props.result.lvName && (
-              <span className="font-title mr-2">{props.result.lvName}</span>
+            {result.lvName && (
+              <span className="font-title mr-2">{result.lvName}</span>
             )}
             <span
               className={clsx(
                 "inline-block mr-2",
                 "fn-level-type",
-                levelTypes[props.result.lvType]
+                levelTypes[result.lvType]
               )}
             >
-              <span>{levelTypes[props.result.lvType]}-</span>
-              <span>{props.result.lvDifficulty}</span>
+              <span>{levelTypes[result.lvType]}-</span>
+              <span>{result.lvDifficulty}</span>
             </span>
-            {props.result.playbackRate4 !== 4 && (
+            {result.playbackRate4 !== 4 && (
               <span className="inline-block mr-2">
                 <span className="mr-1">{t("playbackRate")}:</span>
-                <span className="text-lg">
-                  ×{props.result.playbackRate4 / 4}
-                </span>
+                <span className="text-lg">×{result.playbackRate4 / 4}</span>
               </span>
             )}
-            {props.result.date && (
+            {result.date && (
               <span className="inline-block text-dim">
                 <span>(</span>
                 <span>{resultDate}</span>
-                {props.result.inputType === inputTypes.keyboard ? (
+                {result.inputType === inputTypes.keyboard ? (
                   <KeyboardOne className="inline-block ml-2 align-middle " />
-                ) : props.result.inputType === inputTypes.mouse ? (
+                ) : result.inputType === inputTypes.mouse ? (
                   <MouseOne className="inline-block ml-2 align-middle " />
-                ) : props.result.inputType === inputTypes.pen ? (
+                ) : result.inputType === inputTypes.pen ? (
                   <Write className="inline-block ml-2 align-middle " />
-                ) : props.result.inputType === inputTypes.touch ? (
+                ) : result.inputType === inputTypes.touch ? (
                   <ClickTap className="inline-block ml-2 align-middle " />
-                ) : props.result.inputType === inputTypes.gamepad ? (
+                ) : result.inputType === inputTypes.gamepad ? (
                   <GameThree className="inline-block ml-2 align-middle " />
                 ) : null}
                 <span>)</span>
@@ -95,9 +94,9 @@ export function SharedResultBox(props: Props) {
               <div className="flex flex-col w-48">
                 {(
                   [
-                    ["baseScore", props.result.baseScore100],
-                    ["chainBonus", props.result.chainScore100],
-                    ["bigNoteBonus", props.result.bigScore100],
+                    ["baseScore", result.baseScore100],
+                    ["chainBonus", result.chainScore100],
+                    ["bigNoteBonus", result.bigScore100],
                   ] as const
                 ).map(([name, score100], i) => (
                   <p
@@ -105,7 +104,7 @@ export function SharedResultBox(props: Props) {
                     className={clsx(
                       "flex flex-row w-full items-baseline",
                       name === "bigNoteBonus" &&
-                        props.result.bigCount === null &&
+                        result.bigCount === null &&
                         "text-dim"
                     )}
                   >
@@ -123,11 +122,11 @@ export function SharedResultBox(props: Props) {
                 <p className="flex flex-row w-full items-baseline ">
                   <span className="flex-1 text-sm ">{t("totalScore")}:</span>
                   <span className="text-2xl">
-                    {Math.floor(props.result.score100 / 100)}
+                    {Math.floor(result.score100 / 100)}
                   </span>
                   <span className="">.</span>
                   <span className="text-left w-5 ">
-                    {(props.result.score100 % 100).toString().padStart(2, "0")}
+                    {(result.score100 % 100).toString().padStart(2, "0")}
                   </span>
                 </p>
               </div>
@@ -135,17 +134,17 @@ export function SharedResultBox(props: Props) {
                 <div>
                   <span className="mr-2">{t("rank")}:</span>
                   <span className="text-3xl">
-                    {rankStr(props.result.score100 / 100)}
+                    {rankStr(result.score100 / 100)}
                   </span>
                 </div>
-                {props.result.chainScore100 === chainScoreRate * 100 ? (
+                {result.chainScore100 === chainScoreRate * 100 ? (
                   <div className="text-xl">
                     <span className="">
-                      {props.result.baseScore100 === baseScoreRate * 100
+                      {result.baseScore100 === baseScoreRate * 100
                         ? t("perfect")
                         : t("full")}
                     </span>
-                    {props.result.bigScore100 === bigScoreRate * 100 && (
+                    {result.bigScore100 === bigScoreRate * 100 && (
                       <span className="font-bold">+</span>
                     )}
                     <span>!</span>
@@ -163,22 +162,18 @@ export function SharedResultBox(props: Props) {
                     className="inline-block text-sm w-4 translate-y-0.5"
                   />
                   <span className="flex-1 text-xs ">{ts(name)}</span>
-                  <span className="text-base ">
-                    {props.result.judgeCount[ji]}
-                  </span>
+                  <span className="text-base ">{result.judgeCount[ji]}</span>
                 </div>
               ))}
-              {props.result.bigCount !== false && (
+              {result.bigCount !== false && (
                 <div
                   className={clsx(
                     "flex flex-row items-baseline",
-                    props.result.bigCount === null && "text-dim"
+                    result.bigCount === null && "text-dim"
                   )}
                 >
                   <span className="flex-1 text-xs ">{ts("big")}</span>
-                  <span className="text-base ">
-                    {props.result.bigCount || 0}
-                  </span>
+                  <span className="text-base ">{result.bigCount || 0}</span>
                 </div>
               )}
             </div>

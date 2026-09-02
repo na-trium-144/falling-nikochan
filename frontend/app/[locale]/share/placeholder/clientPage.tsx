@@ -1,6 +1,5 @@
 "use client";
 
-import * as Sentry from "@sentry/nextjs";
 import clsx from "clsx/lite";
 import {
   ChartBrief,
