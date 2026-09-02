@@ -50,7 +50,7 @@ interface Props {
   cid: string | undefined;
   brief: (ChartBrief & { etag: string }) | Error | null;
   record: RecordGetSummary[] | Error | null;
-  sharedResult?: ResultParams | null;
+  sharedResult?: ResultParams | string | null;
   locale: string;
   backButton?: () => void;
   forceShowCId?: boolean; // 通常はPCでは表示、モバイルでは非表示だが、trueの場合モバイルでも表示する
