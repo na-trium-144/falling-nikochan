@@ -187,8 +187,8 @@ importers:
         specifier: catalog:eslint
         version: 9.39.5
       '@tsconfig/node23':
-        specifier: ^23.0.4
-        version: 23.0.4
+        specifier: ^23.0.5
+        version: 23.0.5
       '@types/node':
         specifier: ^22.19.7
         version: 22.19.7
@@ -2475,8 +2475,8 @@ packages:
   '@tailwindcss/postcss@4.3.3':
     resolution: {integrity: sha512-JTSZZGQi1AyKirbLN3azmjVzef92tcX7h+iSqPdaeStyFpGpDlKvvpxeOE8njhbUanbRwr3z8DyzhICWnMtQeg==}
 
-  '@tsconfig/node23@23.0.4':
-    resolution: {integrity: sha512-19Wzl9zYgJL4yQelkeIPhLYk8KKHjlxwf2lAil5PvOuLa+9rvl4k2aVFaFOe/6GsUMnG0miHelYOiGfUjBvplg==}
+  '@tsconfig/node23@23.0.5':
+    resolution: {integrity: sha512-QpcxwBG56HNC4qhqeJfFvsQrCWMjx24ACcOBcWGWfd78MXsckF1/fxZ+pBGVP5Id2KWwxtknEQiQJY9JWhvwHw==}
 
   '@tybys/wasm-util@0.10.1':
     resolution: {integrity: sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg==}
@@ -7349,7 +7349,7 @@ snapshots:
       postcss: 8.5.26
       tailwindcss: 4.3.3
 
-  '@tsconfig/node23@23.0.4': {}
+  '@tsconfig/node23@23.0.5': {}
 
   '@tybys/wasm-util@0.10.1':
     dependencies:
