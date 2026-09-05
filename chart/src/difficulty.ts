@@ -35,7 +35,7 @@ import { getTimeSec } from "./seq.js";
 // function npsToLv(nps: number, multiHit: number) {
 //   return Math.log(nps * multiHit) * 5 - 2;
 // }
-function lvToNps(lv: number, multiHit: number) {
+export function lvToNps(lv: number, multiHit: number) {
   return Math.exp((lv + 2) / 5) / multiHit;
 }
 
@@ -114,7 +114,7 @@ export function difficulty(
   return alv;
 }
 
-function agentsPlay(
+export function agentsPlay(
   level: { notes: NoteCommand[] | NoteCommand3[]; bpmChanges: BPMChange[] },
   multiHit: number,
   notesHitSec: number[],
