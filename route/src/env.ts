@@ -9,6 +9,7 @@ import { env } from "hono/adapter";
 import { Db } from "mongodb";
 import type { ErrorEvent, EventHint } from "@sentry/hono/node";
 import type { BaseLogger } from "@hono/structured-logger";
+import type { webcrypto } from "node:crypto";
 
 export interface Bindings {
   ASSETS?: { fetch: typeof fetch };
@@ -46,6 +47,25 @@ export function secretSalt(e: Bindings) {
   }
 }
 
+export async function buildPubKey(
+  c:
+    | Context<{ Bindings: Bindings }>
+    | Context<{ Bindings: Bindings; Variables: any }>,
+  fetchStatic: (e: Bindings, url: URL) => Promise<ResponseOK>
+) {
+  return await crypto.subtle.importKey(
+    "jwk",
+    (await (
+      await fetchStatic(
+        env(c),
+        new URL("/resultBuildKey.json", backendOrigin(c))
+      )
+    ).json()) as webcrypto.JsonWebKey,
+    { name: "ECDSA", namedCurve: "P-256" },
+    true,
+    ["verify"]
+  );
+}
 export async function resultSecretPubKey(e: Bindings) {
   let keyBase64: string;
   if (e.RESULT_SECRET_PUBLIC_KEY) {
@@ -105,8 +125,7 @@ export function immutable() {
 export function backendOrigin(
   c:
     | Context<{ Bindings: Bindings }>
-    | Context<{ Bindings: Bindings; Variables: { logger: BaseLogger } }>
-    | Context<{ Bindings: Bindings; Variables: { db: () => Promise<Db> } }>
+    | Context<{ Bindings: Bindings; Variables: any }>
 ): string {
   if (env(c).BACKEND_PREFIX) {
     return env(c).BACKEND_PREFIX!;
