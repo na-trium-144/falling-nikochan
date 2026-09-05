@@ -79,6 +79,36 @@ const fetchBrief = (_e: Bindings, cid: string) => getBrief(db!, cid);
 
 export { db };
 
+import { sign } from "hono/jwt";
+import type { ResponseOK } from "@falling-nikochan/route";
+
+let testResultBuildKeyPair: CryptoKeyPair;
+export async function getTestResultBuildKeyPair() {
+  if (!testResultBuildKeyPair) {
+    testResultBuildKeyPair = await crypto.subtle.generateKey(
+      { name: "ECDSA", namedCurve: "P-256" },
+      true,
+      ["sign", "verify"]
+    );
+  }
+  return testResultBuildKeyPair;
+}
+
+export const testFetchStatic = async (
+  e: Bindings,
+  url: URL
+): Promise<ResponseOK> => {
+  if (url.pathname === "/resultBuildKey.json") {
+    const keyPair = await getTestResultBuildKeyPair();
+    const jwk = await crypto.subtle.exportKey("jwk", keyPair.publicKey);
+    return new Response(JSON.stringify(jwk), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    }) as ResponseOK;
+  }
+  return fetchStatic(e, url);
+};
+
 export const app = new Hono<{ Bindings: Bindings }>({ strict: false });
 app
   .use(
@@ -89,19 +119,26 @@ app
     })
   )
   .use(etag())
-  .route("/api", await apiApp({ getConnInfo: () => null, dbMiddleware }))
-  .route("/share", shareApp({ fetchBrief, fetchStatic }))
-  .route("/", redirectApp({ fetchStatic }))
+  .route(
+    "/api",
+    await apiApp({
+      getConnInfo: () => null,
+      dbMiddleware,
+      fetchStatic: testFetchStatic,
+    })
+  )
+  .route("/share", shareApp({ fetchBrief, fetchStatic: testFetchStatic }))
+  .route("/", redirectApp({ fetchStatic: testFetchStatic }))
   .use(languageDetector())
   .onError(
     onError({
-      fetchStatic,
+      fetchStatic: testFetchStatic,
       isTest: true,
       captureException: null,
       setTransactionName: null,
     })
   )
-  .notFound(notFound({ fetchStatic }));
+  .notFound(notFound({ fetchStatic: testFetchStatic }));
 
 export const dummyCid = "100000";
 export const dummyDate = new Date(2025, 0, 1);
