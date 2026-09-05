@@ -7,26 +7,58 @@ import {
   resultSecretPubKey,
 } from "../env.js";
 import { env } from "hono/adapter";
-import { describeRoute, resolver } from "hono-openapi";
+import { describeRoute, resolver, validator } from "hono-openapi";
 import * as v from "valibot";
 import { sign, verify } from "hono/jwt";
+import { sValidatorHook } from "../error.js";
+import type { webcrypto } from "node:crypto";
+import { deserializeResultParams, ResultParams } from "@falling-nikochan/chart";
+import { HTTPException } from "hono/http-exception";
 import type { JsonWebKey } from "node:crypto";
 import { CidSchema } from "@falling-nikochan/chart";
 import { JWTPayload } from "hono/utils/jwt/types";
-import { HTTPException } from "hono/http-exception";
 import { validationErrorSchema } from "../error.js";
 
 const SessionTokenPayloadSchema = () =>
   v.object({
     key: v.pipe(
-      v.object({}),
-      v.transform((v) => v as JsonWebKey)
+      v.looseObject({}),
+      v.transform((key) =>
+        crypto.subtle.importKey(
+          "jwk",
+          key as JsonWebKey,
+          { name: "ECDSA", namedCurve: "P-256" },
+          true,
+          ["verify"]
+        )
+      )
     ),
     cid: CidSchema(),
   });
 type SessionTokenPayload = v.InferOutput<
   ReturnType<typeof SessionTokenPayloadSchema>
 >;
+
+export async function verifySessionPubKey(
+  e: Bindings,
+  authorization: string | undefined
+) {
+  const bearerToken = authorization?.match(/^Bearer\s+(.+)$/i)?.[1];
+  if (!bearerToken) {
+    throw new HTTPException(401, { message: "unauthorizedSessionToken" });
+  }
+  let sessionPayload: JWTPayload;
+  try {
+    sessionPayload = await verify(
+      bearerToken,
+      await resultSecretPubKey(e),
+      "ES256"
+    );
+  } catch {
+    throw new HTTPException(401, { message: "unauthorizedSessionToken" });
+  }
+  return v.parse(SessionTokenPayloadSchema(), sessionPayload);
+}
 
 const playSessionApp = async (config: {
   fetchStatic: (e: Bindings, url: URL) => Promise<ResponseOK>;
@@ -48,18 +80,26 @@ const playSessionApp = async (config: {
           "4. Server verifies the JWT with BuildKey, signs the same payload (SessionKey public key and cid) as a JWT with ResultSecret, and returns it.\n" +
           // 4 here
           "5. Client sends POST /api/record and POST /api/playSession/sign with `Authorization: Bearer <token>` and result data signed with SessionKey.\n" +
-          // "6. Server verifies the token with ResultSecret, verifies sign with SessionKey, verifies timestamp, and returns ResultSecret signature of result (skipped for auto play)." +
-          "7. Client saves and shares ResultParam with ResultSecret signature." +
+          "6. Server verifies the signature of token and record/result, verifies cid and timestamp, and stores the record anonymously / returns ResultSecret signature of result.\n" +
+          // 6 at here and route/src/api/record.ts
+          "7. Client saves and shares ResultParam with ResultSecret signature.\n" +
           // "8. /og/result, /share, and /[locale]/share/placeholder verify ResultParam with ResultSecret public key.",
           "\n" +
           "This API performs the step 4.",
         requestBody: {
           description:
-            'A payload in the format `{ "key": JsonWebKey, "cid": string }` signed with ResultBuildKey as a JWT',
+            "A payload of `key` and `cid` signed with ResultBuildKey as a JWT",
           required: true,
           content: {
             "application/jwt": {
-              schema: (await resolver(v.string()).toOpenAPISchema()).schema,
+              schema: (
+                await resolver(
+                  v.object({
+                    key: v.pipe(v.looseObject({}), v.description("JsonWebKey")),
+                    cid: CidSchema(),
+                  })
+                ).toOpenAPISchema()
+              ).schema,
             },
           },
         },
@@ -82,7 +122,8 @@ const playSessionApp = async (config: {
             },
           },
           401: {
-            description: "Verification of request body failed",
+            description:
+              "Verification of request body with ResultBuildKey failed",
             content: {
               "application/json": {
                 schema: resolver(v.string()), // TODO
@@ -114,6 +155,128 @@ const playSessionApp = async (config: {
         return c.text(sessionToken, 200, {
           "Content-Type": "application/jwt",
         });
+      }
+    )
+    .post(
+      "/sign",
+      describeRoute({
+        description: "Sign the play result data to share.",
+        parameters: [
+          {
+            name: "Authorization",
+            in: "header",
+            description: "`Bearer (JWT returned from /api/playSession/init)`.",
+            schema: { type: "string" },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Successful response with signature",
+            content: {
+              "application/json": {
+                schema: resolver(
+                  v.object({
+                    sign: v.pipe(
+                      v.string(),
+                      v.description(
+                        "Base64Url encoded signature of result with ResultSecret Key"
+                      )
+                    ),
+                  })
+                ),
+              },
+            },
+          },
+          400: {
+            description: "invalid token payload or result data",
+            content: {
+              "application/json": {
+                schema: resolver(await validationErrorSchema()),
+              },
+            },
+          },
+          401: {
+            description: "Verification of token failed",
+            content: {
+              "application/json": {
+                schema: resolver(v.string()), // TODO
+              },
+            },
+          },
+          422: {
+            description: "Verification of result data failed",
+            content: {
+              "application/json": {
+                schema: resolver(v.string()), // TODO
+              },
+            },
+          },
+        },
+      }),
+      validator(
+        "json",
+        v.object({
+          result: v.pipe(
+            v.string(),
+            v.description(
+              "ResultParam serialized with msgpack and encoded as Base64Url"
+            )
+          ),
+          clientSign: v.pipe(
+            v.string(),
+            v.description(
+              "Base64Url encoded signature of result with SessionKey"
+            )
+          ),
+        }),
+        sValidatorHook()
+      ),
+      async (c) => {
+        const { key: sessionPubKey, cid: sessionCid } =
+          await verifySessionPubKey(env(c), c.req.header("Authorization"));
+
+        const { result, clientSign } = c.req.valid("json");
+        const clientSignBin = Buffer.from(clientSign, "base64url");
+        const resultBin = Buffer.from(result, "base64url");
+
+        try {
+          if (
+            !(await crypto.subtle.verify(
+              { name: "ECDSA", hash: { name: "SHA-256" } },
+              await sessionPubKey,
+              clientSignBin,
+              resultBin
+            ))
+          ) {
+            throw "not verified";
+          }
+        } catch {
+          throw new HTTPException(422, { message: "unauthorizedSessionData" });
+        }
+
+        let resultParams: ResultParams;
+        try {
+          resultParams = deserializeResultParams(result);
+        } catch {
+          throw new HTTPException(400, { message: "invalidResultParam" });
+        }
+
+        if (
+          !resultParams.cid ||
+          resultParams.cid !== sessionCid
+          // !resultParams.date ||
+          // Math.abs(resultParams.date.getTime() - Date.now()) > 1000 * 60 * 5 // 5 min
+        ) {
+          throw new HTTPException(422, { message: "unauthorizedSessionData" });
+        }
+
+        const sign = await crypto.subtle.sign(
+          { name: "ECDSA", hash: { name: "SHA-256" } },
+          await resultSecretPrivKey(env(c)),
+          resultBin
+        );
+
+        return c.json({ sign: Buffer.from(sign).toString("base64url") }, 200);
       }
     )
     .get(

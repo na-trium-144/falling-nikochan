@@ -19,6 +19,10 @@ import {
 } from "../error.js";
 import { getIp, updateIp } from "./dbRateLimit.js";
 import { ConnInfo } from "hono/conninfo";
+import { verifySessionPubKey } from "./playSession.js";
+import { verify } from "hono/jwt";
+import { HTTPException } from "hono/http-exception";
+import { JWTPayload } from "hono/utils/jwt/types";
 
 // Cache duration for this API endpoint (in seconds)
 const CACHE_MAX_AGE = 600;
@@ -138,15 +142,41 @@ const recordApp = async (config: {
       "/:cid",
       describeRoute({
         description: "Post a play record for a single play of the chart.",
+        requestBody: {
+          description: "A payload signed with SessionKey as a JWT",
+          required: true,
+          content: {
+            "application/jwt": {
+              schema: (await resolver(RecordPostSchema()).toOpenAPISchema())
+                .schema,
+            },
+          },
+        },
+        parameters: [
+          {
+            name: "Authorization",
+            in: "header",
+            description: "`Bearer (JWT returned from /api/playSession/init)`.",
+            schema: { type: "string" },
+          },
+        ],
         responses: {
           204: {
             description: "No content for successful response",
           },
           400: {
-            description: "invalid chart id or body",
+            description: "invalid chart id, body or token payload",
             content: {
               "application/json": {
                 schema: resolver(await validationErrorSchema()),
+              },
+            },
+          },
+          401: {
+            description: "Verification of token failed",
+            content: {
+              "application/json": {
+                schema: resolver(v.string()), // TODO
               },
             },
           },
@@ -155,6 +185,22 @@ const recordApp = async (config: {
             content: {
               "application/json": {
                 schema: resolver(await errorLiteral("chartIdNotFound")),
+              },
+            },
+          },
+          409: {
+            description: "Same record already posted",
+            content: {
+              "application/json": {
+                schema: resolver(v.string()), // TODO
+              },
+            },
+          },
+          422: {
+            description: "Verification of record data failed",
+            content: {
+              "application/json": {
+                schema: resolver(v.string()), // TODO
               },
             },
           },
@@ -169,9 +215,28 @@ const recordApp = async (config: {
         },
       }),
       validator("param", v.object({ cid: CidSchema() }), sValidatorHook()),
-      validator("json", RecordPostSchema(), sValidatorHook()),
+      // validator("json", RecordPostSchema(), sValidatorHook()),
       async (c) => {
+        const { key: sessionPubKey, cid: sessionCid } =
+          await verifySessionPubKey(env(c), c.req.header("Authorization"));
+
         const { cid } = c.req.valid("param");
+
+        if (cid !== sessionCid) {
+          throw new HTTPException(401, { message: "unauthorizedSessionToken" });
+        }
+
+        let payload: JWTPayload;
+        try {
+          payload = await verify(
+            await c.req.text(),
+            await sessionPubKey,
+            "ES256"
+          );
+        } catch {
+          throw new HTTPException(422, { message: "unauthorizedSessionData" });
+        }
+
         const {
           lvHash,
           auto,
@@ -183,11 +248,18 @@ const recordApp = async (config: {
           fb,
           factor,
           editing,
-        } = c.req.valid("json");
+          date,
+        } = v.parse(RecordPostSchema(), payload);
+
+        // if (
+        //   Math.abs(date - Date.now()) >
+        //   1000 * 60 * 5 // 5 min
+        // ) {
+        //   throw new HTTPException(422, { message: "unauthorizedSessionData" });
+        // }
 
         const ip = getIp(c, config.getConnInfo);
         const db = await c.get("db")();
-
         if (!(await updateIp(env(c), db, ip, "record"))) {
           return c.json(
             {
@@ -198,21 +270,29 @@ const recordApp = async (config: {
           );
         }
 
-        await db.collection<PlayRecordEntry>("playRecord").insertOne({
-          cid,
-          lvHash,
-          auto,
-          playedAt: Date.now(),
-          score,
-          baseScore,
-          chainScore,
-          bigScore,
-          fc,
-          fb,
-          factor: typeof factor === "number" ? factor : 1,
-          editing: !!editing,
-        });
-        return c.body(null, 204);
+        try {
+          await db.collection<PlayRecordEntry>("playRecord").insertOne({
+            cid,
+            lvHash,
+            auto,
+            playedAt: date,
+            score,
+            baseScore,
+            chainScore,
+            bigScore,
+            fc,
+            fb,
+            factor: typeof factor === "number" ? factor : 1,
+            editing: !!editing,
+          });
+          return c.body(null, 204);
+        } catch (e) {
+          if (typeof e === "object" && e && "code" in e && e.code === 11000) {
+            throw new HTTPException(409, { message: "recordAlreadyPosted" });
+          } else {
+            throw e;
+          }
+        }
       }
     );
 

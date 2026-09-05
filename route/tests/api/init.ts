@@ -140,6 +140,36 @@ app
   )
   .notFound(notFound({ fetchStatic: testFetchStatic }));
 
+export async function createTestPlaySession(cid = dummyCid) {
+  const sessionKeyPair = await crypto.subtle.generateKey(
+    { name: "ECDSA", namedCurve: "P-256" },
+    true,
+    ["sign", "verify"]
+  );
+  const buildKeyPair = await getTestResultBuildKeyPair();
+  const buildToken = await sign(
+    {
+      key: await crypto.subtle.exportKey("jwk", sessionKeyPair.publicKey),
+      cid,
+    },
+    buildKeyPair.privateKey,
+    "ES256"
+  );
+  const res = await app.request("/api/playSession/init", {
+    method: "POST",
+    body: buildToken,
+  });
+  if (!res.ok) {
+    throw new Error(`Failed in createTestPlaySession: ${res.status}`);
+  }
+  const sessionToken = await res.text();
+  return {
+    sessionToken,
+    sessionKeyPair,
+    buildKeyPair,
+  };
+}
+
 export const dummyCid = "100000";
 export const dummyDate = new Date(2025, 0, 1);
 export function dummyChart(): Chart17 {
@@ -488,10 +518,14 @@ export async function initDb() {
   const pSecretSalt = process.env.SECRET_SALT || "SecretSalt";
   await db.collection("rateLimit").deleteMany({});
   await db.collection<PlayRecordEntry>("playRecord").deleteMany({});
+  // 本番環境ではcreateIndex.tsで貼る
+  await db
+    .collection("playRecord")
+    .createIndex({ cid: 1, playedAt: 1, score: 1 }, { unique: true });
   await db.collection<PlayRecordEntry>("playRecord").insertOne({
     cid: dummyCid,
     lvHash: "dummy",
-    playedAt: Date.now(),
+    playedAt: Date.now() - 100,
     auto: false,
     score: 100,
     fc: true,
@@ -502,7 +536,7 @@ export async function initDb() {
   await db.collection<PlayRecordEntry>("playRecord").insertOne({
     cid: dummyCid,
     lvHash: "dummy",
-    playedAt: Date.now(),
+    playedAt: Date.now() - 90,
     auto: false,
     score: 100,
     fc: true,
@@ -513,7 +547,7 @@ export async function initDb() {
   await db.collection<PlayRecordEntry>("playRecord").insertOne({
     cid: dummyCid,
     lvHash: "dummy",
-    playedAt: Date.now(),
+    playedAt: Date.now() - 80,
     auto: false,
     score: 50,
     fc: false,
@@ -524,7 +558,7 @@ export async function initDb() {
   await db.collection<PlayRecordEntry>("playRecord").insertOne({
     cid: dummyCid,
     lvHash: "dummy",
-    playedAt: Date.now(),
+    playedAt: Date.now() - 70,
     auto: true,
     score: 50,
     fc: false,
@@ -535,7 +569,7 @@ export async function initDb() {
   await db.collection<PlayRecordEntry>("playRecord").insertOne({
     cid: dummyCid,
     lvHash: "dummy",
-    playedAt: Date.now(),
+    playedAt: Date.now() - 60,
     auto: false,
     score: 30,
     fc: false,
