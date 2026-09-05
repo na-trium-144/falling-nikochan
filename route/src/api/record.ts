@@ -19,6 +19,9 @@ import {
 } from "../error.js";
 import { getIp, updateIp } from "./dbRateLimit.js";
 import { ConnInfo } from "hono/conninfo";
+import { verifySessionPubKey } from "./playSession.js";
+import { verify } from "hono/jwt";
+import { HTTPException } from "hono/http-exception";
 
 // Cache duration for this API endpoint (in seconds)
 const CACHE_MAX_AGE = 600;
@@ -138,6 +141,14 @@ const recordApp = async (config: {
       "/:cid",
       describeRoute({
         description: "Post a play record for a single play of the chart.",
+        parameters: [
+          {
+            name: "Authorization",
+            in: "header",
+            description: "`Bearer (JWT returned from /api/playSession/init)`.",
+            schema: { type: "string" },
+          },
+        ],
         responses: {
           204: {
             description: "No content for successful response",
@@ -169,9 +180,26 @@ const recordApp = async (config: {
         },
       }),
       validator("param", v.object({ cid: CidSchema() }), sValidatorHook()),
-      validator("json", RecordPostSchema(), sValidatorHook()),
+      // validator("json", RecordPostSchema(), sValidatorHook()),
       async (c) => {
+        const sessionPubKey = await verifySessionPubKey(
+          env(c),
+          c.req.header("Authorization")
+        );
+
         const { cid } = c.req.valid("param");
+
+        let payload: object;
+        try {
+          payload = (await verify(
+            await c.req.text(),
+            sessionPubKey,
+            "ES256"
+          )) as Record<string, unknown>;
+        } catch {
+          throw new HTTPException(400, { message: "TODO" });
+        }
+
         const {
           lvHash,
           auto,
@@ -183,7 +211,15 @@ const recordApp = async (config: {
           fb,
           factor,
           editing,
-        } = c.req.valid("json");
+          date,
+        } = v.parse(RecordPostSchema(), payload);
+
+        if (
+          Math.abs(date.getTime() - Date.now()) >
+          1000 * 60 * 5 // 5 min
+        ) {
+          throw new HTTPException(422, { message: "TODO" });
+        }
 
         const ip = getIp(c, config.getConnInfo);
         const db = await c.get("db")();
@@ -202,7 +238,7 @@ const recordApp = async (config: {
           cid,
           lvHash,
           auto,
-          playedAt: Date.now(),
+          playedAt: date,
           score,
           baseScore,
           chainScore,
