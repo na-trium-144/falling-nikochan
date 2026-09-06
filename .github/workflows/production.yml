@@ -30,6 +30,8 @@ jobs:
           ASSET_PREFIX: ${{ vars.PRODUCTION_ASSET_PREFIX }}
           NO_PREFETCH: ${{ vars.PRODUCTION_NO_PREFETCH }}
           BACKEND_ALT_PREFIX: ${{ vars.PRODUCTION_BACKEND_ALT_PREFIX }}
+          FORM_URL: ${{ vars.FORM_URL }}
+          FORM_ID_FIELD: ${{ vars.FORM_ID_FIELD }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
           SENTRY_URL: ${{ secrets.SENTRY_URL }}

@@ -166,6 +166,7 @@ export function ShareBox(props: Props) {
         )}
         <LinksOnError
           dependOnStatus={brief instanceof APIError ? brief.status : undefined}
+          error={brief}
         />
       </div>
     );

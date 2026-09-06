@@ -71,6 +71,8 @@ jobs:
           NO_PREFETCH: ${{ vars.STAGING_NO_PREFETCH }}
           VERSION_SUFFIX: +stg
           TITLE_SUFFIX: Staging
+          FORM_URL: ${{ vars.FORM_URL }}
+          FORM_ID_FIELD: ${{ vars.FORM_ID_FIELD }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
           SENTRY_URL: ${{ secrets.SENTRY_URL }}
