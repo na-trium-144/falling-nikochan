@@ -5,7 +5,7 @@ import {
   languageDetector,
   ResponseOK,
 } from "./env.js";
-import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
+import { getTranslations, locales } from "@falling-nikochan/i18n/dynamic.js";
 import {
   baseScoreRate,
   bigScoreRate,
@@ -44,7 +44,10 @@ const shareApp = (config: {
     // CookieとAccept-Languageでレスポンスが変わるためprivate指定しcache middlewareは使わない
     .get("/:cid{[0-9]+}", async (c) => {
       const lang = c.get("language");
-      const qLang = c.req.query("lang") || lang;
+      let qLang = c.req.query("lang") || lang;
+      if (!locales.includes(qLang)) {
+        qLang = lang;
+      }
       const cid = c.req.param("cid");
       // c.req.param("cid_txt").slice(0, -4) for /share/:cid_txt{[0-9]+.txt}
       const qResult = c.req.query("result");
