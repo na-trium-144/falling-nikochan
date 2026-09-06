@@ -548,19 +548,21 @@ export function ContactFormLink({
   }
   let formUrl = process.env.FORM_URL;
   if (error && process.env.FORM_ID_FIELD) {
-    formUrl +=
-      "?" +
-      process.env.FORM_ID_FIELD +
-      "=" +
-      encodeURIComponent(
-        [
-          String(error),
-          v.isValiError(error) ? JSON.stringify(v.flatten(error.issues)) : null,
-          eventId ? "EventID=" + eventId : null,
-        ]
-          .filter((s) => !!s)
-          .join("; ")
-      );
+    const prefill = (
+      [
+        String(error),
+        v.isValiError(error) ? JSON.stringify(v.flatten(error.issues)) : null,
+        typeof error === "object" && error && "digest" in error
+          ? "Digest=" + error.digest
+          : null,
+        eventId ? "EventID=" + eventId : null,
+      ].filter((s) => !!s) as string[]
+    )
+      .map((s) => (s.length > 200 ? s.slice(0, 200) + "..." : s))
+      .join("; ");
+    const url = new URL(process.env.FORM_URL);
+    url.searchParams.set(process.env.FORM_ID_FIELD, prefill);
+    formUrl = url.toString();
   }
 
   return (
