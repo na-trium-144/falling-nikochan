@@ -1,10 +1,9 @@
 :root {
   @apply scrollbar-thumb-fg-base/65 scrollbar-track-transparent;
-}
-/* :root にはdarkクラスがないので、 dark: variantは使えない */
-.dark,
-.dark * {
-  @apply scrollbar-thumb-fg-base-dark/65;
+  /* :root にはdarkクラスがないので、 dark: variantは使えない */
+  &:has(.dark) {
+    @apply scrollbar-thumb-fg-base-dark/65;
+  }
 }
 /* Legacy browsers with `::-webkit-scrollbar-*` support */
 @supports selector(::-webkit-scrollbar) {
@@ -14,8 +13,7 @@
   ::-webkit-scrollbar-thumb {
     @apply bg-fg-base/65 rounded-full;
   }
-  .dark,
-  .dark * {
+  :has(.dark) {
     ::-webkit-scrollbar-thumb {
       @apply bg-fg-base-dark/65;
     }
