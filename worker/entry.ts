@@ -430,9 +430,13 @@ interface BuildVer {
 
 const languageDetector = async (c: Context, next: () => Promise<void>) => {
   // headerもcookieも使えないので、その代わりにnavigator.languagesを使って検出するミドルウェア
-  const systemLangs = navigator.languages.map(
-    (l) => new Intl.Locale(l).language
-  );
+  const systemLangs = navigator.languages.map((l) => {
+    try {
+      return new Intl.Locale(l).language;
+    } catch {
+      return l;
+    }
+  });
   const preferredLang = c.req.path.split("/")[1];
   const cache = await configCache();
   const preferredLang2 = await cache.match("/lang").then((res) => res?.text());
