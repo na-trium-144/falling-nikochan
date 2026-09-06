@@ -104,8 +104,8 @@ export function FlexYouTube(props: Props) {
               }
             },
             onStateChange: () => {
-              console.log(ytPlayer.current?.getPlayerState());
-              if (ytPlayer.current?.getPlayerState() === 1) {
+              console.log(ytPlayer.current?.getPlayerState?.());
+              if (ytPlayer.current?.getPlayerState?.() === 1) {
                 if (onStartRef.current) {
                   onStartRef.current();
                 }
@@ -118,7 +118,7 @@ export function FlexYouTube(props: Props) {
             onPlaybackRateChange: () => {
               if (onPlaybackRateChangeRef.current) {
                 onPlaybackRateChangeRef.current(
-                  ytPlayer.current?.getPlaybackRate() || 1
+                  ytPlayer.current?.getPlaybackRate?.() || 1
                 );
               }
             },
@@ -153,7 +153,7 @@ export function FlexYouTube(props: Props) {
       }
 
       return () => {
-        internalPlayer?.destroy();
+        internalPlayer?.destroy?.();
         setInternalPlayer(undefined);
       };
     }
@@ -199,8 +199,11 @@ export function FlexYouTube(props: Props) {
 
 /**
  * @see https://developers.google.com/youtube/iframe_api_reference
+ *
+ * 初期化の途中などではそれぞれのプロパティが not a function エラーになる場合があるので、
+ * Partialでラップし、呼び出し時には毎回nullチェックをする
  */
-export interface YouTubePlayer {
+export type YouTubePlayer = Partial<{
   addEventListener(event: string, listener: (event: CustomEvent) => void): void;
   destroy(): void;
   getAvailablePlaybackRates(): readonly number[];
@@ -318,4 +321,4 @@ export interface YouTubePlayer {
     listener: (event: CustomEvent & { data: number }) => void
   ): void;
   // on(eventType: EventType, listener: (event: CustomEvent) => void): void;
-}
+}>;

@@ -151,7 +151,7 @@ export default function Edit(props: {
   const ytPlayer = useRef<YouTubePlayer | undefined>(undefined);
   const [playbackRate, setPlaybackRate] = useState<number>(1);
   const changePlaybackRate = useCallback((rate: number) => {
-    ytPlayer.current?.setPlaybackRate(rate);
+    ytPlayer.current?.setPlaybackRate?.(rate);
   }, []);
 
   // ytPlayerが再生中
@@ -175,11 +175,11 @@ export default function Edit(props: {
       // scroll中などallowSeekAhead=falseでseekした状態で再生するとカーソル位置がバグる
       ytPlayer.current?.seekTo?.(cur.timeSec + chart.offset, true);
     }
-    ytPlayer.current?.playVideo();
+    ytPlayer.current?.playVideo?.();
     ref.current?.focus();
   }, [chart, cur]);
   const stop = useCallback(() => {
-    ytPlayer.current?.pauseVideo();
+    ytPlayer.current?.pauseVideo?.();
     ref.current?.focus();
   }, []);
   const setAndSeekCurrentTimeWithoutOffset = useCallback(
@@ -308,7 +308,7 @@ export default function Edit(props: {
       if (playing && ytPlayer.current && currentLevel) {
         let index = 0;
         const now =
-          ytPlayer.current.getCurrentTime() -
+          (ytPlayer.current.getCurrentTime?.() ?? 0) -
           (chart.offset || 0) +
           audioLatencyRef.current;
         while (
@@ -320,7 +320,7 @@ export default function Edit(props: {
         const playOne = () => {
           if (ytPlayer.current) {
             const now =
-              ytPlayer.current.getCurrentTime() -
+              (ytPlayer.current.getCurrentTime?.() ?? 0) -
               (chart?.offset || 0) +
               audioLatencyRef.current;
             timer = null;
@@ -365,14 +365,14 @@ export default function Edit(props: {
       }
       if (playing && ytPlayer.current && currentLevel) {
         const now =
-          ytPlayer.current.getCurrentTime() -
+          (ytPlayer.current.getCurrentTime?.() ?? 0) -
           (chart?.offset || 0) +
           audioLatencyRef.current;
         let step = getStep(currentLevel.freeze.bpmChanges, now, 4);
         const playOne = () => {
           if (ytPlayer.current && currentLevel) {
             const now =
-              ytPlayer.current.getCurrentTime() -
+              (ytPlayer.current.getCurrentTime?.() ?? 0) -
               (chart?.offset || 0) +
               audioLatencyRef.current;
             timer = null;
