@@ -1,3 +1,12 @@
+## ver. 17.6 - 2026/09/06
+
+* エラー時にフォームに内容を自動入力 [#1364](https://github.com/na-trium-144/falling-nikochan/pull/1364)
+    * ついでにフォームのURLを環境変数 `FORM_URL` に移動
+* ダークテーマ時のスクロールバーの色と、横スクロール時の幅を修正
+* ytPlayerのすべてのメソッド呼び出しにnullチェックを追加
+* intl.Locale にエラーハンドリングを追加
+* share,ogに渡されるlangパラメータのバリデーション
+
 ## ver. 17.5 - 2026/09/03
 
 * levelの長さが負になった場合のエラーを修正 [#1346](https://github.com/na-trium-144/falling-nikochan/pull/1346)
