@@ -33,6 +33,7 @@ import { CidSchema } from "@falling-nikochan/chart";
 import { fetchBackend } from "./common/fetch.js";
 import { SocialLinks } from "./common/social.js";
 import { YouTubeLogo } from "./common/youtubeLogo.js";
+import { StatsDisplay } from "./common/stats.js";
 
 interface Props {
   locale: string;
@@ -317,6 +318,8 @@ export default function TopPage(props: Props) {
           <TopDemo {...demoChart} bottom={grassHeight} visible={demoVisible} />
         </div>
       </div>
+
+      <StatsDisplay />
 
       <div
         id="popular"
