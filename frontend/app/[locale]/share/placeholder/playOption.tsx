@@ -366,7 +366,10 @@ function SelectedLevelInfo(props: {
         {/* histogramの幅 w-5 x13 */}
         {t("otherPlayers")}
         {selectedRecord !== undefined && !(selectedRecord instanceof Error) && (
-          <span className="ml-2 text-sm">({selectedRecord.count || 0})</span>
+          <span className="ml-2 text-sm">
+            ({selectedRecord.count || 0} + auto: {selectedRecord.countAuto || 0}
+            )
+          </span>
         )}
       </p>
       <span className={clsx(props.record === null ? "block" : "hidden")}>

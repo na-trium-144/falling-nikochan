@@ -232,6 +232,7 @@ function PlayTabInternal(
                 )
                 .map((r) => ({
                   cid: r.cid,
+                  count: r.count,
                   updatedAt: r.updatedAt,
                   fetched: false,
                 }))
@@ -440,6 +441,7 @@ function PlayTabInternal(
         showLoading
         badge
         dateDiff={params.sort === "latest"}
+        showCount={params.sort === "popular"}
         containerRef={boxSize.ref as RefObject<HTMLDivElement | null>}
         containerHeight={
           boxSize.height ? boxSize.height - (12 / 4) * rem : undefined

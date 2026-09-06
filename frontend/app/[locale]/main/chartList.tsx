@@ -85,6 +85,7 @@ export type ChartListType = "recent" | "recentEdit" | "popular" | "latest";
 
 export interface ChartLineBrief {
   cid: string;
+  count?: number;
   updatedAt?: number; // searchAPIのレスポンスにこれがある場合はbrief.updatedAtよりも優先する
   fetching?: boolean;
   fetched: boolean;
@@ -102,6 +103,7 @@ interface Props {
   creator?: boolean;
   showLoading?: boolean; // briefsがundefinedか、briefsにfetched:falseが含まれる場合にloadingを表示する
   dateDiff?: boolean;
+  showCount?: boolean;
   search?: boolean;
   href: (cid: string) => string;
   onClick?: (cid: string) => void;
@@ -197,8 +199,22 @@ export function ChartList(props: Props) {
           .get()
           .json((latest) =>
             v
-              .parse(v.array(v.object({ cid: v.string() })), latest)
-              .map(({ cid }) => ({ cid, fetched: false }))
+              .parse(
+                v.array(
+                  v.object({
+                    cid: v.string(),
+                    count: v.optional(v.number()),
+                    updatedAt: v.optional(v.number()),
+                  })
+                ),
+                latest
+              )
+              .map(({ cid, count, updatedAt }) => ({
+                cid,
+                count,
+                updatedAt,
+                fetched: false,
+              }))
           )
           .catch((e: unknown) => captureAndWrap(e, { type: props.type }))
           .then((latest) => mergeAndSetBriefs(latest));
@@ -441,6 +457,8 @@ export function ChartList(props: Props) {
                 original={filteredBriefs.at(i)!.original}
                 newTab={props.newTab}
                 dateDiff={props.dateDiff}
+                showCount={props.showCount ?? props.type === "popular"}
+                count={filteredBriefs.at(i)!.count}
                 badge={props.badge}
                 small={props.small}
                 big={props.big}
@@ -550,6 +568,7 @@ interface CProps {
   className?: string;
   style?: object;
   cid: string;
+  count?: number;
   updatedAt?: number;
   brief?: ChartBrief;
   href: string;
@@ -559,6 +578,7 @@ interface CProps {
   original?: boolean;
   newTab?: boolean;
   dateDiff?: boolean;
+  showCount?: boolean;
   badge?: boolean;
   small?: boolean;
   big?: "h" | "v";
@@ -680,6 +700,9 @@ function ChartListItemChildren(props: CProps) {
                   date={props.updatedAt ?? props.brief?.updatedAt ?? 0}
                 />
               )}
+              {props.showCount && props.count !== undefined && (
+                <span className="ml-2 text-xs">({props.count})</span>
+              )}
               {props.original && (
                 <span className="ml-2 text-xs">(オリジナル曲)</span>
               )}
@@ -752,6 +775,9 @@ function ChartListItemChildren(props: CProps) {
                   date={props.updatedAt ?? props.brief?.updatedAt ?? 0}
                 />
               )}
+              {props.showCount && props.count !== undefined && (
+                <span className="ml-2 text-xs/3 text-dim">({props.count})</span>
+              )}
               {props.original && (
                 <span className="ml-2 text-xs/3">(オリジナル曲)</span>
               )}
@@ -789,6 +815,9 @@ function ChartListItemChildren(props: CProps) {
                   className="ml-2 text-xs"
                   date={props.updatedAt ?? props.brief?.updatedAt ?? 0}
                 />
+              )}
+              {props.showCount && props.count !== undefined && (
+                <span className="ml-2 text-xs">({props.count})</span>
               )}
               {props.original && (
                 <span className="ml-2 text-xs">(オリジナル曲)</span>
