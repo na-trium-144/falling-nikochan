@@ -529,14 +529,46 @@ export function Features({ locale }: { locale: string }) {
   );
 }
 
-export function ContactFormLink() {
+export function ContactFormLink({
+  error,
+  eventId,
+}: {
+  error?: unknown;
+  eventId?: string;
+}) {
   const t = useTranslations("main");
+  if (!process.env.FORM_URL) {
+    console.error("contact form link is disabled because FORM_URL is not set");
+    return (
+      <>
+        <FormOne className="inline-block align-middle mr-1 text-dim" />
+        <span className="text-dim">{t("links.contactForm")}</span>
+      </>
+    );
+  }
+  let formUrl = process.env.FORM_URL;
+  if (error && process.env.FORM_ID_FIELD) {
+    const prefill = (
+      [
+        String(error),
+        v.isValiError(error) ? JSON.stringify(v.flatten(error.issues)) : null,
+        typeof error === "object" && error && "digest" in error
+          ? "Digest=" + error.digest
+          : null,
+        eventId ? "EventID=" + eventId : null,
+      ].filter((s) => !!s) as string[]
+    )
+      .map((s) => (s.length > 200 ? s.slice(0, 200) + "..." : s))
+      .join("; ");
+    const url = new URL(process.env.FORM_URL);
+    url.searchParams.set(process.env.FORM_ID_FIELD, prefill);
+    formUrl = url.toString();
+  }
+
   return (
     <>
       <FormOne className="inline-block align-middle mr-1" />
-      <ExternalLink href="https://forms.gle/3PVFRA7nUtXSHb8TA">
-        {t("links.contactForm")}
-      </ExternalLink>
+      <ExternalLink href={formUrl}>{t("links.contactForm")}</ExternalLink>
     </>
   );
 }

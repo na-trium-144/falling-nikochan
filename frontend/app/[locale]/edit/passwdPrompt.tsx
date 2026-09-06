@@ -79,6 +79,7 @@ export function PasswdPrompt(props: PasswdProps) {
               ? props.loadStatus.status
               : undefined
           }
+          error={props.loadStatus}
         />
         {(standalone || insideFrame) && (
           <p>

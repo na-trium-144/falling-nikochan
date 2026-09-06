@@ -254,6 +254,8 @@ The service worker ([`worker/entry.ts`](worker/entry.ts), bundled into `/sw.js`)
 | `BACKEND_OG_PREFIX` |  |  | required on cloudflare worker | redirect OG image generation to another server because worker cannot handle that |
 | `BACKEND_ALT_PREFIX` | vars.`PRODUCTION_BACKEND_ALT_PREFIX` | optional |  | fallback backend domain used when the primary backend returns 5xx |
 | `NO_PREFETCH` | vars.`PRODUCTION_NO_PREFETCH`, `STAGING_NO_PREFETCH` | optional |  | `1` or unset, disables prefetches of Next.js (useful if you want to reduce number of requests when using vercel free tier etc.) |
+| `FORM_URL` | vars.`FORM_URL` | required | | `https://docs.google.com/forms/d/e/xxxxxxxx/viewform` |
+| `FORM_ID_FIELD` | vars.`FORM_ID_FIELD` | required | | parameter of pre-filled form link; `entry.xxxxxxxx` |
 | `YOUTUBE_API_KEY` |  |  | required | API key for YouTube Data API v3 |
 | `VERSION_SUFFIX` |  | optional |  | suffix appended to version; `+stg` on staging, `+#PR` on preview. In development `+dev` is automatically used if not set. |
 | `TITLE_SUFFIX` |  | optional |  | suffix appended to app title, also used as sentry environment; `Staging` on staging, `Preview #PR` on preview. In development `Development` is automatically used if not set. |

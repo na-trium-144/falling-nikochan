@@ -31,8 +31,12 @@ export function GoHomeButton({ goHome }: { goHome?: string }) {
 
 export function LinksOnError({
   dependOnStatus,
+  error,
+  eventId,
 }: {
   dependOnStatus?: string | number;
+  error?: unknown;
+  eventId?: string;
 }) {
   const tl = useTranslations("main.links");
   const [isServerSideError, setIsServerSideError] = useState(false);
@@ -52,7 +56,7 @@ export function LinksOnError({
       <h4 className="fn-heading-box">{tl("contactLinks")}</h4>
       <ul className="list-disc ml-6 space-y-1 text-left">
         <li>
-          <ContactFormLink />
+          <ContactFormLink error={error} eventId={eventId} />
         </li>
         <li>
           <XLink />
