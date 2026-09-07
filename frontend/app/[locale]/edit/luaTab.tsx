@@ -28,6 +28,10 @@ import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 const AceEditor = dynamic(
   async () => {
+    const aceBuilds = await import("ace-builds");
+    aceBuilds.config.setDefaultValues("session", {
+      useWorker: false,
+    });
     const ace = await import("react-ace");
     // await import("ace-builds/src-min-noconflict/ext-language_tools");
     await import("ace-builds/src-min-noconflict/theme-tomorrow");
