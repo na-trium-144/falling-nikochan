@@ -20,6 +20,8 @@ import Caution from "@icon-park/react/lib/icons/Caution.js";
 import { captureAndWrap, fetchBackend, formatError } from "@/common/fetch.js";
 import { markAsExpected } from "@/common/apiError.js";
 import { YouTubeLogo } from "@/common/youtubeLogo.js";
+import Link from "next/link";
+import Help from "@icon-park/react/lib/icons/Help";
 
 export default function EditTab({ locale }: { locale: string }) {
   const t = useTranslations("main.edit");
@@ -71,6 +73,14 @@ export default function EditTab({ locale }: { locale: string }) {
         <p>{t("welcome")}</p>
         <p>
           {t("welcome2")}
+          <Link
+            className="fn-link-3 mx-1"
+            href={`/${locale}/main/guide/1`}
+            prefetch={process.env.PREFETCH as "auto"}
+          >
+            <Help className="mr-1 inline-block align-middle" />
+            <span className="text-sm">{t("guide")}</span>
+          </Link>
           <ExternalLink
             className="mx-1"
             href="https://www.youtube.com/watch?v=hi9TY_78ETY"
