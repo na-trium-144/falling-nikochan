@@ -59,12 +59,27 @@ const statsApp = new Hono<{
   }),
   async (c) => {
     const db = await c.get("db")();
-    const [chartCount, playCount] = await Promise.all([
-      db
-        .collection<ChartEntryCompressed>("chart")
-        .countDocuments({ deleted: false }),
-      db.collection<PlayRecordEntry>("playRecord").countDocuments(),
-    ]);
+    const [chartCount, recordPlayCount, legacyPlayCountAgg] = await Promise.all(
+      [
+        db
+          .collection<ChartEntryCompressed>("chart")
+          .countDocuments({ deleted: false }),
+        db.collection<PlayRecordEntry>("playRecord").countDocuments(),
+        db
+          .collection<ChartEntryCompressed>("chart")
+          .aggregate<{ total: number }>([
+            {
+              $group: {
+                _id: null,
+                total: { $sum: { $ifNull: ["$playCount", 0] } },
+              },
+            },
+          ])
+          .toArray(),
+      ]
+    );
+
+    const playCount = recordPlayCount + (legacyPlayCountAgg[0]?.total ?? 0);
 
     return c.json(
       {

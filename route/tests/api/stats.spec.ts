@@ -107,4 +107,46 @@ describe("GET /api/stats", () => {
       initialBody.chartCount + 1
     );
   });
+
+  test("should include legacy playCount from chart collection in total playCount", async () => {
+    await initDb();
+    const initialRes = await app.request("/api/stats");
+    const initialBody = await initialRes.json();
+
+    // Insert a chart with legacy playCount
+    await db.collection<ChartEntryCompressed>("chart").insertOne({
+      ...(await zipEntry(
+        await chartToEntry(
+          {
+            ver: 17,
+            falling: "nikochan",
+            offset: 0,
+            ytId: "dummyLegacy",
+            title: "legacy chart",
+            composer: "composer",
+            chartCreator: "creator",
+            locale: "ja",
+            changePasswd: "p",
+            published: true,
+            copyBuffer: {},
+            zoom: 1,
+            levelsMeta: [],
+            lua: [],
+            levelsFreeze: [],
+          },
+          "999996",
+          dummyDate.getTime(),
+          null,
+          undefined,
+          "SecretSalt",
+          null
+        )
+      )),
+      playCount: 42,
+    });
+
+    const res = await app.request("/api/stats");
+    const body = await res.json();
+    expect(body.playCount).to.equal(initialBody.playCount + 42);
+  });
 });
