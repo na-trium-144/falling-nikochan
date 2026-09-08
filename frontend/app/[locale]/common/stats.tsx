@@ -1,68 +1,61 @@
 "use client";
 
-import clsx from "clsx/lite";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import * as v from "valibot";
 import { fetchBackend } from "./fetch.js";
 import Music from "@icon-park/react/lib/icons/Music.js";
-import GameHandle from "@icon-park/react/lib/icons/GameHandle.js";
-import { ButtonHighlight } from "./button.jsx";
+import PlayOne from "@icon-park/react/lib/icons/PlayOne.js";
+import { Box } from "./box.js";
 
 const StatsDataSchema = () =>
   v.object({
     chartCount: v.number(),
     playCount: v.number(),
   });
-type StatsData = v.InferOutput<ReturnType<typeof StatsDataSchema>>;
 
 export function StatsDisplay() {
   const t = useTranslations("main.stats");
-  const [stats, setStats] = useState<StatsData>();
+  const [chartCount, setChartCount] = useState<string | undefined>(
+    process.env.NODE_ENV === "development" ? "999,999" : undefined
+  );
+  const [playCount, setPlayCount] = useState<string | undefined>(
+    process.env.NODE_ENV === "development" ? "444,444" : undefined
+  );
 
   useEffect(() => {
     fetchBackend()
       .get("/api/stats")
-      .json((json) => setStats(v.parse(StatsDataSchema(), json)))
-      .catch(() => {});
+      .json((json) => {
+        const stats = v.parse(StatsDataSchema(), json);
+        setChartCount(stats.chartCount.toLocaleString());
+        setPlayCount(stats.playCount.toLocaleString());
+      });
   }, []);
 
   return (
-    <div className="w-full max-w-main px-3 mb-6 main-wide:px-6 main-wide:mb-8 flex justify-center">
-      <div
-        className={clsx(
-          "fn-flat-button fn-selected fn-plain rounded-sq-2xl",
-          "flex flex-row items-center justify-center gap-6 sm:gap-12",
-          "px-6 py-3.5 shadow-sm shadow-slate-500/20 dark:shadow-stone-950/40"
-        )}
-      >
-        <span className="fn-glass-1" />
-        <span className="fn-glass-2" />
-        <ButtonHighlight />
-        <div className="flex items-center gap-2 sm:gap-3">
-          <Music className="text-xl sm:text-2xl text-sky-600 dark:text-sky-400" />
-          <div className="flex flex-col items-start font-title">
-            <span className="text-xs text-dim leading-none mb-1">
-              {t("chartCount")}
-            </span>
-            <span className="text-lg sm:text-xl font-bold fg-bright leading-none">
-              {stats !== undefined ? stats.chartCount.toLocaleString() : "-"}
+    <div className="w-full max-w-main px-3 mb-6 main-wide:px-6 main-wide:mb-8 grid-centering">
+      <Box classNameInner="flex flex-row items-center" padding={4}>
+        <div className="shrink w-36 min-w-0 flex items-center gap-2">
+          <Music className="text-3xl text-sky-600 dark:text-sky-400" />
+          <div className="flex-1 min-w-0 flex flex-col items-center">
+            <span className="text-sm text-dim">{t("chartCount")}</span>
+            <span className="text-2xl bold-by-stroke fg-bright">
+              {chartCount ?? "-"}
             </span>
           </div>
         </div>
-        <div className="w-px h-8 bg-slate-300/80 dark:bg-stone-700/80" />
-        <div className="flex items-center gap-2 sm:gap-3">
-          <GameHandle className="text-xl sm:text-2xl text-amber-600 dark:text-amber-400" />
-          <div className="flex flex-col items-start font-title">
-            <span className="text-xs text-dim leading-none mb-1">
-              {t("playCount")}
-            </span>
-            <span className="text-lg sm:text-xl font-bold fg-bright leading-none">
-              {stats !== undefined ? stats.playCount.toLocaleString() : "-"}
+        <div className="w-0 h-[75%] mx-4 border-l border-current/50" />
+        <div className="shrink w-36 min-w-0 flex items-center gap-2">
+          <PlayOne className="text-3xl text-amber-600 dark:text-amber-400" />
+          <div className="flex-1 min-w-0 flex flex-col items-center">
+            <span className="text-sm text-dim">{t("playCount")}</span>
+            <span className="text-2xl bold-by-stroke fg-bright">
+              {playCount ?? "-"}
             </span>
           </div>
         </div>
-      </div>
+      </Box>
     </div>
   );
 }
