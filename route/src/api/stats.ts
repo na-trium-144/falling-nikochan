@@ -9,23 +9,7 @@ import { ChartEntryCompressed } from "./chart.js";
 import { PlayRecordEntry } from "./record.js";
 
 // Cache duration for this API endpoint (in seconds)
-const CACHE_MAX_AGE = 600;
-
-export const StatsSchema = () =>
-  v.object({
-    chartCount: v.pipe(
-      v.number(),
-      v.description(
-        "Total number of charts (excluding deleted, including unpublished)"
-      )
-    ),
-    playCount: v.pipe(
-      v.number(),
-      v.description("Total number of play records")
-    ),
-  });
-
-export type Stats = v.InferOutput<ReturnType<typeof StatsSchema>>;
+const CACHE_MAX_AGE = 3600;
 
 const statsApp = new Hono<{
   Bindings: Bindings;
@@ -45,7 +29,20 @@ const statsApp = new Hono<{
         description: "Successful response",
         content: {
           "application/json": {
-            schema: resolver(StatsSchema()),
+            schema: resolver(
+              v.object({
+                chartCount: v.pipe(
+                  v.number(),
+                  v.description(
+                    "Total number of charts (excluding deleted, including unpublished)"
+                  )
+                ),
+                playCount: v.pipe(
+                  v.number(),
+                  v.description("Total number of play records")
+                ),
+              })
+            ),
           },
         },
         headers: {
