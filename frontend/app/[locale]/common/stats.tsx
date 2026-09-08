@@ -39,7 +39,7 @@ export function StatsDisplay() {
         <div className="shrink w-36 min-w-0 flex items-center gap-2">
           <Music className="text-3xl text-sky-600 dark:text-sky-400" />
           <div className="flex-1 min-w-0 flex flex-col items-center">
-            <span className="text-sm text-dim">{t("chartCount")}</span>
+            <span className="text-sm">{t("chartCount")}</span>
             <span className="text-2xl bold-by-stroke fg-bright">
               {chartCount ?? "-"}
             </span>
@@ -49,7 +49,7 @@ export function StatsDisplay() {
         <div className="shrink w-36 min-w-0 flex items-center gap-2">
           <PlayOne className="text-3xl text-amber-600 dark:text-amber-400" />
           <div className="flex-1 min-w-0 flex flex-col items-center">
-            <span className="text-sm text-dim">{t("playCount")}</span>
+            <span className="text-sm">{t("playCount")}</span>
             <span className="text-2xl bold-by-stroke fg-bright">
               {playCount ?? "-"}
             </span>
