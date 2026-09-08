@@ -30,6 +30,7 @@ import { Scrollable } from "@/common/scrollable.js";
 import { captureAndWrap, fetchBackend, formatError } from "@/common/fetch.js";
 import * as v from "valibot";
 import { useDisplayMode } from "@/scale.js";
+import PlayOne from "@icon-park/react/lib/icons/PlayOne.js";
 
 interface PProps {
   locale: string;
@@ -700,9 +701,15 @@ function ChartListItemChildren(props: CProps) {
                   date={props.updatedAt ?? props.brief?.updatedAt ?? 0}
                 />
               )}
-              {props.showCount && props.count !== undefined && (
-                <span className="ml-2 text-xs">({props.count})</span>
-              )}
+              {props.showCount &&
+                props.count !== undefined &&
+                props.count > 0 && (
+                  <span className="ml-2 text-xs">
+                    (
+                    <PlayOne className="inline-block align-middle mr-0.5" />
+                    {Math.ceil(props.count)})
+                  </span>
+                )}
               {props.original && (
                 <span className="ml-2 text-xs">(オリジナル曲)</span>
               )}
@@ -771,13 +778,19 @@ function ChartListItemChildren(props: CProps) {
               <span className="ml-1 text-sm/3">{props.cid}</span>
               {props.dateDiff && (
                 <DateDiff
-                  className="ml-2 text-xs/3 text-dim"
+                  className="ml-2 text-xs/3"
                   date={props.updatedAt ?? props.brief?.updatedAt ?? 0}
                 />
               )}
-              {props.showCount && props.count !== undefined && (
-                <span className="ml-2 text-xs/3 text-dim">({props.count})</span>
-              )}
+              {props.showCount &&
+                props.count !== undefined &&
+                props.count > 0 && (
+                  <span className="ml-2 text-xs/3">
+                    (
+                    <PlayOne className="inline-block align-middle mr-0.5" />
+                    {Math.ceil(props.count)})
+                  </span>
+                )}
               {props.original && (
                 <span className="ml-2 text-xs/3">(オリジナル曲)</span>
               )}
@@ -816,9 +829,15 @@ function ChartListItemChildren(props: CProps) {
                   date={props.updatedAt ?? props.brief?.updatedAt ?? 0}
                 />
               )}
-              {props.showCount && props.count !== undefined && (
-                <span className="ml-2 text-xs">({props.count})</span>
-              )}
+              {props.showCount &&
+                props.count !== undefined &&
+                props.count > 0 && (
+                  <span className="ml-2 text-xs">
+                    (
+                    <PlayOne className="inline-block align-middle mr-0.5" />
+                    {Math.ceil(props.count)})
+                  </span>
+                )}
               {props.original && (
                 <span className="ml-2 text-xs">(オリジナル曲)</span>
               )}
