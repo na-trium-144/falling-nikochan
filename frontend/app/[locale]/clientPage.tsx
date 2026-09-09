@@ -33,6 +33,7 @@ import { CidSchema } from "@falling-nikochan/chart";
 import { fetchBackend } from "./common/fetch.js";
 import { SocialLinks } from "./common/social.js";
 import { YouTubeLogo } from "./common/youtubeLogo.js";
+import { StatsDisplay } from "./common/stats.js";
 
 interface Props {
   locale: string;
@@ -57,6 +58,7 @@ export default function TopPage(props: Props) {
     1 * rem;
   const [initAnim, setInitAnim] = useState<boolean>(false);
   const [demoVisible, setDemoVisible] = useState<boolean>(false);
+  const [statsVisible, setStatsVisible] = useState<boolean>(false);
   const [demoChart, setDemoChart] = useState<DemoChart>();
   useEffect(() => {
     if (isSafari !== undefined) {
@@ -89,6 +91,10 @@ export default function TopPage(props: Props) {
           }
         }
         setDemoVisible(window.scrollY < window.innerHeight);
+        setStatsVisible(
+          window.scrollY >= 36 && // padding 4 + <span text-sm>の高さ20px
+            window.scrollY < window.innerHeight + 36 + 32 // ↑ + <span text-2xl>の高さ32px
+        );
         req = null;
       };
       const onScroll = () => {
@@ -317,6 +323,8 @@ export default function TopPage(props: Props) {
           <TopDemo {...demoChart} bottom={grassHeight} visible={demoVisible} />
         </div>
       </div>
+
+      <StatsDisplay statsVisible={statsVisible} />
 
       <div
         id="popular"
