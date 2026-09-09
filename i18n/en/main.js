@@ -16,7 +16,7 @@ export default {
     back: "Back",
     popular: "Popular Songs",
     stats: {
-      chartCount: "Total Charts",
+      chartCount: "Total Songs",
       playCount: "Total Plays",
     },
     howToPlay: {
