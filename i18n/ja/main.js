@@ -14,7 +14,7 @@ export default {
     back: "戻る",
     popular: "人気の楽曲",
     stats: {
-      chartCount: "総譜面数",
+      chartCount: "総楽曲数",
       playCount: "総プレイ回数",
     },
     howToPlay: {
