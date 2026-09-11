@@ -100,9 +100,7 @@ export default {
       welcome:
         "Welcome to Falling Nikochan chart editor. " +
         "You can create charts without an account.",
-      welcome2: "If you're new, you can also refer to this:",
-      guide: "Chart Editor Help",
-      howToVideo: "How to make a chart for Falling Nikochan",
+      guide: "How to use chart editor (Help)",
       inputId: "Enter Chart ID",
       inputIdDesc:
         "Enter the ID of the chart you want to edit. " +

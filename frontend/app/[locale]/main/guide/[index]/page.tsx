@@ -5,7 +5,7 @@ import { importGuideMDX } from "@falling-nikochan/i18n/mdx";
 import { Pager } from "@/common/pager.js";
 import { notFound } from "next/navigation";
 
-export const maxIndex = 7;
+const maxIndex = 7;
 
 export interface GuideProps {
   params: Promise<{ locale: string; index: string }>;
@@ -18,21 +18,14 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: GuideProps) {
-  const { index: indexStr } = await params;
-  const index = parseInt(indexStr, 10);
-  if (isNaN(index) || index < 1 || index > maxIndex) {
-    return {};
-  }
+  const index = Number((await params).index);
   const t = await getTranslations(params, "edit.guide");
   return initMetadata(params, `/main/guide/${index}`, t(`titles.${index}`), "");
 }
 
 export default async function GuidePage({ params }: GuideProps) {
   const { locale, index: indexStr } = await params;
-  const index = parseInt(indexStr, 10);
-  if (isNaN(index) || index < 1 || index > maxIndex) {
-    notFound();
-  }
+  const index = Number(indexStr);
   const guideComponents = await importGuideMDX(locale);
   const Content = guideComponents[index - 1];
   if (!Content) {
@@ -59,9 +52,7 @@ export default async function GuidePage({ params }: GuideProps) {
           index < maxIndex ? `/${locale}/main/guide/${index + 1}` : undefined
         }
       />
-      <div className="flex-1">
-        <Content />
-      </div>
+      <Content />
     </IndexMain>
   );
 }
