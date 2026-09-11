@@ -20,6 +20,9 @@ import Caution from "@icon-park/react/lib/icons/Caution.js";
 import { captureAndWrap, fetchBackend, formatError } from "@/common/fetch.js";
 import { markAsExpected } from "@/common/apiError.js";
 import { YouTubeLogo } from "@/common/youtubeLogo.js";
+import Link from "next/link";
+import Help from "@icon-park/react/lib/icons/Help";
+import ArrowRight from "@icon-park/react/lib/icons/ArrowRight.js";
 
 export default function EditTab({ locale }: { locale: string }) {
   const t = useTranslations("main.edit");
@@ -68,16 +71,19 @@ export default function EditTab({ locale }: { locale: string }) {
       locale={locale}
     >
       <section className="fn-sect">
-        <p>{t("welcome")}</p>
+        <p className="mb-1">{t("welcome")}</p>
         <p>
-          {t("welcome2")}
-          <ExternalLink
-            className="mx-1"
-            href="https://www.youtube.com/watch?v=hi9TY_78ETY"
+          <Link
+            href={`/${locale}/main/guide/1`}
+            className="fn-link-3"
+            prefetch={process.env.PREFETCH as "auto"}
           >
-            <YouTubeLogo className="mr-1" />
-            <span className="text-sm">{t("howToVideo")}</span>
-          </ExternalLink>
+            {t("guide")}
+            <ArrowRight
+              className="inline-block align-middle ml-1"
+              theme="filled"
+            />
+          </Link>
         </p>
       </section>
       <section className="fn-sect">
