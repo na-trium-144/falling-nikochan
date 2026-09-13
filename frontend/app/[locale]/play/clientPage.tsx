@@ -570,7 +570,9 @@ function Play(props: Props) {
         clearTimeout(showLoadingTimeout.current);
       }
       setShowLoading(false);
-      setShowReady(true);
+      if (!queryOptions.result) {
+        setShowReady(true);
+      }
       setTimeout(() => requestAnimationFrame(() => setOpenReadyAnim(true)));
       resetNotesAll(
         chartSeq.notes.map((n) => ({
@@ -608,6 +610,7 @@ function Play(props: Props) {
     initDone,
     errorMsg,
     resetNotesAll,
+    queryOptions.result,
   ]);
   useEffect(() => {
     if (!errorMsg) {
@@ -953,7 +956,7 @@ function Play(props: Props) {
               <div className="grow-1 basis-0" />
               <StatusBox
                 className={clsx(
-                  "isolate z-play-status flex-none m-3 mt-4.5 mb-0 self-end",
+                  "isolate z-play-status flex-none ml-3 mt-4.5 mb-0 mr-sai-3 self-end",
                   "transition-opacity duration-100",
                   !statusHide && musicAreaOk && notesAll.length > 0
                     ? "ease-in opacity-100"
@@ -1069,7 +1072,7 @@ function Play(props: Props) {
               className={clsx(
                 "absolute inset-x-0",
                 "flex justify-center items-center gap-1",
-                isMobile ? "top-10" : "top-0"
+                isMobile ? "top-10" : "top-(--sai-t)"
               )}
               onPointerDown={(e) => e.stopPropagation()}
               onPointerUp={(e) => e.stopPropagation()}
@@ -1277,7 +1280,7 @@ function Play(props: Props) {
               right: isMobile
                 ? "1rem"
                 : statusOverlaps
-                  ? 18 * statusScale * rem
+                  ? `calc(${18 * statusScale}rem + var(--sai-r))`
                   : "1rem",
             }}
             signature={chartSeq.signature}
@@ -1311,7 +1314,10 @@ function Play(props: Props) {
             <StatusBox
               className="absolute inset-0 isolate z-play-status"
               style={{
-                margin: 1 * statusScale * rem,
+                marginLeft: `max(${1 * statusScale}rem, var(--sai-l))`,
+                marginRight: `max(${1 * statusScale}rem, var(--sai-r))`,
+                marginBottom: `max(${1 * statusScale}rem, var(--sai-b))`,
+                marginTop: `max(${1 * statusScale}rem)`,
               }}
               judgeCount={judgeCount}
               bigCount={bigCount || 0}
@@ -1380,13 +1386,12 @@ function Play(props: Props) {
       {!isMobile && statusHide && showResult && !showReady && (
         <div
           className={clsx(
-            "isolate z-play-status-overlay absolute inset-y-0 my-auto",
+            "isolate z-play-status-overlay absolute inset-y-0 right-0 my-auto",
             "grid-centering"
           )}
-          style={{ right: "0.75rem" }}
         >
           <StatusBox
-            className="h-max"
+            className="h-max mr-sai-3"
             judgeCount={judgeCount}
             bigCount={bigCount || 0}
             bigTotal={bigTotal}

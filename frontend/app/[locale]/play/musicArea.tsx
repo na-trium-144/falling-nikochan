@@ -168,9 +168,13 @@ export function MusicArea(props: Props) {
         )}
         <div
           className={clsx(
-            "flex-1 min-w-0 mr-1 flex flex-col justify-between ",
+            "flex-1 min-w-0 flex flex-col justify-between ",
             "fg-base",
-            props.isMobile && (largeTitle ? "ml-3 mt-4" : "ml-3 mt-2")
+            props.isMobile
+              ? largeTitle
+                ? "ml-sai-3 mt-sai-4 mr-1"
+                : "ml-sai-3 mt-sai-2 mr-1"
+              : "mr-sai-1"
           )}
         >
           <div className={clsx(props.isMobile && "h-0 overflow-visible")}>
@@ -353,7 +357,7 @@ export function MusicArea(props: Props) {
       <ProgressBar
         value={currentSec / levelLength}
         fixedColor="bg-red-500/75"
-        className={clsx(props.isMobile ? "mx-2" : "ml-0.5 mr-1")}
+        className={clsx(props.isMobile ? "mx-sai-2" : "ml-0.5 mr-sai-1")}
       />
       <button
         className={clsx(
@@ -364,7 +368,7 @@ export function MusicArea(props: Props) {
                 "-bottom-9 inset-x-0 mx-auto w-max text-xl",
                 props.isTouch ? "fn-with-bg" : ""
               )
-            : "bottom-0 right-1",
+            : "bottom-0 right-1 mr-sai",
           props.isMobile &&
             (initialVolumeCtrlOpenDone.current
               ? "transition-all ease-out duration-300 opacity-100 "
@@ -383,7 +387,7 @@ export function MusicArea(props: Props) {
           "absolute z-10",
           props.isMobile
             ? "bottom-0 inset-x-0 mx-auto w-80 max-w-full p-4"
-            : "top-full left-3 ml-auto max-w-100 right-1 mt-1 p-3",
+            : "top-full left-3 ml-auto max-w-100 right-[max(var(--sai-r),0.25rem)] mt-1 p-3",
           "rounded-sq-box",
           "fn-plain",
           "transition-all duration-200",

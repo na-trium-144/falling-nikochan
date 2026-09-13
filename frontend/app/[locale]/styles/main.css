@@ -1,6 +1,7 @@
 @layer components {
   .fn-mobile-header {
-    @apply p-3 w-full relative text-center;
+    padding-top: calc(var(--sai-t) + var(--spacing) * 3);
+    @apply pb-3 px-sai-3 w-full relative text-center;
 
     > .fn-back {
       @apply absolute left-3 inset-y-0;
@@ -13,7 +14,8 @@
   }
 
   .fn-mobile-footer {
-    @apply pb-2 px-8 z-mobile-footer w-full;
+    padding-bottom: calc(var(--sai-b) + var(--spacing) * 2);
+    @apply px-sai-8 z-mobile-footer w-full;
     @apply flex flex-row items-center justify-stretch relative;
 
     /* 100vw - (px-8) - (各ボタンの最小幅約5rem*4要素) */
@@ -34,7 +36,7 @@
 
   .fn-pc-header {
     @apply flex items-center gap-4 h-pc-header;
-    @apply w-full;
+    @apply w-full pt-sai;
 
     > nav {
       @apply flex-none flex flex-row gap-4 text-lg;
@@ -42,7 +44,7 @@
   }
   .fn-pc-header2 {
     @apply flex items-center gap-4 h-pc-header;
-    @apply justify-end pr-6 pl-3 z-header2;
+    @apply justify-end pt-sai pr-sai-6 pl-3 z-header2;
   }
 
   .fn-pwa-install.fn-box {
@@ -87,8 +89,8 @@
   .fn-title-main {
     @apply basis-24 relative;
     width: calc(100% + 40rem);
-    marginleft: -20rem;
-    marginright: -20rem;
+    margin-left: -20rem;
+    margin-right: -20rem;
 
     > .fn-title {
       @apply absolute inset-0;
@@ -171,11 +173,11 @@
 
   .fn-feature {
     @apply w-full max-w-main flex items-center;
-    @apply flex-col gap-4 px-3;
+    @apply flex-col gap-4 px-sai-3;
     @variant main-wide {
-      @apply flex-row gap-4 pl-12 pr-0;
+      @apply flex-row gap-4 pl-sai-12 pr-0;
       &.fn-reverse {
-        @apply flex-row-reverse pl-0 pr-12;
+        @apply flex-row-reverse pl-0 pr-sai-12;
       }
     }
 
@@ -196,9 +198,9 @@
 
   .fn-policies-and-links {
     @apply w-full max-w-main flex;
-    @apply flex-col px-3 gap-6;
+    @apply flex-col px-sai-3 gap-6;
     @variant main-wide {
-      @apply flex-row items-start px-12 gap-12;
+      @apply flex-row items-start px-sai-12 gap-12;
     }
     > div {
       @apply basis-1/2 flex flex-col items-center justify-center text-center;
