@@ -91,4 +91,21 @@ body.fn-body {
       }
     }
   }
+
+  .fn-dev-safe-area {
+    @apply z-dev-safe-area fixed bg-red-500 opacity-20 pointer-events-none;
+
+    &.fn-dev-sai-t {
+      @apply top-0 h-sai-t inset-x-0;
+    }
+    &.fn-dev-sai-b {
+      @apply bottom-0 h-sai-b inset-x-0;
+    }
+    &.fn-dev-sai-l {
+      @apply left-0 w-sai-l inset-y-0;
+    }
+    &.fn-dev-sai-r {
+      @apply right-0 w-sai-r inset-y-0;
+    }
+  }
 }
