@@ -267,6 +267,7 @@ function Play(props: Props) {
     screenHeight,
     rem,
     statusScale,
+    mobilePlayUIHeightScale,
     largeResult,
   } = useDisplayMode();
 
@@ -1263,14 +1264,17 @@ function Play(props: Props) {
           initAnim ? "" : "translate-y-[30vh] opacity-0"
         )}
         style={{
-          height: isMobile ? 6 * statusScale * rem : "10vh",
-          maxHeight: "15vh",
+          height: isMobile
+            ? mobilePlayUIHeightScale *
+              Math.min(6 * statusScale * rem, 0.15 * screenHeight)
+            : 0.1 * screenHeight,
         }}
       >
         <IrasutoyaLikeGrass
           height={
             (isMobile
-              ? Math.min(6 * statusScale * rem, 0.15 * screenHeight)
+              ? mobilePlayUIHeightScale *
+                Math.min(6 * statusScale * rem, 0.15 * screenHeight)
               : 0.1 * screenHeight) +
             1 * rem
           }
@@ -1315,12 +1319,12 @@ function Play(props: Props) {
         {isMobile && (
           <>
             <StatusBox
-              className="absolute inset-0 isolate z-play-status"
+              className="absolute isolate z-play-status"
               style={{
-                marginLeft: `max(${1 * statusScale}rem, var(--sai-l))`,
-                marginRight: `max(${1 * statusScale}rem, var(--sai-r))`,
-                marginBottom: `max(${1 * statusScale}rem, var(--sai-b))`,
-                marginTop: `max(${1 * statusScale}rem)`,
+                left: `max(${1 * statusScale * mobilePlayUIHeightScale}rem, var(--sai-l))`,
+                right: `max(${1 * statusScale * mobilePlayUIHeightScale}rem, var(--sai-r))`,
+                bottom: `max(${1 * statusScale * mobilePlayUIHeightScale}rem, var(--sai-b))`,
+                // top: `max(${1 * statusScale}rem)`,
               }}
               judgeCount={judgeCount}
               bigCount={bigCount || 0}

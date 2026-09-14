@@ -40,7 +40,7 @@ interface Props {
 }
 export function MusicArea(props: Props) {
   const { width, height, ref } = useResizeDetector();
-  const { rem, screenHeight } = useDisplayMode();
+  const { rem, screenHeight, mobilePlayUIHeightScale } = useDisplayMode();
   const ytHalf = width && width / 2 < 200;
   const largeTitle = props.isMobile
     ? height && height > 8.5 * rem
@@ -149,8 +149,13 @@ export function MusicArea(props: Props) {
             fixedSide="width"
             className={clsx(
               "z-10",
-              props.isMobile ? "grow-0 shrink-0 w-1/2 mb-1.5" : "w-full mb-1"
+              props.isMobile ? "grow-0 shrink-0 mb-1.5" : "mb-1"
             )}
+            style={{
+              width: props.isMobile
+                ? 50 * mobilePlayUIHeightScale + "%"
+                : "100%",
+            }}
             scale={ytHalf ? 0.5 : 1}
             id={props.chartBrief?.ytId}
             control={false}

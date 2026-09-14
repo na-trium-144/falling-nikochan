@@ -13,6 +13,7 @@ interface DisplayMode {
   rem: number;
   playUIScale: number;
   statusScale: number;
+  mobilePlayUIHeightScale: number;
   largeResult: boolean;
 }
 export function useDisplayMode(): DisplayMode {
@@ -47,7 +48,7 @@ export function useDisplayMode(): DisplayMode {
   // cssのlandscapeと挙動を合わせるため、正方形は縦長扱いとする
   const isMobileGame = width <= height;
 
-  const scalingWidthThreshold2 = isMobileGame ? 520 : 900;
+  const scalingWidthThreshold2 = isMobileGame ? 32 * rem : 56 * rem;
   const playUIScale =
     width > scalingWidthThreshold2
       ? (width / scalingWidthThreshold2) ** 0.5
@@ -57,6 +58,16 @@ export function useDisplayMode(): DisplayMode {
     : (width > scalingWidthThreshold2
         ? (width / scalingWidthThreshold2) ** 0.5
         : 1) * 0.8;
+  // musicArea(50vw*9/16)とgrass(min(6rem,15vh))を除いた中央のエリアの高さが正方形より小さくなる場合
+  // ただしiPadのようにサイズが大きい場合は問題ではない
+  const mobilePlayUIHeight =
+    height -
+    Math.min(6 * statusScale * rem, 0.15 * height) -
+    (width * 0.5 * 9) / 16;
+  const mobilePlayUIHeightScale =
+    mobilePlayUIHeight > 40 * rem || mobilePlayUIHeight > width
+      ? 1
+      : (mobilePlayUIHeight / Math.min(40 * rem, width)) ** 2;
   const largeResultThreshold = 32 * rem * (isMobileGame ? 1 : 1.5);
   const largeResult = width >= largeResultThreshold;
 
@@ -85,6 +96,7 @@ export function useDisplayMode(): DisplayMode {
     rem,
     playUIScale,
     statusScale,
+    mobilePlayUIHeightScale,
     largeResult,
   };
 }
