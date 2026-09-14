@@ -267,6 +267,7 @@ function Play(props: Props) {
     screenHeight,
     rem,
     statusScale,
+    mobilePlayUIHeightScale,
     largeResult,
   } = useDisplayMode();
 
@@ -570,7 +571,9 @@ function Play(props: Props) {
         clearTimeout(showLoadingTimeout.current);
       }
       setShowLoading(false);
-      setShowReady(true);
+      if (!queryOptions.result) {
+        setShowReady(true);
+      }
       setTimeout(() => requestAnimationFrame(() => setOpenReadyAnim(true)));
       resetNotesAll(
         chartSeq.notes.map((n) => ({
@@ -608,6 +611,7 @@ function Play(props: Props) {
     initDone,
     errorMsg,
     resetNotesAll,
+    queryOptions.result,
   ]);
   useEffect(() => {
     if (!errorMsg) {
@@ -953,7 +957,7 @@ function Play(props: Props) {
               <div className="grow-1 basis-0" />
               <StatusBox
                 className={clsx(
-                  "isolate z-play-status flex-none m-3 mt-4.5 mb-0 self-end",
+                  "isolate z-play-status flex-none ml-3 mt-4.5 mb-0 mr-sai-3 self-end",
                   "transition-opacity duration-100",
                   !statusHide && musicAreaOk && notesAll.length > 0
                     ? "ease-in opacity-100"
@@ -1006,7 +1010,10 @@ function Play(props: Props) {
             </>
           )}
         </div>
-        <div className={clsx("relative flex-1")} ref={mainWindowSpace.ref}>
+        <div
+          className={clsx("relative flex-1", "ml-sai", isMobile && "mr-sai")}
+          ref={mainWindowSpace.ref}
+        >
           {isReadyAll && (
             <FallingWindow
               className="absolute inset-0 isolate z-play-fw"
@@ -1069,7 +1076,7 @@ function Play(props: Props) {
               className={clsx(
                 "absolute inset-x-0",
                 "flex justify-center items-center gap-1",
-                isMobile ? "top-10" : "top-0"
+                isMobile ? "top-10" : "top-(--sai-t)"
               )}
               onPointerDown={(e) => e.stopPropagation()}
               onPointerUp={(e) => e.stopPropagation()}
@@ -1257,14 +1264,17 @@ function Play(props: Props) {
           initAnim ? "" : "translate-y-[30vh] opacity-0"
         )}
         style={{
-          height: isMobile ? 6 * statusScale * rem : "10vh",
-          maxHeight: "15vh",
+          height: isMobile
+            ? mobilePlayUIHeightScale *
+              Math.min(6 * statusScale * rem, 0.15 * screenHeight)
+            : 0.1 * screenHeight,
         }}
       >
         <IrasutoyaLikeGrass
           height={
             (isMobile
-              ? Math.min(6 * statusScale * rem, 0.15 * screenHeight)
+              ? mobilePlayUIHeightScale *
+                Math.min(6 * statusScale * rem, 0.15 * screenHeight)
               : 0.1 * screenHeight) +
             1 * rem
           }
@@ -1277,7 +1287,7 @@ function Play(props: Props) {
               right: isMobile
                 ? "1rem"
                 : statusOverlaps
-                  ? 18 * statusScale * rem
+                  ? `calc(${18 * statusScale}rem + var(--sai-r))`
                   : "1rem",
             }}
             signature={chartSeq.signature}
@@ -1309,9 +1319,12 @@ function Play(props: Props) {
         {isMobile && (
           <>
             <StatusBox
-              className="absolute inset-0 isolate z-play-status"
+              className="absolute isolate z-play-status"
               style={{
-                margin: 1 * statusScale * rem,
+                left: `max(${1 * statusScale * mobilePlayUIHeightScale}rem, var(--sai-l))`,
+                right: `max(${1 * statusScale * mobilePlayUIHeightScale}rem, var(--sai-r))`,
+                bottom: `max(${1 * statusScale * mobilePlayUIHeightScale}rem, var(--sai-b))`,
+                // top: `max(${1 * statusScale}rem)`,
               }}
               judgeCount={judgeCount}
               bigCount={bigCount || 0}
@@ -1380,13 +1393,12 @@ function Play(props: Props) {
       {!isMobile && statusHide && showResult && !showReady && (
         <div
           className={clsx(
-            "isolate z-play-status-overlay absolute inset-y-0 my-auto",
+            "isolate z-play-status-overlay absolute inset-y-0 right-0 my-auto",
             "grid-centering"
           )}
-          style={{ right: "0.75rem" }}
         >
           <StatusBox
-            className="h-max"
+            className="h-max mr-sai-3"
             judgeCount={judgeCount}
             bigCount={bigCount || 0}
             bigTotal={bigTotal}

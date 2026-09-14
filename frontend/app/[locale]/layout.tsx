@@ -41,6 +41,14 @@ export default async function RootLayout({
             </ChangeLogProvider>
           </IntlProvider>
         </ThemeProvider>
+        {process.env.NODE_ENV === "development" && (
+          <>
+            <div className="fn-dev-safe-area fn-dev-sai-t" />
+            <div className="fn-dev-safe-area fn-dev-sai-b" />
+            <div className="fn-dev-safe-area fn-dev-sai-l" />
+            <div className="fn-dev-safe-area fn-dev-sai-r" />
+          </>
+        )}
       </body>
     </html>
   );
