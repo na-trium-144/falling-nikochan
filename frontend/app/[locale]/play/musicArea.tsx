@@ -389,10 +389,20 @@ export function MusicArea(props: Props) {
         className={clsx(
           "fg-base",
           "absolute z-10",
+          "flex flex-col",
           props.isMobile
-            ? "bottom-0 inset-x-0 mx-auto w-80 max-w-full p-4"
-            : "top-full left-3 ml-auto max-w-100 right-[max(var(--sai-r),0.25rem)] mt-1 p-3",
-          "rounded-sq-box",
+            ? clsx(
+                "bottom-0 inset-x-0 mx-auto w-80 max-w-full",
+                largeTitle
+                  ? "rounded-sq-box p-4 gap-3"
+                  : "rounded-sq-xl px-3 py-2 gap-1"
+              )
+            : clsx(
+                "top-full left-3 ml-auto max-w-100 right-[max(var(--sai-r),0.25rem)] mt-1",
+                largeTitle
+                  ? "rounded-sq-box p-3 gap-3"
+                  : "rounded-sq-xl px-2 py-1 gap-1"
+              ),
           "fn-plain",
           "transition-all duration-200",
           volumeCtrlOpen
@@ -429,11 +439,18 @@ export function MusicArea(props: Props) {
             )}
           />
         )}*/}
-        <div className="flex flex-row items-center ">
-          <YouTubeLogo className="text-xl" />
-          <span className="text-sm w-8 text-center ">{props.ytVolume}</span>
+        <div className="flex flex-row items-center">
+          <YouTubeLogo className={clsx(largeTitle ? "text-xl" : "text-sm")} />
+          <span
+            className={clsx(
+              largeTitle ? "text-sm w-8" : "text-xs w-6",
+              "text-center"
+            )}
+          >
+            {props.ytVolume}
+          </span>
           <Range
-            className="flex-1 mx-1 "
+            className="flex-1 mx-1"
             min={0}
             max={100}
             disabled={!ytVolumeCtrlAvailable}
@@ -441,20 +458,24 @@ export function MusicArea(props: Props) {
             onChange={props.setYtVolume}
           />
         </div>
-        <div className="flex flex-row items-center mt-3 ">
+        <div className="flex flex-row items-center">
           <SmilingFace
-            className={clsx("text-xl", props.enableSE || "text-dim")}
+            className={clsx(
+              largeTitle ? "text-xl" : "text-sm",
+              props.enableSE || "text-dim"
+            )}
           />
           <span
             className={clsx(
-              "text-sm w-8 text-center",
+              largeTitle ? "text-sm w-8" : "text-xs w-6",
+              "text-center",
               props.enableSE || "text-dim"
             )}
           >
             {props.enableSE ? props.seVolume : t("off")}
           </span>
           <Range
-            className="flex-1 mx-1 "
+            className="flex-1 mx-1"
             min={0}
             max={100}
             disabled={!props.enableSE}
