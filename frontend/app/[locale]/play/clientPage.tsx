@@ -1009,7 +1009,7 @@ function Play(props: Props) {
             </>
           )}
         </div>
-        <div className={clsx("relative flex-1")} ref={mainWindowSpace.ref}>
+        <div className={clsx("relative flex-1 ml-sai")} ref={mainWindowSpace.ref}>
           {isReadyAll && (
             <FallingWindow
               className="absolute inset-0 isolate z-play-fw"

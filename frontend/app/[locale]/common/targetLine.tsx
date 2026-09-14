@@ -7,7 +7,8 @@ interface Props {
   // TargetLineの左端からの画面上のx座標距離(px), またはleft: calc({} - 100%)に入れられる文字列
   barFlash?: number | string;
   left: number | string;
-  right: number | string;
+  right?: number | string;
+  width?: number | string;
   bottom: number | string;
 }
 export default function TargetLine(props: Props) {
@@ -51,6 +52,7 @@ export default function TargetLine(props: Props) {
       style={{
         left: props.left,
         right: props.right,
+        width: props.width,
         bottom: props.bottom,
         ...props.style,
       }}
