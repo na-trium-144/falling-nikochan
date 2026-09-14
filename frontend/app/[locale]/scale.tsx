@@ -51,7 +51,7 @@ export function useDisplayMode(): DisplayMode {
   const playUIScale =
     width > scalingWidthThreshold2
       ? (width / scalingWidthThreshold2) ** 0.5
-        : width / scalingWidthThreshold2;
+      : width / scalingWidthThreshold2;
   const statusScale = isMobileGame
     ? Math.min(width / (31 * rem), 1)
     : (width > scalingWidthThreshold2
