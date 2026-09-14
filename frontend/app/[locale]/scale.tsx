@@ -47,14 +47,11 @@ export function useDisplayMode(): DisplayMode {
   // cssのlandscapeと挙動を合わせるため、正方形は縦長扱いとする
   const isMobileGame = width <= height;
 
-  const scalingWidthThreshold1 = 400 * (isMobileGame ? 1.1 : 1.6);
-  const scalingWidthThreshold2 = 600 * (isMobileGame ? 1.1 : 1.6);
+  const scalingWidthThreshold2 = isMobileGame ? 520 : 900;
   const playUIScale =
     width > scalingWidthThreshold2
       ? (width / scalingWidthThreshold2) ** 0.5
-      : width > scalingWidthThreshold1
-        ? 1
-        : width / scalingWidthThreshold1;
+        : width / scalingWidthThreshold2;
   const statusScale = isMobileGame
     ? Math.min(width / (31 * rem), 1)
     : (width > scalingWidthThreshold2

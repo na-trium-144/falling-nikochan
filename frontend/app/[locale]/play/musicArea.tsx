@@ -40,12 +40,16 @@ interface Props {
 }
 export function MusicArea(props: Props) {
   const { width, height, ref } = useResizeDetector();
-  const { rem } = useDisplayMode();
+  const { rem, screenHeight } = useDisplayMode();
   const ytHalf = width && width / 2 < 200;
-  const largeTitle = props.isMobile ? height && height > 8.5 * rem : true;
-  const veryLargeTitle = props.isMobile
-    ? height && height > 11.5 * rem
-    : width && width > 30 * rem;
+  const largeTitle = props.isMobile
+    ? height && height > 8.5 * rem
+    : screenHeight > 32 * rem;
+  const veryLargeTitle =
+    largeTitle &&
+    (props.isMobile
+      ? height && height > 11.5 * rem
+      : width && width > 30 * rem);
 
   const t = useTranslations("play.message");
 
