@@ -33,8 +33,8 @@ catalogs:
       specifier: 6.2.2
       version: 6.2.2
     colorthief:
-      specifier: 3.4.0
-      version: 3.4.0
+      specifier: 3.5.0
+      version: 3.5.0
     dotenv:
       specifier: ^16.6.1
       version: 16.6.1
@@ -321,7 +321,7 @@ importers:
         version: 2.1.1
       colorthief:
         specifier: 'catalog:'
-        version: 3.4.0(sharp@0.34.5)
+        version: 3.5.0(sharp@0.34.5)
       file-saver:
         specifier: 2.0.5
         version: 2.0.5
@@ -472,7 +472,7 @@ importers:
         version: 0.11.1
       colorthief:
         specifier: 'catalog:'
-        version: 3.4.0(sharp@0.34.5)
+        version: 3.5.0(sharp@0.34.5)
       discord.js:
         specifier: 14.27.0
         version: 14.27.0
@@ -3104,8 +3104,8 @@ packages:
   color-name@1.1.4:
     resolution: {integrity: sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==}
 
-  colorthief@3.4.0:
-    resolution: {integrity: sha512-mwXc0OHLsb1on2JtVD2go31GTyHwBLtkRruggz6H/bY2vI1mL8v8Mvam9qIWiI4khnsbQXoBs8M+EofnlcQitQ==}
+  colorthief@3.5.0:
+    resolution: {integrity: sha512-wV/6Rnkqdx07CAuv8O3WYKBU/j5QdSXbYUfGp26seMIqze5Q40C9ovBSZB9PeVV6XkGe3VWb4zUEtQCYzCfyEA==}
     hasBin: true
     peerDependencies:
       sharp: '>=0.33.0'
@@ -7988,7 +7988,7 @@ snapshots:
 
   color-name@1.1.4: {}
 
-  colorthief@3.4.0(sharp@0.34.5):
+  colorthief@3.5.0(sharp@0.34.5):
     optionalDependencies:
       sharp: 0.34.5
 
