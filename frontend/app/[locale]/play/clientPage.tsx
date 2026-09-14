@@ -1010,7 +1010,7 @@ function Play(props: Props) {
           )}
         </div>
         <div
-          className={clsx("relative flex-1 ml-sai")}
+          className={clsx("relative flex-1", "ml-sai", isMobile && "mr-sai")}
           ref={mainWindowSpace.ref}
         >
           {isReadyAll && (
