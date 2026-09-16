@@ -99,7 +99,7 @@ export const ResultSerializedSchema = () =>
         ])
       ), // [10] bigCount
       v.nullable(v.pipe(v.number(), v.integer(), v.minValue(1))), // [11] inputType
-      v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(8)), // [12] playbackRate4
+      v.pipe(v.number(), v.minValue(0)), // [12] playbackRate4
     ]),
   ]);
 export type ResultSerialized = v.InferOutput<
