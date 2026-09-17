@@ -16,20 +16,21 @@
   .fn-mobile-footer {
     padding-bottom: calc(var(--sai-b) + var(--spacing) * 2);
     @apply px-sai-8 z-mobile-footer w-full;
-    @apply flex flex-row items-center justify-stretch relative;
+    @apply flex flex-row items-start justify-stretch relative;
 
     /* 100vw - (px-8) - (各ボタンの最小幅約5rem*4要素) */
     gap: max(0px, calc((100vw - 4rem - 5rem * 4) / 7));
 
     &.fn-mf-fixed {
       /*
-        TwitterAndroidではbottomが0のfixed要素の位置を勝手に変更する?
-        topから100dvhにあわせ、paddingを適当に変更しbottomが0でないようにしてみる。
+        TwitterAndroid,TwitteriPhoneでは要素の下端が画面の最下部に近いfixed要素の位置を勝手に変更する?
+        topから100dvhにあわせ、heightを適当に変更しbottomが0でないようにしてみる。
         100dvhがビューポートの最下部から浮く環境があったらそれはその時考える
       */
       @apply fixed;
       top: calc(100dvh - var(--container-mobile-footer));
-      padding-bottom: 100dvh;
+      /* fn-mf-blurと常に同じ挙動をしてほしいので、念の為それと同一のheightにしてみる */
+      height: calc(var(--container-mobile-footer) * 2);
     }
 
     .fn-mf-item {
