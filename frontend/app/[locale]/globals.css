@@ -75,6 +75,14 @@
   --sai-b: 40px;
   --sai-l: 40px;
 */
+  &:has(.ua-twitter) {
+    /*
+      Twitterのアプリ内ブラウザでは謎の safe-area-inset-top が発生する。また、下部の操作ボタンを避けたい。 (#1344)
+      themeInit.js がUAを見てua-twitterクラスをbodyに追加
+    */
+    --sai-t: 0px;
+    --sai-b: 3rem;
+  }
 }
 @custom-variant dark (&:where(.dark, .dark *));
 @custom-variant demo-wide {
