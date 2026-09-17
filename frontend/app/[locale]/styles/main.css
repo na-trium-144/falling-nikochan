@@ -21,6 +21,10 @@
     /* 100vw - (px-8) - (各ボタンの最小幅約5rem*4要素) */
     gap: max(0px, calc((100vw - 4rem - 5rem * 4) / 7));
 
+    &.fn-mf-fixed {
+      @apply fixed bottom-0;
+    }
+
     .fn-mf-item {
       @apply w-full text-lg gap-0.5 flex flex-col items-center;
       @apply pb-2 pt-2;
@@ -28,6 +32,7 @@
     }
   }
   .fn-mf-blur {
+    @apply fixed bottom-0;
     @apply z-mf-blur w-full h-mobile-footer;
     @apply backdrop-blur-2xs;
     @apply bg-gradient-to-t from-30% from-sky-50 to-sky-50/0;

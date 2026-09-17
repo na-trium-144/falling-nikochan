@@ -84,12 +84,7 @@ export function DevPage(props: { locale: string }) {
         </div>
         <div className="flex-none basis-mobile-footer no-pc" />
       </div>
-      <MobileFooter
-        className="fixed bottom-0"
-        blurBg
-        locale={props.locale}
-        tabKey={null}
-      />
+      <MobileFooter fixed locale={props.locale} tabKey={null} />
     </main>
   );
 }

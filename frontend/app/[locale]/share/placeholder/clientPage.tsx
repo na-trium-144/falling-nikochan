@@ -141,12 +141,7 @@ export default function ShareChart(props: Props) {
       <PoliciesAndLinks locale={locale} />
 
       <div className="flex-none basis-mobile-footer no-pc" />
-      <MobileFooter
-        className="fixed bottom-0"
-        blurBg
-        locale={locale}
-        tabKey={null}
-      />
+      <MobileFooter fixed locale={locale} tabKey={null} />
     </main>
   );
 }

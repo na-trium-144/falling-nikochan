@@ -370,12 +370,7 @@ export default function TopPage(props: Props) {
       <PoliciesAndLinks locale={locale} />
 
       <div className="flex-none basis-mobile-footer no-pc" />
-      <MobileFooter
-        className="fixed bottom-0"
-        blurBg
-        locale={locale}
-        tabKey="top"
-      />
+      <MobileFooter fixed locale={locale} tabKey="top" />
     </main>
   );
 }
