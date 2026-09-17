@@ -17,8 +17,14 @@ import NoteTab from "./noteTab.js";
 import { Box } from "@/common/box.js";
 import { MetaTab } from "./metaTab.js";
 import { addRecent } from "@/common/recent.js";
-import { convertToPlay, createBrief } from "@falling-nikochan/chart";
-import { Step, stepAdd, stepCmp, stepZero } from "@falling-nikochan/chart";
+import {
+  loadChart,
+  createBrief,
+  Step,
+  stepAdd,
+  stepCmp,
+  stepZero,
+} from "@falling-nikochan/chart";
 import { MobileHeader } from "@/common/header.js";
 import { LuaTabPlaceholder, LuaTabProvider, useLuaExecutor } from "./luaTab.js";
 import Select from "@/common/select.js";
@@ -111,10 +117,7 @@ export default function Edit(props: {
             cid: chart.cid,
             lvIndex: chart.currentLevelIndex || 0,
             brief: await createBrief(chart.toObject(), new Date().getTime()),
-            level: convertToPlay(
-              chart.toObject(),
-              chart.currentLevelIndex || 0
-            ),
+            level: loadChart(chart.toObject(), chart.currentLevelIndex || 0),
             editing: true as const,
           };
           setSessionData(data);

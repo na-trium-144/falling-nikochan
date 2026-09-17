@@ -6,26 +6,30 @@ import {
   loadChart,
   docRefs,
   currentChartVer,
-  LevelPlaySchema17,
-  Level17Play,
+  Chart17,
+  ChartSchema17,
 } from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
-import { describeRoute, resolver } from "hono-openapi";
-import { errorLiteral, validationErrorSchema } from "../error.js";
+import { describeRoute, resolver, validator } from "hono-openapi";
+import {
+  errorLiteral,
+  sValidatorHook,
+  validationErrorSchema,
+} from "../error.js";
 import { supportedEncodings } from "./decompress.js";
 
 const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
   "/",
   describeRoute({
     description:
-      "Accepts MessagePack-encoded Level17Play data and returns chart sequence data in MessagePack format for preview purposes.",
+      "Accepts MessagePack-encoded Chart17 data and returns chart sequence data in MessagePack format for preview purposes.",
     requestBody: {
-      description: "MessagePack-encoded Level17Play data",
+      description: "MessagePack-encoded Chart17 data",
       required: true,
       content: {
         "application/vnd.msgpack": {
-          schema: docRefs("LevelPlay17"),
+          schema: docRefs("Chart17"),
         },
       },
     },
@@ -35,6 +39,12 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
         in: "header",
         description: "Encoding applied to the request body",
         schema: { type: "string" },
+      },
+      {
+        name: "lvIndex",
+        in: "query",
+        description: "Index of the level in the chart (default 0)",
+        schema: { type: "integer", default: 0, minimum: 0 },
       },
     ],
     responses: {
@@ -49,6 +59,22 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
           "Content-Disposition": {
             description: "Filename with extension of .fnseq.mpk",
             schema: { type: "string" },
+          },
+        },
+      },
+      400: {
+        description: "invalid query parameter",
+        content: {
+          "application/json": {
+            schema: resolver(await validationErrorSchema()),
+          },
+        },
+      },
+      404: {
+        description: "level index out of range",
+        content: {
+          "application/json": {
+            schema: resolver(await errorLiteral("levelNotFound")),
           },
         },
       },
@@ -86,10 +112,21 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
       },
     },
   }),
+  validator(
+    "query",
+    v.object({
+      lvIndex: v.optional(
+        v.pipe(v.string(), v.regex(/^[0-9]+$/), v.transform(Number)),
+        "0"
+      ),
+    }),
+    sValidatorHook()
+  ),
   async (c) => {
+    const { lvIndex } = c.req.valid("query");
     const rawBody = await c.req.arrayBuffer();
 
-    let levelData: Level17Play;
+    let chartData: Chart17;
     try {
       const decodedData = msgpack.decode(new Uint8Array(rawBody));
       if (
@@ -102,13 +139,20 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
           return c.json({ message: "oldChartVersion" }, 409);
         }
       }
-      levelData = v.parse(LevelPlaySchema17(), decodedData);
+      chartData = v.parse(ChartSchema17(), decodedData);
     } catch (e) {
       throw new HTTPException(415, { message: "invalidChart", cause: e });
     }
 
+    if (
+      !chartData.levelsFreeze.at(lvIndex) ||
+      !chartData.levelsMeta.at(lvIndex)
+    ) {
+      throw new HTTPException(404, { message: "levelNotFound" });
+    }
+
     // Load chart data
-    const seqData: ChartSeqData = loadChart(levelData);
+    const seqData: ChartSeqData = loadChart(chartData, lvIndex);
 
     // Return msgpack-encoded response
     const filename = "preview.fnseq.mpk";

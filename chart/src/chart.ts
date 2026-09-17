@@ -15,10 +15,8 @@ chartFormat/ 内の定義
   * 旧バージョンからの変換: convertTo14(chart)
   * Min -> Edit: (await luaExec(level.lua.join("\n"))).levelFreezed
   * Entry -> Edit: entryToChart(chart)
-* LevelPlay: /api/playFile で使われる、プレイ時の譜面データ
-  * Edit -> Play: convertToPlay9(chart, lvIndex)
-* ChartSeqData, Note: プレイ中の譜面データ (過去 /api/seqFile でも使われていた)
-  * Play -> SeqData: loadChart9(level)
+* ChartSeqData, Note: プレイ時の譜面データ (/api/seqFile で使われる)
+  * Chart -> SeqData: loadChart(chart, lvIndex)
 
 route/ 内の定義
 
@@ -82,8 +80,6 @@ import {
   ChartUntil17,
   ChartUntil17Min,
   convertTo17,
-  convertToPlay17,
-  Level17Play,
 } from "./legacy/chart17.js";
 
 export const YoutubeIdSchema = () =>
@@ -193,11 +189,9 @@ export const currentChartVer = 17;
 export const lastIncompatibleVer = 16;
 export type ChartEdit = Chart17;
 export const ChartSchema = ChartSchema17;
-export type LevelPlay = Level17Play;
 export type LevelMin = Level15Meta;
 export type LevelFreeze = Level15Freeze;
 export const convertToMin = convertToMin14;
-export const convertToPlay = convertToPlay17;
 
 export async function convertToLatest(chart: ChartUntil17): Promise<ChartEdit> {
   if (chart.ver !== 17) chart = await convertTo17(chart as ChartUntil15);

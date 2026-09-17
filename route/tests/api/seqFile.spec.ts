@@ -1,6 +1,6 @@
 import { test, describe } from "node:test";
 import { expect } from "chai";
-import { app, dummyLevel15, dummyLevel17, dummyLevel6, initDb } from "./init";
+import { app, dummyChart, dummyChart15, dummyChart6, initDb } from "./init";
 import {
   ChartSeqData,
   currentChartVer,
@@ -19,7 +19,7 @@ describe("GET /api/seqFile/:cid/:lvIndex", () => {
     const res = await app.request("/api/seqFile/100000/0");
     expect(res.status).to.equal(200);
     const seqData = msgpack.decode(await res.arrayBuffer()) as ChartSeqData;
-    expect(seqData.notes).to.deep.equal(loadChart(dummyLevel17()).notes);
+    expect(seqData.notes).to.deep.equal(loadChart(dummyChart(), 0).notes);
   });
   test("should return ETag calculated by calcETag()", async () => {
     await initDb();
@@ -80,11 +80,13 @@ describe("GET /api/seqFile/:cid/:lvIndex", () => {
         const res = await app.request(`/api/seqFile/${100000 + ver}/0`);
         expect(res.status).to.equal(200);
         const seqData = msgpack.decode(await res.arrayBuffer()) as ChartSeqData;
-        expect(seqData.notes).to.deep.equal(loadChart(dummyLevel15()).notes);
+        expect(seqData.notes).to.deep.equal(loadChart(dummyChart15(), 0).notes);
         expect(seqData.notes).to.not.deep.equal(
-          loadChart(dummyLevel17()).notes
+          loadChart(dummyChart(), 0).notes
         );
-        expect(seqData.notes).to.not.deep.equal(loadChart(dummyLevel6()).notes);
+        expect(seqData.notes).to.not.deep.equal(
+          loadChart(dummyChart6(), 0).notes
+        );
       }
     );
   }
@@ -97,9 +99,9 @@ describe("GET /api/seqFile/:cid/:lvIndex", () => {
         const res = await app.request(`/api/seqFile/${100000 + ver}/0`);
         expect(res.status).to.equal(200);
         const seqData = msgpack.decode(await res.arrayBuffer()) as ChartSeqData;
-        expect(seqData.notes).to.deep.equal(loadChart(dummyLevel6()).notes);
+        expect(seqData.notes).to.deep.equal(loadChart(dummyChart6(), 0).notes);
         expect(seqData.notes).to.not.deep.equal(
-          loadChart(dummyLevel15()).notes
+          loadChart(dummyChart15(), 0).notes
         );
       }
     );
