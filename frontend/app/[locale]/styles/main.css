@@ -22,7 +22,12 @@
     gap: max(0px, calc((100vw - 4rem - 5rem * 4) / 7));
 
     &.fn-mf-fixed {
-      @apply fixed bottom-0;
+      /*
+        TwitterAndroidでは fixed bottom-0 が100dvhのbodyの最下部と一致しないので、topから100dvhにあわせる。
+        100dvhがビューポートの最下部から浮く環境があったらそれはその時考える
+      */
+      @apply fixed;
+      top: calc(100dvh - var(--container-mobile-footer));
     }
 
     .fn-mf-item {
@@ -32,10 +37,13 @@
     }
   }
   .fn-mf-blur {
-    @apply fixed bottom-0;
-    @apply z-mf-blur w-full h-mobile-footer;
+    @apply fixed;
+    top: calc(100dvh - var(--container-mobile-footer));
+    @apply z-mf-blur w-full;
+    /* 念の為長めに伸ばしておく */
+    height: calc(var(--container-mobile-footer) * 2);
     @apply backdrop-blur-2xs;
-    @apply bg-gradient-to-t from-30% from-sky-50 to-sky-50/0;
+    @apply bg-gradient-to-t from-65% from-sky-50 to-sky-50/0;
     @apply dark:from-orange-950 dark:to-orange-950/0;
   }
 
