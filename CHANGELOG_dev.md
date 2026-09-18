@@ -1,3 +1,7 @@
+## ver. 17.9 - 2026/09/18 [#1367](https://github.com/na-trium-144/falling-nikochan/pull/1367)
+
+* 譜面編集ヘルプを /main/guide/1-7 ページとして追加
+
 ## ver. 17.8 - 2026/09/18 [#1371](https://github.com/na-trium-144/falling-nikochan/pull/1371)
 
 * viewport-fit=cover指定、safe-area-inset対応の修正
