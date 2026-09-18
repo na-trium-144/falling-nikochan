@@ -124,7 +124,7 @@ export async function initMetadata(
     robots: {
       index: path ? true : false,
       follow: path ? true : false,
-      nocache: true,
+      nocache: path ? false : true,
     },
     other: options?.custom,
   };
