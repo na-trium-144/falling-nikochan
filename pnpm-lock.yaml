@@ -48,8 +48,8 @@ catalogs:
       specifier: 1.3.1
       version: 1.3.1
     isbot:
-      specifier: ~5.2.1
-      version: 5.2.1
+      specifier: ~5.2.2
+      version: 5.2.2
     mongodb:
       specifier: 7.5.0
       version: 7.5.0
@@ -330,7 +330,7 @@ importers:
         version: 1.1.0
       isbot:
         specifier: 'catalog:'
-        version: 5.2.1
+        version: 5.2.2
       keyboard-css:
         specifier: 1.2.4
         version: 1.2.4
@@ -487,7 +487,7 @@ importers:
         version: 1.3.1(@hono/standard-validator@0.2.3)(@standard-community/standard-json@0.3.5)(@standard-community/standard-openapi@0.2.9)(@types/json-schema@7.0.15)(hono@4.13.1)(openapi-types@12.1.3)
       isbot:
         specifier: 'catalog:'
-        version: 5.2.1
+        version: 5.2.2
       moji:
         specifier: 0.5.1
         version: 0.5.1
@@ -3983,8 +3983,8 @@ packages:
   isarray@2.0.5:
     resolution: {integrity: sha512-xHjhDr3cNBK0BzdUJSPXZntQUx/mwMS5Rw4A7lPJ90XGAO6ISP/ePDNuo0vhqOZU+UD5JoodwCAAoZQd3FeAKw==}
 
-  isbot@5.2.1:
-    resolution: {integrity: sha512-dJ+LpKyClQZ7NG+j3OensC/mAZkGpukE9YUrgPYvAZj2doVL0edfDgywTUh5CXa0o+nW9a1V9e5+CJTX8+SxRw==}
+  isbot@5.2.2:
+    resolution: {integrity: sha512-iQcBXcd+Rv/pkubRyGh2utW2j1oPG5hZY6TUhVPpqK4G+o3IbxpJNx04hgksjc/N7GK5pEorUxDeg31cFgEk/w==}
     engines: {node: '>=18'}
 
   isexe@2.0.0:
@@ -9056,7 +9056,7 @@ snapshots:
 
   isarray@2.0.5: {}
 
-  isbot@5.2.1: {}
+  isbot@5.2.2: {}
 
   isexe@2.0.0: {}
 
