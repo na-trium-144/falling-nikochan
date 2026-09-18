@@ -19,9 +19,7 @@ import { useRouter } from "next/navigation";
 import Caution from "@icon-park/react/lib/icons/Caution.js";
 import { captureAndWrap, fetchBackend, formatError } from "@/common/fetch.js";
 import { markAsExpected } from "@/common/apiError.js";
-import { YouTubeLogo } from "@/common/youtubeLogo.js";
 import Link from "next/link";
-import Help from "@icon-park/react/lib/icons/Help";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight.js";
 
 export default function EditTab({ locale }: { locale: string }) {
