@@ -1,8 +1,11 @@
+"use client";
+
 import clsx from "clsx/lite";
 import Link from "next/link";
 import { ButtonHighlight } from "./button";
 
 interface Props {
+  className?: string;
   index: number;
   maxIndex: number;
   title: string;
@@ -13,17 +16,12 @@ interface Props {
 }
 export function Pager(props: Props) {
   return (
-    <div
-      className={clsx(
-        "flex flex-col main-wide:flex-row items-center mb-4",
-        "space-y-2 main-wide:space-y-0 main-wide:space-x-2"
-      )}
-    >
-      <div>
+    <div className={clsx("fn-pager", props.className)}>
+      <div className="flex">
         {props.index > 1 ? (
           props.hrefBefore ? (
             <Link
-              className={clsx("fn-icon-button fn-pager-arrow")}
+              className="fn-icon-button fn-pager-arrow"
               href={props.hrefBefore}
               scroll={false}
               replace
@@ -34,7 +32,7 @@ export function Pager(props: Props) {
             </Link>
           ) : (
             <button
-              className={clsx("fn-icon-button fn-pager-arrow")}
+              className="fn-icon-button fn-pager-arrow"
               onClick={props.onClickBefore}
             >
               <ButtonHighlight />
@@ -42,17 +40,15 @@ export function Pager(props: Props) {
             </button>
           )
         ) : (
-          <span className="inline-block w-7" />
+          <span className="w-7" />
         )}
-        <span className="inline-block">
-          <span className="inline-block w-6 text-right">{props.index}</span>
-          <span className="mx-2">/</span>
-          <span className="inline-block w-6 text-left">{props.maxIndex}</span>
-        </span>
+        <span className="w-6 text-right">{props.index}</span>
+        <span className="mx-2">/</span>
+        <span className="w-6 text-left">{props.maxIndex}</span>
         {props.index < props.maxIndex ? (
           props.hrefAfter ? (
             <Link
-              className={clsx("fn-icon-button fn-pager-arrow")}
+              className="fn-icon-button fn-pager-arrow"
               href={props.hrefAfter}
               scroll={false}
               replace
@@ -63,7 +59,7 @@ export function Pager(props: Props) {
             </Link>
           ) : (
             <button
-              className={clsx("fn-icon-button fn-pager-arrow")}
+              className="fn-icon-button fn-pager-arrow"
               onClick={props.onClickAfter}
             >
               <ButtonHighlight />
@@ -71,12 +67,10 @@ export function Pager(props: Props) {
             </button>
           )
         ) : (
-          <span className="inline-block w-7" />
+          <span className="w-7" />
         )}
       </div>
-      <div className="flex-1">
-        <span className="inline-block fn-heading-sect">{props.title}</span>
-      </div>
+      <div className="flex-1 fn-heading-sect">{props.title}</div>
     </div>
   );
 }
