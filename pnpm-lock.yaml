@@ -157,7 +157,7 @@ importers:
         version: 0.1.0(hono@4.13.8)
       '@sentry/hono':
         specifier: catalog:sentry
-        version: 10.65.0(@hono/node-server@2.0.8)(@sentry/bun@10.65.0)(@sentry/cloudflare@10.65.0)(@sentry/node@10.65.0)(hono@4.13.8)
+        version: 10.73.0(@hono/node-server@2.1.1)(@sentry/bun@10.73.0)(@sentry/cloudflare@10.73.0)(@sentry/node@10.73.0)(hono@4.13.8)
       '@vercel/functions':
         specifier: 3.9.8
         version: 3.9.8(ws@8.21.3)
@@ -312,7 +312,7 @@ importers:
         version: 10.73.0
       '@sentry/nextjs':
         specifier: catalog:sentry
-        version: 10.65.0(@opentelemetry/core@2.9.0)(@opentelemetry/sdk-trace-base@2.9.0)(next@16.1.7)(react@19.2.8)(webpack@5.111.0)
+        version: 10.73.0(@opentelemetry/core@2.9.0)(@opentelemetry/sdk-trace-base@2.9.0)(next@16.1.7)(react@19.2.8)(webpack@5.111.0)
       ace-builds:
         specifier: 1.44.0
         version: 1.44.0
@@ -414,8 +414,8 @@ importers:
         specifier: 1.104.1
         version: 1.104.1
       svgo:
-        specifier: 4.1.0
-        version: 4.1.0
+        specifier: 4.0.2
+        version: 4.0.2
       tailwindcss:
         specifier: catalog:tailwindcss
         version: 4.3.3
@@ -441,8 +441,8 @@ importers:
         specifier: workspace:*
         version: link:../i18n
       '@hono/node-server':
-        specifier: 2.0.8
-        version: 2.0.8(hono@4.13.8)
+        specifier: 2.1.1
+        version: 2.1.1(hono@4.13.8)
       '@hono/standard-validator':
         specifier: 0.2.3
         version: 0.2.3(@standard-schema/spec@1.1.0)(hono@4.13.8)
@@ -567,9 +567,6 @@ packages:
   '@apm-js-collab/code-transformer@0.18.1':
     resolution: {integrity: sha512-u1Hb6bHjWtkSpiprwVP6YaHC1DTN4RAU3zYkUDUe7WMnJwdyU1pwTL9dFKiSJB9IiLue/EQovmyx6xhU7FFtAQ==}
     hasBin: true
-
-  '@apm-js-collab/tracing-hooks@0.10.1':
-    resolution: {integrity: sha512-w2OWXR7FWrKqSziuE9+QclaZrStxO/8+OwbXM635s/zs0Eez1Qo3ivSPdB2WsaPY/iznKTytONPx/PitD7IXcA==}
 
   '@axiomhq/js@2.0.0':
     resolution: {integrity: sha512-mhDH0KLFkDko9ytoltgmch2gOiwE6kY6VWhCmTux9lzL9hmjTej68JeQKwq9GGqOY7xwDsya88bNiTnp/zc8+Q==}
@@ -3187,8 +3184,8 @@ packages:
     resolution: {integrity: sha512-w2Xy9UMMwlKtou0vlRnXvWglPAceXCTtcmVSo8ZBUvqCV5aXEFP/PC6d+I464810I9FT++UACwTD5511bmGPUg==}
     engines: {node: '>=16'}
 
-  css-select@6.0.0:
-    resolution: {integrity: sha512-rZZVSLle8v0+EY8QAkDWrKhpgt6SA5OtHsgBnsj6ZaLb5dmDVOWUDtQitd9ydxxvEjhewNudS6eTVU7uOyzvXw==}
+  css-select@5.2.2:
+    resolution: {integrity: sha512-TizTzUddG/xYLA3NXodFM0fSbNizXjOKhqiQQwvhlspadZokn1KDy0NZFS0wuEubIYAV5/c1/lAr0TaaFXEXzw==}
 
   css-to-react-native@3.2.0:
     resolution: {integrity: sha512-e8RKaLXMOFii+02mOlqwjbD00KSEKqblnpO9e++1aXS1fPQOpS1YoqdVHBqPjHNoxeF2mimzVqawm2KCbEdtHQ==}
@@ -3201,8 +3198,8 @@ packages:
     resolution: {integrity: sha512-X7sjQzceUhu1u7Y/ylrRZFU2FS6LRiFVp6rKLPg23y3x3c3DOKAwuXGDp+PAGjh6CSnCjYeAul8pcT8bAl+lSA==}
     engines: {node: ^10 || ^12.20.0 || ^14.13.0 || >=15.0.0}
 
-  css-what@7.0.0:
-    resolution: {integrity: sha512-wD5oz5xibMOPHzy13CyGmogB3phdvcDaB5t0W/Nr5Z2O/agcB8YwOz6e2Lsp10pNDzBoDO9nVa3RGs/2BttpHQ==}
+  css-what@6.2.2:
+    resolution: {integrity: sha512-u/O3vwbptzhMs3L1fQE82ZSLHQQfto5gyZzwteVIEyeaY5Fc7R4dapF/BvRoSYFeqfBk4m0V1Vafq5Pjv25wvA==}
     engines: {node: '>= 6'}
 
   csso@5.0.5:
@@ -4485,8 +4482,8 @@ packages:
     resolution: {integrity: sha512-8Ofs/AUQh8MaEcrlq5xOX0CQ9ypTF5dl78mjlMNfOK08fzpgTHQRQPBxcPlEtIw0yRpws+Zo/3r+5WRby7u3Gg==}
     engines: {node: '>= 0.6'}
 
-  next-intl-swc-plugin-extractor@4.13.6:
-    resolution: {integrity: sha512-M2L8jtPEAXj0CPmXbiW66THdr3OnDqA9IsU1hqv3CdxtVow3Bl9eXPdT9Opeji7L4AFrUZ016dJOs+CoTw66OA==}
+  next-intl-swc-plugin-extractor@4.14.5:
+    resolution: {integrity: sha512-dbpsjHmwbqn795z7eDI7HHL+jxyvZ5CNF40sbGx+nkjM4pCs7HdTzGQnQ84mjF/WWZa/w9pJ6M74prh+3vnbGQ==}
 
   next-intl@4.14.5:
     resolution: {integrity: sha512-9sPJh5ITJbP28HZ5obuFAMC4RwW/mhEvHiGVHXPWL0uRbF2RrjHWz8PcUmLaH2oca79ak2ayQz+uRSALZN9xSw==}
@@ -4673,9 +4670,6 @@ packages:
   picomatch@4.0.7:
     resolution: {integrity: sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==}
     engines: {node: '>=12'}
-
-  pino-abstract-transport@1.2.0:
-    resolution: {integrity: sha512-Guhh8EZfPCfH+PMXAb6rKOjGQEoy0xlAIn+irODG5kgfYV+BQ0rGYYWTIel3P5mmyXqkYkPmdIkywsn6QKUR1Q==}
 
   pino-abstract-transport@3.0.0:
     resolution: {integrity: sha512-wlfUczU+n7Hy/Ha5j9a/gZNy7We5+cXp8YL+X+PG8S0KXxw7n/JXA3c46Y0zQznIJ83URJiwy7Lh56WLokNuxg==}
@@ -5141,8 +5135,8 @@ packages:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
 
-  svgo@4.1.0:
-    resolution: {integrity: sha512-bkxnTg1kSU0guhIBmibA6UUhrQmPVA1XsQLN+ylCd+UWzbnLkySOcXpyk1mrl05f+pcaCx2eHb+sp6BgMZWX+Q==}
+  svgo@4.0.2:
+    resolution: {integrity: sha512-ekx94z1rRc5LDi6oSUaeRnYhd0UOJxdtQCL2rF8xpWxD3TPAsISWOrxezqGovqS38GRZOdpDfvQe3ts6F7nsng==}
     engines: {node: '>=16'}
     hasBin: true
 
@@ -5533,7 +5527,7 @@ snapshots:
 
   '@apm-js-collab/code-transformer-bundler-plugins@0.7.4':
     dependencies:
-      '@apm-js-collab/code-transformer': 0.15.0
+      '@apm-js-collab/code-transformer': 0.18.1
       es-module-lexer: 2.3.2
       magic-string: 0.30.21
       module-details-from-path: 1.0.4
@@ -5546,14 +5540,6 @@ snapshots:
       meriyah: 6.1.4
       semifies: 1.0.0
       source-map: 0.6.1
-
-  '@apm-js-collab/tracing-hooks@0.10.1':
-    dependencies:
-      '@apm-js-collab/code-transformer': 0.15.0
-      debug: 4.4.3
-      module-details-from-path: 1.0.4
-    transitivePeerDependencies:
-      - supports-color
 
   '@axiomhq/js@2.0.0':
     dependencies:
@@ -6460,7 +6446,7 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.28.6
 
-  '@hono/node-server@2.0.8(hono@4.13.8)':
+  '@hono/node-server@2.1.1(hono@4.13.8)':
     dependencies:
       hono: 4.13.8
 
@@ -7091,31 +7077,33 @@ snapshots:
     dependencies:
       '@sentry/core': 10.73.0
 
-  '@sentry/hono@10.65.0(@hono/node-server@2.0.8)(@sentry/bun@10.65.0)(@sentry/cloudflare@10.65.0)(@sentry/node@10.65.0)(hono@4.13.8)':
+  '@sentry/hono@10.73.0(@hono/node-server@2.1.1)(@sentry/bun@10.73.0)(@sentry/cloudflare@10.73.0)(@sentry/node@10.73.0)(hono@4.13.8)':
     dependencies:
       '@opentelemetry/api': 1.9.1
-      '@sentry/core': 10.65.0
+      '@sentry/conventions': 0.16.0
+      '@sentry/core': 10.73.0
       hono: 4.13.8
     optionalDependencies:
-      '@hono/node-server': 2.0.8(hono@4.13.8)
-      '@sentry/bun': 10.65.0(@opentelemetry/core@2.9.0)
-      '@sentry/cloudflare': 10.65.0(@opentelemetry/core@2.9.0)
-      '@sentry/node': 10.65.0(@opentelemetry/core@2.9.0)
+      '@hono/node-server': 2.1.1(hono@4.13.8)
+      '@sentry/bun': 10.73.0(@opentelemetry/core@2.9.0)
+      '@sentry/cloudflare': 10.73.0
+      '@sentry/node': 10.73.0(@opentelemetry/core@2.9.0)
 
-  '@sentry/nextjs@10.65.0(@opentelemetry/core@2.9.0)(@opentelemetry/sdk-trace-base@2.9.0)(next@16.1.7)(react@19.2.8)(webpack@5.111.0)':
+  '@sentry/nextjs@10.73.0(@opentelemetry/core@2.9.0)(@opentelemetry/sdk-trace-base@2.9.0)(next@16.1.7)(react@19.2.8)(webpack@5.111.0)':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@rollup/plugin-commonjs': 28.0.1(rollup@4.60.3)
       '@sentry/browser-utils': 10.73.0
       '@sentry/bundler-plugin-core': 5.3.0
-      '@sentry/conventions': 0.15.1
-      '@sentry/core': 10.65.0
-      '@sentry/node': 10.65.0(@opentelemetry/core@2.9.0)
-      '@sentry/opentelemetry': 10.65.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0)(@opentelemetry/sdk-trace-base@2.9.0)
-      '@sentry/react': 10.65.0(react@19.2.8)
-      '@sentry/vercel-edge': 10.65.0
+      '@sentry/conventions': 0.16.0
+      '@sentry/core': 10.73.0
+      '@sentry/node': 10.73.0(@opentelemetry/core@2.9.0)
+      '@sentry/opentelemetry': 10.73.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0)(@opentelemetry/sdk-trace-base@2.9.0)
+      '@sentry/react': 10.73.0(react@19.2.8)
+      '@sentry/server-utils': 10.73.0
+      '@sentry/vercel-edge': 10.73.0
       '@sentry/webpack-plugin': 5.3.0(webpack@5.111.0)
-      next: 16.1.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.6)(react@19.2.8)(sass@1.102.0)
+      next: 16.1.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.6)(react@19.2.8)(sass@1.104.1)
       rollup: 4.60.3
       stacktrace-parser: 0.1.11
     transitivePeerDependencies:
@@ -8033,10 +8021,10 @@ snapshots:
 
   css-gradient-parser@0.0.17: {}
 
-  css-select@6.0.0:
+  css-select@5.2.2:
     dependencies:
       boolbase: 1.0.0
-      css-what: 7.0.0
+      css-what: 6.2.2
       domhandler: 5.0.3
       domutils: 3.2.2
       nth-check: 2.1.1
@@ -8057,7 +8045,7 @@ snapshots:
       mdn-data: 2.27.1
       source-map-js: 1.2.1
 
-  css-what@7.0.0: {}
+  css-what@6.2.2: {}
 
   csso@5.0.5:
     dependencies:
@@ -9623,7 +9611,7 @@ snapshots:
 
   negotiator@1.0.0: {}
 
-  next-intl-swc-plugin-extractor@4.13.6: {}
+  next-intl-swc-plugin-extractor@4.14.5: {}
 
   next-intl@4.14.5(next@16.1.7)(react@19.2.8):
     dependencies:
@@ -9636,8 +9624,7 @@ snapshots:
       icu-minify: 4.14.5
       negotiator: 1.0.0
       next: 16.1.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.6)(react@19.2.8)(sass@1.104.1)
-      next-intl-swc-plugin-extractor: 4.13.6
-      po-parser: 2.1.1
+      next-intl-swc-plugin-extractor: 4.14.5
       react: 19.2.8
       use-intl: 4.14.5(react@19.2.8)
     transitivePeerDependencies:
@@ -9828,11 +9815,6 @@ snapshots:
   picomatch@4.0.5: {}
 
   picomatch@4.0.7: {}
-
-  pino-abstract-transport@1.2.0:
-    dependencies:
-      readable-stream: 4.7.0
-      split2: 4.2.0
 
   pino-abstract-transport@3.0.0:
     dependencies:
@@ -10437,12 +10419,12 @@ snapshots:
 
   supports-preserve-symlinks-flag@1.0.0: {}
 
-  svgo@4.1.0:
+  svgo@4.0.2:
     dependencies:
       commander: 11.1.0
-      css-select: 6.0.0
+      css-select: 5.2.2
       css-tree: 3.2.1
-      css-what: 7.0.0
+      css-what: 6.2.2
       csso: 5.0.5
       picocolors: 1.1.1
       sax: 1.6.1
