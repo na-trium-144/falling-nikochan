@@ -110,14 +110,14 @@ catalogs:
       version: 16.1.7
   react:
     '@types/react':
-      specifier: ^19.2.18
-      version: 19.2.18
+      specifier: ^19.3.0
+      version: 19.3.0
     '@types/react-dom':
       specifier: ^19.2.3
       version: 19.2.3
     react:
-      specifier: ^19.2.8
-      version: 19.2.8
+      specifier: ^19.3.0
+      version: 19.3.0
     react-dom:
       specifier: ^19.2.6
       version: 19.2.6
@@ -209,7 +209,7 @@ importers:
         version: 17.10.0
       next:
         specifier: catalog:next
-        version: 16.1.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.6)(react@19.2.8)(sass@1.102.0)
+        version: 16.1.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.6)(react@19.3.0)(sass@1.102.0)
       prettier:
         specifier: 3.9.6
         version: 3.9.6
@@ -294,13 +294,13 @@ importers:
         version: 5.2.5
       '@icon-park/react':
         specifier: catalog:iconpark
-        version: 1.4.2(react-dom@19.2.6)(react@19.2.8)
+        version: 1.4.2(react-dom@19.2.6)(react@19.3.0)
       '@mdx-js/loader':
         specifier: 3.1.1
         version: 3.1.1(webpack@5.109.2)
       '@mdx-js/react':
         specifier: 3.1.1
-        version: 3.1.1(@types/react@19.2.18)(react@19.2.8)
+        version: 3.1.1(@types/react@19.3.0)(react@19.3.0)
       '@msgpack/msgpack':
         specifier: 'catalog:'
         version: 3.1.3
@@ -312,7 +312,7 @@ importers:
         version: 10.65.0
       '@sentry/nextjs':
         specifier: catalog:sentry
-        version: 10.65.0(@opentelemetry/core@2.9.0)(@opentelemetry/sdk-trace-base@2.9.0)(next@16.1.7)(react@19.2.8)(webpack@5.109.2)
+        version: 10.65.0(@opentelemetry/core@2.9.0)(@opentelemetry/sdk-trace-base@2.9.0)(next@16.1.7)(react@19.3.0)(webpack@5.109.2)
       ace-builds:
         specifier: 1.44.0
         version: 1.44.0
@@ -339,10 +339,10 @@ importers:
         version: 15.2.0
       next:
         specifier: catalog:next
-        version: 16.1.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.6)(react@19.2.8)(sass@1.102.0)
+        version: 16.1.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.6)(react@19.3.0)(sass@1.102.0)
       next-intl:
         specifier: 'catalog:'
-        version: 4.13.6(next@16.1.7)(react@19.2.8)(typescript@5.9.3)
+        version: 4.13.6(next@16.1.7)(react@19.3.0)(typescript@5.9.3)
       next-license-list:
         specifier: 1.0.1
         version: 1.0.1(webpack@5.109.2)
@@ -351,22 +351,22 @@ importers:
         version: 3.0.3
       pretty-checkbox-react:
         specifier: 3.2.0
-        version: 3.2.0(pretty-checkbox@3.0.3)(react-dom@19.2.6)(react@19.2.8)
+        version: 3.2.0(pretty-checkbox@3.0.3)(react-dom@19.2.6)(react@19.3.0)
       react:
         specifier: catalog:react
-        version: 19.2.8
+        version: 19.3.0
       react-ace:
         specifier: 15.0.0
-        version: 15.0.0(react-dom@19.2.6)(react@19.2.8)
+        version: 15.0.0(react-dom@19.2.6)(react@19.3.0)
       react-dom:
         specifier: catalog:react
-        version: 19.2.6(react@19.2.8)
+        version: 19.2.6(react@19.3.0)
       react-range:
         specifier: 1.10.0
-        version: 1.10.0(react-dom@19.2.6)(react@19.2.8)
+        version: 1.10.0(react-dom@19.2.6)(react@19.3.0)
       react-resize-detector:
         specifier: 12.3.0
-        version: 12.3.0(react@19.2.8)
+        version: 12.3.0(react@19.3.0)
       valibot:
         specifier: 'catalog:'
         version: 1.4.2(typescript@5.9.3)
@@ -400,10 +400,10 @@ importers:
         version: 2.0.14
       '@types/react':
         specifier: catalog:react
-        version: 19.2.18
+        version: 19.3.0
       '@types/react-dom':
         specifier: catalog:react
-        version: 19.2.3(@types/react@19.2.18)
+        version: 19.2.3(@types/react@19.3.0)
       dotenv:
         specifier: 'catalog:'
         version: 16.6.1
@@ -427,7 +427,7 @@ importers:
     dependencies:
       next-intl:
         specifier: 'catalog:'
-        version: 4.13.6(next@16.1.7)(react@19.2.8)(typescript@5.9.3)
+        version: 4.13.6(next@16.1.7)(react@19.3.0)(typescript@5.9.3)
 
   route:
     dependencies:
@@ -499,7 +499,7 @@ importers:
         version: 10.3.1
       react:
         specifier: catalog:react
-        version: 19.2.8
+        version: 19.3.0
       sitemap:
         specifier: 9.0.1
         version: 9.0.1
@@ -524,7 +524,7 @@ importers:
         version: 0.5.3
       '@types/react':
         specifier: catalog:react
-        version: 19.2.18
+        version: 19.3.0
       '@types/twitter-text':
         specifier: ^3.1.10
         version: 3.1.10
@@ -2537,8 +2537,8 @@ packages:
     peerDependencies:
       '@types/react': ^19.2.0
 
-  '@types/react@19.2.18':
-    resolution: {integrity: sha512-AnzbBERsrLKtk2XSfTbYRLjQPdy116Sty4q+T+Bp3IC4l6jNBvreVPAHmpq9qhXQM7CXZPjLVmGMw9sy+hxQ3w==}
+  '@types/react@19.3.0':
+    resolution: {integrity: sha512-N0rFCuH9YoxG9/m61l9MfpJKfmLOVU0em7ipIz6TRgSSkvReLB9vL85GB+yr8Bs5leqpvg96JSwF4ZS1s4viQg==}
 
   '@types/sax@1.2.7':
     resolution: {integrity: sha512-rO73L89PJxeYM3s3pPPjiPgVVcymqU490g0YO5n5By0k2Erzj6tay/4lr1CHAAU4JyOWd1rpQ8bCf6cZfHU96A==}
@@ -4781,8 +4781,8 @@ packages:
     peerDependencies:
       react: ^18.0.0 || ^19.0.0
 
-  react@19.2.8:
-    resolution: {integrity: sha512-PWaYA1L/q9u2u7xYQi+Y3L3Yfnie7XyLeaJICV1MGD6LprsBxcAqGjYyr0eY3p+QdsA+x/Irkt4Qif8D63+Sbw==}
+  react@19.3.0:
+    resolution: {integrity: sha512-E8LUcbtBWt20bbl2YoHfx4ZDBdxVTfOKtCZn9cDSJ4l6/nuoApcpIBcj47t2wZoVX8g2ZHuMHbiShgCR1T5Sog==}
     engines: {node: '>=0.10.0'}
 
   readable-stream@4.7.0:
@@ -6471,10 +6471,10 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
-  '@icon-park/react@1.4.2(react-dom@19.2.6)(react@19.2.8)':
+  '@icon-park/react@1.4.2(react-dom@19.2.6)(react@19.3.0)':
     dependencies:
-      react: 19.2.8
-      react-dom: 19.2.6(react@19.2.8)
+      react: 19.3.0
+      react-dom: 19.2.6(react@19.3.0)
 
   '@icon-park/svg@1.4.2': {}
 
@@ -6638,11 +6638,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@mdx-js/react@3.1.1(@types/react@19.2.18)(react@19.2.8)':
+  '@mdx-js/react@3.1.1(@types/react@19.3.0)(react@19.3.0)':
     dependencies:
       '@types/mdx': 2.0.14
-      '@types/react': 19.2.18
-      react: 19.2.8
+      '@types/react': 19.3.0
+      react: 19.3.0
 
   '@mongodb-js/saslprep@1.4.11':
     dependencies:
@@ -6675,7 +6675,7 @@ snapshots:
       source-map: 0.7.6
     optionalDependencies:
       '@mdx-js/loader': 3.1.1(webpack@5.109.2)
-      '@mdx-js/react': 3.1.1(@types/react@19.2.18)(react@19.2.8)
+      '@mdx-js/react': 3.1.1(@types/react@19.3.0)(react@19.3.0)
 
   '@next/swc-darwin-arm64@16.1.7':
     optional: true
@@ -7088,7 +7088,7 @@ snapshots:
       '@sentry/cloudflare': 10.65.0(@opentelemetry/core@2.9.0)
       '@sentry/node': 10.65.0(@opentelemetry/core@2.9.0)
 
-  '@sentry/nextjs@10.65.0(@opentelemetry/core@2.9.0)(@opentelemetry/sdk-trace-base@2.9.0)(next@16.1.7)(react@19.2.8)(webpack@5.109.2)':
+  '@sentry/nextjs@10.65.0(@opentelemetry/core@2.9.0)(@opentelemetry/sdk-trace-base@2.9.0)(next@16.1.7)(react@19.3.0)(webpack@5.109.2)':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@rollup/plugin-commonjs': 28.0.1(rollup@4.60.3)
@@ -7098,10 +7098,10 @@ snapshots:
       '@sentry/core': 10.65.0
       '@sentry/node': 10.65.0(@opentelemetry/core@2.9.0)
       '@sentry/opentelemetry': 10.65.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0)(@opentelemetry/sdk-trace-base@2.9.0)
-      '@sentry/react': 10.65.0(react@19.2.8)
+      '@sentry/react': 10.65.0(react@19.3.0)
       '@sentry/vercel-edge': 10.65.0
       '@sentry/webpack-plugin': 5.3.0(webpack@5.109.2)
-      next: 16.1.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.6)(react@19.2.8)(sass@1.102.0)
+      next: 16.1.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.6)(react@19.3.0)(sass@1.102.0)
       rollup: 4.60.3
       stacktrace-parser: 0.1.11
     transitivePeerDependencies:
@@ -7149,12 +7149,12 @@ snapshots:
       '@sentry/conventions': 0.15.1
       '@sentry/core': 10.65.0
 
-  '@sentry/react@10.65.0(react@19.2.8)':
+  '@sentry/react@10.65.0(react@19.3.0)':
     dependencies:
       '@sentry/browser': 10.65.0
       '@sentry/conventions': 0.15.1
       '@sentry/core': 10.65.0
-      react: 19.2.8
+      react: 19.3.0
 
   '@sentry/replay-canvas@10.65.0':
     dependencies:
@@ -7405,11 +7405,11 @@ snapshots:
     dependencies:
       undici-types: 7.16.0
 
-  '@types/react-dom@19.2.3(@types/react@19.2.18)':
+  '@types/react-dom@19.2.3(@types/react@19.3.0)':
     dependencies:
-      '@types/react': 19.2.18
+      '@types/react': 19.3.0
 
-  '@types/react@19.2.18':
+  '@types/react@19.3.0':
     dependencies:
       csstype: 3.2.3
 
@@ -9631,18 +9631,18 @@ snapshots:
 
   next-intl-swc-plugin-extractor@4.13.6: {}
 
-  next-intl@4.13.6(next@16.1.7)(react@19.2.8)(typescript@5.9.3):
+  next-intl@4.13.6(next@16.1.7)(react@19.3.0)(typescript@5.9.3):
     dependencies:
       '@formatjs/intl-localematcher': 0.8.7
       '@parcel/watcher': 2.6.0
       '@swc/core': 1.15.33
       icu-minify: 4.13.6
       negotiator: 1.0.0
-      next: 16.1.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.6)(react@19.2.8)(sass@1.102.0)
+      next: 16.1.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.6)(react@19.3.0)(sass@1.102.0)
       next-intl-swc-plugin-extractor: 4.13.6
       po-parser: 2.1.1
-      react: 19.2.8
-      use-intl: 4.13.6(react@19.2.8)
+      react: 19.3.0
+      use-intl: 4.13.6(react@19.3.0)
     optionalDependencies:
       typescript: 5.9.3
     transitivePeerDependencies:
@@ -9654,16 +9654,16 @@ snapshots:
     transitivePeerDependencies:
       - webpack
 
-  next@16.1.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.6)(react@19.2.8)(sass@1.102.0):
+  next@16.1.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.6)(react@19.3.0)(sass@1.102.0):
     dependencies:
       '@next/env': 16.1.7
       '@swc/helpers': 0.5.15
       baseline-browser-mapping: 2.11.13
       caniuse-lite: 1.0.30001809
       postcss: 8.4.31
-      react: 19.2.8
-      react-dom: 19.2.6(react@19.2.8)
-      styled-jsx: 5.1.6(@babel/core@7.29.7)(react@19.2.8)
+      react: 19.3.0
+      react-dom: 19.2.6(react@19.3.0)
+      styled-jsx: 5.1.6(@babel/core@7.29.7)(react@19.3.0)
     optionalDependencies:
       '@next/swc-darwin-arm64': 16.1.7
       '@next/swc-darwin-x64': 16.1.7
@@ -9883,13 +9883,13 @@ snapshots:
 
   prettier@3.9.6: {}
 
-  pretty-checkbox-react@3.2.0(pretty-checkbox@3.0.3)(react-dom@19.2.6)(react@19.2.8):
+  pretty-checkbox-react@3.2.0(pretty-checkbox@3.0.3)(react-dom@19.2.6)(react@19.3.0):
     dependencies:
       clsx: 1.2.1
       nanoid: 3.3.18
       pretty-checkbox: 3.0.3
-      react: 19.2.8
-      react-dom: 19.2.6(react@19.2.8)
+      react: 19.3.0
+      react-dom: 19.2.6(react@19.3.0)
       react-merge-refs: 1.1.0
 
   pretty-checkbox@3.0.3: {}
@@ -9920,35 +9920,35 @@ snapshots:
 
   quick-format-unescaped@4.0.4: {}
 
-  react-ace@15.0.0(react-dom@19.2.6)(react@19.2.8):
+  react-ace@15.0.0(react-dom@19.2.6)(react@19.3.0):
     dependencies:
       ace-builds: 1.44.0
       diff-match-patch: 1.0.5
       fast-equals: 5.4.1
       prop-types: 15.8.1
-      react: 19.2.8
-      react-dom: 19.2.6(react@19.2.8)
+      react: 19.3.0
+      react-dom: 19.2.6(react@19.3.0)
 
-  react-dom@19.2.6(react@19.2.8):
+  react-dom@19.2.6(react@19.3.0):
     dependencies:
-      react: 19.2.8
+      react: 19.3.0
       scheduler: 0.27.0
 
   react-is@16.13.1: {}
 
   react-merge-refs@1.1.0: {}
 
-  react-range@1.10.0(react-dom@19.2.6)(react@19.2.8):
+  react-range@1.10.0(react-dom@19.2.6)(react@19.3.0):
     dependencies:
-      react: 19.2.8
-      react-dom: 19.2.6(react@19.2.8)
+      react: 19.3.0
+      react-dom: 19.2.6(react@19.3.0)
 
-  react-resize-detector@12.3.0(react@19.2.8):
+  react-resize-detector@12.3.0(react@19.3.0):
     dependencies:
       es-toolkit: 1.44.0
-      react: 19.2.8
+      react: 19.3.0
 
-  react@19.2.8: {}
+  react@19.3.0: {}
 
   readable-stream@4.7.0:
     dependencies:
@@ -10437,10 +10437,10 @@ snapshots:
     dependencies:
       inline-style-parser: 0.2.7
 
-  styled-jsx@5.1.6(@babel/core@7.29.7)(react@19.2.8):
+  styled-jsx@5.1.6(@babel/core@7.29.7)(react@19.3.0):
     dependencies:
       client-only: 0.0.1
-      react: 19.2.8
+      react: 19.3.0
     optionalDependencies:
       '@babel/core': 7.29.7
 
@@ -10694,13 +10694,13 @@ snapshots:
     dependencies:
       punycode: 2.3.1
 
-  use-intl@4.13.6(react@19.2.8):
+  use-intl@4.13.6(react@19.3.0):
     dependencies:
       '@formatjs/fast-memoize': 3.1.5
       '@schummar/icu-type-parser': 1.21.5
       icu-minify: 4.13.6
       intl-messageformat: 11.2.5
-      react: 19.2.8
+      react: 19.3.0
 
   valibot@1.4.2(typescript@5.9.3):
     optionalDependencies:
