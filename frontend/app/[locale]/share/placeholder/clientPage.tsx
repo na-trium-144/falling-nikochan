@@ -114,14 +114,15 @@ export default function ShareChart(props: Props) {
       className={clsx(
         "fn-body-scrollable",
         "flex flex-col items-center",
-        "relative"
+        "relative",
+        "pt-sai"
       )}
     >
       <PCHeader2 className="fixed top-0 right-0" locale={locale} backdropBlur />
 
       <TitleAsLink className="grow-3 shrink-0" locale={props.locale} />
       <RedirectedWarning className="mx-3 main-wide:mx-6 mb-2" />
-      <div className="w-full max-w-main px-3 main-wide:px-6 grid-centering mb-12">
+      <div className="w-full max-w-main px-sai-3 main-wide:px-sai-6 grid-centering mb-12">
         <Box classNameOuter="w-full main-wide:w-max h-max max-w-full p-6">
           <ShareBox
             cid={cid}
@@ -140,12 +141,7 @@ export default function ShareChart(props: Props) {
       <PoliciesAndLinks locale={locale} />
 
       <div className="flex-none basis-mobile-footer no-pc" />
-      <MobileFooter
-        className="fixed bottom-0"
-        blurBg
-        locale={locale}
-        tabKey={null}
-      />
+      <MobileFooter fixed locale={locale} tabKey={null} />
     </main>
   );
 }

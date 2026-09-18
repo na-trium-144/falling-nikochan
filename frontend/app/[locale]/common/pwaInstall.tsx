@@ -52,7 +52,12 @@ export function isAndroidTWA(): boolean {
   );
 }
 export function isInsideFrame() {
-  return window.self !== window.top;
+  // webviewも含む
+  return (
+    window.self !== window.top ||
+    (detectOS() === "android" && /;\s*wv\b/.test(navigator.userAgent)) ||
+    (detectOS() === "ios" && !/safari/i.test(navigator.userAgent))
+  );
 }
 export function useInsideFrameDetector() {
   const [state, setState] = useState<boolean | null>(null);

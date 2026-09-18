@@ -554,7 +554,11 @@ export default function Edit(props: {
         >
           {t("titleShort")} ID: {chart?.cid}
         </MobileHeader>
-        <Button text={t("help")} onClick={openGuide} />
+        <Button
+          className="mt-sai mr-sai"
+          text={t("help")}
+          onClick={openGuide}
+        />
       </div>
       <div className="w-0 h-mobile-header edit-wide:hidden" />
       {chart === undefined ? (
@@ -626,12 +630,13 @@ export default function Edit(props: {
           className={clsx(
             "w-full",
             "edit-wide:h-full edit-wide:flex edit-wide:items-stretch edit-wide:justify-center edit-wide:flex-row",
+            "p-sai-3 gap-3",
             "overflow-hidden"
           )}
         >
           <div
             className={clsx(
-              "edit-wide:basis-4/12 edit-wide:h-full edit-wide:p-3",
+              "edit-wide:basis-4/12 edit-wide:h-full",
               "min-w-0 grow-0 shrink-0 flex flex-col items-stretch"
             )}
           >
@@ -780,7 +785,7 @@ export default function Edit(props: {
           </div>
           <div
             className={clsx(
-              "p-3 flex flex-col items-stretch",
+              "flex flex-col items-stretch",
               "h-5/6",
               "min-w-0", // timebarのwidthが大きいので
               "edit-wide:h-full edit-wide:basis-main edit-wide:shrink-1"
@@ -999,7 +1004,7 @@ export default function Edit(props: {
             </Box>
             <Box
               classNameOuter={clsx(
-                "fixed inset-1.5 ml-auto mt-auto w-max h-max shadow-modal z-edit-error",
+                "fixed bottom-0 right-0 m-sai-1.5 w-max h-max shadow-modal z-edit-error",
                 "bg-gray-500/25",
                 !(
                   luaExecutor.running ||
