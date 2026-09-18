@@ -5,6 +5,14 @@
   &:has(> body > .fn-body-scrollable) {
     @apply w-full min-h-dvh overflow-x-clip;
   }
+  &:has(> body.fn-csr-ready) {
+    /* safariのツールバーの色がhtmlのbackgroundを参照するようなので、テーマカラーを設定しておく */
+    /* ここでgradientを設定するのは意味ない。body-scrollableの画面ではhtmlの高さは100dvhでないため */
+    @apply bg-sky-200;
+    &:has(> .dark) {
+      @apply bg-orange-975;
+    }
+  }
 }
 body.fn-body {
   &:not(:has(> .fn-body-scrollable)) {
@@ -84,6 +92,23 @@ body.fn-body {
           stop-color: var(--color-lime-900);
         }
       }
+    }
+  }
+
+  .fn-dev-safe-area {
+    @apply z-dev-safe-area fixed bg-red-500 opacity-20 pointer-events-none;
+
+    &.fn-dev-sai-t {
+      @apply top-0 h-sai-t inset-x-0;
+    }
+    &.fn-dev-sai-b {
+      @apply bottom-0 h-sai-b inset-x-0;
+    }
+    &.fn-dev-sai-l {
+      @apply left-0 w-sai-l inset-y-0;
+    }
+    &.fn-dev-sai-r {
+      @apply right-0 w-sai-r inset-y-0;
     }
   }
 }

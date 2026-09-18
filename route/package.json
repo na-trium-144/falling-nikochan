@@ -1,6 +1,6 @@
 {
   "name": "@falling-nikochan/route",
-  "version": "17.4.0",
+  "version": "17.9.0",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -14,10 +14,10 @@
     "dev": "tsx watch serve-local.ts"
   },
   "dependencies": {
-    "@axiomhq/pino": "1.8.0",
+    "@axiomhq/pino": "2.0.0",
     "@falling-nikochan/chart": "workspace:*",
     "@falling-nikochan/i18n": "workspace:*",
-    "@hono/node-server": "2.0.8",
+    "@hono/node-server": "2.1.1",
     "@hono/standard-validator": "0.2.3",
     "@hono/structured-logger": "catalog:",
     "@hono/swagger-ui": "0.6.1",

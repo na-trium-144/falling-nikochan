@@ -101,6 +101,8 @@ jobs:
       env:
         VERSION_SUFFIX: "+#${{ github.event.number }}"
         TITLE_SUFFIX: "Preview #${{ github.event.number }}"
+        FORM_URL: ${{ vars.FORM_URL }}
+        FORM_ID_FIELD: ${{ vars.FORM_ID_FIELD }}
         SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
         SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
         SENTRY_URL: ${{ secrets.SENTRY_URL }}

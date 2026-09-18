@@ -1,6 +1,5 @@
 "use client";
 
-import * as Sentry from "@sentry/nextjs";
 import clsx from "clsx/lite";
 import {
   ChartBrief,
@@ -52,6 +51,7 @@ interface Props {
 }
 export default function ShareChart(props: Props) {
   const t = useTranslations("share");
+  const te = useTranslations("error");
   const { locale } = props;
   const [cid, setCId] = useState<string>("");
   // const { res, brief } = await getBrief(cid, true);
@@ -59,7 +59,9 @@ export default function ShareChart(props: Props) {
     null
   );
   const [record, setRecord] = useState<RecordGetSummary[] | Error | null>(null);
-  const [sharedResult, setSharedResult] = useState<ResultParams | null>(null);
+  const [sharedResult, setSharedResult] = useState<
+    ResultParams | string | null
+  >(null);
 
   useEffect(() => {
     const cid = window.location.pathname.split("/").pop()!;
@@ -101,26 +103,26 @@ export default function ShareChart(props: Props) {
         setSharedResult(deserializeResultParams(searchParams.get("result")!));
       } catch (e) {
         console.error(e);
-        Sentry.captureException(e);
-        // TODO: show error message?
+        setSharedResult(te("api.invalidResultParam"));
       }
     }
     return () => clearInterval(titleUpdate);
-  }, [t]);
+  }, [t, te]);
 
   return (
     <main
       className={clsx(
         "fn-body-scrollable",
         "flex flex-col items-center",
-        "relative"
+        "relative",
+        "pt-sai"
       )}
     >
       <PCHeader2 className="fixed top-0 right-0" locale={locale} backdropBlur />
 
       <TitleAsLink className="grow-3 shrink-0" locale={props.locale} />
       <RedirectedWarning className="mx-3 main-wide:mx-6 mb-2" />
-      <div className="w-full max-w-main px-3 main-wide:px-6 grid-centering mb-12">
+      <div className="w-full max-w-main px-sai-3 main-wide:px-sai-6 grid-centering mb-12">
         <Box classNameOuter="w-full main-wide:w-max h-max max-w-full p-6">
           <ShareBox
             cid={cid}
@@ -139,12 +141,7 @@ export default function ShareChart(props: Props) {
       <PoliciesAndLinks locale={locale} />
 
       <div className="flex-none basis-mobile-footer no-pc" />
-      <MobileFooter
-        className="fixed bottom-0"
-        blurBg
-        locale={locale}
-        tabKey={null}
-      />
+      <MobileFooter fixed locale={locale} tabKey={null} />
     </main>
   );
 }

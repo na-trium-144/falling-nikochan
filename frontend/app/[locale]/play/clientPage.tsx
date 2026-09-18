@@ -267,6 +267,7 @@ function Play(props: Props) {
     screenHeight,
     rem,
     statusScale,
+    mobilePlayUIHeightScale,
     largeResult,
   } = useDisplayMode();
 
@@ -326,7 +327,7 @@ function Play(props: Props) {
       if (cid) {
         localStorage.setItem(`ytVolume-${cid}`, v.toString());
       }
-      ytPlayer.current?.setVolume(v);
+      ytPlayer.current?.setVolume?.(v);
     },
     [cid]
   );
@@ -337,7 +338,7 @@ function Play(props: Props) {
         100
     );
     setYtVolume_(vol);
-    ytPlayer.current?.setVolume(vol);
+    ytPlayer.current?.setVolume?.(vol);
   }, [cid]);
 
   const ytBegin = chartSeq?.ytBegin ?? 0;
@@ -346,8 +347,8 @@ function Play(props: Props) {
   const setUserBegin = useCallback(
     (v: number | null) => {
       setUserBegin_(v);
-      if (ytPlayer.current?.getPlayerState() === 2) {
-        ytPlayer.current.seekTo(v === null ? ytBegin : v, true);
+      if (ytPlayer.current?.getPlayerState?.() === 2) {
+        ytPlayer.current.seekTo?.(v === null ? ytBegin : v, true);
       }
     },
     [ytBegin]
@@ -355,7 +356,7 @@ function Play(props: Props) {
   const begin = userBegin === null ? ytBegin : userBegin;
   const [playbackRate, setPlaybackRate] = useState<number>(1);
   const changePlaybackRate = (rate: number) => {
-    ytPlayer.current?.setPlaybackRate(rate);
+    ytPlayer.current?.setPlaybackRate?.(rate);
   };
 
   const [enableIOSThru, setEnableIOSThru_] = useState<boolean>(false);
@@ -481,15 +482,15 @@ function Play(props: Props) {
   const reset = useCallback(() => setShowReady(true), []);
   const start = useCallback(() => {
     // Space(スタートボタン)が押されたとき
-    switch (ytPlayer.current?.getPlayerState()) {
+    switch (ytPlayer.current?.getPlayerState?.()) {
       case 2:
       case 0:
-        ytPlayer.current?.seekTo(begin, true);
-        ytPlayer.current?.playVideo();
+        ytPlayer.current?.seekTo?.(begin, true);
+        ytPlayer.current?.playVideo?.();
         break;
       case 5:
       default:
-        ytPlayer.current?.seekTo(begin, true);
+        ytPlayer.current?.seekTo?.(begin, true);
         break;
     }
     // startボタンを押して数秒経っても始まらなかったらloadingを表示
@@ -497,7 +498,7 @@ function Play(props: Props) {
     readyTimeout.current = setInterval(() => {
       setLoadingAfterReady(true);
       // iframe内など特殊な環境ではplayVideo()で開始せずstateが-1になる場合がある
-      setNeedManualStart(ytPlayer.current?.getPlayerState() === -1);
+      setNeedManualStart(ytPlayer.current?.getPlayerState?.() === -1);
     }, 1500);
     // 再生中に呼んでもなにもしない
     playSE("hit"); // ユーザー入力のタイミングで鳴らさないとaudioが有効にならないsafariの対策
@@ -511,10 +512,10 @@ function Play(props: Props) {
       setExitable((ex) => Math.max(ex || 0, performance.now() + 1000));
       for (let i = 1; i < 10; i++) {
         setTimeout(() => {
-          ytPlayer.current?.setVolume(((10 - i) * ytVolume) / 10);
+          ytPlayer.current?.setVolume?.(((10 - i) * ytVolume) / 10);
         }, i * 100);
         setTimeout(() => {
-          ytPlayer.current?.pauseVideo();
+          ytPlayer.current?.pauseVideo?.();
         }, 1000);
       }
     }
@@ -529,12 +530,18 @@ function Play(props: Props) {
   }, []);
   const seekBack = useCallback(() => {
     if (chartPlaying && auto && queryOptions.seek) {
-      ytPlayer.current?.seekTo(ytPlayer.current?.getCurrentTime() - 5, true);
+      ytPlayer.current?.seekTo?.(
+        (ytPlayer.current?.getCurrentTime?.() ?? 0) - 5,
+        true
+      );
     }
   }, [chartPlaying, auto, queryOptions]);
   const seekForward = useCallback(() => {
     if (chartPlaying && auto && queryOptions.seek) {
-      ytPlayer.current?.seekTo(ytPlayer.current?.getCurrentTime() + 5, true);
+      ytPlayer.current?.seekTo?.(
+        (ytPlayer.current?.getCurrentTime?.() ?? 0) + 5,
+        true
+      );
     }
   }, [chartPlaying, auto, queryOptions]);
 
@@ -564,7 +571,9 @@ function Play(props: Props) {
         clearTimeout(showLoadingTimeout.current);
       }
       setShowLoading(false);
-      setShowReady(true);
+      if (!queryOptions.result) {
+        setShowReady(true);
+      }
       setTimeout(() => requestAnimationFrame(() => setOpenReadyAnim(true)));
       resetNotesAll(
         chartSeq.notes.map((n) => ({
@@ -602,6 +611,7 @@ function Play(props: Props) {
     initDone,
     errorMsg,
     resetNotesAll,
+    queryOptions.result,
   ]);
   useEffect(() => {
     if (!errorMsg) {
@@ -622,8 +632,8 @@ function Play(props: Props) {
     if (chartPlaying && chartSeq) {
       const checkEnd = () => {
         const ended =
-          ytPlayer.current?.getPlayerState() === 0 ||
-          (ytPlayer.current?.getCurrentTime() || 0) >= chartSeq.ytEndSec;
+          ytPlayer.current?.getPlayerState?.() === 0 ||
+          (ytPlayer.current?.getCurrentTime?.() ?? 0) >= chartSeq.ytEndSec;
         if (ended !== endSecPassed) {
           setEndSecPassed(ended);
         }
@@ -727,12 +737,12 @@ function Play(props: Props) {
   }, [chartPlaying, showResult, chartEnd, endSecPassed]);
 
   const onReady = useCallback(() => {
-    console.log("ready ->", ytPlayer.current?.getPlayerState());
+    console.log("ready ->", ytPlayer.current?.getPlayerState?.());
     setYtReady(true);
     setExitable(performance.now());
   }, []);
   const onStart = useCallback(() => {
-    console.log("start ->", ytPlayer.current?.getPlayerState());
+    console.log("start ->", ytPlayer.current?.getPlayerState?.());
     if (chartSeq) {
       initOldBestScore();
       setShowStopped(false);
@@ -752,7 +762,7 @@ function Play(props: Props) {
       setExitable(null);
       setShowResult(false);
       const now =
-        (ytPlayer.current?.getCurrentTime() ?? -Infinity) -
+        (ytPlayer.current?.getCurrentTime?.() ?? -Infinity) -
         chartSeq.offset -
         offsetPlusLatency * playbackRate;
       resetNotesAll(
@@ -764,7 +774,7 @@ function Play(props: Props) {
         now
       );
       lateTimes.current = [];
-      ytPlayer.current?.setVolume(ytVolume);
+      ytPlayer.current?.setVolume?.(ytVolume);
     }
     ref.current?.focus();
     filteredStartTimeStamp.current = null;
@@ -781,8 +791,8 @@ function Play(props: Props) {
     offsetPlusLatency,
   ]);
   const onStop = useCallback(() => {
-    console.log("stop ->", ytPlayer.current?.getPlayerState());
-    switch (ytPlayer.current?.getPlayerState()) {
+    console.log("stop ->", ytPlayer.current?.getPlayerState?.());
+    switch (ytPlayer.current?.getPlayerState?.()) {
       case 0:
         if (chartPlaying) {
           setEndSecPassed(true);
@@ -947,7 +957,7 @@ function Play(props: Props) {
               <div className="grow-1 basis-0" />
               <StatusBox
                 className={clsx(
-                  "isolate z-play-status flex-none m-3 mt-4.5 mb-0 self-end",
+                  "isolate z-play-status flex-none ml-3 mt-4.5 mb-0 mr-sai-3 self-end",
                   "transition-opacity duration-100",
                   !statusHide && musicAreaOk && notesAll.length > 0
                     ? "ease-in opacity-100"
@@ -1000,7 +1010,10 @@ function Play(props: Props) {
             </>
           )}
         </div>
-        <div className={clsx("relative flex-1")} ref={mainWindowSpace.ref}>
+        <div
+          className={clsx("relative flex-1", "ml-sai", isMobile && "mr-sai")}
+          ref={mainWindowSpace.ref}
+        >
           {isReadyAll && (
             <FallingWindow
               className="absolute inset-0 isolate z-play-fw"
@@ -1063,7 +1076,7 @@ function Play(props: Props) {
               className={clsx(
                 "absolute inset-x-0",
                 "flex justify-center items-center gap-1",
-                isMobile ? "top-10" : "top-0"
+                isMobile ? "top-10" : "top-(--sai-t)"
               )}
               onPointerDown={(e) => e.stopPropagation()}
               onPointerUp={(e) => e.stopPropagation()}
@@ -1251,14 +1264,17 @@ function Play(props: Props) {
           initAnim ? "" : "translate-y-[30vh] opacity-0"
         )}
         style={{
-          height: isMobile ? 6 * statusScale * rem : "10vh",
-          maxHeight: "15vh",
+          height: isMobile
+            ? mobilePlayUIHeightScale *
+              Math.min(6 * statusScale * rem, 0.15 * screenHeight)
+            : 0.1 * screenHeight,
         }}
       >
         <IrasutoyaLikeGrass
           height={
             (isMobile
-              ? Math.min(6 * statusScale * rem, 0.15 * screenHeight)
+              ? mobilePlayUIHeightScale *
+                Math.min(6 * statusScale * rem, 0.15 * screenHeight)
               : 0.1 * screenHeight) +
             1 * rem
           }
@@ -1271,7 +1287,7 @@ function Play(props: Props) {
               right: isMobile
                 ? "1rem"
                 : statusOverlaps
-                  ? 18 * statusScale * rem
+                  ? `calc(${18 * statusScale}rem + var(--sai-r))`
                   : "1rem",
             }}
             signature={chartSeq.signature}
@@ -1303,9 +1319,12 @@ function Play(props: Props) {
         {isMobile && (
           <>
             <StatusBox
-              className="absolute inset-0 isolate z-play-status"
+              className="absolute isolate z-play-status"
               style={{
-                margin: 1 * statusScale * rem,
+                left: `max(${1 * statusScale * mobilePlayUIHeightScale}rem, var(--sai-l))`,
+                right: `max(${1 * statusScale * mobilePlayUIHeightScale}rem, var(--sai-r))`,
+                bottom: `max(${1 * statusScale * mobilePlayUIHeightScale}rem, var(--sai-b))`,
+                // top: `max(${1 * statusScale}rem)`,
               }}
               judgeCount={judgeCount}
               bigCount={bigCount || 0}
@@ -1374,13 +1393,12 @@ function Play(props: Props) {
       {!isMobile && statusHide && showResult && !showReady && (
         <div
           className={clsx(
-            "isolate z-play-status-overlay absolute inset-y-0 my-auto",
+            "isolate z-play-status-overlay absolute inset-y-0 right-0 my-auto",
             "grid-centering"
           )}
-          style={{ right: "0.75rem" }}
         >
           <StatusBox
-            className="h-max"
+            className="h-max mr-sai-3"
             judgeCount={judgeCount}
             bigCount={bigCount || 0}
             bigTotal={bigTotal}

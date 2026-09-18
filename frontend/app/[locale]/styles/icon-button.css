@@ -25,8 +25,12 @@
     @apply hover:bg-slate-400/25 active:bg-slate-400/25;
     @apply dark:hover:bg-stone-600/25 active:bg-stone-600/25;
   }
-  .fn-pager-arrow {
-    @apply text-center inline-block w-7 h-7;
+  .fn-pager {
+    @apply flex flex-col main-wide:flex-row items-center mb-4;
+    @apply space-y-2 main-wide:space-y-0 main-wide:space-x-2;
+  }
+  .fn-icon-button.fn-pager-arrow {
+    @apply grid-centering w-7 h-7;
     @apply text-lg font-bold;
   }
 }

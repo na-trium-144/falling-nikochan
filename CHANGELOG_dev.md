@@ -1,3 +1,39 @@
+## ver. 17.9 - 2026/09/18 [#1367](https://github.com/na-trium-144/falling-nikochan/pull/1367)
+
+* 譜面編集ヘルプを /main/guide/1-7 ページとして追加
+
+## ver. 17.8 - 2026/09/18 [#1371](https://github.com/na-trium-144/falling-nikochan/pull/1371)
+
+* viewport-fit=cover指定、safe-area-inset対応の修正
+* safari用にhtmlにフォールバック背景色を追加
+* 小さい画面や正方形に近い画面でのUIのサイズを調整
+* Twitterのアプリ内ブラウザではsafe-area-inset-topを無視しbottomのスペースを強制
+* Twitterのアプリ内ブラウザが勝手にfooterの位置を変更するので、高さを変えてTwitterを騙す
+* webviewをiframeと同様の単一画面モードで扱う
+
+## ver. 17.6 - 2026/09/06
+
+* エラー時にフォームに内容を自動入力 [#1364](https://github.com/na-trium-144/falling-nikochan/pull/1364)
+    * ついでにフォームのURLを環境変数 `FORM_URL` に移動
+* ダークテーマ時のスクロールバーの色と、横スクロール時の幅を修正
+* ytPlayerのすべてのメソッド呼び出しにnullチェックを追加
+* intl.Locale にエラーハンドリングを追加
+* share,ogに渡されるlangパラメータのバリデーション
+
+## ver. 17.5 - 2026/09/03
+
+* levelの長さが負になった場合のエラーを修正 [#1346](https://github.com/na-trium-144/falling-nikochan/pull/1346)
+    * エラーコンポーネントでvalierrorをflattenして表示
+    * sessionのパースエラーをcatchせずerrorBoundaryに投げる
+    * ChartBriefでlengthが負にならないようにする
+* resultのパースエラー時の挙動の改善 [#1347](https://github.com/na-trium-144/falling-nikochan/pull/1347)
+    * resultにbase64デコードできない文字が含まれる場合、無視する
+    * resultのパースエラー時にメッセージを表示
+* レベルの増殖を修正 [#1361](https://github.com/na-trium-144/falling-nikochan/pull/1361)
+    * レベルの増殖を修正
+    * #1324 によるレベル選択の位置ずれを修正
+    * 画面幅が48〜50remのときヘッダーが消えるのを修正
+
 ## ver. 17.4 - 2026/08/26
 
 * ver8以前のパスワードなし譜面にはアクセスできないようにする [#1321](https://github.com/na-trium-144/falling-nikochan/pull/1321)

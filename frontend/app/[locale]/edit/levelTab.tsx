@@ -93,11 +93,13 @@ export default function LevelTab(props: Props) {
               )}
               onClick={() => chart?.setCurrentLevelIndex(i)}
             >
-              {i === chart?.currentLevelIndex && (
+              {i === chart?.currentLevelIndex ? (
                 <RightOne
                   theme="filled"
                   className="inline-block w-5 translate-y-0.5"
                 />
+              ) : (
+                <span className="inline-block w-5" />
               )}
               <span className="inline-block w-4 mr-2 text-right">{i + 1}.</span>
               {level.meta.name && (

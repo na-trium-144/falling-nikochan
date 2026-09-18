@@ -27,6 +27,7 @@ import * as v from "valibot";
 import { fetchError } from "../error.js";
 import { cache } from "hono/cache";
 import { BaseLogger } from "@hono/structured-logger";
+import { locales } from "@falling-nikochan/i18n/dynamic.js";
 
 const REDIRECT_CACHE_MAX_AGE = 86400;
 
@@ -148,7 +149,10 @@ const ogApp = (config: {
         })),
       };
 
-      const lang = c.req.query("lang") || "en"; // c.get("language");
+      let lang = c.req.query("lang") || "en"; // c.get("language");
+      if (!locales.includes(lang)) {
+        lang = "en";
+      }
       const qResult = c.req.query("result");
       let resultParams: ResultParams | null = null;
       if (qResult) {

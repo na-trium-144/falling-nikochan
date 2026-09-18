@@ -282,6 +282,7 @@ describe("ChartEditing", () => {
       ce.moveLevelUp();
       expect(ce.levels[0].meta.name).to.equal("level2");
       expect(ce.levels[1].meta.name).to.equal("level1");
+      expect(ce.levels).to.be.lengthOf(2);
       expect(ce.currentLevelIndex).to.equal(0);
     });
     test("should trigger rerender, change and levelIndex events", () => {
@@ -331,6 +332,7 @@ describe("ChartEditing", () => {
       ce.moveLevelDown();
       expect(ce.levels[0].meta.name).to.equal("level2");
       expect(ce.levels[1].meta.name).to.equal("level1");
+      expect(ce.levels).to.be.lengthOf(2);
       expect(ce.currentLevelIndex).to.equal(1);
     });
     test("should trigger rerender, change and levelIndex events", () => {
