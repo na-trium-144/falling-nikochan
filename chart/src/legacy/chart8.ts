@@ -1,12 +1,6 @@
-import { BPMChange1 } from "./chart1.js";
 import { BPMChangeWithLua3, RestStep3 } from "./chart3.js";
-import { Signature5, SignatureWithLua5 } from "./chart5.js";
-import {
-  ChartUntil7,
-  convertTo7,
-  NoteCommand7,
-  NoteCommandWithLua7,
-} from "./chart7.js";
+import { SignatureWithLua5 } from "./chart5.js";
+import { ChartUntil7, convertTo7, NoteCommandWithLua7 } from "./chart7.js";
 
 export interface Chart8Min {
   falling: "nikochan"; // magic
@@ -39,50 +33,6 @@ export interface Level8Freeze {
   signature: SignatureWithLua5[];
 }
 export type Level8Edit = Level8Min & Level8Freeze;
-
-export interface Level8Play {
-  ver: 8;
-  notes: NoteCommand7[];
-  bpmChanges: BPMChange1[];
-  speedChanges: BPMChange1[];
-  signature: Signature5[];
-  offset: number;
-}
-export function convertToPlay8(chart: Chart8Edit, lvIndex: number): Level8Play {
-  const level = chart.levels[lvIndex];
-  return {
-    ver: 8,
-    offset: chart.offset,
-    notes:
-      level?.notes.map((note) => ({
-        step: note.step,
-        big: note.big,
-        hitX: note.hitX,
-        hitVX: note.hitVX,
-        hitVY: note.hitVY,
-        fall: note.fall,
-      })) || [],
-    bpmChanges:
-      level?.bpmChanges.map((change) => ({
-        bpm: change.bpm,
-        step: change.step,
-        timeSec: change.timeSec,
-      })) || [],
-    speedChanges:
-      level?.speedChanges.map((change) => ({
-        bpm: change.bpm,
-        step: change.step,
-        timeSec: change.timeSec,
-      })) || [],
-    signature:
-      level?.signature.map((s) => ({
-        step: s.step,
-        offset: s.offset,
-        barNum: s.barNum,
-        bars: s.bars,
-      })) || [],
-  };
-}
 
 export function convertToMin8(chart: Chart8Edit): Chart8Min {
   return {

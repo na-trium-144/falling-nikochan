@@ -40,12 +40,6 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
         description: "Encoding applied to the request body",
         schema: { type: "string" },
       },
-      {
-        name: "lvIndex",
-        in: "query",
-        description: "Index of the level in the chart (default 0)",
-        schema: { type: "integer", default: 0, minimum: 0 },
-      },
     ],
     responses: {
       200: {
@@ -67,14 +61,6 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
         content: {
           "application/json": {
             schema: resolver(await validationErrorSchema()),
-          },
-        },
-      },
-      404: {
-        description: "level index out of range",
-        content: {
-          "application/json": {
-            schema: resolver(await errorLiteral("levelNotFound")),
           },
         },
       },
@@ -110,14 +96,24 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
           },
         },
       },
+      422: {
+        description: "level index out of range",
+        content: {
+          "application/json": {
+            schema: resolver(await errorLiteral("levelNotFound")),
+          },
+        },
+      },
     },
   }),
   validator(
     "query",
     v.object({
-      lvIndex: v.optional(
-        v.pipe(v.string(), v.regex(/^[0-9]+$/), v.transform(Number)),
-        "0"
+      lvIndex: v.pipe(
+        v.string(),
+        v.regex(/^[0-9]+$/),
+        v.transform(Number),
+        v.description("Index of the level in the chart")
       ),
     }),
     sValidatorHook()
@@ -148,7 +144,7 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
       !chartData.levelsFreeze.at(lvIndex) ||
       !chartData.levelsMeta.at(lvIndex)
     ) {
-      throw new HTTPException(404, { message: "levelNotFound" });
+      throw new HTTPException(422, { message: "levelNotFound" });
     }
 
     // Load chart data

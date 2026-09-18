@@ -32,10 +32,25 @@ describe("POST /api/seqPreview", () => {
     expect(seqData.notes).to.deep.equal(loadChart(dummyChart(), 0).notes);
   });
 
+  test("should return 400 for missing lvIndex query param", async () => {
+    const chartData = dummyChart();
+    const encodedBody = msgpack.encode(chartData);
+
+    const res = await app.request("/api/seqPreview", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/vnd.msgpack",
+      },
+      body: encodedBody,
+    });
+
+    expect(res.status).to.equal(400);
+  });
+
   test("should return 415 for invalid msgpack", async () => {
     const invalidBody = new Uint8Array([0xff, 0xfe, 0xfd]);
 
-    const res = await app.request("/api/seqPreview", {
+    const res = await app.request("/api/seqPreview?lvIndex=0", {
       method: "POST",
       headers: {
         "Content-Type": "application/vnd.msgpack",
@@ -55,7 +70,7 @@ describe("POST /api/seqPreview", () => {
     };
     const encodedBody = msgpack.encode(invalidData);
 
-    const res = await app.request("/api/seqPreview", {
+    const res = await app.request("/api/seqPreview?lvIndex=0", {
       method: "POST",
       headers: {
         "Content-Type": "application/vnd.msgpack",
@@ -77,7 +92,7 @@ describe("POST /api/seqPreview", () => {
     };
     const encodedBody = msgpack.encode(invalidData);
 
-    const res = await app.request("/api/seqPreview", {
+    const res = await app.request("/api/seqPreview?lvIndex=0", {
       method: "POST",
       headers: {
         "Content-Type": "application/vnd.msgpack",
@@ -98,7 +113,7 @@ describe("POST /api/seqPreview", () => {
     };
     const encodedBody = msgpack.encode(invalidData);
 
-    const res = await app.request("/api/seqPreview", {
+    const res = await app.request("/api/seqPreview?lvIndex=0", {
       method: "POST",
       headers: {
         "Content-Type": "application/vnd.msgpack",
@@ -111,7 +126,7 @@ describe("POST /api/seqPreview", () => {
     expect(body.message).to.include("invalidChart");
   });
 
-  test("should return 404 for out-of-range lvIndex", async () => {
+  test("should return 422 for out-of-range lvIndex", async () => {
     const chartData = dummyChart();
     const encodedBody = msgpack.encode(chartData);
 
@@ -123,7 +138,7 @@ describe("POST /api/seqPreview", () => {
       body: encodedBody,
     });
 
-    expect(res.status).to.equal(404);
+    expect(res.status).to.equal(422);
     const body = await res.json();
     expect(body.message).to.equal("levelNotFound");
   });

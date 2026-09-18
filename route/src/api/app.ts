@@ -111,7 +111,15 @@ const apiApp = async (config: {
     )
     .route("/seqFile", seqFileApp)
     .route("/seqPreview", seqPreviewApp)
-    .route("/playFile", seqFileApp)
+    .get("/playFile/:cid/:lvIndex", (c) =>
+      c.redirect(
+        new URL(
+          `/api/seqFile/${c.req.param("cid")}/${c.req.param("lvIndex")}`,
+          backendOrigin(c)
+        ),
+        307
+      )
+    )
     .get("/latest", (c) => {
       c.header("cache-control", immutable());
       return c.redirect(
