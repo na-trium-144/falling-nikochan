@@ -3,7 +3,7 @@
 import clsx from "clsx/lite";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
-import FallingWindow from "./fallingWindow.js";
+import FallingWindow, { DragStyle } from "./fallingWindow.js";
 import {
   getSignatureState,
   getStep,
@@ -408,6 +408,7 @@ export default function Edit(props: {
   const openGuide = () => setGuidePage([2, 4, 5, 6, 7][tab]);
 
   const [dragMode, setDragMode] = useState<null | "p" | "v" | "a">(null);
+  const [dragStyle, setDragStyle] = useState<DragStyle>("free");
   useEffect(() => {
     if (dragMode === null && !isTouch && chart) {
       setDragMode("p");
@@ -722,6 +723,7 @@ export default function Edit(props: {
                   chart={chart}
                   dragMode={dragMode}
                   setDragMode={setDragMode}
+                  dragStyle={dragStyle}
                 />
                 <div
                   className={clsx(
@@ -749,38 +751,52 @@ export default function Edit(props: {
                 />
               </div>
             </div>
-            {chart && isTouch && (
-              <button
-                className={clsx(
-                  "self-start flex flex-row items-center",
-                  "fn-link-1"
+            {chart && (
+              <div className="self-start flex flex-row items-center gap-2">
+                <Select<DragStyle>
+                  options={[
+                    { label: t("dragStyles.free"), value: "free" },
+                    { label: t("dragStyles.center"), value: "center" },
+                    { label: t("dragStyles.spread"), value: "spread" },
+                  ]}
+                  value={dragStyle}
+                  onSelect={(s) => setDragStyle(s)}
+                  showValue
+                />
+                {isTouch && (
+                  <button
+                    className={clsx(
+                      "self-start flex flex-row items-center",
+                      "fn-link-1"
+                    )}
+                    onClick={() => {
+                      setDragMode(
+                        dragMode === "p" ? "v" : dragMode === "v" ? null : "p"
+                      );
+                    }}
+                  >
+                    <span className="relative inline-block w-8 h-8 ">
+                      {dragMode === null ? (
+                        <>
+                          <Move className="absolute text-xl inset-0 w-max h-max m-auto " />
+                          <Forbid className="absolute text-3xl inset-0 w-max h-max m-auto " />
+                        </>
+                      ) : (
+                        <>
+                          <Move
+                            className="absolute text-xl inset-0 w-max h-max m-auto "
+                            theme="two-tone"
+                            fill={["#333", "#fc5"]}
+                          />
+                        </>
+                      )}
+                    </span>
+                    <span className="">
+                      {t("touchMode", { mode: dragMode || "null" })}
+                    </span>
+                  </button>
                 )}
-                onClick={() => {
-                  setDragMode(
-                    dragMode === "p" ? "v" : dragMode === "v" ? null : "p"
-                  );
-                }}
-              >
-                <span className="relative inline-block w-8 h-8 ">
-                  {dragMode === null ? (
-                    <>
-                      <Move className="absolute text-xl inset-0 w-max h-max m-auto " />
-                      <Forbid className="absolute text-3xl inset-0 w-max h-max m-auto " />
-                    </>
-                  ) : (
-                    <>
-                      <Move
-                        className="absolute text-xl inset-0 w-max h-max m-auto "
-                        theme="two-tone"
-                        fill={["#333", "#fc5"]}
-                      />
-                    </>
-                  )}
-                </span>
-                <span className="">
-                  {t("touchMode", { mode: dragMode || "null" })}
-                </span>
-              </button>
+              </div>
             )}
           </div>
           <div
