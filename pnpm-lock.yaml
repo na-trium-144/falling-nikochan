@@ -358,6 +358,9 @@ importers:
       react-ace:
         specifier: 15.0.0
         version: 15.0.0(react-dom@19.2.6)(react@19.2.8)
+      react-countup:
+        specifier: 6.5.3
+        version: 6.5.3(react@19.2.8)
       react-dom:
         specifier: catalog:react
         version: 19.2.6(react@19.2.8)
@@ -3153,6 +3156,9 @@ packages:
   core-js@3.49.0:
     resolution: {integrity: sha512-es1U2+YTtzpwkxVLwAFdSpaIMyQaq0PBgm3YD1W3Qpsn1NAmO3KSgZfu+oGSWVu6NvLHoHCV/aYcsE5wiB7ALg==}
 
+  countup.js@2.10.1:
+    resolution: {integrity: sha512-UHW/BsPDgVZfN919D4iu2HPv+jJxZUuaR3EhT0ScFZaD446GiQtkMTgOnOyJXdA2AewdlyUk9UvERlTHTbVpcw==}
+
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
@@ -4758,6 +4764,11 @@ packages:
     peerDependencies:
       react: ^0.13.0 || ^0.14.0 || ^15.0.1 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^0.13.0 || ^0.14.0 || ^15.0.1 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  react-countup@6.5.3:
+    resolution: {integrity: sha512-udnqVQitxC7QWADSPDOxVWULkLvKUWrDapn5i53HE4DPRVgs+Y5rr4bo25qEl8jSh+0l2cToJgGMx+clxPM3+w==}
+    peerDependencies:
+      react: '>= 16.3.0'
 
   react-dom@19.2.6:
     resolution: {integrity: sha512-0prMI+hvBbPjsWnxDLxlCGyM8PN6UuWjEUCYmZhO67xIV9Xasa/r/vDnq+Xyq4Lo27g8QSbO5YzARu0D1Sps3g==}
@@ -8018,6 +8029,8 @@ snapshots:
 
   core-js@3.49.0: {}
 
+  countup.js@2.10.1: {}
+
   cross-spawn@7.0.6:
     dependencies:
       path-key: 3.1.1
@@ -9928,6 +9941,11 @@ snapshots:
       prop-types: 15.8.1
       react: 19.2.8
       react-dom: 19.2.6(react@19.2.8)
+
+  react-countup@6.5.3(react@19.2.8):
+    dependencies:
+      countup.js: 2.10.1
+      react: 19.2.8
 
   react-dom@19.2.6(react@19.2.8):
     dependencies:

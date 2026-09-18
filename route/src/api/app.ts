@@ -26,6 +26,7 @@ import { env } from "hono/adapter";
 import { Db } from "mongodb";
 import socialApp from "./social.js";
 import briefMultiApp from "./briefs.js";
+import statsApp from "./stats.js";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 export { getBrief } from "./brief.js";
@@ -133,6 +134,7 @@ const apiApp = async (config: {
     .route("/ip", forwardCheckApp({ getConnInfo: config.getConnInfo }))
     .route("/oembed", oembedApp)
     .route("/social", socialApp)
+    .route("/stats", statsApp)
     .get("/debug-sentry", () => {
       throw new Error("My first sentry error!");
     });

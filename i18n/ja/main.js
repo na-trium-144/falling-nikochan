@@ -13,6 +13,10 @@ export default {
       "2025年3月に Falling Nikochan のサイトのURLは <url></url> に移転しました。",
     back: "戻る",
     popular: "人気の楽曲",
+    stats: {
+      chartCount: "総楽曲数",
+      playCount: "総プレイ回数",
+    },
     howToPlay: {
       title: "Falling Nikochan とは？",
       content1:
