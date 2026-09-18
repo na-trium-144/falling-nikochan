@@ -39,7 +39,7 @@ export function IndexMain(props: Props) {
           "w-full overflow-hidden",
           "shrink-0 basis-0 grow-2",
           "flex flex-row items-stretch justify-center",
-          "px-3 main-wide:px-6 main-wide:pb-6"
+          "px-sai-3 main-wide:px-sai-6 main-wide:pb-sai-6"
         )}
       >
         <Box

@@ -4,6 +4,10 @@
 ただしfn-glass-1,2,fn-highlightがローカルなz-index:1〜3を使うので注意
 */
 
+@utility z-dev-safe-area {
+  z-index: 100;
+}
+
 @utility z-dropdown {
   z-index: 60;
 }
@@ -33,7 +37,7 @@
   z-index: 15;
 }
 @utility z-mobile-footer {
-  z-index: 10;
+  z-index: 11;
 }
 @utility z-mf-blur {
   z-index: 9; /* mobile-footerとgrass-nearよりも奥 */

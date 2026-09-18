@@ -21,6 +21,10 @@ import dynamic from "next/dynamic";
 import { Scrollable } from "@/common/scrollable";
 const AceEditor = dynamic(
   async () => {
+    const aceBuilds = await import("ace-builds");
+    aceBuilds.config.setDefaultValues("session", {
+      useWorker: false,
+    });
     const ace = await import("react-ace");
     await import("ace-builds/src-min-noconflict/ext-language_tools");
     await import("ace-builds/src-min-noconflict/theme-tomorrow");
@@ -84,12 +88,7 @@ export function DevPage(props: { locale: string }) {
         </div>
         <div className="flex-none basis-mobile-footer no-pc" />
       </div>
-      <MobileFooter
-        className="fixed bottom-0"
-        blurBg
-        locale={props.locale}
-        tabKey={null}
-      />
+      <MobileFooter fixed locale={props.locale} tabKey={null} />
     </main>
   );
 }

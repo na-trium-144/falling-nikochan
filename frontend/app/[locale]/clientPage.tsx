@@ -212,7 +212,7 @@ export default function TopPage(props: Props) {
           "flex-col demo-wide:flex-row-reverse demo-wide:items-stretch"
         )}
       >
-        <div className="grow shrink-0 grid-centering px-3 demo-wide:px-9">
+        <div className="grow shrink-0 grid-centering px-sai-3 pt-sai demo-wide:py-sai demo-wide:pl-9 demo-wide:pr-sai-9">
           <DemoDetail
             {...demoChart}
             onClick={openModal}
@@ -231,8 +231,8 @@ export default function TopPage(props: Props) {
             className={clsx(
               "w-full max-w-main",
               "flex flex-col items-center text-center",
-              "justify-start px-3 py-6 gap-6",
-              "demo-wide:justify-center demo-wide:pl-12 demo-wide:pr-0",
+              "justify-start px-sai-3 pt-6 pb-sai-6 gap-6",
+              "demo-wide:justify-center demo-wide:pl-sai-12 demo-wide:pr-0 demo-wide:py-sai-6",
               "min-[64rem]:gap-8 min-[82rem]:gap-12"
             )}
           >
@@ -320,7 +320,7 @@ export default function TopPage(props: Props) {
 
       <div
         id="popular"
-        className="w-full max-w-main px-3 mb-8 main-wide:px-6 main-wide:mb-12"
+        className="w-full max-w-main px-sai-3 mb-8 main-wide:px-sai-6 main-wide:mb-12"
       >
         <Box
           classNameOuter="w-full text-center"
@@ -370,12 +370,7 @@ export default function TopPage(props: Props) {
       <PoliciesAndLinks locale={locale} />
 
       <div className="flex-none basis-mobile-footer no-pc" />
-      <MobileFooter
-        className="fixed bottom-0"
-        blurBg
-        locale={locale}
-        tabKey="top"
-      />
+      <MobileFooter fixed locale={locale} tabKey="top" />
     </main>
   );
 }

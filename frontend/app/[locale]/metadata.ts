@@ -19,6 +19,7 @@ export function initViewport(): Viewport {
     maximumScale: 1,
     minimumScale: 1,
     userScalable: false,
+    viewportFit: "cover",
   };
 }
 

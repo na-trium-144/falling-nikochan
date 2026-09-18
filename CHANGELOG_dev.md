@@ -1,3 +1,12 @@
+## ver. 17.8 - 2026/09/18 [#1371](https://github.com/na-trium-144/falling-nikochan/pull/1371)
+
+* viewport-fit=cover指定、safe-area-inset対応の修正
+* safari用にhtmlにフォールバック背景色を追加
+* 小さい画面や正方形に近い画面でのUIのサイズを調整
+* Twitterのアプリ内ブラウザではsafe-area-inset-topを無視しbottomのスペースを強制
+* Twitterのアプリ内ブラウザが勝手にfooterの位置を変更するので、高さを変えてTwitterを騙す
+* webviewをiframeと同様の単一画面モードで扱う
+
 ## ver. 17.6 - 2026/09/06
 
 * エラー時にフォームに内容を自動入力 [#1364](https://github.com/na-trium-144/falling-nikochan/pull/1364)

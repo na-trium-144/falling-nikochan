@@ -36,7 +36,7 @@ export default function StatusBox(props: Props) {
       classNameOuter={clsx(
         props.className,
         "overflow-visible",
-        isMobile ? "rounded-sq-[1.5em]" : "w-[17em]"
+        isMobile ? "rounded-sq-[1.5em] mx-auto max-w-[39rem]" : "w-[17em]"
       )}
       classNameInner={clsx(
         "overflow-visible",
