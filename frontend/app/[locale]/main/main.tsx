@@ -18,6 +18,7 @@ interface Props {
   mobileTabKey: TabKeys; // モバイル表示でfooter内のアクティブなタブ
   noBackButtonMobile?: boolean; // モバイル表示で戻るボタンを非表示 (footerから直接開けるページの場合非表示にする)
   noBackButtonPC?: boolean;
+  afterBackButtonPC?: ReactNode;
   locale: string;
   boxRef?: RefObject<HTMLDivElement | null>;
 }
@@ -49,17 +50,20 @@ export function IndexMain(props: Props) {
           defaultFadeY
           padding={6}
         >
-          {!props.noBackButtonPC && (
-            <button
-              className={clsx("no-mobile w-max mb-3 fn-link-1")}
-              onClick={() => {
-                historyBackWithReview();
-              }}
-            >
-              <ArrowLeft className="inline-block align-middle mr-2 " />
-              {t("back")}
-            </button>
-          )}
+          <div className="flex items-start">
+            {!props.noBackButtonPC && (
+              <button
+                className={clsx("no-mobile w-max mb-3 mr-3 fn-link-1")}
+                onClick={() => {
+                  historyBackWithReview();
+                }}
+              >
+                <ArrowLeft className="inline-block align-middle mr-2 " />
+                {t("back")}
+              </button>
+            )}
+            {props.afterBackButtonPC}
+          </div>
           {props.children}
         </Box>
       </div>

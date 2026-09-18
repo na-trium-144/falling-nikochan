@@ -35,23 +35,28 @@ export default async function GuidePage({ params }: GuideProps) {
 
   return (
     <IndexMain
-      title={t(`titles.${index}`)}
+      // title={t(`titles.${index}`)}
+      // Pagerに各ページのタイトルはすでに表示しているので、mobileHeaderには「譜面編集 ヘルプ」を表示
+      title={t(`titles.1`)}
       tabKey="edit"
       mobileTabKey="edit"
       locale={locale}
       classNameInner="fn-mdx-policies"
+      afterBackButtonPC={
+        <Pager
+          className="flex-1"
+          index={index}
+          maxIndex={maxIndex}
+          title={t(`titles.${index}`)}
+          hrefBefore={
+            index > 1 ? `/${locale}/main/guide/${index - 1}` : undefined
+          }
+          hrefAfter={
+            index < maxIndex ? `/${locale}/main/guide/${index + 1}` : undefined
+          }
+        />
+      }
     >
-      <Pager
-        index={index}
-        maxIndex={maxIndex}
-        title={t(`titles.${index}`)}
-        hrefBefore={
-          index > 1 ? `/${locale}/main/guide/${index - 1}` : undefined
-        }
-        hrefAfter={
-          index < maxIndex ? `/${locale}/main/guide/${index + 1}` : undefined
-        }
-      />
       <Content />
     </IndexMain>
   );
