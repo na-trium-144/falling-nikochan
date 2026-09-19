@@ -16,17 +16,20 @@ import {
   stepZero,
 } from "./step.js";
 import { BPMChange1 } from "./legacy/chart1.js";
-import { Signature5 } from "./legacy/chart5.js";
-import { Chart6, Level6Play } from "./legacy/chart6.js";
+import { Signature5, SignatureWithLua5 } from "./legacy/chart5.js";
+import { Chart6 } from "./legacy/chart6.js";
 import {
-  Level15Play,
+  Chart15,
+  Level15Freeze,
+  Level15Meta,
   OffsetSchema15,
   YTBeginSchema15,
   YTEndSecSchema15,
 } from "./legacy/chart15.js";
 import { docRefs, Schema } from "./docSchema.js";
 import { resolver } from "hono-openapi";
-import { Level17Play } from "./legacy/chart17.js";
+import { Chart17 } from "./legacy/chart17.js";
+import { BPMChangeWithLua3, NoteCommandWithLua3 } from "./legacy/chart3.js";
 
 export const DisplayParamSchema = () =>
   v.object({
@@ -86,9 +89,31 @@ export const NoteSeqSchema = () =>
             "(Exceptionally, if hitTimeSec - current time < 0, use display[0] with t = hitTimeSec - current time - 0.)"
         )
       ),
+      step: StepSchema(),
+      hitX: v.pipe(v.number(), v.description("10 * targetX - 5")),
+      hitVX: v.pipe(v.number(), v.description("4 * vx")),
+      hitVY: v.pipe(v.number(), v.description("4 * vy")),
+      fall: v.pipe(
+        v.boolean(),
+        v.description("whether note falls down after hit")
+      ),
     }),
     v.description("Note data used for judgement and display during play.")
   );
+export async function NoteSeqDoc(): Promise<Schema> {
+  const schema = (await resolver(NoteSeqSchema()).toOpenAPISchema()).schema;
+  return {
+    ...schema,
+    properties: {
+      ...schema.properties,
+      step: docRefs("Step"),
+      display: {
+        type: "array",
+        items: (await resolver(DisplayParamSchema()).toOpenAPISchema()).schema,
+      },
+    },
+  };
+}
 export type NoteAPI = v.InferOutput<ReturnType<typeof NoteSeqSchema>>;
 export type NoteInGame = NoteAPI & {
   /**
@@ -204,6 +229,7 @@ export async function SignatureSeqDoc(): Promise<Schema> {
 
 export const ChartSeqDataSchema = () =>
   v.object({
+    ver: v.pipe(v.number(), v.description("Chart version, e.g. 17, 15, 6")),
     notes: v.array(NoteSeqSchema()),
     bpmChanges: v.array(BPMChangeSeqSchema()),
     speedChanges: v.array(SpeedChangeSeqSchema()),
@@ -279,41 +305,35 @@ function solveQuadEquation(
   return { plus: Math.max(root1, root2), minus: Math.min(root1, root2) };
 }
 
-/**
- * chartを読み込む
- */
-export function loadChart(
-  level: Level17Play | Level15Play | Level6Play | Chart6,
-  levelIndex?: number
+export function loadLevel(
+  freeze:
+    | Level15Freeze
+    | {
+        notes: NoteCommandWithLua3[];
+        bpmChanges: BPMChangeWithLua3[];
+        speedChanges: BPMChangeWithLua3[];
+        signature: SignatureWithLua5[];
+      },
+  meta:
+    | Level15Meta
+    | {
+        name: string;
+        type: string;
+        unlisted?: boolean;
+        ytBegin?: number;
+        ytEndSec?: number;
+      },
+  offset: number,
+  ver: number
 ): ChartSeqData {
-  if ("levels" in level) {
-    if (levelIndex && level.levels.at(levelIndex)) {
-      level = {
-        ...level.levels.at(levelIndex)!,
-        ver: 6,
-        offset: level.offset,
-      } satisfies Level6Play;
-    } else {
-      return {
-        notes: [],
-        bpmChanges: [],
-        speedChanges: [],
-        signature: [],
-        offset: 0,
-        ytBegin: 0,
-        ytEndSec: 0,
-      };
-    }
-  }
-
   const { bpm: bpmChanges, speed: speedChanges } = updateBpmTimeSec(
-    level.bpmChanges,
-    level.speedChanges
+    freeze.bpmChanges,
+    freeze.speedChanges
   );
 
   const notes: NoteAPI[] = [];
-  for (let id = 0; id < level.notes.length; id++) {
-    const c = level.notes[id];
+  for (let id = 0; id < freeze.notes.length; id++) {
+    const c = freeze.notes[id];
 
     // hitの時刻
     const hitTimeSec: number = getTimeSec(bpmChanges, c.step);
@@ -406,7 +426,7 @@ export function loadChart(
         du * (tBegin - tEnd) +
         (ddu * (tBegin - tEnd) * (tBegin - tEnd)) / 2;
 
-      if (level.ver === 6) {
+      if (ver === 6) {
         const vx_Legacy = (vxLegacy * ts.bpm) / 4 / 120;
         const vy_Legacy = (vyLegacy * ts.bpm) / 4 / 120;
         const ay_Legacy = (ayLegacy * ts.bpm * ts.bpm) / 4 / 120 / 120;
@@ -507,12 +527,22 @@ export function loadChart(
       vx,
       vy,
       ay,
-      uRange: level.ver >= 17 ? [uRangeMin, uRangeMax] : null,
+      uRange: ver >= 17 ? [uRangeMin, uRangeMax] : null,
+      step: c.step,
+      hitX: c.hitX,
+      hitVX: c.hitVX,
+      hitVY: c.hitVY,
+      fall: "fall" in c ? !!c.fall : false,
     });
   }
   return {
-    offset: level.offset,
-    signature: level.signature,
+    ver,
+    offset,
+    signature: freeze.signature.map((s) => ({
+      step: s.step,
+      offset: s.offset,
+      bars: s.bars,
+    })),
     bpmChanges: bpmChanges.map((b) => ({
       // 余計なプロパティを削除
       step: b.step,
@@ -526,15 +556,72 @@ export function loadChart(
       bpm: s.bpm,
     })),
     notes,
-    ytBegin: "ytBegin" in level ? level.ytBegin : 0,
+    ytBegin: "ytBegin" in meta && meta.ytBegin !== undefined ? meta.ytBegin : 0,
     ytEndSec:
-      "ytEndSec" in level
-        ? level.ytEndSec
-        : level.notes.length >= 1
-          ? getTimeSec(bpmChanges, level.notes[level.notes.length - 1].step) +
-            level.offset
+      "ytEndSec" in meta && meta.ytEndSec !== undefined
+        ? meta.ytEndSec
+        : freeze.notes.length >= 1
+          ? getTimeSec(bpmChanges, freeze.notes[freeze.notes.length - 1].step) +
+            offset
           : 0,
   };
+}
+
+/**
+ * chartを読み込む
+ */
+export function loadChart(
+  chart: Chart17 | Chart15 | Chart6,
+  levelIndex: number
+): ChartSeqData {
+  if (chart.ver === 6) {
+    const level = chart.levels.at(levelIndex);
+    if (!level) {
+      return {
+        ver: 6,
+        notes: [],
+        bpmChanges: [],
+        speedChanges: [],
+        signature: [],
+        offset: chart.offset,
+        ytBegin: 0,
+        ytEndSec: 0,
+      };
+    }
+    return loadLevel(
+      {
+        notes: level.notes,
+        bpmChanges: level.bpmChanges,
+        speedChanges: level.speedChanges,
+        signature: level.signature,
+      },
+      {
+        name: level.name,
+        type: level.type,
+        unlisted: level.unlisted,
+        ytBegin: 0,
+        ytEndSec: 0,
+      },
+      chart.offset,
+      6
+    );
+  } else {
+    const levelFreeze = chart.levelsFreeze.at(levelIndex);
+    const levelMeta = chart.levelsMeta.at(levelIndex);
+    if (!levelFreeze || !levelMeta) {
+      return {
+        ver: chart.ver,
+        notes: [],
+        bpmChanges: [],
+        speedChanges: [],
+        signature: [],
+        offset: chart.offset,
+        ytBegin: 0,
+        ytEndSec: 0,
+      };
+    }
+    return loadLevel(levelFreeze, levelMeta, chart.offset, chart.ver);
+  }
 }
 
 export function displayNote(

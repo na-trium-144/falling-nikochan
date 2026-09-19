@@ -4,7 +4,6 @@ import briefApp from "./brief.js";
 import { backendOrigin, Bindings, immutable } from "../env.js";
 import chartFileApp from "./chartFile.js";
 import newChartFileApp from "./newChartFile.js";
-import playFileApp from "./playFile.js";
 import seqFileApp from "./seqFile.js";
 import seqPreviewApp from "./seqPreview.js";
 import hashPasswdApp from "./hashPasswd.js";
@@ -112,7 +111,15 @@ const apiApp = async (config: {
     )
     .route("/seqFile", seqFileApp)
     .route("/seqPreview", seqPreviewApp)
-    .route("/playFile", playFileApp)
+    .get("/playFile/:cid/:lvIndex", (c) =>
+      c.redirect(
+        new URL(
+          `/api/seqFile/${c.req.param("cid")}/${c.req.param("lvIndex")}`,
+          backendOrigin(c)
+        ),
+        307
+      )
+    )
     .get("/latest", (c) => {
       c.header("cache-control", immutable());
       return c.redirect(

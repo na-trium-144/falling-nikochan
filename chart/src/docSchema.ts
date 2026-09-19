@@ -6,7 +6,6 @@ import {
   CopyBufferEntrySchema,
   LevelFreeze15Doc,
   LevelMeta15Doc,
-  LevelPlay15Doc,
   NoteCommand15Doc,
   OffsetSchema15,
   Rest15Doc,
@@ -22,12 +21,12 @@ import { resolver } from "hono-openapi";
 import {
   BPMChangeSeqDoc,
   ChartSeqDataDoc,
-  NoteSeqSchema,
+  NoteSeqDoc,
   SignatureSeqDoc,
   SpeedChangeSeqDoc,
 } from "./seq.js";
 import { SignatureBarSchema } from "./signature.js";
-import { Chart17Doc, LevelPlay17Doc } from "./legacy/chart17.js";
+import { Chart17Doc } from "./legacy/chart17.js";
 
 export type Schema = OpenAPIV3_1.SchemaObject;
 export type Reference = OpenAPIV3_1.ReferenceObject;
@@ -37,8 +36,6 @@ export const docSchemas = async () => ({
   Chart15: await Chart15Doc(),
   LevelMeta15: await LevelMeta15Doc(),
   LevelFreeze15: await LevelFreeze15Doc(),
-  LevelPlay17: await LevelPlay17Doc(),
-  LevelPlay15: await LevelPlay15Doc(),
   ChartBrief: (await resolver(ChartBriefSchema()).toOpenAPISchema()).schema,
   EmptyObj: (await resolver(EmptyObj()).toOpenAPISchema()).schema,
   Step: (await resolver(StepSchema()).toOpenAPISchema()).schema,
@@ -57,7 +54,7 @@ export const docSchemas = async () => ({
     .schema,
   CopyBuffer: await CopyBufferDoc(),
   ChartSeqData: await ChartSeqDataDoc(),
-  NoteSeq: (await resolver(NoteSeqSchema()).toOpenAPISchema()).schema,
+  NoteSeq: await NoteSeqDoc(),
   BPMChangeSeq: await BPMChangeSeqDoc(),
   SpeedChangeSeq: await SpeedChangeSeqDoc(),
   SignatureSeq: await SignatureSeqDoc(),

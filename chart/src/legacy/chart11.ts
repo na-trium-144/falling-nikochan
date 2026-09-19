@@ -45,19 +45,6 @@ export const LevelEditSchema11 = () =>
     ...LevelMinSchema11().entries,
     ...LevelFreezeSchema11().entries,
   });
-export const LevelPlaySchema11 = () =>
-  v.object({
-    ver: v.union([v.literal(11), v.literal(12)]),
-    offset: v.pipe(v.number(), v.minValue(0)),
-    notes: v.array(NoteCommandSchema9()),
-    bpmChanges: v.array(BPMChangeSchema9()),
-    speedChanges: v.array(SpeedChangeSchema9()),
-    signature: v.array(SignatureSchema9()),
-    ytBegin: YTBeginSchema11(),
-    ytEnd: YTEndSchema11(),
-    ytEndSec: v.number(),
-  });
-
 export const ChartMinSchema11 = () =>
   v.object({
     falling: v.literal("nikochan"),
@@ -89,27 +76,9 @@ export type Level11Freeze = v.InferOutput<
 >;
 export type Level11Min = v.InferOutput<ReturnType<typeof LevelMinSchema11>>;
 export type Level11Edit = v.InferOutput<ReturnType<typeof LevelEditSchema11>>;
-export type Level11Play = v.InferOutput<ReturnType<typeof LevelPlaySchema11>>;
 export type Chart11Min = v.InferOutput<ReturnType<typeof ChartMinSchema11>>;
 export type Chart11Edit = v.InferOutput<ReturnType<typeof ChartEditSchema11>>;
 
-export function convertToPlay11(
-  chart: Chart11Edit,
-  lvIndex: number
-): Level11Play {
-  const level = chart.levels.at(lvIndex);
-  return {
-    ver: 12,
-    offset: chart.offset,
-    notes: level?.notes || [],
-    bpmChanges: level?.bpmChanges || [],
-    speedChanges: level?.speedChanges || [],
-    signature: level?.signature || [],
-    ytBegin: level?.ytBegin || 0,
-    ytEnd: level?.ytEnd || "note",
-    ytEndSec: level?.ytEndSec || 0,
-  };
-}
 export function convertToMin11(chart: Chart11Edit): Chart11Min {
   return {
     falling: "nikochan",
