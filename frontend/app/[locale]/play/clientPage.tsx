@@ -394,6 +394,8 @@ function Play(props: Props) {
   const rawStartTimeStamp = useRef<DOMHighResTimeStamp | null>(null);
   const filteredStartTimeStamp = useRef<DOMHighResTimeStamp | null>(null);
   const timeStampLastAdjusted = useRef<DOMHighResTimeStamp>(0);
+  const perfStarted = useRef<DOMHighResTimeStamp | null>(null);
+  const actualPlaybackRateRef = useRef<number>(playbackRate);
   const minActualPlaybackRateRef = useRef<number>(playbackRate);
   const [minActualPlaybackRate, setMinActualPlaybackRate] =
     useState<number>(playbackRate);
@@ -410,6 +412,13 @@ function Play(props: Props) {
       if (filteredStartTimeStamp.current === null) {
         filteredStartTimeStamp.current = rawStartTimeStamp.current;
       }
+      if (perfStarted.current === null) {
+        perfStarted.current = perfNow;
+      }
+
+      const now =
+        ((perfNow - filteredStartTimeStamp.current) / 1000) * playbackRate;
+      const dt = (perfNow - timeStampLastAdjusted.current) / 1000;
 
       // 再生速度改ざん検知
       if (
@@ -418,19 +427,21 @@ function Play(props: Props) {
         perfNow - sampleTimestamps.current[0].perf > 1000
       ) {
         const actualPlaybackRate =
-          Math.round(
-            ((ytCurrentTime - sampleTimestamps.current[0].yt) /
-              (perfNow - sampleTimestamps.current[0].perf)) *
-              1000 *
-              20
-          ) / 20; // x0.05単位
-        // かつ設定速度から-5%までの誤差は許容する
+          ((ytCurrentTime - sampleTimestamps.current[0].yt) /
+            (perfNow - sampleTimestamps.current[0].perf)) *
+          1000;
+        actualPlaybackRateRef.current =
+          actualPlaybackRateRef.current * Math.exp(-dt / 1.0) +
+          actualPlaybackRate * (1 - Math.exp(-dt / 1.0));
+        const actualPlaybackRateRounded =
+          Math.round(actualPlaybackRateRef.current * 20) / 20; // x0.05単位;
         if (
-          actualPlaybackRate < minActualPlaybackRateRef.current &&
-          actualPlaybackRate < playbackRate * 0.96
+          perfNow - perfStarted.current > 3000 && // スマホなどで再生開始直後は不安定なため待つ
+          actualPlaybackRateRounded < minActualPlaybackRateRef.current &&
+          actualPlaybackRateRounded < playbackRate * 0.96 // 設定速度から-5%までの誤差は許容する
         ) {
           setMinActualPlaybackRate(
-            (minActualPlaybackRateRef.current = actualPlaybackRate)
+            (minActualPlaybackRateRef.current = actualPlaybackRateRounded)
           );
         }
 
@@ -444,9 +455,6 @@ function Play(props: Props) {
       }
       sampleTimestamps.current.push({ perf: perfNow, yt: ytCurrentTime });
 
-      const now =
-        ((perfNow - filteredStartTimeStamp.current) / 1000) * playbackRate;
-      const dt = (perfNow - timeStampLastAdjusted.current) / 1000;
       // ずれを少しずつ補正する (ローパスフィルタ)
       filteredStartTimeStamp.current =
         filteredStartTimeStamp.current * Math.exp(-dt / 1.0) +
@@ -811,7 +819,7 @@ function Play(props: Props) {
       ytPlayer.current?.setVolume?.(ytVolume);
     }
     ref.current?.focus();
-    filteredStartTimeStamp.current = null;
+    filteredStartTimeStamp.current = perfStarted.current = null;
     setMinActualPlaybackRate((minActualPlaybackRateRef.current = playbackRate));
     sampleTimestamps.current = [];
   }, [
@@ -843,7 +851,7 @@ function Play(props: Props) {
         break;
     }
     ref.current?.focus();
-    filteredStartTimeStamp.current = null;
+    filteredStartTimeStamp.current = perfStarted.current = null;
     // setMinActualPlaybackRate(minActualPlaybackRateRef.current = playbackRate);
     sampleTimestamps.current = [];
   }, [chartPlaying, ref]);
