@@ -414,6 +414,7 @@ function Play(props: Props) {
       }
       if (perfStarted.current === null) {
         perfStarted.current = perfNow;
+        actualPlaybackRateRef.current = playbackRate;
       }
 
       const now =
@@ -431,12 +432,12 @@ function Play(props: Props) {
             (perfNow - sampleTimestamps.current[0].perf)) *
           1000;
         actualPlaybackRateRef.current =
-          actualPlaybackRateRef.current * Math.exp(-dt / 1.0) +
-          actualPlaybackRate * (1 - Math.exp(-dt / 1.0));
+          actualPlaybackRateRef.current * Math.exp(-dt / 5.0) +
+          actualPlaybackRate * (1 - Math.exp(-dt / 5.0));
         const actualPlaybackRateRounded =
           Math.round(actualPlaybackRateRef.current * 20) / 20; // x0.05単位;
         if (
-          perfNow - perfStarted.current > 3000 && // スマホなどで再生開始直後は不安定なため待つ
+          perfNow - perfStarted.current > 5000 && // スマホなどで再生開始直後は不安定なため待つ
           actualPlaybackRateRounded < minActualPlaybackRateRef.current &&
           actualPlaybackRateRounded < playbackRate * 0.96 // 設定速度から-5%までの誤差は許容する
         ) {
