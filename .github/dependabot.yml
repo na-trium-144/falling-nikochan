@@ -13,9 +13,21 @@ updates:
     cooldown:
       default-days: 1
     ignore:
-      - dependency-name: "@fontsource/*"
-      - dependency-name: "@fontsource-variable/*"
+      - dependency-name: "@fontsource/kaisei-opti"
+      - dependency-name: "@fontsource/merriweather"
     groups:
+      babel:
+        patterns:
+          - "@babel/*"
+      eslint:
+        patterns:
+          - "eslint"
+          - "@eslint/js"
+          - "@eslint/eslintrc"
+      fontsource:
+        patterns:
+          - "@fontsource/*"
+          - "@fontsource-variable/*"
       next:
         patterns:
           - "next"

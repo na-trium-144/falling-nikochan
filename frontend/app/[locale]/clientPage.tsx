@@ -12,7 +12,6 @@ import { ChartList } from "./main/chartList.jsx";
 import { FestivalLink, useFestival } from "./common/festival.jsx";
 import { useSharePageModal } from "./common/sharePageModal.jsx";
 import { ButtonHighlight } from "./common/button.jsx";
-import Youtube from "@icon-park/react/lib/icons/Youtube.js";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight.js";
 import FormOne from "@icon-park/react/lib/icons/FormOne.js";
 import { ExternalLink } from "./common/extLink.js";
@@ -32,6 +31,8 @@ import { useRouter } from "next/navigation.js";
 import * as v from "valibot";
 import { CidSchema } from "@falling-nikochan/chart";
 import { fetchBackend } from "./common/fetch.js";
+import { SocialLinks } from "./common/social.js";
+import { YouTubeLogo } from "./common/youtubeLogo.js";
 
 interface Props {
   locale: string;
@@ -207,11 +208,11 @@ export default function TopPage(props: Props) {
       <div
         id="top"
         className={clsx(
-          "w-full h-screen min-h-max flex items-center justify-center",
-          "flex-col demo-wide:flex-row-reverse"
+          "w-full h-max min-h-screen flex items-center justify-center",
+          "flex-col demo-wide:flex-row-reverse demo-wide:items-stretch"
         )}
       >
-        <div className="grow shrink-0 grid-centering px-3 demo-wide:px-9">
+        <div className="grow shrink-0 grid-centering px-sai-3 pt-sai demo-wide:py-sai demo-wide:pl-9 demo-wide:pr-sai-9">
           <DemoDetail
             {...demoChart}
             onClick={openModal}
@@ -222,7 +223,7 @@ export default function TopPage(props: Props) {
           className={clsx(
             "relative w-full",
             "grow-2 basis-[max-content]",
-            "demo-wide:grow-1 demo-wide:basis-main demo-wide:min-w-0 demo-wide:h-full",
+            "demo-wide:grow-1 demo-wide:basis-main demo-wide:min-w-0",
             "demo-wide:flex demo-wide:items-center demo-wide:justify-end"
           )}
         >
@@ -230,8 +231,8 @@ export default function TopPage(props: Props) {
             className={clsx(
               "w-full max-w-main",
               "flex flex-col items-center text-center",
-              "justify-start px-3 py-6 gap-6",
-              "demo-wide:justify-center demo-wide:pl-12 demo-wide:pr-0",
+              "justify-start px-sai-3 pt-6 pb-sai-6 gap-6",
+              "demo-wide:justify-center demo-wide:pl-sai-12 demo-wide:pr-0 demo-wide:py-sai-6",
               "min-[64rem]:gap-8 min-[82rem]:gap-12"
             )}
           >
@@ -254,7 +255,7 @@ export default function TopPage(props: Props) {
             </Link>
             <Link
               href={`/${locale}/main/play`}
-              className="fn-button fn-cta hidden demo-wide:inline-block"
+              className="fn-button fn-cta hidden demo-wide:inline-flex"
               prefetch={process.env.PREFETCH as "auto"}
             >
               <span className="fn-glass-1" />
@@ -319,7 +320,7 @@ export default function TopPage(props: Props) {
 
       <div
         id="popular"
-        className="w-full max-w-main px-3 mb-8 main-wide:px-6 main-wide:mb-12"
+        className="w-full max-w-main px-sai-3 mb-8 main-wide:px-sai-6 main-wide:mb-12"
       >
         <Box
           classNameOuter="w-full text-center"
@@ -364,16 +365,12 @@ export default function TopPage(props: Props) {
       </div>
 
       <Features locale={locale} />
+      <SocialLinks />
       <hr className="fn-hr" />
       <PoliciesAndLinks locale={locale} />
 
       <div className="flex-none basis-mobile-footer no-pc" />
-      <MobileFooter
-        className="fixed bottom-0"
-        blurBg
-        locale={locale}
-        tabKey="top"
-      />
+      <MobileFooter fixed locale={locale} tabKey="top" />
     </main>
   );
 }
@@ -488,12 +485,9 @@ export function Features({ locale }: { locale: string }) {
             <p>
               {t.rich("howToEdit.content2", {
                 youtube: (c) => (
-                  <span className="relative inline-block">
-                    <Youtube
-                      className="absolute left-0.5 bottom-1"
-                      theme="filled"
-                    />
-                    <span className="ml-5 mr-1">{c}</span>
+                  <span className="relative inline-block px-1 space-x-1">
+                    <YouTubeLogo />
+                    <span>{c}</span>
                   </span>
                 ),
               })}
@@ -530,14 +524,46 @@ export function Features({ locale }: { locale: string }) {
   );
 }
 
-export function ContactFormLink() {
+export function ContactFormLink({
+  error,
+  eventId,
+}: {
+  error?: unknown;
+  eventId?: string;
+}) {
   const t = useTranslations("main");
+  if (!process.env.FORM_URL) {
+    console.error("contact form link is disabled because FORM_URL is not set");
+    return (
+      <>
+        <FormOne className="inline-block align-middle mr-1 text-dim" />
+        <span className="text-dim">{t("links.contactForm")}</span>
+      </>
+    );
+  }
+  let formUrl = process.env.FORM_URL;
+  if (error && process.env.FORM_ID_FIELD) {
+    const prefill = (
+      [
+        String(error),
+        v.isValiError(error) ? JSON.stringify(v.flatten(error.issues)) : null,
+        typeof error === "object" && error && "digest" in error
+          ? "Digest=" + error.digest
+          : null,
+        eventId ? "EventID=" + eventId : null,
+      ].filter((s) => !!s) as string[]
+    )
+      .map((s) => (s.length > 200 ? s.slice(0, 200) + "..." : s))
+      .join("; ");
+    const url = new URL(process.env.FORM_URL);
+    url.searchParams.set(process.env.FORM_ID_FIELD, prefill);
+    formUrl = url.toString();
+  }
+
   return (
     <>
       <FormOne className="inline-block align-middle mr-1" />
-      <ExternalLink href="https://forms.gle/3PVFRA7nUtXSHb8TA">
-        {t("links.contactForm")}
-      </ExternalLink>
+      <ExternalLink href={formUrl}>{t("links.contactForm")}</ExternalLink>
     </>
   );
 }
@@ -545,7 +571,7 @@ export function YouTubeLink() {
   const t = useTranslations("main");
   return (
     <>
-      <Youtube className="inline-block align-middle mr-1" theme="filled" />
+      <YouTubeLogo className="mr-1" />
       <ExternalLink href="https://www.youtube.com/@nikochan144">
         <span className="no-mobile">{t("links.officialChannel")}</span>
         <span className="no-pc">{t("links.officialChannelShort")}</span>

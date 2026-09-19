@@ -89,12 +89,11 @@ export default function OGTemplate() {
         </div>
         <div
           className={clsx(
-            "ml-20 mt-2 flex flex-row items-baseline",
+            "ml-20 mt-4 flex flex-row items-baseline",
             showDummyData || "invisible"
           )}
         >
           <span className="font-title text-4xl mr-4">LevelName</span>
-          {/* todo: fn-level-typeクラスの実装時にサイズが変わったが、 ogResult.tsx のほうに反映していない */}
           <span className={clsx("text-4xl", "fn-level-type", levelTypes[0])}>
             <span>{levelTypes[0]}-</span>
             <span>44</span>
@@ -168,9 +167,10 @@ export default function OGTemplate() {
         {["good", "ok", "bad", "miss"].map((name, ji) => (
           <div key={ji} className="flex flex-row items-baseline ">
             <span className="flex-1">
-              <span className="inline-block w-8 text-2xl translate-y-1 ">
-                <JudgeIcon index={ji} />
-              </span>
+              <JudgeIcon
+                index={ji}
+                className="inline-block w-8 text-2xl translate-y-1"
+              />
               <span className={clsx("text-2xl", showDummyData || "invisible")}>
                 {ts(name)}
               </span>
@@ -202,7 +202,7 @@ export default function OGTemplate() {
           classNameNear="absolute"
         />
         <RhythmicalSlime
-          className="z-14 absolute scale-165 origin-bottom-right "
+          className="z-14 absolute scale-150 origin-bottom-right "
           style={{
             bottom: "100%",
             right: "1rem",
@@ -219,6 +219,7 @@ export default function OGTemplate() {
           playing={false}
           bpmChanges={[]}
           playbackRate={1}
+          startsJumping={null}
         />
         <div className="z-13 scale-150 absolute w-full h-full bottom-0 left-0 translate-y-4 origin-bottom-left">
           <BPMSign

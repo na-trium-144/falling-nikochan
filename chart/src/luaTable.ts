@@ -1,5 +1,5 @@
+import { ChartEdit } from "./chart.js";
 import { defaultCopyBufferObj } from "./command.js";
-import { ChartUntil15Min } from "./legacy/chart15.js";
 
 export function findLuaLevelCode(rawCode: string) {
   return (
@@ -15,18 +15,10 @@ export function findLuaLevelCode(rawCode: string) {
   });
 }
 export function chartToLuaTableCode(
-  chart: ChartUntil15Min,
+  chart: ChartEdit,
   fnCommandsVer: string
 ): string {
-  const levelsLuaOnly = (
-    "levelsMeta" in chart
-      ? chart.levelsMeta
-      : "levelsMin" in chart
-        ? chart.levelsMin
-        : "levels" in chart
-          ? chart.levels
-          : []
-  )
+  const levelsLuaOnly = chart.levelsMeta
     .map((min, i) => {
       const jsonItems = (
         [

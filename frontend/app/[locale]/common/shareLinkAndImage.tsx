@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { ChartBrief, ChartUntil15Min } from "@falling-nikochan/chart";
+import { ChartBrief, ChartUntil17Min } from "@falling-nikochan/chart";
 import {
   createContext,
   useCallback,
@@ -24,7 +24,7 @@ import { fetchBackend } from "./fetch";
 
 export function useShareLink(
   cid: string | undefined,
-  brief: ChartUntil15Min | ChartBrief | undefined | null,
+  brief: ChartUntil17Min | ChartBrief | undefined | null,
   lang?: string,
   resultParam?: string,
   date?: number | null

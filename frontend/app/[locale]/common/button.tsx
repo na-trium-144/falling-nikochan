@@ -105,11 +105,7 @@ interface LabelProps {
 export function ButtonStyledLabel(props: LabelProps) {
   return (
     <label
-      className={clsx(
-        "fn-button",
-        "inline-flex items-center align-bottom",
-        props.className
-      )}
+      className={clsx("fn-button align-bottom", props.className)}
       htmlFor={props.htmlFor}
     >
       <span className="fn-glass-1" />

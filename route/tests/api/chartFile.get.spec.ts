@@ -10,6 +10,7 @@ import {
   dummyChart13,
   dummyChart14,
   dummyChart15,
+  dummyChart16,
   dummyChart6,
   dummyChart7,
   dummyChart8,
@@ -81,7 +82,7 @@ describe("GET /api/chartFile/:cid", () => {
       headers: { Authorization: basicAuth("p") },
     });
     expect(res.status).to.equal(200);
-    const chart = msgpack.decode(await res.arrayBuffer()) as Chart15;
+    const chart = msgpack.decode(await res.arrayBuffer());
     expect(chart).to.deep.equal({ ...dummyChart(), published: true });
   });
   test("should return ChartEdit if password hash with pUserSalt matches", async () => {
@@ -170,7 +171,16 @@ describe("GET /api/chartFile/:cid", () => {
     expect(res.status).to.equal(412);
     expect(await res.json()).to.deep.equal({ message: "etagMismatch" });
   });
-  currentChartVer satisfies 16; // edit tests below when chart version is bumped
+  currentChartVer satisfies 17; // edit tests below when chart version is bumped
+  test("should return Chart16 if chart version is 16", async () => {
+    await initDb();
+    const res = await app.request("/api/chartFile/100016", {
+      headers: { Authorization: basicAuth("p") },
+    });
+    expect(res.status).to.equal(200);
+    const chart = msgpack.decode(await res.arrayBuffer()) as Chart15;
+    expect(chart).to.deep.equal(dummyChart16());
+  });
   test("should return Chart15 if chart version is 15", async () => {
     await initDb();
     const res = await app.request("/api/chartFile/100015", {

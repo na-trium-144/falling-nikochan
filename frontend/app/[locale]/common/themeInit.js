@@ -19,6 +19,12 @@ window.fnCurrentThemeIsDark = () => {
 };
 window.fnApplyTheme = () => {
   document.body.classList.add("fn-csr-ready");
+  if (
+    navigator.userAgent.includes("Twitter for iPhone") ||
+    navigator.userAgent.includes("TwitterAndroid")
+  ) {
+    document.body.classList.add("ua-twitter");
+  }
   if (window.fnCurrentThemeIsDark()) {
     document.body.classList.add("dark");
   } else {

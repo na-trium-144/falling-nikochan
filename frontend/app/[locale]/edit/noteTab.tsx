@@ -188,11 +188,7 @@ function NoteEdit(props: Props) {
               <td className="pr-2 ">
                 <span>{t("position")}</span>
                 <span className="inline-block ml-1">
-                  (
-                  <span className="inline-block">
-                    <Mouse className="" />
-                  </span>
-                  )
+                  (<Mouse className="inline-block" />)
                 </span>
                 <HelpIcon>
                   {t.rich("positionHelp", { br: () => <br /> })}
@@ -242,10 +238,7 @@ function NoteEdit(props: Props) {
                 <span>{t("velocity")}</span>
                 <span className="inline-block ml-1">
                   (<Key handleKeyDown>Shift</Key>+
-                  <span className="inline-block">
-                    <Mouse className="" />
-                  </span>
-                  )
+                  <Mouse className="inline-block" />)
                 </span>
                 <HelpIcon>
                   <p>{t.rich("velocityHelp1", { br: () => <br /> })}</p>

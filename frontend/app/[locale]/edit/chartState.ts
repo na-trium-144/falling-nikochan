@@ -22,7 +22,7 @@ import {
   convertToLatest,
   updateBpmTimeSec,
   updateBarNum,
-  ChartSchema15,
+  ChartSchema,
 } from "@falling-nikochan/chart";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as msgpack from "@msgpack/msgpack";
@@ -75,7 +75,7 @@ const EditSessionSchema = () =>
       ph: v.nullable(v.string()),
       pbypass: v.nullable(v.string()),
     }),
-    chart: ChartSchema15(),
+    chart: ChartSchema(),
     convertedFrom: v.number(),
     currentLevelIndex: v.optional(v.number()),
     hasChange: v.boolean(),
@@ -289,10 +289,11 @@ export function useChartState(props: Props) {
       };
       if (chartState.chart.cid === undefined) {
         await fetchBackend()
-          .url(`/api/newChartFile`)
+          .url(`/api/chartFile`)
           .headers(requestHeaders)
           .body(requestBody)
           .options({
+            // no-cacheでも動作はするが、セキュリティのために保存しない
             cache: "no-store",
             credentials,
           })
@@ -321,7 +322,7 @@ export function useChartState(props: Props) {
           })
           .headers(xCredentialsHeader)
           .auth(chartAuthorization(chartState.chart.currentPasswd) ?? "")
-          .post()
+          .put()
           .unauthorized(markAsExpected)
           .notFound(markAsExpected)
           .error(409, markAsExpected)

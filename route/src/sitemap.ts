@@ -7,7 +7,6 @@ import { ChartEntryCompressed } from "./api/chart.js";
 import { text } from "node:stream/consumers";
 import { Db } from "mongodb";
 import { cache } from "hono/cache";
-import { etag } from "hono/etag";
 
 const CACHE_MAX_AGE = 86400;
 
@@ -17,6 +16,13 @@ const staticSitemapItems: SitemapItemLoose[] = [
   // {url: "/edit", priority: 0},
   { url: "/main/about" },
   { url: "/main/edit" },
+  { url: "/main/guide/1" },
+  { url: "/main/guide/2" },
+  { url: "/main/guide/3" },
+  { url: "/main/guide/4" },
+  { url: "/main/guide/5" },
+  { url: "/main/guide/6" },
+  { url: "/main/guide/7" },
   // { url: "/main/links", priority: 0 },
   { url: "/main/play" },
   { url: "/main/policies" },
@@ -30,7 +36,6 @@ const sitemapApp = async (config: { dbMiddleware: MiddlewareHandler }) =>
     strict: false,
   }).get(
     "/",
-    etag(),
     cache({
       cacheName: "sitemap",
     }),

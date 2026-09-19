@@ -14,6 +14,7 @@ import {
   fetchStatic,
   cronTestApp,
   getBrief,
+  methodNotAllowed,
 } from "./src/index.js";
 import { Hono } from "hono";
 import { ImageResponse } from "@vercel/og";
@@ -22,6 +23,7 @@ import { Db, MongoClient } from "mongodb";
 import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 import { structuredLogger } from "@hono/structured-logger";
+import { etag } from "hono/etag";
 
 const port = 8787;
 
@@ -52,13 +54,16 @@ const fetchBrief = (_e: Bindings, cid: string) => getBrief(db!, cid);
 
 console.log(`Server is running on http://localhost:${port}`);
 
-const app = new Hono<{ Bindings: Bindings }>({ strict: false })
+const app = new Hono<{ Bindings: Bindings }>({ strict: false });
+app
   .use(
     structuredLogger({
       createLogger: () => console,
       onRequest: () => undefined,
     })
   )
+  .use(etag())
+  .use(methodNotAllowed(app))
   .route("/api", await apiApp({ getConnInfo, dbMiddleware }))
   .route("/og", ogApp({ ImageResponse, fetchBrief, fetchStatic }))
   .route("/cron", cronTestApp)
@@ -89,7 +94,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   .onError(
     onError({ fetchStatic, captureException: null, setTransactionName: null })
   )
-  .notFound(notFound);
+  .notFound(notFound({ fetchStatic }));
 
 serve({
   fetch: app.fetch,

@@ -20,11 +20,13 @@ import { Signature5 } from "./legacy/chart5.js";
 import { Chart6, Level6Play } from "./legacy/chart6.js";
 import {
   Level15Play,
+  OffsetSchema15,
   YTBeginSchema15,
   YTEndSecSchema15,
 } from "./legacy/chart15.js";
 import { docRefs, Schema } from "./docSchema.js";
 import { resolver } from "hono-openapi";
+import { Level17Play } from "./legacy/chart17.js";
 
 export const DisplayParamSchema = () =>
   v.object({
@@ -48,7 +50,7 @@ export const NoteSeqSchema = () =>
       big: v.pipe(v.boolean(), v.description("whether the note is big")),
       hitTimeSec: v.pipe(
         v.number(),
-        v.description("hit judgement time, ignoring offset")
+        v.description("hit judgement time in seconds (from chart start)")
       ),
       appearTimeSec: v.pipe(
         v.number(),
@@ -63,6 +65,13 @@ export const NoteSeqSchema = () =>
       vx: v.pipe(v.number(), v.description("1 / 4 of NoteCommand.vx")),
       vy: v.pipe(v.number(), v.description("1 / 4 of NoteCommand.vy")),
       ay: v.pipe(v.number(), v.description("always 1 / 4")),
+      uRange: v.pipe(
+        v.optional(v.nullable(v.tuple([v.number(), v.number()]))),
+        v.description(
+          "When parameter u (in the description in `display`) is outside of this range [min, max], hide this note. " +
+            "On ver <= 16, this is null and the note shoule be always visible."
+        )
+      ),
       display: v.pipe(
         v.array(DisplayParamSchema()),
         v.description(
@@ -107,12 +116,15 @@ export const BPMChangeSeqSchema = () =>
       timeSec: v.pipe(
         v.number(),
         v.description(
-          "the timestamp when the bpm change happens, ignoring offset"
+          "the time in second (from chart start) when the bpm change happens."
         )
       ),
       bpm: v.number(),
     }),
-    v.description("BPM change command data with timestamp.")
+    v.description(
+      "BPM change command data with timestamp. " +
+        "This is already applied to the NoteSeq properties, so there is no need to take this into account when displaying the notes."
+    )
   );
 export async function BPMChangeSeqDoc(): Promise<Schema> {
   const schema = (await resolver(BPMChangeSeqSchema()).toOpenAPISchema())
@@ -132,7 +144,7 @@ export const SpeedChangeSeqSchema = () =>
       bpm: v.pipe(
         v.number(),
         v.description(
-          "the timestamp when the speed change happens, ignoring offset"
+          "the time in seconds (from chart start) when the speed change happens"
         )
       ),
       interp: v.pipe(
@@ -144,7 +156,8 @@ export const SpeedChangeSeqSchema = () =>
       timeSec: v.pipe(v.number(), v.minValue(0)),
     }),
     v.description(
-      "Speed change command with timestamp, where bpm is the speed multiplier."
+      "Speed change command with timestamp, where bpm is the speed multiplier. " +
+        "This is already applied to the NoteSeq properties, so there is no need to take this into account when displaying the notes."
     )
   );
 export async function SpeedChangeSeqDoc(): Promise<Schema> {
@@ -195,7 +208,7 @@ export const ChartSeqDataSchema = () =>
     bpmChanges: v.array(BPMChangeSeqSchema()),
     speedChanges: v.array(SpeedChangeSeqSchema()),
     signature: v.array(SignatureSeqSchema()),
-    offset: v.number(),
+    offset: OffsetSchema15(),
     ytBegin: YTBeginSchema15(),
     ytEndSec: YTEndSecSchema15(),
   });
@@ -210,6 +223,7 @@ export async function ChartSeqDataDoc(): Promise<Schema> {
       bpmChanges: docRefs("BPMChangeSeq"),
       speedChanges: docRefs("SpeedChangeSeq"),
       signature: docRefs("SignatureSeq"),
+      offset: docRefs("Offset15"),
       ytBegin: docRefs("YTBegin15"),
       ytEndSec: docRefs("YTEndSec15"),
     },
@@ -223,6 +237,7 @@ export type ChartSeqData = v.InferOutput<ReturnType<typeof ChartSeqDataSchema>>;
  * 時刻の情報を持たない
  *
  * ver14でvelを追加
+ * ver17でvisibleを追加 (falseの場合、隠す)
  */
 export interface DisplayNote {
   id: number;
@@ -234,6 +249,7 @@ export interface DisplayNote {
   chainBonus?: number;
   bigBonus?: number;
   chain?: number;
+  visible: boolean;
 }
 
 /**
@@ -267,7 +283,7 @@ function solveQuadEquation(
  * chartを読み込む
  */
 export function loadChart(
-  level: Level15Play | Level6Play | Chart6,
+  level: Level17Play | Level15Play | Level6Play | Chart6,
   levelIndex?: number
 ): ChartSeqData {
   if ("levels" in level) {
@@ -491,6 +507,7 @@ export function loadChart(
       vx,
       vy,
       ay,
+      uRange: level.ver >= 17 ? [uRangeMin, uRangeMax] : null,
     });
   }
   return {
@@ -531,6 +548,7 @@ export function displayNote(
       id: note.id,
       pos: note.hitPos || { x: -1, y: -1 },
       vel: { x: 0, y: 0 },
+      visible: true,
       done: note.done,
       bigDone: note.bigDone,
       chain: note.chain,
@@ -562,6 +580,8 @@ export function displayNote(
         x: note.vx * u_,
         y: note.vy * u_ - note.ay * u * u_,
       },
+      // ver16以前はuRangeがnullで、強制的に表示する
+      visible: note.uRange ? u > note.uRange[0] && u < note.uRange[1] : true,
       done: note.done,
       bigDone: note.bigDone,
       chain: note.chain,

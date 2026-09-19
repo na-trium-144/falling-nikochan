@@ -95,8 +95,7 @@ export default {
       welcome:
         "Falling Nikochan の譜面エディタにようこそ。" +
         "アカウント登録不要で誰でも譜面を作成することができます。",
-      welcome2: "初めての方はこちらも参考にどうぞ。",
-      howToVideo: "Falling Nikochan 譜面の作り方",
+      guide: "譜面編集の使い方 (ヘルプ)",
       inputId: "譜面IDを入力",
       inputIdDesc:
         "編集したい譜面の ID を知っている場合はこちらに入力してください。" +
@@ -142,6 +141,14 @@ export default {
         "対応ブラウザは {browserslist} です。" +
         "それ以前のバージョンでは一部正常に動作・表示しない可能性があります。",
       showAll: "もっと見る",
+    },
+    social: {
+      title: "ソーシャルリンク",
+      discord: {
+        online: "{num}人がオンライン",
+        members: "{num}人",
+        join: "Discordサーバーに参加",
+      },
     },
     links: {
       title: "その他",

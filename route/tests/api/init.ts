@@ -10,6 +10,7 @@ import {
   Chart13Edit,
   Chart14Edit,
   Chart15,
+  Chart17,
   Chart4,
   Chart5,
   Chart6,
@@ -20,6 +21,7 @@ import {
   defaultCopyBuffer,
   defaultCopyBufferObj,
   Level15Play,
+  Level17Play,
   Level6Play,
   stepZero,
 } from "@falling-nikochan/chart";
@@ -40,6 +42,7 @@ import { createMiddleware } from "hono/factory";
 import { Db } from "mongodb";
 import { before, after } from "node:test";
 import { structuredLogger } from "@hono/structured-logger";
+import { etag } from "hono/etag";
 inspect.defaultOptions.depth = null;
 
 if (typeof process.env.MONGODB_URI !== "string") {
@@ -76,7 +79,8 @@ const fetchBrief = (_e: Bindings, cid: string) => getBrief(db!, cid);
 
 export { db };
 
-export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
+export const app = new Hono<{ Bindings: Bindings }>({ strict: false });
+app
   .use(
     structuredLogger({
       createLogger: () => console,
@@ -84,6 +88,7 @@ export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
       onResponse: () => undefined,
     })
   )
+  .use(etag())
   .route("/api", await apiApp({ getConnInfo: () => null, dbMiddleware }))
   .route("/share", shareApp({ fetchBrief, fetchStatic }))
   .route("/", redirectApp({ fetchStatic }))
@@ -96,11 +101,11 @@ export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
       setTransactionName: null,
     })
   )
-  .notFound(notFound);
+  .notFound(notFound({ fetchStatic }));
 
 export const dummyCid = "100000";
 export const dummyDate = new Date(2025, 0, 1);
-export function dummyChart(): Chart15 {
+export function dummyChart(): Chart17 {
   return {
     falling: "nikochan",
     ver: currentChartVer,
@@ -176,7 +181,10 @@ export function dummyChart(): Chart15 {
     ],
   };
 }
-currentChartVer satisfies 16;
+currentChartVer satisfies 17;
+export function dummyChart16(): Chart15 {
+  return { ...dummyChart(), ver: 16 };
+}
 export function dummyChart15(): Chart15 {
   return { ...dummyChart(), ver: 15 };
 }
@@ -287,6 +295,58 @@ export function dummyChart4(): Chart4 {
   return {
     ...dummyChart5(),
     ver: 4,
+  };
+}
+
+export function dummyLevel17(): Level17Play {
+  return {
+    ver: 17,
+    offset: 1.23,
+    notes: [
+      {
+        step: stepZero(),
+        big: false,
+        hitX: 0,
+        hitVX: 0,
+        hitVY: 0,
+        fall: true,
+        luaLine: null,
+      },
+    ],
+    bpmChanges: [
+      {
+        step: stepZero(),
+        // timeSec: 0,
+        bpm: 180,
+        luaLine: null,
+      },
+      {
+        step: { fourth: 1, numerator: 0, denominator: 1 },
+        // timeSec: 60 / 180,
+        bpm: 120,
+        luaLine: null,
+      },
+    ],
+    speedChanges: [
+      {
+        step: stepZero(),
+        // timeSec: 0,
+        bpm: 240,
+        interp: false,
+        luaLine: null,
+      },
+    ],
+    signature: [
+      {
+        step: stepZero(),
+        offset: stepZero(),
+        // barNum: 0,
+        bars: [[4]],
+        luaLine: null,
+      },
+    ],
+    ytBegin: 0,
+    ytEndSec: 1.23,
   };
 }
 
@@ -757,5 +817,31 @@ export async function initDb() {
     },
     { upsert: true }
   );
-  currentChartVer satisfies 16;
+  await db.collection<ChartEntryCompressed>("chart").updateOne(
+    { cid: String(Number(dummyCid) + 16) },
+    {
+      $set: await zipEntry({
+        ...(await chartToEntry(
+          {
+            ...dummyChart(),
+            changePasswd: "p",
+          },
+          String(Number(dummyCid) + 16),
+          dummyDate.getTime(),
+          null,
+          undefined,
+          pSecretSalt,
+          null
+        )),
+        ver: 16,
+        levels: dummyChart16().levelsMeta.map((meta, i) => ({
+          ...meta,
+          ...dummyChart16().levelsFreeze![i],
+          lua: dummyChart16().lua![i],
+        })),
+      }),
+    },
+    { upsert: true }
+  );
+  currentChartVer satisfies 17;
 }

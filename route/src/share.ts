@@ -5,7 +5,7 @@ import {
   languageDetector,
   ResponseOK,
 } from "./env.js";
-import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
+import { getTranslations, locales } from "@falling-nikochan/i18n/dynamic.js";
 import {
   baseScoreRate,
   bigScoreRate,
@@ -18,7 +18,6 @@ import {
 import packageJson from "../package.json" with { type: "json" };
 import { env } from "hono/adapter";
 import { Context, Hono } from "hono";
-import { etag } from "hono/etag";
 import { etagContentRegex } from "./api/chart.js";
 import { BaseLogger } from "@hono/structured-logger";
 
@@ -42,11 +41,13 @@ const shareApp = (config: {
     strict: false,
   })
     .use(config.languageDetector || languageDetector())
-    .use(etag())
     // CookieとAccept-Languageでレスポンスが変わるためprivate指定しcache middlewareは使わない
     .get("/:cid{[0-9]+}", async (c) => {
       const lang = c.get("language");
-      const qLang = c.req.query("lang") || lang;
+      let qLang = c.req.query("lang") || lang;
+      if (!locales.includes(qLang)) {
+        qLang = lang;
+      }
       const cid = c.req.param("cid");
       // c.req.param("cid_txt").slice(0, -4) for /share/:cid_txt{[0-9]+.txt}
       const qResult = c.req.query("result");

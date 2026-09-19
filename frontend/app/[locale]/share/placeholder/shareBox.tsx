@@ -50,7 +50,7 @@ interface Props {
   cid: string | undefined;
   brief: (ChartBrief & { etag: string }) | Error | null;
   record: RecordGetSummary[] | Error | null;
-  sharedResult?: ResultParams | null;
+  sharedResult?: ResultParams | string | null;
   locale: string;
   backButton?: () => void;
   forceShowCId?: boolean; // 通常はPCでは表示、モバイルでは非表示だが、trueの場合モバイルでも表示する
@@ -118,6 +118,7 @@ export function ShareBox(props: Props) {
         .query({ lang: locale })
         .get()
         .notFound((e) => markAsExpected(e))
+        .error(424, (e) => markAsExpected(e))
         .json((res) => setYtMeta(v.parse(YtMetaSchema(), res)))
         .catch((e) => {
           captureAndWrap(e, { cid });
@@ -165,6 +166,7 @@ export function ShareBox(props: Props) {
         )}
         <LinksOnError
           dependOnStatus={brief instanceof APIError ? brief.status : undefined}
+          error={brief}
         />
       </div>
     );

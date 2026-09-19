@@ -14,6 +14,7 @@ export default {
       chartIdNotFound: "指定した譜面IDのデータはありません",
       levelNotFound: "指定したレベルのデータはありません",
       // 405
+      methodNotAllowed: "許可されていないリクエストメソッドです",
       readonlyOnDev:
         "development サーバーで production データベースに変更を加えることはできません",
       // 409
@@ -33,6 +34,8 @@ export default {
       // 418
       noCORSCredentialsOnProd:
         "production サーバーで cookie を使ったクロスオリジンの認証はできません",
+      // 424
+      ytMetaNotFound: "YouTube から情報を取得できませんでした",
       // 429
       tooManyRequest: "しばらく待ってからやり直してください",
       // 500

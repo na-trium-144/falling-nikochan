@@ -91,6 +91,8 @@ const env = {
   ASSET_QUERY_NIKOCHAN: "?v=2",
   ASSET_QUERY_CLOUD: "?v=2",
   ASSET_LP: "?v=1",
+  FORM_URL: process.env.FORM_URL || "", // https://docs.google.com/forms/d/e/xxxxxxxx/viewform
+  FORM_ID_FIELD: process.env.FORM_ID_FIELD || "", // entry.xxxxxxxx
   // Sentry DSN (make available to client-side code)
   SENTRY_DSN: process.env.SENTRY_DSN || "",
   SENTRY_TUNNEL:

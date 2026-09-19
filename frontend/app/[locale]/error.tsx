@@ -25,7 +25,7 @@ export default function ClientErrorPage(props: ErrorProps) {
     <CenterBox scrollableY classNameInner="flex flex-col items-center">
       <ClientErrorTitle />
       <ErrorMessage error={props.error} eventId={eventId} />
-      <LinksOnError />
+      <LinksOnError error={props.error} eventId={eventId} />
       <GoHomeButton />
     </CenterBox>
   );

@@ -510,7 +510,7 @@ export function InitErrorMessage(props: MessageProps3) {
       {
         // play/clientPage.tsx で生成されるstring型のerrorMsgはすべてexpectedのエラー
         props.msg instanceof Error && !isExpectedError(props.msg) && (
-          <LinksOnError />
+          <LinksOnError error={props.msg} />
         )
       }
       <p>

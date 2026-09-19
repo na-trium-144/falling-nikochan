@@ -8,12 +8,15 @@ import {
   redirectApp,
   ResponseOK,
   shareApp,
+  methodNotAllowed,
 } from "@falling-nikochan/route";
 import { locales } from "@falling-nikochan/i18n/staticMin.js";
 import { TarFileType, TarReader } from "@gera2ld/tarjs";
 import cfBeaconHtml from "./beacon.html?raw";
 import { getMimeType, mimes } from "hono/utils/mime";
 import { structuredLogger } from "@hono/structured-logger";
+import { HTTPException } from "hono/http-exception";
+import { ContentfulStatusCode } from "hono/utils/http-status";
 
 const e: Bindings = {
   MONGODB_URI: "",
@@ -105,6 +108,9 @@ async function clearOldCaches() {
   );
 }
 
+/**
+ * urlのoriginは無視し、pathnameは正規化し、searchはそのまま使用
+ */
 async function fetchStatic(_e: any, url: URL): Promise<Response> {
   const cache = await mainCache();
   let pathname = url.pathname;
@@ -115,22 +121,32 @@ async function fetchStatic(_e: any, url: URL): Promise<Response> {
     pathname = pathname.slice(0, -5);
   }
   pathname = pathname.replaceAll("[", "%5B").replaceAll("]", "%5D");
-  const res = await cache.match(pathname);
+  let res = await cache.match(pathname + url.search);
   if (res) {
     return res;
   } else {
+    res satisfies undefined;
     // 通常は全部cacheに入っているはずなのでここに来ることはほぼない
     // console.warn(`${url} is not in cache`);
-    const res = await fetch(
-      (process.env.ASSET_PREFIX || self.origin) + url.pathname
-    ).catch(fetchError(e));
-    if (res.ok) {
-      const returnRes = returnBody(res.body, res.headers);
-      await (await mainCache()).put(url.pathname, returnRes.clone());
-      return returnRes;
-    } else {
-      return res;
+    // ASSET_PREFIXへのリクエストが4xxの場合(通信エラー以外)はoriginで再試行
+    for (const origin of [process.env.ASSET_PREFIX, self.origin]) {
+      if (origin) {
+        res = await fetch(
+          (process.env.ASSET_PREFIX || self.origin) + url.pathname + url.search
+        ).catch(fetchError(e));
+        if (res.ok) {
+          const returnRes = returnBody(res.body, res.headers);
+          await (
+            await mainCache()
+          ).put(pathname + url.search, returnRes.clone());
+          return returnRes;
+        }
+      }
     }
+    // res is not ok and not undefined here
+    throw new HTTPException(res!.status as ContentfulStatusCode, {
+      cause: res,
+    });
   }
 }
 async function fetchStaticWithThrow(_e: any, url: URL): Promise<ResponseOK> {
@@ -143,7 +159,11 @@ async function fetchStaticWithThrow(_e: any, url: URL): Promise<ResponseOK> {
 }
 
 // serviceWorkerからクライアントに返すため、cache-controlを削除したresponseを作成
-function returnBody(body: string | ReadableStream | null, headers: Headers) {
+function returnBody(
+  body: string | ReadableStream | null,
+  headers: Headers,
+  status?: number
+) {
   return new Response(body, {
     headers: {
       ...(headers.has("Content-Type") && {
@@ -151,6 +171,7 @@ function returnBody(body: string | ReadableStream | null, headers: Headers) {
       }),
       "Cache-Control": "no-store",
     },
+    status,
   });
 }
 
@@ -214,11 +235,7 @@ function sendInitState(
 let initInProgress = false;
 
 type InitAssetsResult =
-  | "done"
-  | "failed"
-  | "updating"
-  | "noUpdate"
-  | "inProgress";
+  "done" | "failed" | "updating" | "noUpdate" | "inProgress";
 async function initAssetsCache(config: {
   clearOld: boolean;
 }): Promise<InitAssetsResult> {
@@ -230,7 +247,7 @@ async function initAssetsCache(config: {
   try {
     const remoteRes = await fetch(
       (process.env.ASSET_PREFIX || self.origin) + "/buildVer.json",
-      { cache: "no-store" }
+      { cache: "no-cache" }
     ).catch(fetchError(e));
     if (!remoteRes.ok) {
       return sendInitState("failed");
@@ -263,7 +280,7 @@ async function initAssetsCache(config: {
     const downloadTarAssets = async (): Promise<string[]> => {
       const tarRes = await fetch(
         (process.env.ASSET_PREFIX || self.origin) + "/staticFiles.tar.gz",
-        { cache: "no-store" }
+        { cache: "no-cache" }
       ).catch(fetchError(e));
       if (!tarRes.ok) {
         throw new Error(`failed to fetch staticFiles.tar.gz: ${tarRes.status}`);
@@ -295,7 +312,7 @@ async function initAssetsCache(config: {
     const downloadNextAssets = async (): Promise<string[]> => {
       const nextFilesRes = await fetch(
         (process.env.ASSET_PREFIX || self.origin) + "/nextFiles.txt",
-        { cache: "no-store" }
+        { cache: "no-cache" }
       ).catch(fetchError(e));
       if (!nextFilesRes.ok) {
         throw new Error(
@@ -373,7 +390,10 @@ async function initAssetsCache(config: {
       const keys = await cache.keys();
       await Promise.all(
         keys.map(async (req) => {
-          if (!allPathnames.includes(new URL(req.url).pathname)) {
+          if (
+            !allPathnames.includes(new URL(req.url).pathname) &&
+            !new URL(req.url).search.includes("v=")
+          ) {
             // console.warn(`delete ${req.url}`);
             await cache.delete(req);
           }
@@ -410,9 +430,13 @@ interface BuildVer {
 
 const languageDetector = async (c: Context, next: () => Promise<void>) => {
   // headerもcookieも使えないので、その代わりにnavigator.languagesを使って検出するミドルウェア
-  const systemLangs = navigator.languages.map(
-    (l) => new Intl.Locale(l).language
-  );
+  const systemLangs = navigator.languages.map((l) => {
+    try {
+      return new Intl.Locale(l).language;
+    } catch {
+      return l;
+    }
+  });
   const preferredLang = c.req.path.split("/")[1];
   const cache = await configCache();
   const preferredLang2 = await cache.match("/lang").then((res) => res?.text());
@@ -439,7 +463,6 @@ async function fetchAPI(input: string | URL | Request, init?: RequestInit) {
     (res.status >= 500 || res.status === 403) &&
     process.env.BACKEND_ALT_PREFIX &&
     !inputUrl.pathname.startsWith("/api/chartFile") &&
-    !inputUrl.pathname.startsWith("/api/newChartFile") &&
     !inputUrl.pathname.startsWith("/api/hashPasswd")
   ) {
     const altReq = new Request(
@@ -471,7 +494,8 @@ async function fetchAPI(input: string | URL | Request, init?: RequestInit) {
   }
   return res;
 }
-const app = new Hono({ strict: false })
+const app = new Hono<{ Bindings: undefined }>({ strict: false });
+app
   .use(
     structuredLogger({
       createLogger: () => console,
@@ -479,12 +503,14 @@ const app = new Hono({ strict: false })
       onResponse: () => undefined,
     })
   )
+  .use(methodNotAllowed(app))
   .use(async (c, next) => {
     await next();
     if (c.res.headers.get("Content-Type")?.includes("text/html")) {
       c.res = returnBody(
         (await c.res.text()).replace("</body>", cfBeaconHtml + "</body>"),
-        c.res.headers
+        c.res.headers,
+        c.res.status
       );
     }
   })
@@ -526,10 +552,7 @@ const app = new Hono({ strict: false })
     const res = await fetchAPI(c.req.url, {
       credentials: "omit",
     });
-    return new Response(res.body, {
-      headers: res.headers,
-      status: res.status,
-    });
+    return returnBody(res.body, res.headers, res.status);
   })
   .get("/worker/checkUpdate", async (c) => {
     const result = await initAssetsCache({ clearOld: false });
@@ -572,6 +595,16 @@ const app = new Hono({ strict: false })
       });
     }
 
+    // ?v= がつくリクエストの場合は、そのパラメータだけそのまま使う
+    // (以前のバージョンのキャッシュを返さないようにするため)
+    let reqPath = c.req.path;
+    if (new URL(c.req.url).search.includes("v=")) {
+      reqPath =
+        c.req.path +
+        "?v=" +
+        new URLSearchParams(new URL(c.req.url).search).get("v");
+    }
+
     if (
       !c.req.path.includes(".") ||
       c.req.path.endsWith(".txt") ||
@@ -584,7 +617,7 @@ const app = new Hono({ strict: false })
       const timeout = setTimeout(() => abortController.abort(), 1000);
       try {
         const remoteRes = await fetch(
-          (process.env.ASSET_PREFIX || self.origin) + c.req.path,
+          (process.env.ASSET_PREFIX || self.origin) + reqPath,
           { cache: "no-cache", signal: abortController.signal }
         ).catch(fetchError(e));
         clearTimeout(timeout);
@@ -595,7 +628,7 @@ const app = new Hono({ strict: false })
         // pass
       }
     }
-    return await fetchStatic(null, new URL(c.req.url));
+    return await fetchStatic(null, new URL(self.origin + reqPath));
   })
   .use(languageDetector)
   .onError(
@@ -605,7 +638,7 @@ const app = new Hono({ strict: false })
       setTransactionName: null,
     })
   )
-  .notFound(notFound);
+  .notFound(notFound({ fetchStatic: fetchStaticWithThrow }));
 
 self.addEventListener("install", () => {
   console.log("service worker install");

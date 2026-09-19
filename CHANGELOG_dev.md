@@ -1,3 +1,135 @@
+## ver. 17.9 - 2026/09/18 [#1367](https://github.com/na-trium-144/falling-nikochan/pull/1367)
+
+* 譜面編集ヘルプを /main/guide/1-7 ページとして追加
+
+## ver. 17.8 - 2026/09/18 [#1371](https://github.com/na-trium-144/falling-nikochan/pull/1371)
+
+* viewport-fit=cover指定、safe-area-inset対応の修正
+* safari用にhtmlにフォールバック背景色を追加
+* 小さい画面や正方形に近い画面でのUIのサイズを調整
+* Twitterのアプリ内ブラウザではsafe-area-inset-topを無視しbottomのスペースを強制
+* Twitterのアプリ内ブラウザが勝手にfooterの位置を変更するので、高さを変えてTwitterを騙す
+* webviewをiframeと同様の単一画面モードで扱う
+
+## ver. 17.6 - 2026/09/06
+
+* エラー時にフォームに内容を自動入力 [#1364](https://github.com/na-trium-144/falling-nikochan/pull/1364)
+    * ついでにフォームのURLを環境変数 `FORM_URL` に移動
+* ダークテーマ時のスクロールバーの色と、横スクロール時の幅を修正
+* ytPlayerのすべてのメソッド呼び出しにnullチェックを追加
+* intl.Locale にエラーハンドリングを追加
+* share,ogに渡されるlangパラメータのバリデーション
+
+## ver. 17.5 - 2026/09/03
+
+* levelの長さが負になった場合のエラーを修正 [#1346](https://github.com/na-trium-144/falling-nikochan/pull/1346)
+    * エラーコンポーネントでvalierrorをflattenして表示
+    * sessionのパースエラーをcatchせずerrorBoundaryに投げる
+    * ChartBriefでlengthが負にならないようにする
+* resultのパースエラー時の挙動の改善 [#1347](https://github.com/na-trium-144/falling-nikochan/pull/1347)
+    * resultにbase64デコードできない文字が含まれる場合、無視する
+    * resultのパースエラー時にメッセージを表示
+* レベルの増殖を修正 [#1361](https://github.com/na-trium-144/falling-nikochan/pull/1361)
+    * レベルの増殖を修正
+    * #1324 によるレベル選択の位置ずれを修正
+    * 画面幅が48〜50remのときヘッダーが消えるのを修正
+
+## ver. 17.4 - 2026/08/26
+
+* ver8以前のパスワードなし譜面にはアクセスできないようにする [#1321](https://github.com/na-trium-144/falling-nikochan/pull/1321)
+* og画像の修正 [#1322](https://github.com/na-trium-144/falling-nikochan/pull/1322)
+    * ogレンダリング時にNotoSansJPのサブセットをGoogleFontsから動的に取得
+    * fontsource/noto-sansを削除、fontsource-variable/noto-sansをアップデート
+    * タイトルの有無で高さが変わるのを修正
+    * 背景画像を新slime画像に更新
+* iOS26でのアイコンの表示位置ずれを修正 [#1324](https://github.com/na-trium-144/falling-nikochan/pull/1324)
+* Bun 1.4 [#1318](https://github.com/na-trium-144/falling-nikochan/pull/1318)
+
+## ver. 17.3 - 2026/08/14
+
+* openapiドキュメントの修正
+    * offsetの説明を追加
+    * ignoring offset の意味を明確に
+    * time in seconds が動画基準か譜面基準かを明確に
+    * changePasswdはPUTにも適用される
+    * BPMChange,SpeedChangeはNoteSeqに適用済み
+    * レスポンスでEmptyObjが返ることはない
+
+## ver. 17.2 - 2026/08/14
+
+* service workerを経由した際404エラーに言語設定が反映されないのを修正
+
+## ver. 17.1 - 2026/08/13 [#1310](https://github.com/na-trium-144/falling-nikochan/pull/1310)
+
+* hono4.13で追加されたmethodNotAllowedミドルウェアを使用
+* etagが404などを正しく処理するようになったので、ルートごとに使用するのをやめてグローバルにetagミドルウェアを使う
+* POST /api/chartFile/cid -> PUT
+* POST /api/newChartFile -> POST /api/chartFile
+* 可能な限りno-storeではなくno-cacheでフェッチする
+* notFound()でthrowせず直接404レスポンスを返すよう修正
+
+## ver. 17.0 - 2026/08/11
+
+* uMin/uMaxの範囲外の音符を隠す [#1285](https://github.com/na-trium-144/falling-nikochan/pull/1285)
+* データベースの保存形式をmsgpackに変更 [#1285](https://github.com/na-trium-144/falling-nikochan/pull/1285)
+* slime周りのリファクタ & 新画像 & 新アニメーション [#1207](https://github.com/na-trium-144/falling-nikochan/pull/1207)
+    * リザルト表示時にRhythmicalSlimeがぴょんぴょんするアニメーション
+    * slimeのidをランダムstateからuseIdに置き換え
+    * 通常のloop版slimeのアニメーショントリガーをbegin:0sではなくuseEffectで行う
+    * RhythmicalSlimeのジャンプトリガーの実装をImperativeHandleで作り直す
+    * slimeの画像を作り直した
+* playのripple,particle, editのtrailをcanvasに移植 [#1228](https://github.com/na-trium-144/falling-nikochan/pull/1228)
+    * particleはver9.3以前のものを再現
+    * editの音符をplayと統一(ver14以降の音符画像)
+
+## ver. 16.30 - 2026/07/27 [#1280](https://github.com/na-trium-144/falling-nikochan/pull/1280)
+
+* ogのbriefパラメータを更新、v=16.29以前のurlはurlを設定し直し再リダイレクト
+* ogShareにレベル表示を追加
+* share,resultのbpmsignとslimeのサイズを変更
+* ogShare,ogResultのレベル表示のフォントサイズを変更
+* なんか文字の高さがあわないので目視ででっちあげ
+* ogTemplate画像をchromeで撮り直す
+  * backdrop-blurが無いのはfirefoxのバグだった
+* すべてのリダイレクトにcache-controlを設定
+  * cloudflareがキャッシュをbypassしてしまうため。
+* /api/latest, popular はもう戻すことないので308でimmutableに変更
+* リダイレクトのパスを正規化
+  * `/` -> `/ja/?` になっていたのを `/ja` になるよう修正
+* /api/ytMetaで対象動画が存在しない場合に424エラーを返す
+* discordとxへのアナウンスメッセージを変更
+
+## ver. 16.29 - 2026/07/23 [#1277](https://github.com/na-trium-144/falling-nikochan/pull/1277)
+
+* /api/briefs APIを追加 (未使用)
+
+## ver. 16.28 - 2026/07/22
+
+* lpをassetのアーカイブから除外
+* v=をクエリに含むアセットについて、キャッシュキーにvパラメータを含む
+* v=をクエリに含むアセットをキャッシュから消さない
+* asset_prefixへのリクエストが4xxの場合self.originにフォールバック
+* トップページデモの音符サイズがおかしいのを修正
+    * ver16.24 の変更以降FallingWindowの高さが100vhになっていなかった。
+
+## ver. 16.26 - 2026/07/17 [#1262](https://github.com/na-trium-144/falling-nikochan/pull/1262)
+
+* eslint, babelをcatalogでグループ化
+* strictPeerDependenciesを追加
+* savePrefixを指定、ほとんどのバージョン指定をexactに
+
+## ver. 16.25 - 2026/07/13 [#1230](https://github.com/na-trium-144/falling-nikochan/pull/1230)
+
+* Discordサーバーの招待リンク・YouTube,X公式アカウントリンクの表示を追加
+* /api/social APIを追加
+* icon-parkのyoutubeロゴをすべてsvgで置き換え
+
+## ver. 16.24 - 2026/07/12 [#1104](https://github.com/na-trium-144/falling-nikochan/pull/1104)
+
+* TailwindCSS4.3にアップデート、古いブラウザでの表示を修正
+    * fn-buttonのcontent-center指定を削除し、padding-yでの高さ調整に置き換え
+    * h-screen min-h-max はsafariで正しく動作しないので h-max min-h-screen に置き換え
+
 ## ver. 16.23 - 2026/07/10
 
 * undo/redo [#1224](https://github.com/na-trium-144/falling-nikochan/pull/1224)

@@ -8,6 +8,7 @@ import Link from "next/link.js";
 interface Props {
   anim?: boolean;
   className?: string;
+  style?: object;
 }
 /**
  * このTitleコンポーネントはサイズを変えられない。サイズを変えたいときはscaleで変える。
@@ -44,7 +45,7 @@ export default function Title(props: Props) {
   }, [nikochanPhase]);
 
   return (
-    <div className={clsx("fn-title", props.className)}>
+    <div className={clsx("fn-title", props.className)} style={props.style}>
       <TargetLine
         barFlash={barFlash ? "100% - 1.75rem" : undefined}
         left={0}

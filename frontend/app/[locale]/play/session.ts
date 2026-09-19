@@ -1,13 +1,21 @@
 import * as v from "valibot";
-import { ChartBriefSchema, LevelPlaySchema15 } from "@falling-nikochan/chart";
+import {
+  ChartBriefSchema,
+  currentChartVer,
+  LevelPlaySchema15,
+  LevelPlaySchema17,
+} from "@falling-nikochan/chart";
 
 const SessionDataSchema = () =>
-  v.union([
+  v.variant("editing", [
     v.object({
       cid: v.optional(v.string()),
       lvIndex: v.number(),
       brief: ChartBriefSchema(),
-      level: LevelPlaySchema15(),
+      level:
+        (currentChartVer satisfies 17,
+        // 1バージョン前まで許可する
+        v.variant("ver", [LevelPlaySchema17(), LevelPlaySchema15()])),
       editing: v.literal(true),
     }),
     v.object({
@@ -43,9 +51,13 @@ export function initSession(
   localStorage.setItem(`session-${sessionId}`, JSON.stringify(data));
   return sessionId;
 }
-// sessionIdがあればlocalStorageからsessionを取得し、sessionStorageにも保存
-// なければsessionStorageから取得
-// それもなければnull
+/**
+ * sessionIdがあればlocalStorageからsessionを取得し、sessionStorageにも保存
+ * なければsessionStorageから取得
+ * それもなければnull
+ *
+ * エラーハンドリングはあえて行わず、 error.tsx に任せる。
+ */
 export function getSession(sessionId?: number): SessionData | null {
   // Discord等のアプリ内ブラウザからFirefoxに遷移すると、ユーザーに見えない隠しタブが
   // 同時にplayページを開くことがある。隠しタブが先にlocalStorageのsessionを読み出して
@@ -55,33 +67,19 @@ export function getSession(sessionId?: number): SessionData | null {
     return null;
   }
   if (sessionId && localStorage.getItem(`session-${sessionId}`)) {
-    try {
-      const sessionData = v.parse(
-        SessionDataSchema(),
-        JSON.parse(localStorage.getItem(`session-${sessionId}`)!)
-      );
-      localStorage.removeItem(`session-${sessionId}`);
-      sessionStorage.setItem("session", JSON.stringify(sessionData));
-      return sessionData;
-    } catch (e) {
-      console.error(
-        `Error parsing session-${sessionId}:`,
-        v.isValiError(e) ? v.flatten(e.issues) : e
-      );
-    }
+    const sessionData = v.parse(
+      SessionDataSchema(),
+      JSON.parse(localStorage.getItem(`session-${sessionId}`)!)
+    );
+    localStorage.removeItem(`session-${sessionId}`);
+    sessionStorage.setItem("session", JSON.stringify(sessionData));
+    return sessionData;
   }
   if (sessionStorage.getItem("session")) {
-    try {
-      return v.parse(
-        SessionDataSchema(),
-        JSON.parse(sessionStorage.getItem("session")!)
-      );
-    } catch (e) {
-      console.error(
-        `Error parsing session from sessionStorage:`,
-        v.isValiError(e) ? v.flatten(e.issues) : e
-      );
-    }
+    return v.parse(
+      SessionDataSchema(),
+      JSON.parse(sessionStorage.getItem("session")!)
+    );
   }
   return null;
 }

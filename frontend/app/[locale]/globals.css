@@ -11,9 +11,17 @@
   --color-fg-bright-dark: var(--color-stone-100);
   --color-fg-base-dark: var(--color-stone-300);
   --container-main: 88rem;
-  --container-pc-header: 4rem;
-  --container-mobile-header: 3.25rem; /* MobileHeader を編集したら変えること */
-  --container-mobile-footer: 3.75rem; /* MobileFooter を編集したら変えること */
+  --container-pc-header: calc(4rem + var(--sai-t));
+  --container-mobile-header: calc(
+    3.25rem + var(--sai-t)
+  ); /* MobileHeader を編集したら変えること */
+  --container-mobile-footer: calc(
+    3.75rem + var(--sai-b)
+  ); /* MobileFooter を編集したら変えること */
+  --container-sai-t: var(--sai-t);
+  --container-sai-b: var(--sai-b);
+  --container-sai-l: var(--sai-l);
+  --container-sai-r: var(--sai-r);
   --text-1_5xl: 1.375rem; /* 22px */
   --text-2_5xl: 1.6875rem; /* 27px */
   --blur-2xs: 2px;
@@ -25,19 +33,63 @@
     "Noto Sans", "Noto Sans Variable", "Noto Sans JP", "Noto Sans JP Variable",
     sans-serif;
   --default-font-family: var(--font-main-ui);
+
+  /* discord招待ボタンのテーマ
+  ブラウザ版Discord上の本物の招待ボタンや、公式招待リンクのUIを確認すると全部ちょっとずつ色が違い、またどうせアップデートで変わりうるので、
+  https://github.com/SwitchbladeBot/invidget/blob/master/src/InviteRenderer.js のものを使用し
+  あまりにも違和感が大きくならない限りdiscordの更新には追従しないことにした。
+
+  ただしbgとtextについてはnikochan側のテーマを使うので、
+  結局joinボタンとonline/membersのdotの色だけ
+  */
+  /*--color-discord-background-dark: #2f3136;*/
+  /*--color-discord-serverName-dark: #ffffff;*/
+  /*--color-discord-presenceText-dark: #b9bbbe;*/
+  /*--color-discord-background: #f2f3f5;*/
+  /*--color-discord-serverName: #060607;*/
+  /*--color-discord-presenceText: #4f5660;*/
+  --color-discord-joinButtonBackground: #3ba55c;
+  --color-discord-joinButtonHovered: #2e854b; /*これはもとのソースにない、geminiがハルシネーションした色*/
+  /*--color-discord-joinButtonText: #ffffff;*/
+  --color-discord-online: #3ba55c;
+  --color-discord-members: #747f8d;
 }
 :root {
   --alpha-dim: 60%;
   --alpha-highlight: 50%;
+
+  /* usage:
+    `h-sai-t`: defined by --container-sai-
+    `h-(--sai-t)`: defined by variables here
+    `pt-sai` = `pt-(--sai-t)`: defined in utilities.css
+    `pt-sai-4` = `max(--sai-t, 4)`: defined in utilities.css
+    etc.
+  */
+  --sai-t: env(safe-area-inset-top, 0px);
+  --sai-r: env(safe-area-inset-right, 0px);
+  --sai-b: env(safe-area-inset-bottom, 0px);
+  --sai-l: env(safe-area-inset-left, 0px);
+  /* for debug:
+  --sai-t: 40px;
+  --sai-r: 40px;
+  --sai-b: 40px;
+  --sai-l: 40px;
+*/
+  &:has(.ua-twitter) {
+    /*
+      Twitterのアプリ内ブラウザでは謎の safe-area-inset-top が発生する。また、下部の操作ボタンを避けたい。 (#1344)
+      themeInit.js がUAを見てua-twitterクラスをbodyに追加
+    */
+    --sai-t: 0px;
+    --sai-b: 3rem;
+  }
 }
 @custom-variant dark (&:where(.dark, .dark *));
 @custom-variant demo-wide {
   /* 画面幅が一定以下 or 画面が縦長 のときデモ画面をモバイルレイアウトにする */
   /* 正方形は縦長扱い */
-  @variant main-wide {
-    @variant landscape {
-      @slot;
-    }
+  @variant main-wide:landscape {
+    @slot;
   }
 }
 

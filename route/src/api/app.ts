@@ -1,7 +1,7 @@
 import { Context, Hono, MiddlewareHandler } from "hono";
 import { cors } from "hono/cors";
 import briefApp from "./brief.js";
-import { backendOrigin, Bindings } from "../env.js";
+import { backendOrigin, Bindings, immutable } from "../env.js";
 import chartFileApp from "./chartFile.js";
 import newChartFileApp from "./newChartFile.js";
 import playFileApp from "./playFile.js";
@@ -24,7 +24,8 @@ import oembedApp from "./oembed.js";
 import decompressMiddleware from "./decompress.js";
 import { env } from "hono/adapter";
 import { Db } from "mongodb";
-import { etag } from "hono/etag";
+import socialApp from "./social.js";
+import briefMultiApp from "./briefs.js";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 export { getBrief } from "./brief.js";
@@ -84,7 +85,6 @@ const apiApp = async (config: {
         }
       }
     })
-    .use(etag())
     .use(
       "/*",
       bodyLimit({
@@ -97,29 +97,42 @@ const apiApp = async (config: {
     .use("/*", decompressMiddleware)
     .use("/*", config.dbMiddleware)
     .route("/brief", await briefApp())
+    .route("/briefs", await briefMultiApp())
     .route("/ytMeta", ytMetaApp)
     .route(
       "/chartFile",
       await chartFileApp({ getConnInfo: config.getConnInfo })
     )
     .route(
-      "/newChartFile",
+      "/chartFile",
       await newChartFileApp({ getConnInfo: config.getConnInfo })
+    )
+    .all("/newChartFile", (c) =>
+      c.redirect(new URL("/api/chartFile", backendOrigin(c)), 307)
     )
     .route("/seqFile", seqFileApp)
     .route("/seqPreview", seqPreviewApp)
     .route("/playFile", playFileApp)
-    .get("/latest", (c) =>
-      c.redirect(new URL("/api/search?sort=latest", backendOrigin(c)), 307)
-    )
-    .get("/popular", (c) =>
-      c.redirect(new URL("/api/search?sort=popular", backendOrigin(c)), 307)
-    )
+    .get("/latest", (c) => {
+      c.header("cache-control", immutable());
+      return c.redirect(
+        new URL("/api/search?sort=latest", backendOrigin(c)),
+        308
+      );
+    })
+    .get("/popular", (c) => {
+      c.header("cache-control", immutable());
+      return c.redirect(
+        new URL("/api/search?sort=popular", backendOrigin(c)),
+        308
+      );
+    })
     .route("/search", searchApp)
     .route("/hashPasswd", hashPasswdApp)
     .route("/record", await recordApp({ getConnInfo: config.getConnInfo }))
     .route("/ip", forwardCheckApp({ getConnInfo: config.getConnInfo }))
     .route("/oembed", oembedApp)
+    .route("/social", socialApp)
     .get("/debug-sentry", () => {
       throw new Error("My first sentry error!");
     });

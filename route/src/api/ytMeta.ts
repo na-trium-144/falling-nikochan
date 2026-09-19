@@ -66,6 +66,14 @@ const ytMetaApp = new Hono<{
           },
         },
       },
+      424: {
+        description: "Failed to get metadata from YouTube",
+        content: {
+          "application/json": {
+            schema: resolver(await errorLiteral("ytMetaNotFound")),
+          },
+        },
+      },
     },
   }),
   validator("param", v.object({ cid: CidSchema() }), sValidatorHook()),

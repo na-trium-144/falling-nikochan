@@ -121,10 +121,7 @@ function PlayTabInternal(
         search: searchParams.get("search") || "",
         sort:
           (searchParams.get("sort") as
-            | "relevance"
-            | "latest"
-            | "popular"
-            | "recent") || "relevance",
+            "relevance" | "latest" | "popular" | "recent") || "relevance",
         minLv: Number(searchParams.get("minLv") ?? minLv),
         maxLv: Number(searchParams.get("maxLv") ?? maxLv),
       };

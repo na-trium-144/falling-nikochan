@@ -175,7 +175,9 @@ export const YTBeginSchema15 = () =>
   v.pipe(
     v.number(),
     v.minValue(0),
-    v.description("The time in seconds to start the video")
+    v.description(
+      "The time in seconds (timestamp of the video) to start the video"
+    )
   );
 export const YTEndSchema15 = () =>
   v.pipe(
@@ -184,7 +186,7 @@ export const YTEndSchema15 = () =>
       "The time to end the video. " +
         "'note': the end time is determined by the last note, rest or bpm/speed change command. " +
         "'yt': the end time is determined by ytEndSec. " +
-        "a number value: the end time in seconds. " +
+        "a number value: the end time in seconds (timestamp of the video). " +
         "This is only used by the chart editor and is ignored when playing."
     )
   );
@@ -192,7 +194,19 @@ export const YTEndSecSchema15 = () =>
   v.pipe(
     v.number(),
     v.minValue(0),
-    v.description("The time in seconds to end the video.")
+    v.description(
+      "The time in seconds (timestamp of the video) to end the video."
+    )
+  );
+export const OffsetSchema15 = () =>
+  v.pipe(
+    v.number(),
+    v.minValue(0),
+    v.description(
+      "The time in seconds (timestamp of the video) to start the chart. " +
+        "This is independent of the `ytBegin` value; " +
+        "for example, if `ytBegin=1` and `offset=2`, playback of the video starts at the 0:01 mark, and the chart begins one second later (at 0:02)."
+    )
   );
 
 export const LevelMetaSchema15 = () =>
@@ -248,7 +262,7 @@ export async function LevelFreeze15Doc(): Promise<Schema> {
 export const LevelPlaySchema15 = () =>
   v.object({
     ver: v.union([v.literal(15), v.literal(16)]),
-    offset: v.pipe(v.number(), v.minValue(0)),
+    offset: OffsetSchema15(),
     notes: v.array(NoteCommandSchema15()),
     bpmChanges: v.array(BPMChangeSchema15()),
     speedChanges: v.array(SpeedChangeSchema15()),
@@ -262,6 +276,7 @@ export async function LevelPlay15Doc(): Promise<Schema> {
     ...schema,
     properties: {
       ...schema.properties,
+      offset: docRefs("Offset15"),
       notes: ArrayDoc(docRefs("NoteCommand15")),
       bpmChanges: ArrayDoc(docRefs("BPMChange15")),
       speedChanges: ArrayDoc(docRefs("SpeedChange15")),
@@ -310,7 +325,7 @@ export const ChartSchema15 = () =>
     v.object({
       falling: v.literal("nikochan"),
       ver: v.union([v.literal(15), v.literal(16)]),
-      offset: v.pipe(v.number(), v.minValue(0)),
+      offset: OffsetSchema15(),
       ytId: v.string(),
       title: v.string(),
       composer: v.string(),
@@ -345,7 +360,7 @@ export const ChartSchema15 = () =>
           null
         ),
         v.description(
-          "When this field is not null on POST request, " +
+          "When this field is not null on POST/PUT request, " +
             "the server changes the chart passwd to this value."
         )
       ),
@@ -366,6 +381,7 @@ export async function Chart15Doc(): Promise<Schema> {
     ...schema,
     properties: {
       ...schema.properties,
+      offset: docRefs("Offset15"),
       copyBuffer: docRefs("CopyBuffer"),
       levelsMeta: ArrayOrEmptyObjDoc(docRefs("LevelMeta15")),
       levelsFreeze: ArrayOrEmptyObjDoc(docRefs("LevelFreeze15")),

@@ -8,6 +8,7 @@ import {
   LevelMeta15Doc,
   LevelPlay15Doc,
   NoteCommand15Doc,
+  OffsetSchema15,
   Rest15Doc,
   Signature15Doc,
   SpeedChange15Doc,
@@ -26,14 +27,17 @@ import {
   SpeedChangeSeqDoc,
 } from "./seq.js";
 import { SignatureBarSchema } from "./signature.js";
+import { Chart17Doc, LevelPlay17Doc } from "./legacy/chart17.js";
 
 export type Schema = OpenAPIV3_1.SchemaObject;
 export type Reference = OpenAPIV3_1.ReferenceObject;
 
 export const docSchemas = async () => ({
+  Chart17: await Chart17Doc(),
   Chart15: await Chart15Doc(),
   LevelMeta15: await LevelMeta15Doc(),
   LevelFreeze15: await LevelFreeze15Doc(),
+  LevelPlay17: await LevelPlay17Doc(),
   LevelPlay15: await LevelPlay15Doc(),
   ChartBrief: (await resolver(ChartBriefSchema()).toOpenAPISchema()).schema,
   EmptyObj: (await resolver(EmptyObj()).toOpenAPISchema()).schema,
@@ -48,6 +52,7 @@ export const docSchemas = async () => ({
   YTBegin15: (await resolver(YTBeginSchema15()).toOpenAPISchema()).schema,
   YTEnd15: (await resolver(YTEndSchema15()).toOpenAPISchema()).schema,
   YTEndSec15: (await resolver(YTEndSecSchema15()).toOpenAPISchema()).schema,
+  Offset15: (await resolver(OffsetSchema15()).toOpenAPISchema()).schema,
   CopyBufferEntry: (await resolver(CopyBufferEntrySchema()).toOpenAPISchema())
     .schema,
   CopyBuffer: await CopyBufferDoc(),

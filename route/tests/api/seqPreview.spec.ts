@@ -1,12 +1,17 @@
 import { test, describe } from "node:test";
 import { expect } from "chai";
-import { app, dummyLevel15 } from "./init";
-import { ChartSeqData, loadChart } from "@falling-nikochan/chart";
+import { app, dummyLevel15, dummyLevel17 } from "./init";
+import {
+  ChartSeqData,
+  currentChartVer,
+  loadChart,
+} from "@falling-nikochan/chart";
 import msgpack from "@msgpack/msgpack";
 
 describe("POST /api/seqPreview", () => {
-  test("should return ChartSeqData from valid Level15Play data", async () => {
-    const levelData = dummyLevel15();
+  test("should return ChartSeqData from valid Level17Play data", async () => {
+    currentChartVer satisfies 17;
+    const levelData = dummyLevel17();
     const encodedBody = msgpack.encode(levelData);
 
     const res = await app.request("/api/seqPreview", {
@@ -24,7 +29,7 @@ describe("POST /api/seqPreview", () => {
     );
 
     const seqData = msgpack.decode(await res.arrayBuffer()) as ChartSeqData;
-    expect(seqData.notes).to.deep.equal(loadChart(dummyLevel15()).notes);
+    expect(seqData.notes).to.deep.equal(loadChart(dummyLevel17()).notes);
   });
 
   test("should return 415 for invalid msgpack", async () => {
@@ -43,9 +48,9 @@ describe("POST /api/seqPreview", () => {
     expect(body.message).to.equal("invalidChart");
   });
 
-  test("should return 415 for invalid Level15Play data (missing required fields)", async () => {
+  test("should return 415 for invalid LevelPlay data (missing required fields)", async () => {
     const invalidData = {
-      ver: 15,
+      ver: currentChartVer,
       // missing required fields like offset, notes, etc.
     };
     const encodedBody = msgpack.encode(invalidData);
@@ -64,7 +69,8 @@ describe("POST /api/seqPreview", () => {
   });
 
   test("should return 409 for invalid ver field", async () => {
-    const levelData = dummyLevel15();
+    currentChartVer satisfies 17;
+    const levelData = dummyLevel17();
     const invalidData = {
       ...levelData,
       ver: 14, // wrong version
@@ -85,7 +91,7 @@ describe("POST /api/seqPreview", () => {
   });
 
   test("should return 415 for negative offset", async () => {
-    const levelData = dummyLevel15();
+    const levelData = dummyLevel17();
     const invalidData = {
       ...levelData,
       offset: -1, // negative offset is invalid

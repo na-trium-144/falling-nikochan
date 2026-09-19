@@ -18,6 +18,7 @@ interface Props {
   mobileTabKey: TabKeys; // モバイル表示でfooter内のアクティブなタブ
   noBackButtonMobile?: boolean; // モバイル表示で戻るボタンを非表示 (footerから直接開けるページの場合非表示にする)
   noBackButtonPC?: boolean;
+  afterBackButtonPC?: ReactNode;
   locale: string;
   boxRef?: RefObject<HTMLDivElement | null>;
 }
@@ -27,7 +28,7 @@ export function IndexMain(props: Props) {
 
   return (
     <main className="relative flex flex-col w-full h-full items-center">
-      <MobileHeader noBackButton={props.noBackButtonMobile}>
+      <MobileHeader className="no-pc" noBackButton={props.noBackButtonMobile}>
         {props.title}
       </MobileHeader>
       <PCHeader locale={locale} />
@@ -38,7 +39,7 @@ export function IndexMain(props: Props) {
           "w-full overflow-hidden",
           "shrink-0 basis-0 grow-2",
           "flex flex-row items-stretch justify-center",
-          "px-3 main-wide:px-6 main-wide:pb-6"
+          "px-sai-3 main-wide:px-sai-6 main-wide:pb-sai-6"
         )}
       >
         <Box
@@ -49,17 +50,20 @@ export function IndexMain(props: Props) {
           defaultFadeY
           padding={6}
         >
-          {!props.noBackButtonPC && (
-            <button
-              className={clsx("no-mobile w-max mb-3 fn-link-1")}
-              onClick={() => {
-                historyBackWithReview();
-              }}
-            >
-              <ArrowLeft className="inline-block align-middle mr-2 " />
-              {t("back")}
-            </button>
-          )}
+          <div className="flex items-start">
+            {!props.noBackButtonPC && (
+              <button
+                className={clsx("no-mobile w-max mb-3 mr-3 fn-link-1")}
+                onClick={() => {
+                  historyBackWithReview();
+                }}
+              >
+                <ArrowLeft className="inline-block align-middle mr-2 " />
+                {t("back")}
+              </button>
+            )}
+            {props.afterBackButtonPC}
+          </div>
           {props.children}
         </Box>
       </div>

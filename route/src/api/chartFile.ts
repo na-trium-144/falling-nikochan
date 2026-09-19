@@ -9,9 +9,9 @@ import {
   rateLimit,
   convertToLatest,
   validateChartWithoutConvert,
-  Chart14Edit,
   Chart15,
   docRefs,
+  Chart17,
 } from "@falling-nikochan/chart";
 import { Db } from "mongodb";
 import {
@@ -86,7 +86,7 @@ const chartFileApp = async (config: {
     Variables: ChartFileAppVars;
   }>({ strict: false })
     .on(
-      ["GET", "POST", "DELETE"],
+      ["GET", "PUT", "POST", "DELETE"],
       "/:cid",
       validator("param", v.object({ cid: CidSchema() }), sValidatorHook()),
       validator("query", PasswdParamSchema(), sValidatorHook()),
@@ -148,8 +148,8 @@ const chartFileApp = async (config: {
       describeRoute({
         description:
           "Get a raw chart file in MessagePack format. Requires a password (either p/ph query or Authorization header). " +
-          "The chart data format can be either Chart4, Chart5, Chart6, Chart7, Chart8Edit, Chart9Edit, Chart11Edit, Chart13Edit or Chart14Edit, " +
-          `while this documentation only describes Chart15 format. ` +
+          "The chart data format can be either Chart4, Chart5, Chart6, Chart7, Chart8Edit, Chart9Edit, Chart11Edit, Chart13Edit, Chart14Edit, Chart15 or Chart17, " +
+          `while this documentation only describes the latest format. ` +
           `The chart editor can import chart data from the API.`,
         parameters: [passwdHeaderDoc, ifNoneMatchHeaderDoc, ifMatchHeaderDoc],
         responses: {
@@ -157,7 +157,7 @@ const chartFileApp = async (config: {
             description: "Successful response",
             content: {
               "application/vnd.msgpack": {
-                schema: docRefs("Chart15"),
+                schema: docRefs("Chart17"),
               },
             },
             headers: {
@@ -317,20 +317,24 @@ const chartFileApp = async (config: {
         return c.body(null, 204);
       }
     )
-    .post(
+    .post("/:cid", describeRoute({ hide: true }))
+    .put(
       "/:cid",
       describeRoute({
         description:
           "Update a chart file with new data in MessagePack format. " +
-          `The chart data format must be the latest format (Chart15) or one version earlier (Chart14Edit). ` +
+          `The chart data format must be the latest format (Chart17) or one version earlier (Chart15). ` +
           `The chart data may be compressed using ${supportedEncodings.join(", ")} (in that case Content-Encoding header must be set.) ` +
-          "The previous password is required (either p/ph query or Authorization header). If the posted chart data has a different password, it will be used next time.",
+          "The previous password is required (either p/ph query or Authorization header). If the posted chart data has a different password, it will be used next time. " +
+          "POST is also allowed for backward compatibility.",
         requestBody: {
           description: "Chart data in MessagePack format.",
           required: true,
           content: {
             "application/vnd.msgpack": {
-              schema: docRefs("Chart15"),
+              schema: {
+                anyOf: [docRefs("Chart17"), docRefs("Chart15")],
+              },
             },
           },
         },
@@ -446,116 +450,106 @@ const chartFileApp = async (config: {
             },
           },
         },
-      }),
-      async (c) => {
-        const cid = c.get("cid");
-        const ip = c.get("ip");
-        const entry = c.get("entry");
-        const db = await c.get("db")();
-        const pSecretSalt = c.get("pSecretSalt");
+      })
+    )
+    .on(["PUT", "POST"], "/:cid", async (c) => {
+      const cid = c.get("cid");
+      const ip = c.get("ip");
+      const entry = c.get("entry");
+      const db = await c.get("db")();
+      const pSecretSalt = c.get("pSecretSalt");
 
-        const chartBuf = await c.req.arrayBuffer();
+      const chartBuf = await c.req.arrayBuffer();
 
-        let newChart: Chart14Edit | Chart15;
-        try {
-          newChart = msgpack.decode(chartBuf) as Chart14Edit | Chart15;
-          if (newChart.ver < currentChartVer - 1) {
-            // 過去2バージョンまでサポート
-            return c.json({ message: "oldChartVersion" }, 409);
-          }
-          newChart = validateChartWithoutConvert(newChart) as
-            | Chart14Edit
-            | Chart15;
-        } catch (e) {
-          throw new HTTPException(415, { message: "invalidChart", cause: e });
+      let newChart: Chart15 | Chart17;
+      try {
+        newChart = msgpack.decode(chartBuf) as Chart15 | Chart17;
+        if (newChart.ver < currentChartVer - 1) {
+          // 過去2バージョンまでサポート
+          return c.json({ message: "oldChartVersion" }, 409);
         }
+        newChart = validateChartWithoutConvert(newChart) as Chart15 | Chart17;
+      } catch (e) {
+        throw new HTTPException(415, { message: "invalidChart", cause: e });
+      }
 
-        if (numEvents(newChart as Chart14Edit | Chart15) > chartMaxEvent) {
-          throw new HTTPException(413, {
-            message: "tooManyEvent",
-            // message: `Chart too large (number of events is ${numEvents(
-            //   newChart
-            // )} / ${chartMaxEvent})`,
-          });
-        }
-
-        // update Time
-        // Convert existing chart to latest version before comparing hashes
-        // This allows preserving play records when overwriting with same content from older versions
-        const upgradedChart = await convertToLatest(c.get("chart"));
-        interface LevelHash {
-          hash: string;
-          unlisted: boolean;
-        }
-        const prevHashes: LevelHash[] = await Promise.all(
-          upgradedChart.levelsMeta.map(async (min, i) => ({
-            unlisted: min.unlisted,
-            hash: await hashLevel(upgradedChart.levelsFreeze[i]),
-          }))
-        );
-        const savedHashesMap: Record<string, string> = {};
-        for (let i = 0; i < prevHashes.length; i++) {
-          savedHashesMap[prevHashes[i].hash] = entry.levelBrief[i].hash;
-        }
-        const newHashes: LevelHash[] =
-          newChart.ver === 14
-            ? await Promise.all(
-                newChart.levelsMin.map(async (level, i) => ({
-                  unlisted: level.unlisted,
-                  hash: await hashLevel(newChart.levelsFreeze[i]),
-                }))
-              )
-            : await Promise.all(
-                newChart.levelsMeta.map(async (min, i) => ({
-                  unlisted: min.unlisted,
-                  hash: await hashLevel(newChart.levelsFreeze[i]),
-                }))
-              );
-        const prevHashesFiltered = prevHashes.filter((l) => !l.unlisted);
-        const newHashesFiltered = newHashes.filter((l) => !l.unlisted);
-        let updatedAt = entry.updatedAt;
-        // unlistedでない譜面のハッシュまたはunlistedフラグそのものが1つでも変わっている場合更新日時を更新
-        if (
-          prevHashesFiltered.length !== newHashesFiltered.length ||
-          !newHashesFiltered.every(
-            (l, i) => l.hash === prevHashesFiltered[i].hash
-          ) ||
-          (!entry.published && newChart.published)
-        ) {
-          updatedAt = new Date().getTime();
-        }
-        // 既存のハッシュに一致するものがあるならそれを再利用し、なければ新しいハッシュで保存
-        const newSaveHashes = newHashes.map(
-          (l) => savedHashesMap[l.hash] ?? l.hash
-        );
-
-        await db.collection<ChartEntryCompressed>("chart").updateOne(
-          { cid },
-          {
-            $set: await zipEntry(
-              await chartToEntry(
-                newChart,
-                cid,
-                updatedAt,
-                ip,
-                await getYTDataEntry(
-                  c.var.logger,
-                  env(c),
-                  db,
-                  newChart.ytId
-                ).catch(() => undefined),
-                pSecretSalt,
-                entry,
-                newSaveHashes
-              )
-            ),
-          }
-        );
-        const newEntry = await getChartEntryCompressed(db, cid, null);
-        return c.body(null, 204, {
-          "ETag": await calcETag(newEntry),
+      if (numEvents(newChart) > chartMaxEvent) {
+        throw new HTTPException(413, {
+          message: "tooManyEvent",
+          // message: `Chart too large (number of events is ${numEvents(
+          //   newChart
+          // )} / ${chartMaxEvent})`,
         });
       }
-    );
+
+      // update Time
+      // Convert existing chart to latest version before comparing hashes
+      // This allows preserving play records when overwriting with same content from older versions
+      const upgradedChart = await convertToLatest(c.get("chart"));
+      interface LevelHash {
+        hash: string;
+        unlisted: boolean;
+      }
+      const prevHashes: LevelHash[] = await Promise.all(
+        upgradedChart.levelsMeta.map(async (min, i) => ({
+          unlisted: min.unlisted,
+          hash: await hashLevel(upgradedChart.levelsFreeze[i]),
+        }))
+      );
+      const savedHashesMap: Record<string, string> = {};
+      for (let i = 0; i < prevHashes.length; i++) {
+        savedHashesMap[prevHashes[i].hash] = entry.levelBrief[i].hash;
+      }
+      const newHashes: LevelHash[] = await Promise.all(
+        newChart.levelsMeta.map(async (min, i) => ({
+          unlisted: min.unlisted,
+          hash: await hashLevel(newChart.levelsFreeze[i]),
+        }))
+      );
+      const prevHashesFiltered = prevHashes.filter((l) => !l.unlisted);
+      const newHashesFiltered = newHashes.filter((l) => !l.unlisted);
+      let updatedAt = entry.updatedAt;
+      // unlistedでない譜面のハッシュまたはunlistedフラグそのものが1つでも変わっている場合更新日時を更新
+      if (
+        prevHashesFiltered.length !== newHashesFiltered.length ||
+        !newHashesFiltered.every(
+          (l, i) => l.hash === prevHashesFiltered[i].hash
+        ) ||
+        (!entry.published && newChart.published)
+      ) {
+        updatedAt = new Date().getTime();
+      }
+      // 既存のハッシュに一致するものがあるならそれを再利用し、なければ新しいハッシュで保存
+      const newSaveHashes = newHashes.map(
+        (l) => savedHashesMap[l.hash] ?? l.hash
+      );
+
+      await db.collection<ChartEntryCompressed>("chart").updateOne(
+        { cid },
+        {
+          $set: await zipEntry(
+            await chartToEntry(
+              newChart,
+              cid,
+              updatedAt,
+              ip,
+              await getYTDataEntry(
+                c.var.logger,
+                env(c),
+                db,
+                newChart.ytId
+              ).catch(() => undefined),
+              pSecretSalt,
+              entry,
+              newSaveHashes
+            )
+          ),
+        }
+      );
+      const newEntry = await getChartEntryCompressed(db, cid, null);
+      return c.body(null, 204, {
+        "ETag": await calcETag(newEntry),
+      });
+    });
 
 export default chartFileApp;

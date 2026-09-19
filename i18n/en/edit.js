@@ -110,7 +110,7 @@ export default {
         "This chart has been converted from the old format (ver.{ver}), " +
         "and some notes may behave differently. " +
         "Saving will overwrite the previous chart data with the converted data. " +
-        "(For details, please check the update history at the bottom of the top page.)",
+        "(For details, please check the change logs.)",
       shareLink: "Share link",
       localSaveLoad: "Save/load locally",
       localSaveLoadHelp:

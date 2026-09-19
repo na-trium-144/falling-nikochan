@@ -14,6 +14,7 @@ export default {
       chartIdNotFound: "The specified chart ID does not exist",
       levelNotFound: "The specified level does not exist",
       // 405
+      methodNotAllowed: "Method not allowed",
       readonlyOnDev:
         "Modification to the production database is not allowed on the development server",
       // 409
@@ -33,6 +34,8 @@ export default {
       // 418
       noCORSCredentialsOnProd:
         "Cross-origin authentication using cookie is not allowed on the production server",
+      // 424
+      ytMetaNotFound: "Failed to get metadata from YouTube",
       // 429
       tooManyRequest: "Please wait a while and try again",
       // 500

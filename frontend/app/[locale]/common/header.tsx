@@ -36,7 +36,13 @@ interface MProps {
 }
 export function MobileHeader(props: MProps) {
   return (
-    <header className={clsx("fn-mobile-header no-pc", props.className)}>
+    <header
+      className={clsx(
+        "fn-mobile-header",
+        // "no-pc",
+        props.className
+      )}
+    >
       {!props.noBackButton && (
         <button
           className="fn-back fn-icon-button h-max m-auto"

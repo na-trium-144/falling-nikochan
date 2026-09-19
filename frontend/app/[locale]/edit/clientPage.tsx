@@ -151,7 +151,7 @@ export default function Edit(props: {
   const ytPlayer = useRef<YouTubePlayer | undefined>(undefined);
   const [playbackRate, setPlaybackRate] = useState<number>(1);
   const changePlaybackRate = useCallback((rate: number) => {
-    ytPlayer.current?.setPlaybackRate(rate);
+    ytPlayer.current?.setPlaybackRate?.(rate);
   }, []);
 
   // ytPlayerが再生中
@@ -175,11 +175,11 @@ export default function Edit(props: {
       // scroll中などallowSeekAhead=falseでseekした状態で再生するとカーソル位置がバグる
       ytPlayer.current?.seekTo?.(cur.timeSec + chart.offset, true);
     }
-    ytPlayer.current?.playVideo();
+    ytPlayer.current?.playVideo?.();
     ref.current?.focus();
   }, [chart, cur]);
   const stop = useCallback(() => {
-    ytPlayer.current?.pauseVideo();
+    ytPlayer.current?.pauseVideo?.();
     ref.current?.focus();
   }, []);
   const setAndSeekCurrentTimeWithoutOffset = useCallback(
@@ -308,7 +308,7 @@ export default function Edit(props: {
       if (playing && ytPlayer.current && currentLevel) {
         let index = 0;
         const now =
-          ytPlayer.current.getCurrentTime() -
+          (ytPlayer.current.getCurrentTime?.() ?? 0) -
           (chart.offset || 0) +
           audioLatencyRef.current;
         while (
@@ -320,7 +320,7 @@ export default function Edit(props: {
         const playOne = () => {
           if (ytPlayer.current) {
             const now =
-              ytPlayer.current.getCurrentTime() -
+              (ytPlayer.current.getCurrentTime?.() ?? 0) -
               (chart?.offset || 0) +
               audioLatencyRef.current;
             timer = null;
@@ -365,14 +365,14 @@ export default function Edit(props: {
       }
       if (playing && ytPlayer.current && currentLevel) {
         const now =
-          ytPlayer.current.getCurrentTime() -
+          (ytPlayer.current.getCurrentTime?.() ?? 0) -
           (chart?.offset || 0) +
           audioLatencyRef.current;
         let step = getStep(currentLevel.freeze.bpmChanges, now, 4);
         const playOne = () => {
           if (ytPlayer.current && currentLevel) {
             const now =
-              ytPlayer.current.getCurrentTime() -
+              (ytPlayer.current.getCurrentTime?.() ?? 0) -
               (chart?.offset || 0) +
               audioLatencyRef.current;
             timer = null;
@@ -549,12 +549,16 @@ export default function Edit(props: {
         )}
       >
         <MobileHeader
-          className="flex-1 "
+          className="flex-1 edit-wide:hidden"
           noBackButton={!standalone && !insideFrame}
         >
           {t("titleShort")} ID: {chart?.cid}
         </MobileHeader>
-        <Button text={t("help")} onClick={openGuide} />
+        <Button
+          className="mt-sai mr-sai"
+          text={t("help")}
+          onClick={openGuide}
+        />
       </div>
       <div className="w-0 h-mobile-header edit-wide:hidden" />
       {chart === undefined ? (
@@ -626,12 +630,13 @@ export default function Edit(props: {
           className={clsx(
             "w-full",
             "edit-wide:h-full edit-wide:flex edit-wide:items-stretch edit-wide:justify-center edit-wide:flex-row",
+            "p-sai-3 gap-3",
             "overflow-hidden"
           )}
         >
           <div
             className={clsx(
-              "edit-wide:basis-4/12 edit-wide:h-full edit-wide:p-3",
+              "edit-wide:basis-4/12 edit-wide:h-full",
               "min-w-0 grow-0 shrink-0 flex flex-col items-stretch"
             )}
           >
@@ -780,7 +785,7 @@ export default function Edit(props: {
           </div>
           <div
             className={clsx(
-              "p-3 flex flex-col items-stretch",
+              "flex flex-col items-stretch",
               "h-5/6",
               "min-w-0", // timebarのwidthが大きいので
               "edit-wide:h-full edit-wide:basis-main edit-wide:shrink-1"
@@ -999,7 +1004,7 @@ export default function Edit(props: {
             </Box>
             <Box
               classNameOuter={clsx(
-                "fixed inset-1.5 ml-auto mt-auto w-max h-max shadow-modal z-edit-error",
+                "fixed bottom-0 right-0 m-sai-1.5 w-max h-max shadow-modal z-edit-error",
                 "bg-gray-500/25",
                 !(
                   luaExecutor.running ||

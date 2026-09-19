@@ -79,6 +79,7 @@ export function PasswdPrompt(props: PasswdProps) {
               ? props.loadStatus.status
               : undefined
           }
+          error={props.loadStatus}
         />
         {(standalone || insideFrame) && (
           <p>
@@ -89,9 +90,7 @@ export function PasswdPrompt(props: PasswdProps) {
     );
   } else {
     props.loadStatus satisfies
-      | "passwdFailed"
-      | "passwdFailedSilent"
-      | "rateLimited";
+      "passwdFailed" | "passwdFailedSilent" | "rateLimited";
     return (
       <>
         <h4 className="fn-heading-box">

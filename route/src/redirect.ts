@@ -2,6 +2,7 @@ import { Context, Hono } from "hono";
 import {
   backendOrigin,
   Bindings,
+  immutable,
   languageDetector,
   ResponseOK,
 } from "./env.js";
@@ -21,6 +22,7 @@ const redirectApp = (config: {
       const q = new URLSearchParams(new URL(c.req.url).search);
       const cid = c.req.param("cid");
       q.set("cid", cid);
+      c.header("cache-control", immutable());
       return c.redirect(new URL(`/edit?${q}`, backendOrigin(c)), 301);
     })
     .get("/:lang/main/:sort{latest|popular|recent}", (c) => {
@@ -29,6 +31,7 @@ const redirectApp = (config: {
       const lang = c.req.param("lang");
       const sort = c.req.param("sort");
       q.set("sort", sort);
+      c.header("cache-control", immutable());
       return c.redirect(
         new URL(`/${lang}/main/play?${q}`, backendOrigin(c)),
         301
@@ -36,25 +39,28 @@ const redirectApp = (config: {
     })
     .get("/:lang/main/about/:page{[1-5]}", (c) => {
       // deprecated (used until ver15.12)
-      const q = new URLSearchParams(new URL(c.req.url).search);
+      const search = new URL(c.req.url).search;
       const lang = c.req.param("lang");
       const page = Number(c.req.param("page"));
       switch (page) {
         case 1:
         case 2:
+          c.header("cache-control", immutable());
           return c.redirect(
-            new URL(`/${lang}?${q}#feature-play`, backendOrigin(c)),
+            new URL(`/${lang}${search}#feature-play`, backendOrigin(c)),
             301
           );
         case 3:
+          c.header("cache-control", immutable());
           return c.redirect(
-            new URL(`/${lang}?${q}#feature-edit`, backendOrigin(c)),
+            new URL(`/${lang}${search}#feature-edit`, backendOrigin(c)),
             301
           );
         case 4:
         case 5:
+          c.header("cache-control", immutable());
           return c.redirect(
-            new URL(`/${lang}/main/about?${q}`, backendOrigin(c)),
+            new URL(`/${lang}/main/about${search}`, backendOrigin(c)),
             301
           );
         default:
@@ -62,12 +68,10 @@ const redirectApp = (config: {
       }
     })
     .on("get", ["/", "/edit", "/main/*", "/play"], async (c) => {
-      const q = new URLSearchParams(new URL(c.req.url).search);
+      const search = new URL(c.req.url).search;
+      const path = c.req.path === "/" ? "" : c.req.path;
       const lang = c.get("language");
-      const redirected = new URL(
-        `/${lang}${c.req.path}?${q}`,
-        backendOrigin(c)
-      );
+      const redirected = new URL(`/${lang}${path}${search}`, backendOrigin(c));
       if (isbot(c.req.header("User-Agent"))) {
         // crawlerに対してはリダイレクトのレスポンスを返す代わりにリダイレクト先のページを直接返す
         const res = await config.fetchStatic(env(c), new URL(redirected));
@@ -76,6 +80,7 @@ const redirectApp = (config: {
           "Cache-Control": "no-store",
         });
       }
+      c.header("cache-control", "no-store, private");
       return c.redirect(redirected, 307);
     });
 

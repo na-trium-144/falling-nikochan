@@ -1,8 +1,9 @@
 import { locales } from "@falling-nikochan/i18n/dynamic.js";
 import { languageDetector as honoLanguageDetector } from "hono/language";
+import { methodNotAllowed as honoMethodNotAllowed } from "hono/method-not-allowed";
 import dotenv from "dotenv";
 import { dirname, join } from "node:path";
-import { Context } from "hono";
+import { Context, type Hono } from "hono";
 import { fetchError } from "./error.js";
 import { env } from "hono/adapter";
 import { Db } from "mongodb";
@@ -51,6 +52,9 @@ export function cacheControl(e: Bindings, age: number, private_?: boolean) {
   } else {
     return `max-age=${age}, must-revalidate`;
   }
+}
+export function immutable() {
+  return "max-age=31536000, s-maxage=31536000, immutable";
 }
 
 export function backendOrigin(
@@ -111,6 +115,16 @@ export function languageDetector() {
       httpOnly: false,
     },
     // debug: process.env.API_ENV === "development",
+  });
+}
+
+export function methodNotAllowed(app: Hono<{ Bindings: any }>) {
+  return honoMethodNotAllowed({
+    app,
+    onMethodNotAllowed: (c, methods) =>
+      c.json({ message: "methodNotAllowed" }, 405, {
+        Allow: methods.join(", "),
+      }),
   });
 }
 
