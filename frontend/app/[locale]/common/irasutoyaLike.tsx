@@ -179,7 +179,7 @@ export const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
   const style = {
     left: "-2.5rem",
     right: "-2.5rem",
-    bottom: "-2.5rem",
+    top: 0,
     height: `calc(${screenHeight}px + 2.5rem)`,
   };
   const viewBox = `0 0 ${screenWidth + 5 * rem} ${screenHeight + 2.5 * rem}`;

@@ -234,7 +234,7 @@ function StorageEditor(props: EProps) {
             mode="yaml"
             theme={themeState.isDark ? "tomorrow_night" : "tomorrow"}
             width="calc(100dvw - 6rem)"
-            height="calc(100dvh - 19rem)" // てきとう
+            height="calc(var(--100dvh) - 19rem)" // てきとう
             tabSize={2}
             fontSize={1 * rem}
             highlightActiveLine={false}

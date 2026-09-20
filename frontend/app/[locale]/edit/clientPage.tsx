@@ -517,7 +517,7 @@ export default function Edit(props: {
   return (
     <main
       className={clsx(
-        "w-full h-dvh overflow-x-clip overflow-y-auto",
+        "w-full h-(--100dvh) overflow-x-clip overflow-y-auto",
         "edit-wide:overflow-y-clip",
         dragMode !== null && "touch-none"
       )}

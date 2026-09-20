@@ -877,7 +877,7 @@ function Play(props: Props) {
   return (
     <main
       className={clsx(
-        "overflow-hidden w-full h-dvh relative select-none flex flex-col touch-none"
+        "overflow-hidden w-full h-(--100dvh) relative select-none flex flex-col touch-none"
       )}
       tabIndex={0}
       ref={ref}

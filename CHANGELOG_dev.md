@@ -1,3 +1,8 @@
+## ver. 17.13 - 2026/09/21
+
+* Twitter for iPhone のビューポートがおかしなことになっているので、100dvhを max(100svh, 100dvh) で置き換えてみる
+    * 普通は svh < dvh のはずなので、Twitter以外には実害はないはず
+
 ## ver. 17.12 - 2026/09/20 [#1381](https://github.com/na-trium-144/falling-nikochan/pull/1381)
 
 * トップページのgrassの高さを半分にする

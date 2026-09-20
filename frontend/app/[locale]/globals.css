@@ -58,6 +58,9 @@
   --alpha-dim: 60%;
   --alpha-highlight: 50%;
 
+  /* Twitter for iPhone で100dvhが100svhより小さい場合がある (常時ではない?) */
+  --100dvh: max(100svh, 100dvh);
+
   /* usage:
     `h-sai-t`: defined by --container-sai-
     `h-(--sai-t)`: defined by variables here

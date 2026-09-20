@@ -24,7 +24,14 @@ export function useDisplayMode(): DisplayMode {
       setSize([1200, 630]);
     } else {
       function updateSize() {
-        setSize([window.innerWidth, window.innerHeight]);
+        setSize([
+          window.innerWidth,
+          Math.max(
+            // 高さは max(innerHeight, 100svh, 100dvh) にする
+            window.innerHeight,
+            document.querySelector(".fn-fallback-bg")?.clientHeight ?? 0
+          ),
+        ]);
         setRem(parseFloat(getComputedStyle(document.documentElement).fontSize));
       }
       window.addEventListener("resize", updateSize);

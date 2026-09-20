@@ -158,7 +158,7 @@ export default function TopPage(props: Props) {
             ref={(node) => {
               grassRefFar.current = node;
             }}
-            className="fixed inset-0 top-[50vh] overflow-hidden pointer-events-none z-irasutoya-like-grass-far"
+            className="fixed inset-x-0 top-[50vh] h-[50vh] overflow-hidden pointer-events-none z-irasutoya-like-grass-far"
           >
             <figure className="relative w-full h-[80vh]">
               <IrasutoyaLikeGrass
@@ -176,7 +176,7 @@ export default function TopPage(props: Props) {
             ref={(node) => {
               grassRefNear.current = node;
             }}
-            className="fixed inset-0 top-[50vh] overflow-hidden pointer-events-none z-irasutoya-like-grass-near"
+            className="fixed inset-x-0 top-[50vh] h-[50vh] overflow-hidden pointer-events-none z-irasutoya-like-grass-near"
           >
             <figure className="relative w-full h-[80vh]">
               <IrasutoyaLikeGrass

@@ -28,7 +28,7 @@
         100dvhがビューポートの最下部から浮く環境があったらそれはその時考える
       */
       @apply fixed;
-      top: calc(100dvh - var(--container-mobile-footer));
+      top: calc(var(--100dvh) - var(--container-mobile-footer));
       /* fn-mf-blurと常に同じ挙動をしてほしいので、念の為それと同一のheightにしてみる */
       height: calc(var(--container-mobile-footer) * 2);
     }
@@ -41,7 +41,7 @@
   }
   .fn-mf-blur {
     @apply fixed;
-    top: calc(100dvh - var(--container-mobile-footer));
+    top: calc(var(--100dvh) - var(--container-mobile-footer));
     @apply z-mf-blur w-full;
     /* 念の為長めに伸ばしておく */
     height: calc(var(--container-mobile-footer) * 2);

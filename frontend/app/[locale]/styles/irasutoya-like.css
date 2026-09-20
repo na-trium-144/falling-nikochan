@@ -1,9 +1,9 @@
 :root {
   &:not(:has(> body > .fn-body-scrollable)) {
-    @apply w-screen h-dvh overflow-hidden;
+    @apply w-screen h-(--100dvh) overflow-hidden;
   }
   &:has(> body > .fn-body-scrollable) {
-    @apply w-full min-h-dvh overflow-x-clip;
+    @apply w-full min-h-(--100dvh) overflow-x-clip;
   }
   &:has(> body.fn-csr-ready) {
     --fn-theme-top: var(--color-sky-200);
@@ -69,14 +69,14 @@ body.fn-body {
     @apply w-full h-full overflow-hidden touch-none;
   }
   &:has(> .fn-body-scrollable) {
-    @apply w-full min-h-dvh overflow-hidden;
+    @apply w-full min-h-(--100dvh) overflow-hidden;
   }
 
   &.fn-csr-ready {
     @apply fg-base;
 
     > .fn-fallback-bg {
-      @apply fixed inset-0 pointer-events-none z-fallback-bg;
+      @apply fixed inset-x-0 top-0 h-(--100dvh) pointer-events-none z-fallback-bg;
       @apply bg-gradient-to-t;
       @apply bg-sky-50 from-sky-50 to-sky-200;
       @apply dark:bg-orange-950 dark:from-orange-950 dark:to-orange-975;
@@ -87,7 +87,7 @@ body.fn-body {
 @layer components {
   .fn-irasutoya-like-bg {
     /* absoluteにするとなぜかSafariでパフォーマンスが大幅に低下する。 */
-    @apply fixed inset-y-0 left-0 w-screen pointer-events-none z-irasutoya-like-bg;
+    @apply fixed top-0 left-0 w-screen pointer-events-none z-irasutoya-like-bg;
 
     #bgGradient > stop {
       &:nth-child(1) {
