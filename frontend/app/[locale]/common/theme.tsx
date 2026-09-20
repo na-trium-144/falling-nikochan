@@ -27,11 +27,13 @@ export interface ThemeState {
   theme: "dark" | "light" | null;
   isDark: boolean;
   setTheme: (theme: "dark" | "light" | null) => void;
+  updateTheme: () => void;
 }
 const ThemeContext = createContext<ThemeState>({
   theme: null,
   isDark: false,
   setTheme: () => {},
+  updateTheme: () => {},
 });
 export const useTheme = () => useContext(ThemeContext);
 
@@ -76,6 +78,7 @@ export function ThemeProvider(props: { children: ReactNode }) {
           }
           updateTheme();
         },
+        updateTheme,
       }}
     >
       <script

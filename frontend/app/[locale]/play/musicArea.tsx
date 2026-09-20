@@ -13,6 +13,7 @@ import Range from "@/common/range";
 import { useColorThief } from "@/common/colorThief";
 import { ButtonHighlight } from "@/common/button";
 import { YouTubeLogo } from "@/common/youtubeLogo";
+import { useTheme } from "@/common/theme";
 
 interface Props {
   ready: boolean;
@@ -106,6 +107,23 @@ export function MusicArea(props: Props) {
   }, [props.ytPlayer, props.ytBeginSec, levelLength]);
 
   const colorThief = useColorThief();
+  const { updateTheme } = useTheme();
+
+  useEffect(() => {
+    if (colorThief.ready) {
+      document.documentElement.style.setProperty(
+        "--fn-play-current-color",
+        colorThief.currentColor
+      );
+      updateTheme();
+      return () => {
+        document.documentElement.style.removeProperty(
+          "--fn-play-current-color"
+        );
+        updateTheme();
+      };
+    }
+  }, [colorThief.ready, colorThief.currentColor, updateTheme]);
 
   return (
     <div
