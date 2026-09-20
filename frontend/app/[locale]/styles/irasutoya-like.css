@@ -6,11 +6,61 @@
     @apply w-full min-h-dvh overflow-x-clip;
   }
   &:has(> body.fn-csr-ready) {
+    --fn-theme-top: var(--color-sky-200);
+    --fn-theme-bottom: var(--color-sky-50);
+    &:has(> .dark) {
+      --fn-theme-top: var(--color-orange-975);
+      --fn-theme-bottom: var(--color-orange-950);
+    }
+    /*
+    モバイル表示のplayページでは上側を動画のテーマカラーに、下側をgrassの色に変更する。
+    ついでにtheme-colorも動画のテーマカラーに変えている (color-mixがないのでちょっと色違うけど)
+    */
+    &:has(.fn-play-music-area-ok) {
+      @variant portrait {
+        --fn-theme-top: color-mix(
+          in oklab,
+          var(--fn-play-current-color) 50%,
+          var(--color-white)
+        );
+        &:has(> .dark) {
+          --fn-theme-top: color-mix(
+            in oklab,
+            var(--fn-play-current-color) 50%,
+            var(--color-stone-700)
+          );
+        }
+      }
+      --fn-theme-bottom: var(--color-lime-600);
+      &:has(> .dark) {
+        --fn-theme-bottom: var(--color-lime-900);
+      }
+    }
+
     /* safariのツールバーの色がhtmlのbackgroundを参照するようなので、テーマカラーを設定しておく */
     /* ここでgradientを設定するのは意味ない。body-scrollableの画面ではhtmlの高さは100dvhでないため */
-    @apply bg-sky-200;
-    &:has(> .dark) {
-      @apply bg-orange-975;
+    background: var(--fn-theme-top);
+
+    &:not(:has(> body > .fn-body-scrollable)) {
+      /*
+      iOS26以降では、fixedのブロックを上下端に置くとツールバーやステータスバーの挙動が変わる。
+      https://qiita.com/na-trium-144/items/0add98a80ca2391e3f17
+      スクロール可能なトップページとshareには置かず、それ以外には上下端に置く
+      */
+      .fn-ios-dummy-block {
+        @apply fixed inset-x-0;
+        height: 11px;
+        @apply z-ios-dummy-block pointer-events-none;
+        @apply bg-clip-text;
+        &.fn-ios-dummy-block-top {
+          @apply top-0;
+          background-color: var(--fn-theme-top);
+        }
+        &.fn-ios-dummy-block-bottom {
+          @apply bottom-0;
+          background-color: var(--fn-theme-bottom);
+        }
+      }
     }
   }
 }

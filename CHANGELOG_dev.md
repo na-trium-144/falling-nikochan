@@ -1,3 +1,10 @@
+## ver. 17.12 - 2026/09/20 [#1381](https://github.com/na-trium-144/falling-nikochan/pull/1381)
+
+* トップページのgrassの高さを半分にする
+* iOS26用に上下端にダミーの固定ブロックを置く
+* プレイ画面の上下端の色を動的に変更してみる
+* ナビゲーション時にupdateThemeを再実行する
+
 ## ver. 17.10 - 2026/09/20 [#1380](https://github.com/na-trium-144/falling-nikochan/pull/1380)
 
 * iOS27では2点タッチのバグが修正されているため、無反応補正を無効化

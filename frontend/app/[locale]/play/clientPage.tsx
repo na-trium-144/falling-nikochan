@@ -930,7 +930,9 @@ function Play(props: Props) {
           <MusicArea
             className={clsx(
               "isolate z-play-music-area transition-transform duration-500 ease-in-out",
-              musicAreaOk ? "translate-y-0" : "translate-y-[-40vw]"
+              musicAreaOk
+                ? "fn-play-music-area-ok translate-y-0"
+                : "translate-y-[-40vw]"
             )}
             ready={musicAreaOk}
             playing={chartPlaying}

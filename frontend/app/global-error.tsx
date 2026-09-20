@@ -33,6 +33,8 @@ export default function Error(props: ErrorProps) {
           <ClientErrorTitle />
           <ErrorMessage error={props.error} />
         </CenterBox>
+        <div className="fn-ios-dummy-block fn-ios-dummy-block-top" />
+        <div className="fn-ios-dummy-block fn-ios-dummy-block-bottom" />
         {process.env.NODE_ENV === "development" && (
           <>
             <div className="fn-dev-safe-area fn-dev-sai-t" />
