@@ -12,6 +12,25 @@
     &:has(> .dark) {
       @apply bg-orange-975;
     }
+
+    &:not(:has(> body > .fn-body-scrollable)) {
+      /*
+      iOS26以降では、fixedのブロックを上下端に置くとツールバーやステータスバーの挙動が変わる。
+      https://qiita.com/na-trium-144/items/0add98a80ca2391e3f17
+      スクロール可能なトップページとshareには置かず、それ以外には上下端に置く
+      */
+      .fn-ios-dummy-block {
+        @apply fixed inset-x-0 h-4;
+        @apply z-ios-dummy-block pointer-events-none;
+        @apply bg-clip-text;
+        &.fn-ios-dummy-block-top {
+          @apply top-0 bg-sky-200 dark:bg-orange-975;
+        }
+        &.fn-ios-dummy-block-bottom {
+          @apply bottom-0 bg-sky-50 dark:bg-orange-950;
+        }
+      }
+    }
   }
 }
 body.fn-body {

@@ -7,6 +7,9 @@
 @utility z-dev-safe-area {
   z-index: 100;
 }
+@utility z-ios-dummy-block {
+  z-index: 101;
+}
 
 @utility z-dropdown {
   z-index: 60;
