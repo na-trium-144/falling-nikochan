@@ -54,6 +54,7 @@ import { useSE } from "@/common/se.js";
 import Pause from "@icon-park/react/lib/icons/Pause.js";
 import { Key } from "@/common/key.js";
 import {
+  detectiOS27OrLater,
   detectOS,
   historyBackWithReview,
   isInsideFrame,
@@ -378,7 +379,7 @@ function Play(props: Props) {
     localStorage.setItem("enableIOSThru", v ? "1" : "0");
   }, []);
   useEffect(() => {
-    if (detectOS() === "ios") {
+    if (detectOS() === "ios" && !detectiOS27OrLater()) {
       const enableIOSThruInitial =
         localStorage.getItem("enableIOSThru") === "1" ||
         localStorage.getItem("enableIOSThru") == null;
@@ -906,6 +907,7 @@ function Play(props: Props) {
           isReadyAll &&
           e.pointerType === "touch" &&
           detectOS() === "ios" &&
+          !detectiOS27OrLater() &&
           enableIOSThru
         ) {
           iosRelease();

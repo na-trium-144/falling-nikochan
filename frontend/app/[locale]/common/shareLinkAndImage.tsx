@@ -132,7 +132,7 @@ export function useShareLink(
     [shareImageCtx, ogPath, cid]
   );
 
-  const detectedOS = useOSDetector();
+  const { os: detectedOS } = useOSDetector();
 
   return {
     url: (
@@ -264,7 +264,7 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
     }
   }, [cid, imageBlob]);
 
-  const detectedOS = useOSDetector();
+  const { os: detectedOS } = useOSDetector();
 
   return (
     <ShareImageModalContext.Provider value={{ openModal }}>

@@ -25,7 +25,8 @@ export default {
         "Due to a bug in Safari, taps with two or more <br></br>" +
         "fingers may become unresponsive. <br></br>" +
         "Predict and correct this under certain <br></br>" +
-        "conditions and maintain your chain.",
+        "conditions and maintain your chain." +
+        "(iOS 26 and earlier only)",
       // unused option
       displaySpeed: "Show Note Speed",
       offset: "Offset Adjustment",

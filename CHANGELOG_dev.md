@@ -1,3 +1,7 @@
+## ver. 17.10 - 2026/09/20 [#1380](https://github.com/na-trium-144/falling-nikochan/pull/1380)
+
+* iOS27では2点タッチのバグが修正されているため、無反応補正を無効化
+
 ## ver. 17.9 - 2026/09/18 [#1367](https://github.com/na-trium-144/falling-nikochan/pull/1367)
 
 * 譜面編集ヘルプを /main/guide/1-7 ページとして追加
