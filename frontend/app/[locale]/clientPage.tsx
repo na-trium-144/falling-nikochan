@@ -146,9 +146,11 @@ export default function TopPage(props: Props) {
       <PCHeader2 className="fixed top-0 right-0" locale={locale} backdropBlur />
 
       {/*
-      safariでは高さ130vhのdiv要素で囲い100vhのdiv要素の中でそれをスクロールすることで動かすのが一番滑らかに動く。
+      safariでは高さ80vhのdiv要素で囲い50vhのdiv要素の中でそれをスクロールすることで動かすのが一番滑らかに動く。
       しかしこのアプローチはchromeで重く、firefoxでsvgが描画されなくなるバグがある。
       chrome,firefoxではsvgのbottomの値を書き換えて動かす。これはsafariだと重くて動かない
+
+      iOS26以降では上端にかかる100dvhにするとステータスバー・ツールバーの挙動が変わる
       */}
       {isSafari === true ? (
         <>
@@ -156,9 +158,9 @@ export default function TopPage(props: Props) {
             ref={(node) => {
               grassRefFar.current = node;
             }}
-            className="fixed inset-0 overflow-hidden pointer-events-none z-irasutoya-like-grass-far"
+            className="fixed inset-0 top-[50vh] overflow-hidden pointer-events-none z-irasutoya-like-grass-far"
           >
-            <figure className="relative w-full h-[130vh]">
+            <figure className="relative w-full h-[80vh]">
               <IrasutoyaLikeGrass
                 only="far"
                 className={clsx(
@@ -174,9 +176,9 @@ export default function TopPage(props: Props) {
             ref={(node) => {
               grassRefNear.current = node;
             }}
-            className="fixed inset-0 overflow-hidden pointer-events-none z-irasutoya-like-grass-near"
+            className="fixed inset-0 top-[50vh] overflow-hidden pointer-events-none z-irasutoya-like-grass-near"
           >
-            <figure className="relative w-full h-[130vh]">
+            <figure className="relative w-full h-[80vh]">
               <IrasutoyaLikeGrass
                 only="near"
                 className={clsx(
