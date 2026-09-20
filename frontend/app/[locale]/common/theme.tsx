@@ -16,6 +16,7 @@ import Moon from "@icon-park/react/lib/icons/Moon";
 import Sun from "@icon-park/react/lib/icons/Sun";
 import DownOne from "@icon-park/react/lib/icons/DownOne";
 import themeInitScript from "./themeInit.js?raw";
+import { usePathname } from "next/navigation";
 
 declare global {
   var fnGetCurrentTheme: () => "dark" | "light" | null;
@@ -40,6 +41,7 @@ export const useTheme = () => useContext(ThemeContext);
 export function ThemeProvider(props: { children: ReactNode }) {
   const [theme, setTheme] = useState<"dark" | "light" | null>(null);
   const [isDark, setIsDark] = useState<boolean>(false);
+  const pathname = usePathname();
   const updateTheme = useCallback(() => {
     setTheme(window.fnGetCurrentTheme());
     const isDark = window.fnCurrentThemeIsDark();
@@ -64,7 +66,8 @@ export function ThemeProvider(props: { children: ReactNode }) {
       window.removeEventListener("visibilitychange", updateTheme);
       window.removeEventListener("popstate", updateTheme);
     };
-  }, [updateTheme]);
+    // ナビゲーション時(pathname変化時)にも再実行
+  }, [updateTheme, pathname]);
   return (
     <ThemeContext.Provider
       value={{
