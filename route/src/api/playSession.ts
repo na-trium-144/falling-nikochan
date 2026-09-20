@@ -49,7 +49,7 @@ const playSessionApp = async (config: {
           // 4 here
           "5. Client sends POST /api/record and POST /api/playSession/sign with `Authorization: Bearer <token>` and result data signed with SessionKey.\n" +
           // "6. Server verifies the token with ResultSecret, verifies sign with SessionKey, verifies timestamp, and returns ResultSecret signature of result (skipped for auto play)." +
-          // "7. Client saves and shares ResultParam with ResultSecret signature." +
+          "7. Client saves and shares ResultParam with ResultSecret signature." +
           // "8. /og/result, /share, and /[locale]/share/placeholder verify ResultParam with ResultSecret public key.",
           "\n" +
           "This API performs the step 4.",
