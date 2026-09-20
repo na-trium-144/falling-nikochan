@@ -486,12 +486,14 @@ export default function Edit(props: {
               ? aceSessionRef.current[chart.currentLevelIndex]
               : undefined;
           session?.getUndoManager().undo(session);
+          e.preventDefault(); // chromeはどこにもフォーカスがなくてもctrl+zでテキストを戻そうとする場合がある
         } else if (e.key === "y") {
           const session =
             chart?.currentLevelIndex !== undefined
               ? aceSessionRef.current[chart.currentLevelIndex]
               : undefined;
           session?.getUndoManager().redo(session);
+          e.preventDefault();
         } else {
           //
         }
