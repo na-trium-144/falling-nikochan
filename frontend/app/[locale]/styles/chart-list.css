@@ -56,7 +56,7 @@
     }
 
     &.fn-cl-big-h {
-      --item-min-width: 24rem;
+      /*--item-min-width: 24rem; not used? */
       --item-max-width: calc(
         var(--thumbnail-height) * 16 / 9 * 2 + var(--spacing) * 3 * 2
       );

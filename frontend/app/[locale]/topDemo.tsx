@@ -24,7 +24,9 @@ export interface DemoChart {
   offset: number;
 }
 export const demoCharts: DemoChart[] = (
-  process.env.NODE_ENV === "development"
+  process.env.NODE_ENV === "development" &&
+  // 本番環境(ネットワーク越し)はTLDを含むはずという雑なチェック
+  !/[a-z]\.[a-z]/.test(process.env.BACKEND_PREFIX ?? "")
     ? ([["102399", 0, 4.5]] as const)
     : ([
         ["850858", 1, 11.3], // bad apple!! single-7
@@ -197,7 +199,7 @@ export function DemoDetail(
       <ul
         className={clsx(
           "demo-wide:hidden",
-          "fn-chart-list fn-cl-big-h w-[min(var(--item-max-width),var(--item-min-width))] max-w-full",
+          "fn-chart-list fn-cl-big-h w-(--item-max-width) max-w-full",
           "transition-[translate,opacity] duration-1000 ease-out",
           show ? "" : "opacity-0 translate-y-1"
         )}
