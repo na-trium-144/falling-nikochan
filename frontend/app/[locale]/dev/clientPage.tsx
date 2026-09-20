@@ -15,6 +15,10 @@ import {
   forceRequestReview,
   historyBackWithForceReview,
   useAndroidTWADetector,
+  useInsideFrameDetector,
+  useOSDetector,
+  useSafariDetector,
+  useStandaloneDetector,
 } from "@/common/pwaInstall";
 import Button, { ButtonHighlight } from "@/common/button";
 import dynamic from "next/dynamic";
@@ -45,6 +49,12 @@ export function DevPage(props: { locale: string }) {
     setSS(sessionStorage);
   }, []);
   const isAndroidTWA = useAndroidTWADetector();
+
+  const standalone = useStandaloneDetector();
+  const androidTWA = useAndroidTWADetector();
+  const insideFrame = useInsideFrameDetector();
+  const { os, iOS27OrLater } = useOSDetector();
+  const safari = useSafariDetector();
 
   return (
     <main className="w-full h-full overflow-clip ">
@@ -84,6 +94,27 @@ export function DevPage(props: { locale: string }) {
                 </Button>
               </div>
             )}
+            <pre
+              className={clsx(
+                "relative fn-sky fn-pre",
+                "mb-3 p-2 rounded-sq-xl text-xs",
+                "whitespace-pre-wrap",
+                "text-center"
+              )}
+              suppressHydrationWarning
+            >
+              <span className="fn-glass-1" />
+              <span className="fn-glass-2" />
+              {navigator.userAgent}
+            </pre>
+            <ul className="text-center">
+              <li>isStandalone: {String(standalone)}</li>
+              <li>androidTWA: {String(androidTWA)}</li>
+              <li>insideFrame: {String(insideFrame)}</li>
+              <li>os: {String(os)}</li>
+              <li>iOS27OrLater: {String(iOS27OrLater)}</li>
+              <li>safari: {String(safari)}</li>
+            </ul>
           </Box>
         </div>
         <div className="flex-none basis-mobile-footer no-pc" />
