@@ -751,21 +751,21 @@ export default function Edit(props: {
               </div>
             </div>
             {chart && (
-              <div className="self-start flex flex-row items-center gap-2">
-                <Select<DragStyle>
+              <div className="self-start flex flex-row items-center gap-2 py-3">
+                <Select
                   options={[
                     { label: t("dragStyles.free"), value: "free" },
                     { label: t("dragStyles.center"), value: "center" },
                     { label: t("dragStyles.spread"), value: "spread" },
                   ]}
                   value={dragStyle}
-                  onSelect={(s) => setDragStyle(s)}
+                  onSelect={(s: DragStyle) => setDragStyle(s)}
                   showValue
                 />
                 {isTouch && (
                   <button
                     className={clsx(
-                      "self-start flex flex-row items-center",
+                      "flex flex-row items-center",
                       "fn-link-1"
                     )}
                     onClick={() => {
@@ -790,7 +790,7 @@ export default function Edit(props: {
                         </>
                       )}
                     </span>
-                    <span className="">
+                    <span className="whitespace-nowrap">
                       {t("touchMode", { mode: dragMode || "null" })}
                     </span>
                   </button>
