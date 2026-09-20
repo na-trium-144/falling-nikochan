@@ -527,7 +527,6 @@ export default function Edit(props: {
       onKeyUp={(e) => {
         if (
           chart &&
-          ready &&
           !isCodeTab &&
           (e.key === "Shift" || e.key === "Control")
         ) {
