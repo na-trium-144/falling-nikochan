@@ -48,7 +48,8 @@
       スクロール可能なトップページとshareには置かず、それ以外には上下端に置く
       */
       .fn-ios-dummy-block {
-        @apply fixed inset-x-0 h-4;
+        @apply fixed inset-x-0;
+        height: 11px;
         @apply z-ios-dummy-block pointer-events-none;
         @apply bg-clip-text;
         &.fn-ios-dummy-block-top {
