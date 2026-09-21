@@ -1,11 +1,13 @@
 import { createTranslator } from "next-intl";
 import enEdit from "./en/edit.js";
 import enError from "./en/error.js";
+import enInspect from "./en/inspect.js";
 import enMain from "./en/main.js";
 import enPlay from "./en/play.js";
 import enShare from "./en/share.js";
 import jaEdit from "./ja/edit.js";
 import jaError from "./ja/error.js";
+import jaInspect from "./ja/inspect.js";
 import jaMain from "./ja/main.js";
 import jaPlay from "./ja/play.js";
 import jaShare from "./ja/share.js";
@@ -21,6 +23,7 @@ export function getMessages(locale) {
       return {
         ...enEdit,
         ...enError,
+        ...enInspect,
         ...enMain,
         ...enPlay,
         ...enShare,
@@ -29,6 +32,7 @@ export function getMessages(locale) {
       return {
         ...jaEdit,
         ...jaError,
+        ...jaInspect,
         ...jaMain,
         ...jaPlay,
         ...jaShare,

@@ -20,6 +20,7 @@ export default {
     bestScore: "あなたのベストスコア",
     detail: "詳細",
     start: "ゲーム開始！",
+    inspect: "譜面確認",
     unavailable: "公開されている譜面がまだありません。",
     titleWithResult: "{date} のプレイ記録 - {title}",
     titleWithResultNoDate: "プレイ記録 - {title}",
