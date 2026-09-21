@@ -20,6 +20,7 @@ import { MetaTab } from "./metaTab.js";
 import { addRecent } from "@/common/recent.js";
 import {
   createBrief,
+  getTimeSec,
   Step,
   stepAdd,
   stepCmp,
@@ -48,6 +49,7 @@ import {
   useStandaloneDetector,
 } from "@/common/pwaInstall.jsx";
 import { useSE } from "@/common/se.js";
+import { useSETimer } from "./seTimer.js";
 import { useChartState } from "./chartState.js";
 import { PasswdPrompt } from "./passwdPrompt.jsx";
 import { useColorThief } from "@/common/colorThief.js";
@@ -317,111 +319,13 @@ export default function Edit(props: {
     beatVolumeCid: chart?.cid ? `beatVolume-${chart?.cid}` : undefined,
     enableBeatSE: "enableBeatEdit",
   });
-  const audioLatencyRef = useRef<number>(null!);
-  audioLatencyRef.current = audioLatency || 0;
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | null = null;
-    const initSETimer = () => {
-      if (timer !== null) {
-        clearTimeout(timer);
-        timer = null;
-      }
-      if (playing && ytPlayer.current && currentLevel) {
-        let index = 0;
-        const now =
-          (ytPlayer.current.getCurrentTime?.() ?? 0) -
-          (chart.offset || 0) +
-          audioLatencyRef.current;
-        while (
-          index < currentLevel.seqNotes.length &&
-          currentLevel.seqNotes[index].hitTimeSec < now
-        ) {
-          index++;
-        }
-        const playOne = () => {
-          if (ytPlayer.current) {
-            const now =
-              (ytPlayer.current.getCurrentTime?.() ?? 0) -
-              (chart?.offset || 0) +
-              audioLatencyRef.current;
-            timer = null;
-            while (
-              index < currentLevel!.seqNotes.length &&
-              currentLevel!.seqNotes[index].hitTimeSec <= now
-            ) {
-              playSE(currentLevel!.seqNotes[index].big ? "hitBig" : "hit");
-              index++;
-            }
-            if (index < currentLevel!.seqNotes.length) {
-              timer = setTimeout(
-                playOne,
-                (currentLevel!.seqNotes[index].hitTimeSec - now) * 1000
-              );
-            }
-          }
-        };
-        if (index < currentLevel!.seqNotes.length) {
-          timer = setTimeout(
-            playOne,
-            (currentLevel!.seqNotes[index].hitTimeSec - now) * 1000
-          );
-        }
-      }
-    };
-    initSETimer();
-    chart?.on("change", initSETimer);
-    return () => {
-      if (timer !== null) {
-        clearTimeout(timer);
-      }
-      chart?.off("change", initSETimer);
-    };
-  }, [playing, chart, currentLevel, playSE]);
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | null = null;
-    const initSETimer = () => {
-      if (timer !== null) {
-        clearTimeout(timer);
-        timer = null;
-      }
-      if (playing && ytPlayer.current && currentLevel) {
-        const now =
-          (ytPlayer.current.getCurrentTime?.() ?? 0) -
-          (chart?.offset || 0) +
-          audioLatencyRef.current;
-        let step = getStep(currentLevel.freeze.bpmChanges, now, 4);
-        const playOne = () => {
-          if (ytPlayer.current && currentLevel) {
-            const now =
-              (ytPlayer.current.getCurrentTime?.() ?? 0) -
-              (chart?.offset || 0) +
-              audioLatencyRef.current;
-            timer = null;
-            while (getTimeSec(currentLevel.freeze.bpmChanges, step) <= now) {
-              const ss = getSignatureState(currentLevel.freeze.signature, step);
-              if (ss.count.numerator === 0 && stepCmp(step, stepZero()) >= 0) {
-                playSE(ss.count.fourth === 0 ? "beat1" : "beat");
-              }
-              step = stepAdd(step, { fourth: 0, numerator: 1, denominator: 4 });
-            }
-            timer = setTimeout(
-              playOne,
-              (getTimeSec(currentLevel.freeze.bpmChanges, step) - now) * 1000
-            );
-          }
-        };
-        playOne();
-      }
-    };
-    initSETimer();
-    chart?.on("change", initSETimer);
-    return () => {
-      if (timer !== null) {
-        clearTimeout(timer);
-      }
-      chart?.off("change", initSETimer);
-    };
-  }, [playing, playSE, chart, currentLevel]);
+  useSETimer({
+    playing,
+    ytPlayer,
+    playSE,
+    audioLatency,
+    chart,
+  });
 
   const [tab, setTab] = useState<number>(0);
   const tabNameKeys = ["meta", "timing", "level", "note", "code"];
