@@ -176,7 +176,7 @@ export function PlayOption(props: Props) {
         props.brief &&
         selectedLevel !== null &&
         selectedLevel >= 0 && (
-          <p className="mt-3 text-center ">
+          <p className="mt-3 text-center flex justify-center items-center gap-2">
             <Button
               text={t("start")}
               onClick={() => {
@@ -192,6 +192,24 @@ export function PlayOption(props: Props) {
                 } else {
                   window
                     .open(`/${props.locale}/play?sid=${sessionId}`, "_blank")
+                    ?.focus();
+                }
+              }}
+            />
+            <Button
+              text={t("inspect")}
+              onClick={() => {
+                const sessionId = initSession({
+                  cid: props.cid!,
+                  lvIndex: selectedLevel,
+                  brief: props.brief!,
+                  editing: false as const,
+                });
+                if (isStandalone() || isInsideFrame()) {
+                  router.push(`/${props.locale}/inspect?sid=${sessionId}`);
+                } else {
+                  window
+                    .open(`/${props.locale}/inspect?sid=${sessionId}`, "_blank")
                     ?.focus();
                 }
               }}
