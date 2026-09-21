@@ -9,7 +9,6 @@ import {
   getStep,
   getTimeSec,
   Step,
-  stepAdd,
   stepCmp,
   stepZero,
   updateBarNum,
@@ -39,6 +38,7 @@ import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
 import { IrasutoyaLikeGrass } from "@/common/irasutoyaLike.jsx";
 import InspectFallingWindow from "./fallingWindow.js";
 import TimeBar from "@/edit/timeBar.js";
+import { useSETimer } from "@/edit/seTimer.js";
 import {
   historyBackWithReview,
   useInsideFrameDetector,
@@ -300,116 +300,18 @@ function Inspect(props: InspectProps) {
     enableBeatSE: "enableBeatInspect",
   });
 
-  const audioLatencyRef = useRef<number>(0);
-  audioLatencyRef.current = audioLatency || 0;
-
-  // ノートSEタイマー
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | null = null;
-    const initSETimer = () => {
-      if (timer !== null) {
-        clearTimeout(timer);
-        timer = null;
-      }
-      if (playing && ytPlayer.current && chartSeq) {
-        let index = 0;
-        const now =
-          (ytPlayer.current.getCurrentTime?.() ?? 0) -
-          (chartSeq.offset || 0) +
-          audioLatencyRef.current;
-        while (
-          index < chartSeq.notes.length &&
-          chartSeq.notes[index].hitTimeSec < now
-        ) {
-          index++;
-        }
-        const playOne = () => {
-          if (ytPlayer.current && chartSeq) {
-            const now =
-              (ytPlayer.current.getCurrentTime?.() ?? 0) -
-              chartSeq.offset +
-              audioLatencyRef.current;
-            timer = null;
-            while (
-              index < chartSeq.notes.length &&
-              chartSeq.notes[index].hitTimeSec <= now
-            ) {
-              playSE(chartSeq.notes[index].big ? "hitBig" : "hit");
-              index++;
-            }
-            if (index < chartSeq.notes.length) {
-              timer = setTimeout(
-                playOne,
-                (chartSeq.notes[index].hitTimeSec - now) * 1000
-              );
-            }
-          }
-        };
-        if (index < chartSeq.notes.length) {
-          timer = setTimeout(
-            playOne,
-            (chartSeq.notes[index].hitTimeSec - now) * 1000
-          );
-        }
-      }
-    };
-    initSETimer();
-    return () => {
-      if (timer !== null) {
-        clearTimeout(timer);
-      }
-    };
-  }, [playing, chartSeq, playSE]);
+  useSETimer({
+    playing,
+    ytPlayer,
+    playSE,
+    audioLatency,
+    chartSeq,
+  });
 
   const signatureWithBarNum = useMemo(
     () => (chartSeq ? updateBarNum(chartSeq.signature) : []),
     [chartSeq]
   );
-
-  // メトロノームSEタイマー
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | null = null;
-    const initSETimer = () => {
-      if (timer !== null) {
-        clearTimeout(timer);
-        timer = null;
-      }
-      if (playing && ytPlayer.current && chartSeq) {
-        const now =
-          (ytPlayer.current.getCurrentTime?.() ?? 0) -
-          (chartSeq.offset || 0) +
-          audioLatencyRef.current;
-        let step = getStep(chartSeq.bpmChanges, now, 4);
-        const playOne = () => {
-          if (ytPlayer.current && chartSeq) {
-            const now =
-              (ytPlayer.current.getCurrentTime?.() ?? 0) -
-              chartSeq.offset +
-              audioLatencyRef.current;
-            timer = null;
-            while (getTimeSec(chartSeq.bpmChanges, step) <= now) {
-              const ss = getSignatureState(signatureWithBarNum, step);
-              if (ss.count.numerator === 0 && stepCmp(step, stepZero()) >= 0) {
-                playSE(ss.count.fourth === 0 ? "beat1" : "beat");
-              }
-              step = stepAdd(step, { fourth: 0, numerator: 1, denominator: 4 });
-            }
-            timer = setTimeout(
-              playOne,
-              (getTimeSec(chartSeq.bpmChanges, step) - now) * 1000
-            );
-          }
-        };
-        playOne();
-      }
-    };
-    initSETimer();
-    return () => {
-      if (timer !== null) {
-        clearTimeout(timer);
-      }
-    };
-  }, [playing, playSE, chartSeq, signatureWithBarNum]);
 
   // カーソル移動 (前/次のイベント)
   const seekPrevEvent = useCallback(() => {
