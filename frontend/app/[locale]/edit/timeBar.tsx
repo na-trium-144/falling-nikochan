@@ -39,6 +39,11 @@ export type TimeBarProps = {
     allowSeekAhead?: boolean
   ) => void;
   zoom?: number;
+  isNoteSelected?: (n: {
+    id: number;
+    hitTimeSec: number;
+    step: Step;
+  }) => boolean;
 } & (
   | {
       chart?: ChartEditing;
@@ -254,15 +259,15 @@ export default function TimeBar(props: TimeBarProps) {
   const isNoteSelected = (n: {
     id: number;
     hitTimeSec: number;
-    step?: Step;
+    step: Step;
   }) => {
+    if (props.isNoteSelected) {
+      return props.isNoteSelected(n);
+    }
     if (chart && currentLevel) {
       return n.hitTimeSec === currentLevel.currentSeqNote?.hitTimeSec;
     }
-    return (
-      Math.abs(n.hitTimeSec - currentTimeSec) < 0.005 ||
-      (n.step !== undefined && stepCmp(n.step, currentStep) === 0)
-    );
+    return false;
   };
 
   const currentBpm = chart
