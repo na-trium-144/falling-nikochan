@@ -310,7 +310,7 @@ function Play(props: Props) {
 
   const [chartPlaying, setChartPlaying] = useState<boolean>(false);
   const [wasAutoPlay, setWasAutoPlay] = useState<boolean>(false); // start時点でautoだったかどうか
-  const [oldPlaybackRate, setOldPlaybackRate] = useState<number>(1);
+  // const [oldPlaybackRate, setOldPlaybackRate] = useState<number>(1);  use minActualPlaybackRate instead
   const [oldUserBegin, setOldUserBegin] = useState<number | null>(null);
   // 終了ボタンが押せるようになる時刻をセット
   const [exitable, setExitable] = useState<DOMHighResTimeStamp | null>(null);
@@ -396,26 +396,73 @@ function Play(props: Props) {
   const rawStartTimeStamp = useRef<DOMHighResTimeStamp | null>(null);
   const filteredStartTimeStamp = useRef<DOMHighResTimeStamp | null>(null);
   const timeStampLastAdjusted = useRef<DOMHighResTimeStamp>(0);
+  const perfStarted = useRef<DOMHighResTimeStamp | null>(null);
+  const actualPlaybackRateRef = useRef<number>(playbackRate);
+  const minActualPlaybackRateRef = useRef<number>(playbackRate);
+  const [minActualPlaybackRate, setMinActualPlaybackRate] =
+    useState<number>(playbackRate);
+  const sampleTimestamps = useRef<{ perf: DOMHighResTimeStamp; yt: number }[]>(
+    []
+  );
   const getCurrentTimeSec = useCallback(() => {
     if (ytPlayer.current?.getCurrentTime && chartSeq && chartPlaying) {
+      const ytCurrentTime = ytPlayer.current.getCurrentTime();
+      const perfNow = performance.now();
       const ytNow =
-        ytPlayer.current?.getCurrentTime() -
-        chartSeq.offset -
-        offsetPlusLatency * playbackRate;
-      rawStartTimeStamp.current =
-        performance.now() - (ytNow * 1000) / playbackRate;
+        ytCurrentTime - chartSeq.offset - offsetPlusLatency * playbackRate;
+      rawStartTimeStamp.current = perfNow - (ytNow * 1000) / playbackRate;
       if (filteredStartTimeStamp.current === null) {
         filteredStartTimeStamp.current = rawStartTimeStamp.current;
       }
+      if (perfStarted.current === null) {
+        perfStarted.current = perfNow;
+        actualPlaybackRateRef.current = playbackRate;
+      }
+
       const now =
-        ((performance.now() - filteredStartTimeStamp.current) / 1000) *
-        playbackRate;
-      const dt = (performance.now() - timeStampLastAdjusted.current) / 1000;
+        ((perfNow - filteredStartTimeStamp.current) / 1000) * playbackRate;
+      const dt = (perfNow - timeStampLastAdjusted.current) / 1000;
+
+      // 再生速度改ざん検知
+      if (
+        ytPlayer.current?.getPlayerState?.() === 1 &&
+        sampleTimestamps.current.length > 2 &&
+        perfNow - sampleTimestamps.current[0].perf > 1000
+      ) {
+        const actualPlaybackRate =
+          ((ytCurrentTime - sampleTimestamps.current[0].yt) /
+            (perfNow - sampleTimestamps.current[0].perf)) *
+          1000;
+        actualPlaybackRateRef.current =
+          actualPlaybackRateRef.current * Math.exp(-dt / 5.0) +
+          actualPlaybackRate * (1 - Math.exp(-dt / 5.0));
+        const actualPlaybackRateRounded =
+          Math.round(actualPlaybackRateRef.current * 20) / 20; // x0.05単位;
+        if (
+          perfNow - perfStarted.current > 5000 && // スマホなどで再生開始直後は不安定なため待つ
+          actualPlaybackRateRounded < minActualPlaybackRateRef.current &&
+          actualPlaybackRateRounded < playbackRate * 0.96 // 設定速度から-5%までの誤差は許容する
+        ) {
+          setMinActualPlaybackRate(
+            (minActualPlaybackRateRef.current = actualPlaybackRateRounded)
+          );
+        }
+
+        // 1000msのリングバッファ
+        while (
+          sampleTimestamps.current.length > 2 &&
+          perfNow - sampleTimestamps.current[0].perf > 1000
+        ) {
+          sampleTimestamps.current.shift();
+        }
+      }
+      sampleTimestamps.current.push({ perf: perfNow, yt: ytCurrentTime });
+
       // ずれを少しずつ補正する (ローパスフィルタ)
       filteredStartTimeStamp.current =
         filteredStartTimeStamp.current * Math.exp(-dt / 1.0) +
         rawStartTimeStamp.current * (1 - Math.exp(-dt / 1.0));
-      timeStampLastAdjusted.current = performance.now();
+      timeStampLastAdjusted.current = perfNow;
       return now;
     }
   }, [chartSeq, chartPlaying, offsetPlusLatency, playbackRate]);
@@ -651,7 +698,7 @@ function Play(props: Props) {
           cid &&
           !auto &&
           userBegin === null &&
-          playbackRate === 1 &&
+          minActualPlaybackRate === 1 &&
           lvIndex !== undefined &&
           chartBrief?.levels.at(lvIndex)
         ) {
@@ -687,7 +734,7 @@ function Play(props: Props) {
           if (
             cid &&
             userBegin === null &&
-            playbackRate === 1 &&
+            minActualPlaybackRate === 1 &&
             chartBrief?.levels.at(lvIndex)
           ) {
             try {
@@ -757,7 +804,7 @@ function Play(props: Props) {
       setNeedManualStart(false);
       setChartPlaying(true);
       setWasAutoPlay(auto);
-      setOldPlaybackRate(playbackRate);
+      // setOldPlaybackRate(playbackRate);
       setOldUserBegin(userBegin);
       // setChartStarted(true);
       setExitable(null);
@@ -778,7 +825,9 @@ function Play(props: Props) {
       ytPlayer.current?.setVolume?.(ytVolume);
     }
     ref.current?.focus();
-    filteredStartTimeStamp.current = null;
+    filteredStartTimeStamp.current = perfStarted.current = null;
+    setMinActualPlaybackRate((minActualPlaybackRateRef.current = playbackRate));
+    sampleTimestamps.current = [];
   }, [
     chartSeq,
     lateTimes,
@@ -808,7 +857,9 @@ function Play(props: Props) {
         break;
     }
     ref.current?.focus();
-    filteredStartTimeStamp.current = null;
+    filteredStartTimeStamp.current = perfStarted.current = null;
+    // setMinActualPlaybackRate(minActualPlaybackRateRef.current = playbackRate);
+    sampleTimestamps.current = [];
   }, [chartPlaying, ref]);
   const onError = useCallback((ec: number) => {
     setYtError(ec);
@@ -936,6 +987,11 @@ function Play(props: Props) {
             )}
             ready={musicAreaOk}
             playing={chartPlaying}
+            minActualPlaybackRate={
+              chartPlaying || (showResult && !showReady)
+                ? minActualPlaybackRate
+                : playbackRate
+            }
             playbackRate={playbackRate}
             ytBeginSec={ytBegin}
             offset={(chartSeq?.offset || 0) + offsetPlusLatency}
@@ -998,7 +1054,7 @@ function Play(props: Props) {
                 showResultDiff={
                   !wasAutoPlay &&
                   oldUserBegin === null &&
-                  oldPlaybackRate === 1 &&
+                  minActualPlaybackRate === 1 &&
                   showResult &&
                   !showReady
                 }
@@ -1232,13 +1288,15 @@ function Play(props: Props) {
               isTouch={isTouch}
               showShareButton={!wasAutoPlay && oldUserBegin === null}
               showRecord={
-                !wasAutoPlay && oldUserBegin === null && oldPlaybackRate === 1
+                !wasAutoPlay &&
+                oldUserBegin === null &&
+                minActualPlaybackRate === 1
               }
               newRecord={
                 score > oldBestScoreState &&
                 !wasAutoPlay &&
                 oldUserBegin === null &&
-                oldPlaybackRate === 1 &&
+                minActualPlaybackRate === 1 &&
                 lvIndex !== undefined &&
                 chartBrief?.levels[lvIndex] !== undefined
                   ? score - oldBestScoreState
@@ -1247,7 +1305,7 @@ function Play(props: Props) {
               largeResult={largeResult}
               record={record}
               inputType={hitType}
-              playbackRate4={oldPlaybackRate * 4}
+              playbackRate4={minActualPlaybackRate * 4}
             />
           )}
           {showStopped && (
@@ -1365,7 +1423,7 @@ function Play(props: Props) {
               showResultDiff={
                 !wasAutoPlay &&
                 oldUserBegin === null &&
-                oldPlaybackRate === 1 &&
+                minActualPlaybackRate === 1 &&
                 showResult &&
                 !showReady
               }
@@ -1412,11 +1470,15 @@ function Play(props: Props) {
             best={bestScoreAvailable ? oldBestScoreState : null}
             bestCount={oldBestScoreCounts}
             showBestScore={
-              !wasAutoPlay && oldUserBegin === null && oldPlaybackRate === 1
+              !wasAutoPlay &&
+              oldUserBegin === null &&
+              minActualPlaybackRate === 1
             }
             countMode={"judge"}
             showResultDiff={
-              !wasAutoPlay && oldUserBegin === null && oldPlaybackRate === 1
+              !wasAutoPlay &&
+              oldUserBegin === null &&
+              minActualPlaybackRate === 1
             }
           />
         </div>
