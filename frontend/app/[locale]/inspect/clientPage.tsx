@@ -111,7 +111,8 @@ export function InitInspect() {
 
   const [cid, setCid] = useState<string>();
   const [chartBrief, setChartBrief] = useState<ChartBrief>();
-  const [chartSeq, setChartSeq] = useState<ChartSeqData>();
+  const [seqMap, setSeqMap] = useState<Record<number, ChartSeqData>>();
+  const [initialLvIndex, setInitialLvIndex] = useState<number>(0);
   const [errorMsg, setErrorMsg] = useState<string | Error>();
 
   useEffect(() => {
@@ -126,38 +127,70 @@ export function InitInspect() {
     setChartBrief(session.brief);
 
     if (session.editing) {
-      setChartSeq(session.level);
+      setSeqMap({ [session.lvIndex]: session.level });
+      setInitialLvIndex(session.lvIndex);
       setErrorMsg(undefined);
     } else {
-      fetchBackend()
-        .url(`/api/seqFile/${session.cid}/${session.lvIndex}`)
-        .headers({ "X-If-Match": `"${session.brief.etag}"` })
-        .get()
-        .badRequest(markAsExpected)
-        .notFound(markAsExpected)
-        .error(412, (e) => {
-          refreshBrief(session.cid);
-          markAsExpected(e);
-        })
-        .arrayBuffer((buf) => {
-          const seq = msgpack.decode(buf) as ChartSeqData;
-          if (seq.ver === 6 || seq.ver === 15 || seq.ver === currentChartVer) {
-            return { seq, error: undefined };
-          } else {
-            return {
+      const listedLevels = session.brief.levels
+        .map((level, index) => ({ level, index }))
+        .filter(({ level }) => !level.unlisted);
+
+      if (listedLevels.length === 0) {
+        setErrorMsg(te("seqEmpty"));
+        return;
+      }
+
+      setInitialLvIndex(listedLevels[0].index);
+
+      Promise.all(
+        listedLevels.map(({ index }) =>
+          fetchBackend()
+            .url(`/api/seqFile/${session.cid}/${index}`)
+            .headers({ "X-If-Match": `"${session.brief.etag}"` })
+            .get()
+            .badRequest(markAsExpected)
+            .notFound(markAsExpected)
+            .error(412, (e) => {
+              refreshBrief(session.cid);
+              markAsExpected(e);
+            })
+            .arrayBuffer((buf) => {
+              const seq = msgpack.decode(buf) as ChartSeqData;
+              if (
+                seq.ver === 6 ||
+                seq.ver === 15 ||
+                seq.ver === currentChartVer
+              ) {
+                return { index, seq, error: undefined };
+              } else {
+                return {
+                  index,
+                  seq: undefined,
+                  error: te("chartVersion", { ver: (seq as any)?.ver }),
+                };
+              }
+            })
+            .catch((e: unknown) => ({
+              index,
               seq: undefined,
-              error: te("chartVersion", { ver: (seq as any)?.ver }),
-            };
+              error: captureAndWrap(e),
+            }))
+        )
+      ).then((results) => {
+        const errorResult = results.find((r) => r.error);
+        if (errorResult) {
+          setErrorMsg(errorResult.error);
+          return;
+        }
+        const map: Record<number, ChartSeqData> = {};
+        for (const r of results) {
+          if (r.seq) {
+            map[r.index] = r.seq;
           }
-        })
-        .catch((e: unknown) => ({
-          seq: undefined,
-          error: captureAndWrap(e),
-        }))
-        .then(({ seq, error }) => {
-          setChartSeq(seq);
-          setErrorMsg(error);
-        });
+        }
+        setSeqMap(map);
+        setErrorMsg(undefined);
+      });
     }
   }, [te]);
 
@@ -166,7 +199,8 @@ export function InitInspect() {
       errorMsg={errorMsg}
       cid={cid}
       chartBrief={chartBrief}
-      chartSeq={chartSeq}
+      seqMap={seqMap}
+      initialLvIndex={initialLvIndex}
     />
   );
 }
@@ -175,11 +209,12 @@ interface InspectProps {
   errorMsg?: string | Error;
   cid?: string;
   chartBrief?: ChartBrief;
-  chartSeq?: ChartSeqData;
+  seqMap?: Record<number, ChartSeqData>;
+  initialLvIndex?: number;
 }
 
 function Inspect(props: InspectProps) {
-  const { errorMsg, cid, chartBrief, chartSeq } = props;
+  const { errorMsg, cid, chartBrief, seqMap, initialLvIndex = 0 } = props;
   const t = useTranslations("inspect");
   const {
     isTouch,
@@ -189,6 +224,48 @@ function Inspect(props: InspectProps) {
   } = useDisplayMode();
   const standalone = useStandaloneDetector();
   const insideFrame = useInsideFrameDetector();
+
+  const listedLevels = useMemo(() => {
+    if (!chartBrief) return [];
+    return chartBrief.levels
+      .map((level, index) => ({ level, index }))
+      .filter(
+        ({ level, index }) => !level.unlisted || (seqMap && index in seqMap)
+      );
+  }, [chartBrief, seqMap]);
+
+  const [selectedLvIndex, setSelectedLvIndex] =
+    useState<number>(initialLvIndex);
+
+  useEffect(() => {
+    if (
+      listedLevels.length > 0 &&
+      !listedLevels.some((l) => l.index === selectedLvIndex)
+    ) {
+      setSelectedLvIndex(listedLevels[0].index);
+    }
+  }, [listedLevels, selectedLvIndex]);
+
+  const chartSeq = seqMap ? seqMap[selectedLvIndex] : undefined;
+
+  const levelOptions = useMemo(
+    () =>
+      listedLevels.map(({ level, index }) => ({
+        value: index,
+        label: (
+          <span className="flex items-center gap-1.5 truncate">
+            {level.name && (
+              <span className="font-title truncate">{level.name}</span>
+            )}
+            <span className={clsx("fn-level-type", level.type)}>
+              <span>{level.type}-</span>
+              <span>{level.difficulty}</span>
+            </span>
+          </span>
+        ),
+      })),
+    [listedLevels]
+  );
 
   const ref = useRef<HTMLDivElement | null>(null);
   const ytPlayer = useRef<YouTubePlayer | undefined>(undefined);
@@ -493,6 +570,24 @@ function Inspect(props: InspectProps) {
               )}
             </div>
           </div>
+          {/* レベル選択 */}
+          {levelOptions.length > 0 && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-semibold whitespace-nowrap">
+                {t("level")}:
+              </span>
+              <Select
+                className="flex-1 min-w-0"
+                options={levelOptions}
+                value={selectedLvIndex}
+                onSelect={(idx: number) => {
+                  setSelectedLvIndex(idx);
+                }}
+                disabled={levelOptions.length <= 1}
+                showValue
+              />
+            </div>
+          )}
 
           {/* 操作ボタン */}
           <div className="flex flex-wrap items-center gap-1">
