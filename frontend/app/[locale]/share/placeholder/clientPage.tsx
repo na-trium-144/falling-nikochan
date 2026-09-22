@@ -4,9 +4,11 @@ import clsx from "clsx/lite";
 import {
   ChartBrief,
   deserializeResultParams,
+  isVerificationRequired,
   RecordGetSummary,
   RecordGetSummarySchema,
   ResultParams,
+  verifyResultParams,
 } from "@falling-nikochan/chart";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
@@ -62,6 +64,9 @@ export default function ShareChart(props: Props) {
   const [sharedResult, setSharedResult] = useState<
     ResultParams | string | null
   >(null);
+  const [sharedResultVerified, setSharedResultVerified] = useState<
+    boolean | Error | null
+  >(null);
 
   useEffect(() => {
     const cid = window.location.pathname.split("/").pop()!;
@@ -99,8 +104,36 @@ export default function ShareChart(props: Props) {
       .catch((e: unknown) => captureAndWrap(e, { cid }))
       .then((record) => setRecord(record));
     if (searchParams.get("result")) {
+      let resultParams: ResultParams;
       try {
-        setSharedResult(deserializeResultParams(searchParams.get("result")!));
+        resultParams = deserializeResultParams(searchParams.get("result")!);
+        setSharedResult(resultParams);
+        setSharedResultVerified(null);
+        if (isVerificationRequired(resultParams)) {
+          fetchBackend()
+            .get(`/api/playSession/publicKey`)
+            .json(async (jwks: { keys: JsonWebKey[] }) => {
+              const pubKey = await Promise.all(
+                jwks.keys.map((jwk) =>
+                  crypto.subtle.importKey(
+                    "jwk",
+                    jwk,
+                    { name: "ECDSA", namedCurve: "P-256" },
+                    true,
+                    ["verify"]
+                  )
+                )
+              );
+              const verified = await verifyResultParams(
+                searchParams.get("result")!,
+                pubKey
+              );
+              setSharedResultVerified(verified);
+            })
+            .catch((e) => {
+              setSharedResultVerified(e);
+            });
+        }
       } catch (e) {
         console.error(e);
         setSharedResult(te("api.invalidResultParam"));
@@ -129,6 +162,7 @@ export default function ShareChart(props: Props) {
             brief={brief}
             record={record}
             sharedResult={sharedResult}
+            sharedResultVerified={sharedResultVerified}
             locale={locale}
             forceShowCId
           />

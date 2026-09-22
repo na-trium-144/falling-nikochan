@@ -2,9 +2,10 @@ import * as msgpack from "@msgpack/msgpack";
 import { decodeBase64Url, encodeBase64Url } from "hono/utils/encode";
 import * as v from "valibot";
 import { CidSchema } from "./chart.js";
+import type { webcrypto } from "node:crypto";
 
 const dateBase3 = new Date(2025, 2, 1);
-const dateBase4 = new Date(2025, 10, 1);
+const dateBase4 = new Date(2026, 10, 1);
 export function serializeDate3(date: Date): number {
   const targetDate = new Date(
     date.getFullYear(),
@@ -28,6 +29,7 @@ export function deserializeDate4(diffMinutes: number): Date {
 }
 
 export interface ResultParams {
+  ver?: number;
   date: Date | null;
   lvName: string;
   lvType: number;
@@ -186,7 +188,7 @@ export function serializeResultParams(params: ResultParams): string {
 }
 export function deserializeResultParams(serialized: string): ResultParams {
   const serializedArr = decodeBase64Url(
-    serialized.replace(/[^0-9a-zA-Z+/_-]/g, "")
+    serialized.split(".")[0].replace(/[^0-9a-zA-Z+/_-]/g, "")
   );
   const deserialized = v.parse(
     ResultSerializedSchema(),
@@ -196,6 +198,7 @@ export function deserializeResultParams(serialized: string): ResultParams {
     case 1:
     case 2:
       return {
+        ver: deserialized[0],
         date:
           deserialized[1] !== null
             ? new Date(dateBase3.getTime() + deserialized[1])
@@ -215,6 +218,7 @@ export function deserializeResultParams(serialized: string): ResultParams {
       };
     case 3:
       return {
+        ver: deserialized[0],
         date:
           deserialized[1] !== null ? deserializeDate3(deserialized[1]) : null,
         lvName: deserialized[2],
@@ -232,6 +236,7 @@ export function deserializeResultParams(serialized: string): ResultParams {
       };
     case 4:
       return {
+        ver: deserialized[0],
         date:
           deserialized[1] !== null ? deserializeDate4(deserialized[1]) : null,
         lvName: deserialized[2],
@@ -250,4 +255,41 @@ export function deserializeResultParams(serialized: string): ResultParams {
     default:
       throw new Error("Invalid version");
   }
+}
+export function isVerificationRequired(result: ResultParams) {
+  // ver3以前かつ日付が署名導入前なら署名は不要
+  if (typeof result.ver !== "number") {
+    throw new Error("result.ver must be a number");
+  }
+  return (
+    result.ver >= 4 ||
+    (result.date && result.date.getTime() >= dateBase4.getTime())
+  );
+}
+export async function verifyResultParams(
+  serialized: string,
+  resultSecretPubKeys: webcrypto.CryptoKey[]
+): Promise<boolean> {
+  const result = serialized.split(".").at(0);
+  const sign = serialized.split(".").at(1);
+  if (!result || !sign) {
+    return false;
+  }
+  for (const pubkey of resultSecretPubKeys) {
+    try {
+      if (
+        await crypto.subtle.verify(
+          { name: "ECDSA", hash: { name: "SHA-256" } },
+          pubkey,
+          decodeBase64Url(sign),
+          decodeBase64Url(result)
+        )
+      ) {
+        return true;
+      }
+    } catch {
+      // pass
+    }
+  }
+  return false;
 }

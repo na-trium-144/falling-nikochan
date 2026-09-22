@@ -4,6 +4,7 @@ import {
   cacheControl,
   languageDetector,
   ResponseOK,
+  resultSecretPubKey,
 } from "./env.js";
 import { getTranslations, locales } from "@falling-nikochan/i18n/dynamic.js";
 import {
@@ -12,8 +13,10 @@ import {
   chainScoreRate,
   ChartBrief,
   deserializeResultParams,
+  isVerificationRequired,
   levelTypes,
   ResultParams,
+  verifyResultParams,
 } from "@falling-nikochan/chart";
 import packageJson from "../package.json" with { type: "json" };
 import { env } from "hono/adapter";
@@ -57,9 +60,17 @@ const shareApp = (config: {
       if (qResult) {
         try {
           resultParams = deserializeResultParams(qResult);
-        } catch (e) {
-          c.var.logger.error(e);
+        } catch {
           // throw new HTTPException(400, { message: "invalidResultParam" });
+        }
+        if (
+          resultParams &&
+          isVerificationRequired(resultParams) &&
+          !(await verifyResultParams(qResult, [
+            await resultSecretPubKey(env(c)),
+          ]))
+        ) {
+          resultParams = null;
         }
       }
       const pBriefRes = config.fetchBrief(env(c), cid);

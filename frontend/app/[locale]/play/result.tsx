@@ -69,7 +69,7 @@ export default function Result(props: Props) {
     props.brief,
     props.lang,
     props.resultSerialized,
-    // props.resultSign,
+    props.resultSign,
     props.date ? props.date.getTime() : null
   );
 

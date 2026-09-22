@@ -12,7 +12,12 @@ import * as v from "valibot";
 import { sign, verify } from "hono/jwt";
 import { sValidatorHook } from "../error.js";
 import type { webcrypto } from "node:crypto";
-import { deserializeResultParams, ResultParams } from "@falling-nikochan/chart";
+import {
+  deserializeResultParams,
+  isVerificationRequired,
+  ResultParams,
+  verifyResultParams,
+} from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
 import type { JsonWebKey } from "node:crypto";
 import { CidSchema } from "@falling-nikochan/chart";
@@ -277,6 +282,66 @@ const playSessionApp = async (config: {
         );
 
         return c.json({ sign: Buffer.from(sign).toString("base64url") }, 200);
+      }
+    )
+    .get(
+      "/verify",
+      describeRoute({
+        description: "Verify the shared play result data.",
+        responses: {
+          204: {
+            description: "Successful verification",
+          },
+          409: {
+            description: "Verification not applicable for older results",
+            content: {
+              "application/json": {
+                schema: resolver(v.string()), // TODO
+              },
+            },
+          },
+          422: {
+            description: "Failed verification",
+            content: {
+              "application/json": {
+                schema: resolver(v.string()), // TODO
+              },
+            },
+          },
+        },
+      }),
+      validator(
+        "query",
+        v.object({
+          result: v.pipe(
+            v.string(),
+            v.description(
+              "ResultParam and signature encoded as Base64Url and concatenated with '.'"
+            )
+          ),
+        }),
+        sValidatorHook()
+      ),
+      async (c) => {
+        const { result } = c.req.valid("query");
+        let resultParams: ResultParams;
+        try {
+          resultParams = deserializeResultParams(result);
+        } catch {
+          throw new HTTPException(400, { message: "invalidResultParam" });
+        }
+        if (!isVerificationRequired(resultParams)) {
+          throw new HTTPException(409, {
+            message: "verificationNotApplicable",
+          });
+        }
+        if (
+          await verifyResultParams(result, [await resultSecretPubKey(env(c))])
+        ) {
+          return c.body(null, 204);
+        } else {
+          throw new HTTPException(422, { message: "unauthorizedResultParam" });
+        }
       }
     )
     .get(

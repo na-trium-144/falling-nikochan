@@ -5,6 +5,7 @@ import {
   cacheControl,
   immutable,
   ResponseOK,
+  resultSecretPubKey,
 } from "../env.js";
 // import { ImageResponse } from "@vercel/og";
 import { HTTPException } from "hono/http-exception";
@@ -12,8 +13,10 @@ import {
   ChartBrief,
   deserializeResultParams,
   inputTypes,
+  isVerificationRequired,
   levelTypes,
   ResultParams,
+  verifyResultParams,
 } from "@falling-nikochan/chart";
 import { OGShare } from "./ogShare.js";
 import { OGResult } from "./ogResult.js";
@@ -161,6 +164,14 @@ const ogApp = (config: {
         } catch (e) {
           c.var.logger.error(e);
           throw new HTTPException(400, { message: "invalidResultParam" });
+        }
+        if (
+          isVerificationRequired(resultParams) &&
+          !(await verifyResultParams(qResult, [
+            await resultSecretPubKey(env(c)),
+          ]))
+        ) {
+          throw new HTTPException(422, { message: "unauthorizedResultParam" });
         }
       }
 
