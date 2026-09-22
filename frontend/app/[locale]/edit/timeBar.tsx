@@ -52,8 +52,8 @@ export type TimeBarProps = {
     }
   | {
       chart?: never;
-      chartSeq?: ChartSeqData;
-      currentTimeSec?: number;
+      chartSeq: ChartSeqData;
+      currentTimeSec: number;
     }
 );
 
@@ -69,9 +69,12 @@ export default function TimeBar(props: TimeBarProps) {
   const cur = currentLevel?.current;
 
   const offset = chart ? chart.offset : (chartSeq?.offset ?? 0);
+
   const currentTimeSec = chart
     ? (cur?.timeSec ?? 0)
     : (props.currentTimeSec ?? 0);
+  const currentTimeSecRef = useRef<number>(0);
+  currentTimeSecRef.current = currentTimeSec;
   const zoomLevel = props.zoom ?? chart?.zoom ?? 0;
 
   const { rem } = useDisplayMode();
@@ -116,11 +119,12 @@ export default function TimeBar(props: TimeBarProps) {
   const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const suppressNoteClickUntil = useRef(0);
   const onUserScrolled = useCallback(() => {
+    // ここではcurrentTimeSecに依存させずrefを使う
     if (
       (chart || chartSeq) &&
       Math.abs(
         (timeBarRef.current?.scrollLeft ?? 0) / zoomPxPerSec() -
-          (currentTimeSec + offset)
+          (currentTimeSecRef.current + offset)
       ) > 0.01
     ) {
       if (scrollTimeout.current !== null) {
@@ -146,17 +150,14 @@ export default function TimeBar(props: TimeBarProps) {
     timeBarRef,
     chart,
     chartSeq,
-    currentTimeSec,
     offset,
   ]);
 
   useEffect(() => {
     const scrollTimeBar = () => {
-      if (chart || chartSeq) {
-        timeBarRef.current?.scrollTo({
-          left: (currentTimeSec + offset) * zoomPxPerSec(),
-        });
-      }
+      timeBarRef.current?.scrollTo({
+        left: (currentTimeSec + offset) * zoomPxPerSec(),
+      });
     };
     scrollTimeBar();
     if (chart) {
@@ -165,7 +166,7 @@ export default function TimeBar(props: TimeBarProps) {
         chart.off("rerender", scrollTimeBar);
       };
     }
-  }, [chart, chartSeq, cur, currentTimeSec, offset, timeBarRef, zoomPxPerSec]);
+  }, [chart, offset, timeBarRef, zoomPxPerSec, currentTimeSec]);
 
   useEffect(() => {
     const timeBar = timeBarRef.current;
@@ -190,6 +191,7 @@ export default function TimeBar(props: TimeBarProps) {
         dragged = true;
       }
       timeBar.scrollLeft = dragStartScrollLeft - dx;
+      onUserScrolled();
       e.preventDefault();
     };
     const onMouseUp = () => {
@@ -201,18 +203,24 @@ export default function TimeBar(props: TimeBarProps) {
       }
     };
 
+    /*
+    onUserScrolledをReactのonScrollに登録すると、useEffectと同時発火して無限ループする場合があったので、
+    timeBar.addEventListenerで登録する必要がある
+    */
+    timeBar.addEventListener("scroll", onUserScrolled);
     timeBar.addEventListener("mousedown", onMouseDown);
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
     window.addEventListener("blur", onMouseUp);
     return () => {
+      timeBar.removeEventListener("scroll", onUserScrolled);
       timeBar.removeEventListener("mousedown", onMouseDown);
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
       window.removeEventListener("blur", onMouseUp);
       setDraggingTimeBar(false);
     };
-  }, [timeBarRef]);
+  }, [timeBarRef, onUserScrolled]);
 
   const currentStep = chart
     ? (cur?.step ?? stepZero())
@@ -296,7 +304,6 @@ export default function TimeBar(props: TimeBarProps) {
         )}
         style={{ height: barTop + barHeight + barBottom }}
         ref={timeBarRef as RefObject<HTMLDivElement>}
-        onScroll={onUserScrolled}
         scrollableX
         convertDeltaYToX
       >
@@ -308,7 +315,7 @@ export default function TimeBar(props: TimeBarProps) {
             marginLeft: timeBarWidth / 2,
             marginRight: timeBarWidth,
             width:
-              Math.max(ytEndSec ?? 0, (currentTimeSec ?? 0) + (offset ?? 0)) *
+              Math.max(ytEndSec ?? 0, currentTimeSec + (offset ?? 0)) *
               zoomPxPerSec(),
           }}
         >
@@ -330,22 +337,18 @@ export default function TimeBar(props: TimeBarProps) {
           {Array.from(
             new Array(Math.ceil(timeBarWidth / 2 / zoomPxPerSec()))
           ).map((_, dt) => (
-            <Fragment
-              key={Math.round((currentTimeSec ?? 0) + (offset ?? 0)) + dt}
-            >
+            <Fragment key={Math.round(currentTimeSec + (offset ?? 0)) + dt}>
               <span
                 className="absolute border-l border-gray-500 "
                 style={{
                   top: -1.25 * rem,
                   bottom: -4,
                   left: timeBarPos(
-                    Math.round((currentTimeSec ?? 0) + (offset ?? 0)) + dt
+                    Math.round(currentTimeSec + (offset ?? 0)) + dt
                   ),
                 }}
               >
-                {timeSecStr(
-                  Math.round((currentTimeSec ?? 0) + (offset ?? 0)) + dt
-                )}
+                {timeSecStr(Math.round(currentTimeSec + (offset ?? 0)) + dt)}
               </span>
               {dt !== 0 && (
                 <span
@@ -354,13 +357,11 @@ export default function TimeBar(props: TimeBarProps) {
                     top: -1.25 * rem,
                     bottom: -4,
                     left: timeBarPos(
-                      Math.round((currentTimeSec ?? 0) + (offset ?? 0)) - dt
+                      Math.round(currentTimeSec + (offset ?? 0)) - dt
                     ),
                   }}
                 >
-                  {timeSecStr(
-                    Math.round((currentTimeSec ?? 0) + (offset ?? 0)) - dt
-                  )}
+                  {timeSecStr(Math.round(currentTimeSec + (offset ?? 0)) - dt)}
                 </span>
               )}
             </Fragment>
