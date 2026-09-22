@@ -5,7 +5,6 @@ import {
   ChartSeqData,
   displayNote,
   DisplayNote,
-  getStep,
   stepCmp,
   targetY,
 } from "@falling-nikochan/chart";
@@ -14,16 +13,18 @@ import { useCanvasProps } from "@/play/fallingWindow.js";
 import { DisplayNikochan } from "@/play/displayNikochan.js";
 import { useDisplayMode } from "@/scale.js";
 import { useTheme } from "@/common/theme.js";
+import { ChartEvent, getInspectCurrentStep } from "./clientPage.js";
 
 interface Props {
   className?: string;
   style?: React.CSSProperties;
   chartSeq?: ChartSeqData;
+  allEvents: readonly ChartEvent[];
   getCurrentTimeSec: () => number;
 }
 
 export default function InspectFallingWindow(props: Props) {
-  const { chartSeq, getCurrentTimeSec } = props;
+  const { chartSeq, allEvents, getCurrentTimeSec } = props;
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const {
@@ -78,7 +79,11 @@ export default function InspectFallingWindow(props: Props) {
 
         ctx.clearRect(0, 0, canvasRect.width * dpr, canvasRect.height * dpr);
 
-        const currentStep = getStep(chartSeq.bpmChanges, currentTimeSec, 192);
+        const currentStep = getInspectCurrentStep(
+          chartSeq,
+          allEvents,
+          currentTimeSec
+        );
 
         const notesInGame = chartSeq.notes.map((n) => ({
           ...n,
@@ -102,9 +107,7 @@ export default function InspectFallingWindow(props: Props) {
         // 軌跡を描画
         displayNikochan.forEach((d) => {
           const note = chartSeq.notes[d.dn.id];
-          const isSelected =
-            Math.abs(note.hitTimeSec - currentTimeSec) < 0.005 ||
-            stepCmp(note.step, currentStep) === 0;
+          const isSelected = stepCmp(note.step, currentStep) === 0;
           d.drawTrail(
             ctx,
             dpr,
@@ -120,9 +123,7 @@ export default function InspectFallingWindow(props: Props) {
         // 選択中のみ赤丸を描画
         displayNikochan.forEach((d) => {
           const note = chartSeq.notes[d.dn.id];
-          const isSelected =
-            Math.abs(note.hitTimeSec - currentTimeSec) < 0.005 ||
-            stepCmp(note.step, currentStep) === 0;
+          const isSelected = stepCmp(note.step, currentStep) === 0;
           if (isSelected) {
             d.drawCircle(ctx, dpr, "oklch(70.4% 0.191 22.216)"); // red-400
           }
@@ -131,6 +132,7 @@ export default function InspectFallingWindow(props: Props) {
     },
     [
       chartSeq,
+      allEvents,
       canvasRect,
       dpr,
       boxSize,

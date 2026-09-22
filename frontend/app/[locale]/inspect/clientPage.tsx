@@ -47,13 +47,13 @@ import {
 import { titleWithSiteName } from "@/common/title.js";
 import { InitErrorMessage } from "@/play/messageBox.js";
 
-interface ChartEvent {
+export interface ChartEvent {
   step: Step;
   timeSec: number;
   type: "note" | "bpm" | "speed" | "signature";
 }
 
-function getAllEvents(chartSeq: ChartSeqData): ChartEvent[] {
+export function getAllEvents(chartSeq: ChartSeqData): ChartEvent[] {
   const events: ChartEvent[] = [];
   for (const n of chartSeq.notes) {
     events.push({
@@ -91,8 +91,8 @@ function getAllEvents(chartSeq: ChartSeqData): ChartEvent[] {
   return events;
 }
 
-function getUniqueEventTimes(
-  events: ChartEvent[]
+export function getUniqueEventTimes(
+  events: readonly ChartEvent[]
 ): { step: Step; timeSec: number }[] {
   const result: { step: Step; timeSec: number }[] = [];
   for (const ev of events) {
@@ -104,6 +104,63 @@ function getUniqueEventTimes(
     }
   }
   return result;
+}
+
+export function findClosestEvent(
+  events: readonly ChartEvent[],
+  currentTimeSec: number
+): ChartEvent | null {
+  if (events.length === 0) return null;
+  let low = 0;
+  let high = events.length - 1;
+  while (low <= high) {
+    const mid = (low + high) >> 1;
+    if (events[mid].timeSec < currentTimeSec) {
+      low = mid + 1;
+    } else {
+      high = mid - 1;
+    }
+  }
+  let best = events[Math.min(Math.max(0, low), events.length - 1)];
+  let minDiff = Math.abs(best.timeSec - currentTimeSec);
+
+  if (low - 1 >= 0) {
+    const prev = events[low - 1];
+    const diff = Math.abs(prev.timeSec - currentTimeSec);
+    if (diff < minDiff) {
+      minDiff = diff;
+      best = prev;
+    }
+  }
+  if (low + 1 < events.length) {
+    const next = events[low + 1];
+    const diff = Math.abs(next.timeSec - currentTimeSec);
+    if (diff < minDiff) {
+      minDiff = diff;
+      best = next;
+    }
+  }
+  return best;
+}
+
+export function getInspectCurrentStep(
+  chartSeq: ChartSeqData,
+  events: readonly ChartEvent[],
+  currentTimeSec: number
+): Step {
+  const stepSnap4th = getStep(chartSeq.bpmChanges, currentTimeSec, 1);
+  const closestEvent = findClosestEvent(events, currentTimeSec);
+  if (!closestEvent) {
+    return stepSnap4th;
+  }
+  const timeSnap4th = getTimeSec(chartSeq.bpmChanges, stepSnap4th);
+  const diffSnap4th = Math.abs(timeSnap4th - currentTimeSec);
+  const diffEvent = Math.abs(closestEvent.timeSec - currentTimeSec);
+
+  if (diffEvent <= diffSnap4th) {
+    return closestEvent.step;
+  }
+  return stepSnap4th;
 }
 
 export function InitInspect() {
@@ -390,28 +447,45 @@ function Inspect(props: InspectProps) {
     [chartSeq]
   );
 
+  const allEvents = useMemo(
+    () => (chartSeq ? getAllEvents(chartSeq) : []),
+    [chartSeq]
+  );
+  const uniqueEvents = useMemo(
+    () => getUniqueEventTimes(allEvents),
+    [allEvents]
+  );
+
+  const currentStep = useMemo(() => {
+    if (!chartSeq) return stepZero();
+    return getInspectCurrentStep(chartSeq, allEvents, currentTimeSec);
+  }, [chartSeq, allEvents, currentTimeSec]);
+
+  const isNoteSelected = useCallback(
+    (n: { step: Step }) => stepCmp(n.step, currentStep) === 0,
+    [currentStep]
+  );
+
   // カーソル移動 (前/次のイベント)
   const seekPrevEvent = useCallback(() => {
     if (!chartSeq) return;
-    const events = getUniqueEventTimes(getAllEvents(chartSeq));
-    const target = events
-      .filter((ev) => ev.timeSec < currentTimeSec - 0.005)
+    const target = uniqueEvents
+      .filter((ev) => stepCmp(ev.step, currentStep) < 0)
       .pop();
     if (!target) {
       setAndSeekCurrentTimeWithoutOffset(0);
     } else {
       setAndSeekCurrentTimeWithoutOffset(target.timeSec + chartSeq.offset);
     }
-  }, [chartSeq, currentTimeSec, setAndSeekCurrentTimeWithoutOffset]);
+  }, [chartSeq, uniqueEvents, currentStep, setAndSeekCurrentTimeWithoutOffset]);
 
   const seekNextEvent = useCallback(() => {
     if (!chartSeq) return;
-    const events = getUniqueEventTimes(getAllEvents(chartSeq));
-    const target = events.find((ev) => ev.timeSec > currentTimeSec + 0.005);
+    const target = uniqueEvents.find((ev) => stepCmp(ev.step, currentStep) > 0);
     if (target) {
       setAndSeekCurrentTimeWithoutOffset(target.timeSec + chartSeq.offset);
     }
-  }, [chartSeq, currentTimeSec, setAndSeekCurrentTimeWithoutOffset]);
+  }, [chartSeq, uniqueEvents, currentStep, setAndSeekCurrentTimeWithoutOffset]);
 
   // キーボードショートカット
   useEffect(() => {
@@ -438,10 +512,6 @@ function Inspect(props: InspectProps) {
     return () => window.removeEventListener("keydown", keydown);
   }, [chartSeq, playing, start, stop, seekPrevEvent, seekNextEvent]);
 
-  const currentStep = chartSeq
-    ? getStep(chartSeq.bpmChanges, currentTimeSec, 192)
-    : stepZero();
-
   const currentSignatureState = chartSeq
     ? getSignatureState(signatureWithBarNum, currentStep)
     : null;
@@ -460,12 +530,7 @@ function Inspect(props: InspectProps) {
     : "-";
 
   // 選択中の音符（現在カーソル位置と一致する音符）
-  const selectedNotes =
-    chartSeq?.notes.filter(
-      (n) =>
-        Math.abs(n.hitTimeSec - currentTimeSec) < 0.005 ||
-        stepCmp(n.step, currentStep) === 0
-    ) || [];
+  const selectedNotes = chartSeq?.notes.filter((n) => isNoteSelected(n)) || [];
 
   const ytId = chartBrief?.ytId;
 
@@ -749,6 +814,7 @@ function Inspect(props: InspectProps) {
           <InspectFallingWindow
             className="absolute inset-0"
             chartSeq={chartSeq}
+            allEvents={allEvents}
             getCurrentTimeSec={getCurrentTimeSecForFW}
           />
         </div>
@@ -781,6 +847,7 @@ function Inspect(props: InspectProps) {
               setAndSeekCurrentTimeWithoutOffset
             }
             zoom={zoom}
+            isNoteSelected={isNoteSelected}
           />
         </div>
       </div>
