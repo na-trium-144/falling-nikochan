@@ -274,6 +274,8 @@ function Inspect(props: InspectProps) {
   const [playing, setPlaying] = useState<boolean>(false);
   const [ready, setReady] = useState<boolean>(false);
   const [currentTimeSec, setCurrentTimeSec] = useState<number>(0);
+  const currentTimeSecRef = useRef<number>(0);
+  currentTimeSecRef.current = currentTimeSec;
   const [zoom, setZoom] = useState<number>(0);
 
   const colorThief = useColorThief();
@@ -349,12 +351,12 @@ function Inspect(props: InspectProps) {
     }
   }, [playing, chartSeq]);
 
-  const getCurrentTimeSecForFW = useCallback(() => {
+  const getCurrentTimeSec = useCallback(() => {
     if (playing && ytPlayer.current?.getCurrentTime && chartSeq) {
       return Math.max(0, ytPlayer.current.getCurrentTime() - chartSeq.offset);
     }
-    return currentTimeSec;
-  }, [playing, chartSeq, currentTimeSec]);
+    return currentTimeSecRef.current;
+  }, [playing, chartSeq]);
 
   // SE設定
   const {
@@ -749,7 +751,7 @@ function Inspect(props: InspectProps) {
           <InspectFallingWindow
             className="absolute inset-0"
             chartSeq={chartSeq}
-            getCurrentTimeSec={getCurrentTimeSecForFW}
+            getCurrentTimeSec={getCurrentTimeSec}
           />
         </div>
       </div>
