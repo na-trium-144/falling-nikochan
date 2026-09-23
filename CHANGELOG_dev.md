@@ -1,3 +1,8 @@
+## ver. 17.13 - 2026/09/24
+
+* 不要なBaggage,Sentry-Trace,X-Request-Idヘッダーを削除
+* service workerが生成するレスポンスを203として区別
+
 ## ver. 17.12 - 2026/09/20 [#1381](https://github.com/na-trium-144/falling-nikochan/pull/1381)
 
 * トップページのgrassの高さを半分にする

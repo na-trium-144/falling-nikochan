@@ -20,6 +20,7 @@ import { env } from "hono/adapter";
 import { Context, Hono } from "hono";
 import { etagContentRegex } from "./api/chart.js";
 import { BaseLogger } from "@hono/structured-logger";
+import { ContentfulStatusCode } from "hono/utils/http-status";
 
 /*
 OGPの見た目を優先するため、shareページではクエリのlangを優先する。
@@ -36,6 +37,7 @@ const shareApp = (config: {
   ) => Promise<{ brief: ChartBrief; etag: string }>;
   fetchStatic: (e: Bindings, url: URL) => Promise<ResponseOK>;
   languageDetector?: (c: Context, next: () => Promise<void>) => Promise<void>;
+  successStatus?: ContentfulStatusCode;
 }) =>
   new Hono<{ Bindings: Bindings; Variables: { logger: BaseLogger } }>({
     strict: false,
@@ -178,7 +180,7 @@ const shareApp = (config: {
           "</script></body></html>";
       }
 
-      return c.text(replacedBody, 200, {
+      return c.text(replacedBody, config.successStatus ?? 200, {
         "Content-Type": res.headers.get("Content-Type") || "text/plain",
         "Cache-Control": cacheControl(env(c), CACHE_MAX_AGE, true),
         /*

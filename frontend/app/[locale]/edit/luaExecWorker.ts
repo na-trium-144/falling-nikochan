@@ -19,6 +19,7 @@ Sentry.init({
     // transportOptions type is not recognized correctly: https://github.com/getsentry/sentry-javascript/issues/13548
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any,
+  tracePropagationTargets: [],
   enabled: !isbot(navigator?.userAgent),
   beforeSend(event /*, hint*/) {
     return event;

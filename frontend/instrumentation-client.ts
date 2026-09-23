@@ -19,6 +19,8 @@ Sentry.init({
     // transportOptions type is not recognized correctly: https://github.com/getsentry/sentry-javascript/issues/13548
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any,
+  // disable Baggage and Sentry-Trace header
+  tracePropagationTargets: [],
   enabled: !isbot(navigator?.userAgent),
   ignoreErrors: [
     "Minified React error #418", // hydration failed

@@ -507,11 +507,13 @@ app
   .use(async (c, next) => {
     await next();
     if (c.res.headers.get("Content-Type")?.includes("text/html")) {
-      c.res = returnBody(
-        (await c.res.text()).replace("</body>", cfBeaconHtml + "</body>"),
-        c.res.headers,
-        c.res.status
-      );
+      let body = await c.res.text();
+      if (body.includes("</body>") && !body.includes("beacon.min.js")) {
+        body = body.replace("</body>", cfBeaconHtml + "</body>");
+        c.res = returnBody(body, c.res.headers, c.res.ok ? 203 : c.res.status);
+      } else {
+        c.res = returnBody(body, c.res.headers, c.res.status);
+      }
     }
   })
   .route(
@@ -534,6 +536,7 @@ app
       },
       fetchStatic: fetchStaticWithThrow,
       languageDetector,
+      successStatus: 203,
     })
   )
   .route(
@@ -589,7 +592,7 @@ app
   })
   .get("/*", async (c) => {
     if (c.req.method === "HEAD") {
-      return c.body(null, 200, {
+      return c.body(null, 203, {
         "Cache-Control": "no-store",
         "Content-Type": getContentType(c.req.path),
       });

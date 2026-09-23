@@ -72,7 +72,7 @@ const fetchBrief = (_e: Bindings, cid: string) => getBrief(db!, cid);
 const app = new Hono<{ Bindings: Bindings }>({ strict: false });
 app.use(sentryMiddleware(app));
 app
-  .use(requestId())
+  .use(requestId({ headerName: "" }))
   .use(
     structuredLogger({
       createLogger: (c) => rootLogger.child({ requestId: c.var.requestId }),
