@@ -913,6 +913,8 @@ function Inspect(props: InspectProps) {
             chartSeq={chartSeq}
             allEvents={allEvents}
             getCurrentTimeSec={getCurrentTimeSec}
+            playing={playing}
+            playbackRate={playbackRate}
           />
         </div>
       </div>
