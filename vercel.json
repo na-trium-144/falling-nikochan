@@ -44,7 +44,7 @@
       "destination": "/api"
     },
     {
-      "source": "/(edit|edit/.*|play|main/.*)",
+      "source": "/(edit|edit/.*|play|inspect|main/.*)",
       "destination": "/api"
     },
     {

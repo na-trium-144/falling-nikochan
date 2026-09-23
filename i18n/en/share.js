@@ -22,6 +22,7 @@ export default {
     // "Details →" button below best score
     detail: "Details",
     start: "Start Game!",
+    inspect: "Inspect Chart",
     unavailable: "No levels have been published yet.",
     titleWithResult: "Play record on {date} - {title}",
     titleWithResultNoDate: "Play record - {title}",

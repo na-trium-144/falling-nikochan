@@ -3,6 +3,10 @@
 import clsx from "clsx/lite";
 import {
   ChartEditing,
+  ChartSeqData,
+  findBpmIndexFromSec,
+  findBpmIndexFromStep,
+  getBarLength,
   getSignatureState,
   getStep,
   getTimeSec,
@@ -11,38 +15,68 @@ import {
   stepCmp,
   stepImproper,
   stepZero,
+  updateBarNum,
 } from "@falling-nikochan/chart";
 import {
   Fragment,
   RefObject,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { timeSecStr, timeStr } from "./str.js";
 import { useDisplayMode } from "@/scale.js";
-import { getBarLength } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { Scrollable } from "@/common/scrollable.jsx";
 
-interface Props {
-  chart?: ChartEditing;
+export type TimeBarProps = {
   setAndSeekCurrentTimeWithoutOffset: (
     timeSec: number,
     focus?: boolean,
     allowSeekAhead?: boolean
   ) => void;
-}
+  zoom?: number;
+  isNoteSelected?: (n: {
+    id: number;
+    hitTimeSec: number;
+    step: Step;
+  }) => boolean;
+} & (
+  | {
+      chart?: ChartEditing;
+      chartSeq?: never;
+      currentTimeSec?: never;
+    }
+  | {
+      chart?: never;
+      chartSeq: ChartSeqData;
+      currentTimeSec: number;
+    }
+);
+
 const DRAG_THRESHOLD_PX = 1;
 const DRAG_CLICK_SUPPRESSION_MS = 100;
 
-export default function TimeBar(props: Props) {
+export default function TimeBar(props: TimeBarProps) {
   const t = useTranslations("edit.timeBar");
-  const { chart, setAndSeekCurrentTimeWithoutOffset } = props;
+  const { setAndSeekCurrentTimeWithoutOffset } = props;
+  const chart = props.chart;
+  const chartSeq = props.chartSeq;
   const currentLevel = chart?.currentLevel;
   const cur = currentLevel?.current;
+
+  const offset = chart ? chart.offset : (chartSeq?.offset ?? 0);
+
+  const currentTimeSec = chart
+    ? (cur?.timeSec ?? 0)
+    : (props.currentTimeSec ?? 0);
+  const currentTimeSecRef = useRef<number>(0);
+  currentTimeSecRef.current = currentTimeSec;
+  const zoomLevel = props.zoom ?? chart?.zoom ?? 0;
+
   const { rem } = useDisplayMode();
   const [draggingTimeBar, setDraggingTimeBar] = useState(false);
 
@@ -50,21 +84,47 @@ export default function TimeBar(props: Props) {
   const timeBarWidth = timeBarResize.width || 500;
   const timeBarRef = timeBarResize.ref;
   const zoomPxPerSec = useCallback(
-    () => 300 * Math.pow(1.5, chart?.zoom ?? 0),
-    [chart]
+    () => 300 * Math.pow(1.5, zoomLevel),
+    [zoomLevel]
   );
   // timebar上の位置を計算
   const timeBarPos = (timeSec: number) => timeSec * zoomPxPerSec();
 
+  const bpmChanges = chart
+    ? (currentLevel?.freeze.bpmChanges ?? [])
+    : (chartSeq?.bpmChanges ?? []);
+  const speedChanges = chart
+    ? (currentLevel?.freeze.speedChanges ?? [])
+    : (chartSeq?.speedChanges ?? []);
+  const signature = useMemo(
+    () =>
+      chart
+        ? (currentLevel?.freeze.signature ?? [])
+        : chartSeq
+          ? updateBarNum(chartSeq.signature)
+          : [],
+    [chart, currentLevel, chartSeq]
+  );
+  const seqNotes = chart
+    ? (currentLevel?.seqNotes ?? [])
+    : (chartSeq?.notes ?? []);
+  const ytBegin = chart
+    ? (currentLevel?.meta.ytBegin ?? 0)
+    : (chartSeq?.ytBegin ?? 0);
+  const ytEndSec = chart
+    ? (currentLevel?.meta.ytEndSec ?? 0)
+    : (chartSeq?.ytEndSec ?? 0);
+  const snapDivider = chart ? currentLevel?.meta.snapDivider || 1 : 1;
+
   const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const suppressNoteClickUntil = useRef(0);
   const onUserScrolled = useCallback(() => {
+    // ここではcurrentTimeSecに依存させずrefを使う
     if (
-      cur &&
-      chart &&
+      (chart || chartSeq) &&
       Math.abs(
         (timeBarRef.current?.scrollLeft ?? 0) / zoomPxPerSec() -
-          (cur.timeSec + chart.offset)
+          (currentTimeSecRef.current + offset)
       ) > 0.01
     ) {
       if (scrollTimeout.current !== null) {
@@ -89,22 +149,25 @@ export default function TimeBar(props: Props) {
     zoomPxPerSec,
     timeBarRef,
     chart,
-    cur,
+    chartSeq,
+    offset,
   ]);
+
   useEffect(() => {
     const scrollTimeBar = () => {
-      if (cur && chart) {
-        timeBarRef.current?.scrollTo({
-          left: (cur.timeSec + chart.offset) * zoomPxPerSec(),
-        });
-      }
+      timeBarRef.current?.scrollTo({
+        left: (currentTimeSec + offset) * zoomPxPerSec(),
+      });
     };
     scrollTimeBar();
-    chart?.on("rerender", scrollTimeBar);
-    return () => {
-      chart?.off("rerender", scrollTimeBar);
-    };
-  }, [chart, cur, timeBarRef, zoomPxPerSec]);
+    if (chart) {
+      chart.on("rerender", scrollTimeBar);
+      return () => {
+        chart.off("rerender", scrollTimeBar);
+      };
+    }
+  }, [chart, offset, timeBarRef, zoomPxPerSec, currentTimeSec]);
+
   useEffect(() => {
     const timeBar = timeBarRef.current;
     if (!timeBar) return;
@@ -128,6 +191,7 @@ export default function TimeBar(props: Props) {
         dragged = true;
       }
       timeBar.scrollLeft = dragStartScrollLeft - dx;
+      onUserScrolled();
       e.preventDefault();
     };
     const onMouseUp = () => {
@@ -139,53 +203,60 @@ export default function TimeBar(props: Props) {
       }
     };
 
+    /*
+    onUserScrolledをReactのonScrollに登録すると、useEffectと同時発火して無限ループする場合があったので、
+    timeBar.addEventListenerで登録する必要がある
+    */
+    timeBar.addEventListener("scroll", onUserScrolled);
     timeBar.addEventListener("mousedown", onMouseDown);
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
     window.addEventListener("blur", onMouseUp);
     return () => {
+      timeBar.removeEventListener("scroll", onUserScrolled);
       timeBar.removeEventListener("mousedown", onMouseDown);
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
       window.removeEventListener("blur", onMouseUp);
       setDraggingTimeBar(false);
     };
-  }, [timeBarRef]);
+  }, [timeBarRef, onUserScrolled]);
+
+  const currentStep = chart
+    ? (cur?.step ?? stepZero())
+    : getStep(bpmChanges, currentTimeSec, 4);
 
   const timeBarBeginStep =
-    chart && currentLevel && cur
+    chart || chartSeq
       ? stepAdd(
           getStep(
-            currentLevel.freeze.bpmChanges,
-            cur.timeSec - timeBarWidth / 2 / zoomPxPerSec(),
-            currentLevel.meta.snapDivider
+            bpmChanges,
+            currentTimeSec - timeBarWidth / 2 / zoomPxPerSec(),
+            snapDivider
           ),
           {
             fourth: 0,
             numerator: -1,
-            denominator: currentLevel.meta.snapDivider,
+            denominator: snapDivider,
           }
         )
       : stepZero();
 
   // timebarに表示するstep目盛りのリスト
   const timeBarSteps: { step: Step; timeSec: number }[] = [];
-  if (currentLevel && cur) {
+  if (chart || chartSeq) {
     timeBarSteps.push({
       step: timeBarBeginStep,
-      timeSec: getTimeSec(currentLevel.freeze.bpmChanges, timeBarBeginStep),
+      timeSec: getTimeSec(bpmChanges, timeBarBeginStep),
     });
     while (true) {
       const s = stepAdd(timeBarSteps[timeBarSteps.length - 1].step, {
         fourth: 0,
         numerator: 1,
-        denominator: currentLevel.meta.snapDivider,
+        denominator: snapDivider,
       });
-      const t = getTimeSec(currentLevel.freeze.bpmChanges, s) + chart.offset;
-      if (
-        t - (cur.timeSec + chart.offset) <
-        timeBarWidth / 2 / zoomPxPerSec()
-      ) {
+      const t = getTimeSec(bpmChanges, s) + offset;
+      if (t - (currentTimeSec + offset) < timeBarWidth / 2 / zoomPxPerSec()) {
         timeBarSteps.push({ step: s, timeSec: t });
       } else {
         break;
@@ -193,9 +264,37 @@ export default function TimeBar(props: Props) {
     }
   }
 
+  const isNoteSelected = (n: {
+    id: number;
+    hitTimeSec: number;
+    step: Step;
+  }) => {
+    if (props.isNoteSelected) {
+      return props.isNoteSelected(n);
+    }
+    if (chart && currentLevel) {
+      return n.hitTimeSec === currentLevel.currentSeqNote?.hitTimeSec;
+    }
+    return false;
+  };
+
+  const currentBpm = chart
+    ? (currentLevel?.currentBpm ?? 120)
+    : (bpmChanges[findBpmIndexFromSec(bpmChanges, currentTimeSec)]?.bpm ?? 120);
+
+  const currentSpeed = chart
+    ? (currentLevel?.currentSpeed ?? 120)
+    : (speedChanges[findBpmIndexFromSec(speedChanges, currentTimeSec)]?.bpm ??
+      120);
+
+  const currentSignature = chart
+    ? currentLevel?.currentSignature
+    : signature[findBpmIndexFromStep(signature, currentStep)];
+
   const barTop = 2.5 * rem;
   const barHeight = 1.5 * rem;
   const barBottom = 6 * rem; // including scrollbar
+
   return (
     <div className="relative w-full **:leading-4">
       <Scrollable
@@ -205,7 +304,6 @@ export default function TimeBar(props: Props) {
         )}
         style={{ height: barTop + barHeight + barBottom }}
         ref={timeBarRef as RefObject<HTMLDivElement>}
-        onScroll={onUserScrolled}
         scrollableX
         convertDeltaYToX
       >
@@ -215,12 +313,10 @@ export default function TimeBar(props: Props) {
             marginTop: barTop,
             height: barHeight,
             marginLeft: timeBarWidth / 2,
-            marginRight: timeBarWidth, // / 2,
+            marginRight: timeBarWidth,
             width:
-              Math.max(
-                currentLevel?.meta.ytEndSec ?? 0,
-                (cur?.timeSec ?? 0) + (chart?.offset ?? 0)
-              ) * zoomPxPerSec(),
+              Math.max(ytEndSec ?? 0, currentTimeSec + (offset ?? 0)) *
+              zoomPxPerSec(),
           }}
         >
           <div
@@ -233,33 +329,26 @@ export default function TimeBar(props: Props) {
           <div
             className="absolute inset-y-0 bg-gray-500/20"
             style={{
-              marginLeft: (currentLevel?.meta.ytBegin ?? 0) * zoomPxPerSec(),
-              width:
-                ((currentLevel?.meta.ytEndSec ?? 0) -
-                  (currentLevel?.meta.ytBegin ?? 0)) *
-                zoomPxPerSec(),
+              marginLeft: (ytBegin ?? 0) * zoomPxPerSec(),
+              width: ((ytEndSec ?? 0) - (ytBegin ?? 0)) * zoomPxPerSec(),
             }}
           />
           {/* 秒数目盛り */}
           {Array.from(
             new Array(Math.ceil(timeBarWidth / 2 / zoomPxPerSec()))
           ).map((_, dt) => (
-            <Fragment
-              key={Math.round((cur?.timeSec ?? 0) + (chart?.offset ?? 0)) + dt}
-            >
+            <Fragment key={Math.round(currentTimeSec + (offset ?? 0)) + dt}>
               <span
                 className="absolute border-l border-gray-500 "
                 style={{
                   top: -1.25 * rem,
                   bottom: -4,
                   left: timeBarPos(
-                    Math.round((cur?.timeSec ?? 0) + (chart?.offset ?? 0)) + dt
+                    Math.round(currentTimeSec + (offset ?? 0)) + dt
                   ),
                 }}
               >
-                {timeSecStr(
-                  Math.round((cur?.timeSec ?? 0) + (chart?.offset ?? 0)) + dt
-                )}
+                {timeSecStr(Math.round(currentTimeSec + (offset ?? 0)) + dt)}
               </span>
               {dt !== 0 && (
                 <span
@@ -268,25 +357,22 @@ export default function TimeBar(props: Props) {
                     top: -1.25 * rem,
                     bottom: -4,
                     left: timeBarPos(
-                      Math.round((cur?.timeSec ?? 0) + (chart?.offset ?? 0)) -
-                        dt
+                      Math.round(currentTimeSec + (offset ?? 0)) - dt
                     ),
                   }}
                 >
-                  {timeSecStr(
-                    Math.round((cur?.timeSec ?? 0) + (chart?.offset ?? 0)) - dt
-                  )}
+                  {timeSecStr(Math.round(currentTimeSec + (offset ?? 0)) - dt)}
                 </span>
               )}
             </Fragment>
           ))}
-          {/* step目盛り 目盛りのリストは別で計算してある */}
-          {currentLevel &&
+          {/* step目盛り */}
+          {(chart || chartSeq) &&
             timeBarSteps
               .map(({ step, timeSec }) => ({
                 step,
                 timeSec,
-                ss: getSignatureState(currentLevel!.freeze.signature, step),
+                ss: getSignatureState(signature, step),
               }))
               .map(
                 ({ step, timeSec, ss }) =>
@@ -297,7 +383,7 @@ export default function TimeBar(props: Props) {
                       style={{
                         top: -4,
                         bottom: ss.count.numerator === 0 ? -1.25 * rem : -4,
-                        left: timeBarPos(timeSec), // offsetはtimeBarStepsに足されている
+                        left: timeBarPos(timeSec),
                       }}
                     >
                       <span className="absolute bottom-0">
@@ -313,40 +399,39 @@ export default function TimeBar(props: Props) {
                   )
               )}
           {/* bpm変化 */}
-          {chart &&
-            currentLevel?.freeze.bpmChanges.map((ch, i) => (
+          {(chart || chartSeq) &&
+            bpmChanges.map((ch, i) => (
               <span
                 key={i}
                 className="absolute"
                 style={{
                   bottom: -2.5 * rem,
-                  left: timeBarPos(ch.timeSec + chart.offset),
+                  left: timeBarPos(ch.timeSec + offset),
                 }}
               >
                 <span className="absolute bottom-0 w-max">{ch.bpm}</span>
               </span>
             ))}
           {/* speed変化 */}
-          {chart &&
-            currentLevel?.freeze.speedChanges.map((ch, i) => (
+          {(chart || chartSeq) &&
+            speedChanges.map((ch, i) => (
               <span
                 key={i}
                 className="absolute"
                 style={{
                   bottom: -3.75 * rem,
-                  left: timeBarPos(ch.timeSec + chart.offset),
+                  left: timeBarPos(ch.timeSec + offset),
                 }}
               >
                 <span className="absolute bottom-0 w-max">
                   {ch.bpm}
-                  {currentLevel!.freeze.speedChanges[i + 1]?.interp && (
+                  {speedChanges[i + 1]?.interp && (
                     <span
                       className="absolute inset-y-0 left-0 m-auto h-0 border border-base"
                       style={{
                         width:
-                          timeBarPos(
-                            currentLevel!.freeze.speedChanges[i + 1].timeSec
-                          ) - timeBarPos(ch.timeSec),
+                          timeBarPos(speedChanges[i + 1].timeSec) -
+                          timeBarPos(ch.timeSec),
                       }}
                     />
                   )}
@@ -356,9 +441,7 @@ export default function TimeBar(props: Props) {
                       style={{
                         width:
                           timeBarPos(ch.timeSec) -
-                          timeBarPos(
-                            currentLevel!.freeze.speedChanges[i - 1].timeSec
-                          ),
+                          timeBarPos(speedChanges[i - 1].timeSec),
                       }}
                     />
                   )}
@@ -366,12 +449,12 @@ export default function TimeBar(props: Props) {
               </span>
             ))}
           {/* signature変化 */}
-          {chart &&
-            currentLevel?.freeze.signature
+          {(chart || chartSeq) &&
+            signature
               .map((sig) => ({
                 sig,
                 len: getBarLength(sig),
-                sec: getTimeSec(currentLevel!.freeze.bpmChanges, sig.step),
+                sec: getTimeSec(bpmChanges, sig.step),
               }))
               .map(({ len, sec }, i) => (
                 <span
@@ -380,7 +463,7 @@ export default function TimeBar(props: Props) {
                   style={{
                     top: -4,
                     bottom: -5 * rem,
-                    left: timeBarPos(sec + chart.offset),
+                    left: timeBarPos(sec + offset),
                   }}
                 >
                   <span className="absolute bottom-0 w-max">
@@ -396,39 +479,33 @@ export default function TimeBar(props: Props) {
                 </span>
               ))}
           {/* にこちゃんの位置 */}
-          {chart &&
-            cur &&
-            currentLevel?.seqNotes.map(
+          {(chart || chartSeq) &&
+            seqNotes.map(
               (n) =>
-                n.hitTimeSec + chart.offset >
-                  cur.timeSec + chart.offset - timeBarWidth / zoomPxPerSec() &&
-                n.hitTimeSec + chart.offset <
-                  cur.timeSec + chart.offset + timeBarWidth / zoomPxPerSec() &&
+                n.hitTimeSec + offset >
+                  currentTimeSec + offset - timeBarWidth / zoomPxPerSec() &&
+                n.hitTimeSec + offset <
+                  currentTimeSec + offset + timeBarWidth / zoomPxPerSec() &&
                 // 同じ位置に2つ以上の音符を重ねない
-                n.hitTimeSec !==
-                  currentLevel?.seqNotes.at(n.id + 1)?.hitTimeSec && (
+                n.hitTimeSec !== seqNotes.at(n.id + 1)?.hitTimeSec && (
                   <span
                     key={n.id}
                     className={clsx(
                       "absolute rounded-full cursor-pointer",
                       "transition duration-100",
                       "hover:brightness-110 hover:scale-110 active:brightness-125",
-                      n.hitTimeSec === currentLevel.currentSeqNote?.hitTimeSec
-                        ? "bg-red-400"
-                        : "bg-yellow-400"
+                      isNoteSelected(n) ? "bg-red-400" : "bg-yellow-400"
                     )}
                     onClick={() => {
                       if (Date.now() < suppressNoteClickUntil.current) return;
-                      setAndSeekCurrentTimeWithoutOffset(
-                        n.hitTimeSec + chart.offset
-                      );
+                      setAndSeekCurrentTimeWithoutOffset(n.hitTimeSec + offset);
                     }}
                     style={{
                       width: n.big ? "1.5rem" : "1rem",
                       height: n.big ? "1.5rem" : "1rem",
                       top: ((6 / 4 - (n.big ? 1.5 : 1)) * rem) / 2,
                       left:
-                        timeBarPos(n.hitTimeSec + chart.offset) -
+                        timeBarPos(n.hitTimeSec + offset) -
                         ((n.big ? 1.5 : 1) * rem) / 2,
                     }}
                   >
@@ -438,8 +515,8 @@ export default function TimeBar(props: Props) {
                       style={{ top: n.big ? "0.125rem" : 0 }}
                     >
                       {(() => {
-                        const length = chart
-                          .currentLevel!.seqNotes.slice(0, n.id)
+                        const length = seqNotes
+                          .slice(0, n.id)
                           .filter(
                             (n2) => n.hitTimeSec === n2.hitTimeSec
                           ).length;
@@ -452,7 +529,7 @@ export default function TimeBar(props: Props) {
         </div>
       </Scrollable>
       {/* 現在位置カーソル */}
-      {currentLevel && cur && (
+      {(chart || chartSeq) && (
         <div className="absolute inset-0 h-full w-0 m-auto pointer-events-none">
           <div
             className={clsx(
@@ -468,7 +545,7 @@ export default function TimeBar(props: Props) {
               left: 0,
             }}
           >
-            {timeStr(cur.timeSec + chart.offset)}
+            {timeStr(currentTimeSec + offset)}
           </span>
           <div className="absolute" style={{ top: barTop, height: barHeight }}>
             {/* 現在bpm */}
@@ -488,7 +565,7 @@ export default function TimeBar(props: Props) {
                 left: 0,
               }}
             >
-              {currentLevel.currentBpm}
+              {currentBpm}
             </div>
             {/* 現在speed */}
             <div
@@ -503,7 +580,7 @@ export default function TimeBar(props: Props) {
             <div
               className={clsx(
                 "absolute w-max pr-1 rounded-md backdrop-blur-2xs",
-                currentLevel.nextSpeedInterp &&
+                currentLevel?.nextSpeedInterp &&
                   clsx(
                     "-translate-x-1.5 px-1.5 translate-y-0.5 py-0.5",
                     "bg-white/50 dark:bg-stone-700/50",
@@ -515,7 +592,7 @@ export default function TimeBar(props: Props) {
                 left: 0,
               }}
             >
-              {currentLevel.nextSpeedInterp
+              {currentLevel?.nextSpeedInterp && cur
                 ? (
                     currentLevel.currentSpeed! +
                     ((currentLevel.nextSpeed! - currentLevel.currentSpeed!) /
@@ -523,9 +600,9 @@ export default function TimeBar(props: Props) {
                         currentLevel.currentSpeedChange!.timeSec)) *
                       (cur.timeSec - currentLevel.currentSpeedChange!.timeSec)
                   ).toFixed(2)
-                : currentLevel.currentSpeed}
+                : currentSpeed}
             </div>
-            {/*signature*/}
+            {/* signature */}
             <div
               className="absolute w-max px-1 rounded-md backdrop-blur-2xs"
               style={{
@@ -542,8 +619,8 @@ export default function TimeBar(props: Props) {
                 left: 0,
               }}
             >
-              {currentLevel.currentSignature &&
-                getBarLength(currentLevel.currentSignature).map((len, i) => (
+              {currentSignature &&
+                getBarLength(currentSignature).map((len, i) => (
                   <Fragment key={i}>
                     {i >= 1 && <span className="mx-0.5">+</span>}
                     <span>{stepImproper(len)}</span>
