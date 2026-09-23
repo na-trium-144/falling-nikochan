@@ -5,11 +5,14 @@ import {
   ChartBrief,
   ChartSeqData,
   currentChartVer,
+  getBarLength,
   getSignatureState,
   getStep,
   getTimeSec,
+  Signature,
   Step,
   stepCmp,
+  stepImproper,
   stepZero,
   updateBarNum,
 } from "@falling-nikochan/chart";
@@ -161,6 +164,13 @@ export function getInspectCurrentStep(
     return closestEvent.step;
   }
   return stepSnap4th;
+}
+
+export function formatSignature(sig: Signature): string {
+  const barLengths = getBarLength(sig);
+  return barLengths
+    .map((len) => `${stepImproper(len)}/${len.denominator * 4}`)
+    .join(" + ");
 }
 
 export function InitInspect() {
@@ -532,7 +542,56 @@ function Inspect(props: InspectProps) {
     : "-";
 
   // 選択中の音符（現在カーソル位置と一致する音符）
-  const selectedNotes = chartSeq?.notes.filter((n) => isNoteSelected(n)) || [];
+  const selectedNotes = useMemo(
+    () => chartSeq?.notes.filter((n) => isNoteSelected(n)) || [],
+    [chartSeq, isNoteSelected]
+  );
+
+  const selectedBpmChanges = useMemo(() => {
+    if (!chartSeq) return [];
+    return chartSeq.bpmChanges.filter(
+      (b) => stepCmp(b.step, currentStep) === 0
+    );
+  }, [chartSeq, currentStep]);
+
+  const selectedSpeedChanges = useMemo(() => {
+    if (!chartSeq) return [];
+    const results: (
+      | { type: "direct"; bpm: number }
+      | { type: "interp"; prevBpm: number; bpm: number }
+    )[] = [];
+    for (let i = 0; i < chartSeq.speedChanges.length; i++) {
+      const s = chartSeq.speedChanges[i];
+      if (s.interp && i > 0) {
+        const prev = chartSeq.speedChanges[i - 1];
+        if (
+          stepCmp(currentStep, prev.step) > 0 &&
+          stepCmp(currentStep, s.step) <= 0
+        ) {
+          results.push({
+            type: "interp",
+            prevBpm: prev.bpm,
+            bpm: s.bpm,
+          });
+        }
+      } else {
+        if (stepCmp(s.step, currentStep) === 0) {
+          results.push({
+            type: "direct",
+            bpm: s.bpm,
+          });
+        }
+      }
+    }
+    return results;
+  }, [chartSeq, currentStep]);
+
+  const selectedSignatureChanges = useMemo(() => {
+    if (!chartSeq) return [];
+    return chartSeq.signature.filter(
+      (sig) => stepCmp(sig.step, currentStep) === 0
+    );
+  }, [chartSeq, currentStep]);
 
   const ytId = chartBrief?.ytId;
 
@@ -777,7 +836,7 @@ function Inspect(props: InspectProps) {
             </div>
           </div>
 
-          {/* 音符の詳細情報表示 */}
+          {/* 音符・イベントの詳細情報表示 */}
           <Box
             classNameOuter="w-full mt-1"
             classNameInner="p-2 text-xs flex flex-col gap-1"
@@ -787,25 +846,61 @@ function Inspect(props: InspectProps) {
               <span className="font-mono text-sm">{currentStepStr}</span>
             </div>
             <div className="border-t border-slate-300 dark:border-stone-600 pt-1 flex flex-col gap-1 max-h-28 overflow-y-auto">
-              {selectedNotes.length === 0 ? (
-                <span className="text-dim">{t("noNote")}</span>
+              {selectedNotes.length === 0 &&
+              selectedBpmChanges.length === 0 &&
+              selectedSpeedChanges.length === 0 &&
+              selectedSignatureChanges.length === 0 ? (
+                <span className="text-dim">{t("noSelection")}</span>
               ) : (
-                selectedNotes.map((note) => (
-                  <div
-                    key={note.id}
-                    className="flex items-center justify-between font-mono bg-slate-100 dark:bg-stone-800 px-1.5 py-0.5 rounded"
-                  >
-                    <span>
-                      #{note.id + 1}
-                      {note.big ? " (Big)" : ""}:
-                    </span>
-                    <span className="space-x-2">
-                      <span>x: {note.hitX}</span>
-                      <span>vx: {note.hitVX}</span>
-                      <span>vy: {note.hitVY}</span>
-                    </span>
-                  </div>
-                ))
+                <>
+                  {selectedBpmChanges.map((b, i) => (
+                    <div
+                      key={`bpm-${i}`}
+                      className="flex items-center justify-between font-mono bg-slate-100 dark:bg-stone-800 px-1.5 py-0.5 rounded"
+                    >
+                      <span>{t("bpmChange")}:</span>
+                      <span>{b.bpm}</span>
+                    </div>
+                  ))}
+                  {selectedSpeedChanges.map((s, i) => (
+                    <div
+                      key={`speed-${i}`}
+                      className="flex items-center justify-between font-mono bg-slate-100 dark:bg-stone-800 px-1.5 py-0.5 rounded"
+                    >
+                      <span>{t("speedChange")}:</span>
+                      <span>
+                        {s.type === "interp"
+                          ? `${s.prevBpm} → ${s.bpm}`
+                          : s.bpm}
+                      </span>
+                    </div>
+                  ))}
+                  {selectedSignatureChanges.map((sig, i) => (
+                    <div
+                      key={`sig-${i}`}
+                      className="flex items-center justify-between font-mono bg-slate-100 dark:bg-stone-800 px-1.5 py-0.5 rounded"
+                    >
+                      <span>{t("signatureChange")}:</span>
+                      <span>{formatSignature(sig)}</span>
+                    </div>
+                  ))}
+                  {selectedNotes.map((note) => (
+                    <div
+                      key={note.id}
+                      className="flex items-center justify-between font-mono bg-slate-100 dark:bg-stone-800 px-1.5 py-0.5 rounded"
+                    >
+                      <span>
+                        #{note.id + 1}
+                        {note.big ? " (Big)" : ""}:
+                      </span>
+                      <span className="space-x-2">
+                        <span>x: {note.hitX}</span>
+                        <span>vx: {note.hitVX}</span>
+                        <span>vy: {note.hitVY}</span>
+                      </span>
+                    </div>
+                  ))}
+                </>
               )}
             </div>
           </Box>
