@@ -16,6 +16,7 @@ export interface Bindings {
   API_ENV?: "development";
   API_NO_RATELIMIT?: "1";
   SECRET_SALT?: string;
+  RESULT_SECRET_KEY?: string;
   API_CACHE_EDGE?: "1";
   ASSET_PREFIX?: string;
   BACKEND_PREFIX?: string;
@@ -42,6 +43,25 @@ export function secretSalt(e: Bindings) {
   } else {
     throw new Error("SECRET_SALT not set in production environment!");
   }
+}
+
+export async function resultSecretKey(e: Bindings) {
+  let keyBase64: string;
+  if (e.RESULT_SECRET_KEY) {
+    keyBase64 = e.RESULT_SECRET_KEY;
+  } else if (e.API_ENV === "development") {
+    // This is an example key that can be used for development. In production, a different key is used.
+    keyBase64 = "u5Qz5x_24m6k6lG-J4X9Q0wF_89v2Zt6g5v2x2w6K5k";
+  } else {
+    throw new Error("RESULT_SECRET_KEY not set in production environment!");
+  }
+  return await crypto.subtle.importKey(
+    "raw",
+    Buffer.from(keyBase64, "base64url"),
+    { name: "HMAC", hash: { name: "SHA-256" } },
+    true,
+    ["sign", "verify"]
+  );
 }
 
 export function cacheControl(e: Bindings, age: number, private_?: boolean) {

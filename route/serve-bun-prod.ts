@@ -96,7 +96,7 @@ app
   .use(compress())
   .use(etag())
   .use(methodNotAllowed(app))
-  .route("/api", await apiApp({ getConnInfo, dbMiddleware }))
+  .route("/api", await apiApp({ getConnInfo, dbMiddleware, fetchStatic }))
   .route("/og", ogApp({ ImageResponse, fetchBrief, fetchStatic }))
   .route("/sitemap.xml", await sitemapApp({ dbMiddleware }))
   .route("/rss.xml", await rssApp({ dbMiddleware }))

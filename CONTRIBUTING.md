@@ -248,6 +248,7 @@ The service worker ([`worker/entry.ts`](worker/entry.ts), bundled into `/sw.js`)
 | `API_ENV` |  |  | DO NOT SET | if set to `development`, development-specific behaviors such as password bypass will be enabled |
 | `API_NO_RATELIMIT` |  |  | DO NOT SET | |
 | `SECRET_SALT` |  |  | required | any string |
+| `RESULT_SECRET_KEY` |  |  | required | HMAC SHA-256 key in base64url format. Generate with `pnpm exec tsx ./route/generateSecretKey.ts` |
 | `VERCEL_PROTECTION_BYPASS_SECRET` |  |  | optional | needed only when deploy to vercel as preview |
 | `API_CACHE_EDGE` |  |  | optional | `1` or unset, if set `s-maxage` is added to response cache-control |
 | `ASSET_PREFIX` | vars.`PRODUCTION_ASSET_PREFIX`, `STAGING_ASSET_PREFIX` | optional | optional | `https://domain-of-your-assets` or unset, if you want to use different domain for assets |
