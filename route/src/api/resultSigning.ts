@@ -45,9 +45,9 @@ const resultSigningApp = async (config: {
         // 3,5 at frontend/app/[locale]/play/resultSigningAuth.ts
         "4. Server verifies the JWT with BuildKey, adds 3-hour expiration (exp), signs it as a JWT with ResultSecret, and returns it.\n" +
         // 4 here
-        // "5. Client sends POST /api/record and POST /api/resultSigning/sign with `Authorization: Bearer <token>` and result data signed with ResultSessionKey.\n" +
+        "5. Client sends POST /api/record and POST /api/resultSigning/sign with `Authorization: Bearer <token>` and result data signed with ResultSessionKey.\n" +
         // "6. Server verifies the signature of token and record/result, verifies cid and timestamp, and stores the record anonymously / returns ResultSecret signature of result.\n" +
-        // "7. Client saves and shares ResultParam with ResultSecret signature.\n" +
+        "7. Client saves and shares ResultParam with ResultSecret signature." +
         // "8. /og/result, /share, and /[locale]/share/placeholder verify ResultParam with GET /api/resultSigning/verify.",
         "\n" +
         "This API performs the step 4.",

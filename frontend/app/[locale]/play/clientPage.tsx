@@ -31,6 +31,7 @@ import {
   LevelPlay,
   ResultParams,
   serializeResultParams,
+  deserializeResultParams,
 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
@@ -326,10 +327,14 @@ function Play(props: Props) {
     cid && lvIndex !== undefined && chartBrief?.levels[lvIndex];
   const reloadBestScore = useCallback(() => {
     if (cid && lvIndex !== undefined && chartBrief?.levels[lvIndex]) {
-      const data = getBestScore(cid, chartBrief.levels[lvIndex].hash);
+      const data = getBestScore(cid, chartBrief.levels[lvIndex]);
       if (data) {
-        setBestScoreState(data.baseScore + data.chainScore + data.bigScore);
-        setBestScoreCounts([...data.judgeCount, data.bigCount ?? 0]);
+        const result = deserializeResultParams(data.result);
+        setBestScoreState(
+          (result.baseScore100 + result.chainScore100 + result.bigScore100) /
+            100
+        );
+        setBestScoreCounts([...result.judgeCount, result.bigCount || 0]);
       } else {
         setBestScoreState(0);
         setBestScoreCounts(null);
@@ -738,23 +743,6 @@ function Play(props: Props) {
           lvIndex !== undefined &&
           chartBrief?.levels.at(lvIndex)
         ) {
-          if (score > bestScoreState) {
-            setBestScore(cid, chartBrief.levels[lvIndex].hash, {
-              date: newResultDate.getTime(),
-              baseScore,
-              chainScore,
-              bigScore,
-              judgeCount: judgeCount.slice(0, 4) as [
-                number,
-                number,
-                number,
-                number,
-              ],
-              bigCount: bigCount,
-              inputType: hitType,
-            });
-            reloadBestScore();
-          }
           fetchBackend()
             .get(`/api/record/${cid}`)
             .json((record) =>
@@ -825,6 +813,22 @@ function Play(props: Props) {
                 (sign) => {
                   setResultSerialized(resultSerialized);
                   setResultSign(sign);
+                  if (
+                    score > bestScoreState &&
+                    // cid &&
+                    // !auto &&
+                    // userBegin === null &&
+                    // chartBrief?.levels.at(lvIndex) &&
+                    oldPlaybackRate === 1
+                  ) {
+                    setBestScore(
+                      cid,
+                      chartBrief.levels[lvIndex].hash,
+                      resultSerialized,
+                      sign
+                    );
+                    reloadBestScore();
+                  }
                 }
               );
             }

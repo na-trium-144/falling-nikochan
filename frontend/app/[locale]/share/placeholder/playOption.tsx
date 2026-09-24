@@ -3,17 +3,13 @@
 import clsx from "clsx/lite";
 import {
   ChartBrief,
+  deserializeResultParams,
   levelTypes,
   rankStr,
   RecordGetSummary,
-  serializeResultParams,
+  ResultParams,
 } from "@falling-nikochan/chart";
-import {
-  bestKey,
-  getBestScore,
-  ResultData,
-  toResultParams,
-} from "@/common/bestScore.js";
+import { bestKey, getBestScore } from "@/common/bestScore.js";
 import Button, { ButtonHighlight } from "@/common/button.js";
 import { FourthNote } from "@/common/fourthNote.js";
 import { initSession } from "@/play/session.js";
@@ -48,7 +44,7 @@ export function PlayOption(props: Props) {
         setStatus(
           props.brief?.levels
             // .filter((l) => !l.unlisted)
-            .map((l) => getBadge(getBestScore(props.cid!, l.hash))) || []
+            .map((l) => getBadge(getBestScore(props.cid!, l))) || []
         );
       };
       const storageUpdate = (e: StorageEvent) => {
@@ -261,27 +257,28 @@ function SelectedLevelInfo(props: {
             (r) => r.lvHash === props.brief.levels[props.selectedLevel]?.hash
           );
 
-  const [bestScoreState, setBestScoreState] = useState<(ResultData | null)[]>(
-    []
-  );
-  const [serializedParam, setSerializedParam] = useState<string[]>([]);
+  const [bestScoreState, setBestScoreState] = useState<
+    ({ deserialized: ResultParams; result: string; sign?: string } | null)[]
+  >([]);
   useEffect(() => {
     const update = () => {
-      const bestScoreState: (ResultData | null)[] = [];
-      const serializedParam: string[] = [];
+      const bestScoreState: ({
+        deserialized: ResultParams;
+        result: string;
+        sign?: string;
+      } | null)[] = [];
       for (let i = 0; i < props.brief.levels.length; i++) {
-        const bestScore = getBestScore(props.cid, props.brief.levels[i].hash);
-        bestScoreState.push(bestScore);
-        serializedParam.push(
+        const bestScore = getBestScore(props.cid, props.brief.levels[i]);
+        bestScoreState.push(
           bestScore
-            ? serializeResultParams(
-                toResultParams(bestScore, props.brief.levels[i])
-              )
-            : ""
+            ? {
+                ...bestScore,
+                deserialized: deserializeResultParams(bestScore.result),
+              }
+            : null
         );
       }
       setBestScoreState(bestScoreState);
-      setSerializedParam(serializedParam);
     };
     const storageUpdate = (e: StorageEvent) => {
       if (
@@ -303,17 +300,19 @@ function SelectedLevelInfo(props: {
 
   const selectedBestScore = bestScoreState.at(props.selectedLevel);
   const totalScore = selectedBestScore
-    ? selectedBestScore.baseScore +
-      selectedBestScore.chainScore +
-      selectedBestScore.bigScore
+    ? (selectedBestScore.deserialized.baseScore100 +
+        selectedBestScore.deserialized.chainScore100 +
+        selectedBestScore.deserialized.bigScore100) /
+      100
     : 0;
 
   const shareLink = useShareLink(
     props.cid,
     props.brief,
     props.locale,
-    serializedParam.at(props.selectedLevel) || "",
-    selectedBestScore?.date
+    selectedBestScore?.result,
+    selectedBestScore?.sign,
+    selectedBestScore?.deserialized.date?.getTime()
   );
 
   return (
@@ -402,9 +401,11 @@ function SelectedLevelInfo(props: {
           </>
         )}
         <p className="">{t("bestScore")}</p>
-        {showBestDetail && selectedBestScore?.date && (
+        {showBestDetail && selectedBestScore?.deserialized.date && (
           <span className="text-sm text-dim">
-            ({new Date(selectedBestScore.date).toLocaleDateString()})
+            (
+            {new Date(selectedBestScore.deserialized.date).toLocaleDateString()}
+            )
           </span>
         )}
         <div className="flex flex-row items-center ">
@@ -441,35 +442,39 @@ function SelectedLevelInfo(props: {
           <>
             <span className="inline-block ">
               <span className="">
-                {Math.floor(selectedBestScore.baseScore)}
+                {Math.floor(selectedBestScore.deserialized.baseScore100 / 100)}
               </span>
               <span className="text-sm">.</span>
               <span className="text-sm">
-                {(Math.floor(selectedBestScore.baseScore * 100) % 100)
+                {(Math.floor(selectedBestScore.deserialized.baseScore100) % 100)
                   .toString()
                   .padStart(2, "0")}
               </span>
               <span className="ml-0.5 mr-0.5">+</span>
               <span className="">
-                {Math.floor(selectedBestScore.chainScore)}
+                {Math.floor(selectedBestScore.deserialized.chainScore100 / 100)}
               </span>
               <span className="text-sm">.</span>
               <span className="text-sm">
-                {(Math.floor(selectedBestScore.chainScore * 100) % 100)
+                {(
+                  Math.floor(selectedBestScore.deserialized.chainScore100) % 100
+                )
                   .toString()
                   .padStart(2, "0")}
               </span>
               <span className="ml-0.5 mr-0.5">+</span>
-              <span className="">{Math.floor(selectedBestScore.bigScore)}</span>
+              <span className="">
+                {Math.floor(selectedBestScore.deserialized.bigScore100 / 100)}
+              </span>
               <span className="text-sm">.</span>
               <span className="text-sm">
-                {(Math.floor(selectedBestScore.bigScore * 100) % 100)
+                {(Math.floor(selectedBestScore.deserialized.bigScore100) % 100)
                   .toString()
                   .padStart(2, "0")}
               </span>
             </span>
             <span className="inline-block ml-2 mr-2 space-x-2 ">
-              {selectedBestScore?.judgeCount.map((j, i) => (
+              {selectedBestScore?.deserialized.judgeCount.map((j, i) => (
                 <span key={i} className="inline-block">
                   <JudgeIcon
                     index={i}
