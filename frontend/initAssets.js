@@ -69,3 +69,29 @@ writeFileSync(
   Write({ size: 24, fill: slate500 }),
   "utf8"
 );
+
+// Generate ephemeral BuildKey for this build (/api/resultSigning step 2)
+const resultBuildKeyPair = await crypto.subtle.generateKey(
+  { name: "ECDSA", namedCurve: "P-256" },
+  true,
+  ["sign", "verify"]
+);
+writeFileSync(
+  "public/resultBuildKey.json",
+  JSON.stringify(
+    await crypto.subtle.exportKey("jwk", resultBuildKeyPair.publicKey)
+  ),
+  "utf8"
+);
+writeFileSync(
+  ".resultBuildPrivKey.json",
+  JSON.stringify(
+    await crypto.subtle.exportKey("jwk", resultBuildKeyPair.privateKey)
+  ),
+  "utf8"
+);
+if (!existsSync("out")) {
+  mkdirSync("out");
+}
+// for backend development server
+copyFileSync("public/resultBuildKey.json", "out/resultBuildKey.json");
