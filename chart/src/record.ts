@@ -28,8 +28,17 @@ export const RecordPostSchema = () =>
       fc: v.boolean(),
       fb: v.boolean(),
       editing: v.optional(v.boolean()),
-      // adjust the weight of the record. reduce if one player has too many records in a short time.
-      factor: v.optional(v.pipe(v.number(), v.minValue(0), v.maxValue(1))),
+      factor: v.optional(
+        v.pipe(
+          v.number(),
+          v.minValue(0),
+          v.maxValue(1),
+          v.description(
+            "adjust the weight of the record. reduce if one player has too many records in a short time."
+          )
+        )
+      ),
+      date: v.pipe(v.number(), v.integer(), v.minValue(0)),
     }),
     v.check((record) => {
       if (
