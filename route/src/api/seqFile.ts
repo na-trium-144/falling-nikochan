@@ -14,9 +14,7 @@ import {
   ChartSeqData,
   loadChart,
   convertTo15,
-  convertToPlay15,
   docRefs,
-  convertToPlay17,
 } from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
@@ -111,25 +109,19 @@ const seqFileApp = new Hono<{
     let seqData: ChartSeqData;
     switch (chart.ver) {
       case 4:
-      case 5:
-        if (!chart.levels.at(lvIndex)) {
+      case 5: {
+        const chart6 = await convertTo6(chart);
+        if (!chart6.levels.at(lvIndex)) {
           throw new HTTPException(404, { message: "levelNotFound" });
         }
-        seqData = loadChart({
-          ...(await convertTo6(chart)).levels.at(lvIndex)!,
-          ver: 6,
-          offset: chart.offset,
-        });
+        seqData = loadChart(chart6, lvIndex);
         break;
+      }
       case 6:
         if (!chart.levels.at(lvIndex)) {
           throw new HTTPException(404, { message: "levelNotFound" });
         }
-        seqData = loadChart({
-          ...chart.levels.at(lvIndex)!,
-          ver: 6,
-          offset: chart.offset,
-        });
+        seqData = loadChart(chart, lvIndex);
         break;
       case 7:
       case 8:
@@ -138,29 +130,29 @@ const seqFileApp = new Hono<{
       case 11:
       case 12:
       case 13:
-        if (!chart.levels.at(lvIndex)) {
+      case 14: {
+        const chart15 = await convertTo15(chart);
+        if (
+          !chart15.levelsMeta.at(lvIndex) ||
+          !chart15.levelsFreeze.at(lvIndex)
+        ) {
           throw new HTTPException(404, { message: "levelNotFound" });
         }
-        seqData = loadChart(convertToPlay15(await convertTo15(chart), lvIndex));
+        seqData = loadChart(chart15, lvIndex);
         break;
-      case 14:
-        if (!chart.levelsMin.at(lvIndex) || !chart.levelsFreeze.at(lvIndex)) {
-          throw new HTTPException(404, { message: "levelNotFound" });
-        }
-        seqData = loadChart(convertToPlay15(await convertTo15(chart), lvIndex));
-        break;
+      }
       case 15:
       case 16:
         if (!chart.levelsMeta.at(lvIndex) || !chart.levelsFreeze.at(lvIndex)) {
           throw new HTTPException(404, { message: "levelNotFound" });
         }
-        seqData = loadChart(convertToPlay15(chart, lvIndex));
+        seqData = loadChart(chart, lvIndex);
         break;
       case 17:
         if (!chart.levelsMeta.at(lvIndex) || !chart.levelsFreeze.at(lvIndex)) {
           throw new HTTPException(404, { message: "levelNotFound" });
         }
-        seqData = loadChart(convertToPlay17(chart, lvIndex));
+        seqData = loadChart(chart, lvIndex);
         break;
       default:
         chart satisfies never;
