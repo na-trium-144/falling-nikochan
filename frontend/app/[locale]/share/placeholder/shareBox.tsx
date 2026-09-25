@@ -51,6 +51,7 @@ interface Props {
   brief: (ChartBrief & { etag: string }) | Error | null;
   record: RecordGetSummary[] | Error | null;
   sharedResult?: ResultParams | string | null;
+  sharedResultVerified?: boolean | Error | null;
   locale: string;
   backButton?: () => void;
   forceShowCId?: boolean; // 通常はPCでは表示、モバイルでは非表示だが、trueの場合モバイルでも表示する
@@ -58,7 +59,13 @@ interface Props {
 export function ShareBox(props: Props) {
   const t = useTranslations("share");
   const te = useTranslations("error");
-  const { cid, brief: propBrief, sharedResult, locale } = props;
+  const {
+    cid,
+    brief: propBrief,
+    sharedResult,
+    sharedResultVerified,
+    locale,
+  } = props;
 
   const [refreshedBrief, setRefreshedBrief] = useState<
     (ChartBrief & { etag: string }) | Error | null
@@ -341,7 +348,12 @@ export function ShareBox(props: Props) {
           </div>
         </div>
       </div>
-      {sharedResult && <SharedResultBox result={sharedResult} />}
+      {sharedResult && (
+        <SharedResultBox
+          result={sharedResult}
+          verified={sharedResultVerified}
+        />
+      )}
       <p className="mt-2">
         <span className="no-mobile mr-2">{t("shareLink")}:</span>
         <a
