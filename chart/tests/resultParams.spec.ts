@@ -13,6 +13,7 @@ import * as msgpack from "@msgpack/msgpack";
 import { encodeBase64Url } from "hono/utils/encode";
 
 const expectedParams = {
+  ver: 4,
   date: new Date(2026, 4, 1),
   lvName: "abcあいうえお",
   lvType: 1,
@@ -82,9 +83,14 @@ describe("resultParams", () => {
       serializeResultParamsLegacy(expectedParams)
     );
 
+    expect(serializedBase64).to.be.equal(
+      serializeResultParamsLegacy(expectedParams)
+    );
+
     const deserialized = deserializeResultParams(serializedBase64);
     expect(deserialized).to.be.deep.equal({
       ...expectedParams,
+      ver: 3,
       cid: null,
     } satisfies ResultParams);
   });
@@ -110,6 +116,7 @@ describe("resultParams", () => {
     const deserialized = deserializeResultParams(serializedBase64);
     expect(deserialized).to.be.deep.equal({
       ...expectedParams,
+      ver: 2,
       playbackRate4: 4,
       cid: null,
     } satisfies ResultParams);
@@ -135,9 +142,89 @@ describe("resultParams", () => {
     const deserialized = deserializeResultParams(serializedBase64);
     expect(deserialized).to.be.deep.equal({
       ...expectedParams,
+      ver: 1,
       inputType: null,
       playbackRate4: 4,
       cid: null,
     } satisfies ResultParams);
+  });
+
+  test("should deserialize signed result param with dot notation", async () => {
+    const serialized = serializeResultParams(expectedParams);
+    const dummySignature = "dummySignBase64Url";
+    const signedParam = `${serialized}.${dummySignature}`;
+    const deserialized = deserializeResultParams(signedParam);
+    expect(deserialized).to.be.deep.equal(expectedParams);
+  });
+
+  describe("verifyResultParams", () => {
+    test("should verify valid signed result", async () => {
+      const key = await crypto.subtle.generateKey(
+        { name: "HMAC", hash: { name: "SHA-256" } },
+        true,
+        ["sign", "verify"]
+      );
+
+      const serialized = serializeResultParams(expectedParams);
+      const signature = await crypto.subtle.sign(
+        { name: "HMAC", hash: { name: "SHA-256" } },
+        key,
+        Buffer.from(serialized, "base64url")
+      );
+      const signatureBase64Url = Buffer.from(signature).toString("base64url");
+      const signedParam = `${serialized}.${signatureBase64Url}`;
+
+      const verified = await verifyResultParams(signedParam, key);
+      expect(verified).to.be.true;
+    });
+
+    test("should return false for tampered signature", async () => {
+      const key = await crypto.subtle.generateKey(
+        { name: "HMAC", hash: { name: "SHA-256" } },
+        true,
+        ["sign", "verify"]
+      );
+
+      const serialized = serializeResultParams(expectedParams);
+      const signedParam = `${serialized}.invalidSignature`;
+
+      const verified = await verifyResultParams(signedParam, key);
+      expect(verified).to.be.false;
+    });
+
+    test("should return false for tampered result content", async () => {
+      const key = await crypto.subtle.generateKey(
+        { name: "HMAC", hash: { name: "SHA-256" } },
+        true,
+        ["sign", "verify"]
+      );
+
+      const serialized = serializeResultParams(expectedParams);
+      const signature = await crypto.subtle.sign(
+        { name: "HMAC", hash: { name: "SHA-256" } },
+        key,
+        Buffer.from(serialized, "base64url")
+      );
+      const signatureBase64Url = Buffer.from(signature).toString("base64url");
+
+      const tamperedParams = { ...expectedParams, score100: 99999 };
+      const tamperedSerialized = serializeResultParams(tamperedParams);
+      const tamperedSignedParam = `${tamperedSerialized}.${signatureBase64Url}`;
+
+      const verified = await verifyResultParams(tamperedSignedParam, key);
+      expect(verified).to.be.false;
+    });
+
+    test("should return false for unsigned result format", async () => {
+      const key = await crypto.subtle.generateKey(
+        { name: "HMAC", hash: { name: "SHA-256" } },
+        true,
+        ["sign", "verify"]
+      );
+
+      const serialized = serializeResultParams(expectedParams);
+      const verified = await verifyResultParams(serialized, key);
+      expect(verified).to.be.false;
+    });
   });
 });

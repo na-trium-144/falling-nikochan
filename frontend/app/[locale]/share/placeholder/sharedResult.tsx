@@ -1,5 +1,5 @@
 import clsx from "clsx/lite";
-import { Box } from "@/common/box";
+import { Box, WarningBox } from "@/common/box";
 import { JudgeIcon } from "@/play/statusBox";
 import {
   baseScoreRate,
@@ -17,15 +17,18 @@ import ClickTap from "@icon-park/react/lib/icons/ClickTap";
 import GameThree from "@icon-park/react/lib/icons/GameThree";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { formatError } from "@/common/fetch";
 
 interface Props {
   result: ResultParams | string;
+  verified: boolean | Error | null | undefined;
 }
 export function SharedResultBox(props: Props) {
   const th = useTranslations("share");
   const t = useTranslations("play.result");
   const ts = useTranslations("play.status");
-  const { result } = props;
+  const te = useTranslations("error");
+  const { result, verified } = props;
   const [resultDate, setResultDate] = useState<string>("");
   useEffect(() => {
     if (typeof result === "object" && result.date) {
@@ -40,6 +43,11 @@ export function SharedResultBox(props: Props) {
         <p className="text-center ">{result}</p>
       ) : (
         <>
+          {verified === false ? (
+            <WarningBox>{th("notVerified")}</WarningBox>
+          ) : verified instanceof Error ? (
+            <WarningBox>{formatError(verified, te)}</WarningBox>
+          ) : null}
           <p className="text-center ">
             {result.lvName && (
               <span className="font-title mr-2">{result.lvName}</span>

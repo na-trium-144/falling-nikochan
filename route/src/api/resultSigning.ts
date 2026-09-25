@@ -1,11 +1,22 @@
 import { Hono } from "hono";
-import { Bindings, buildPubKey, ResponseOK, resultSecretKey } from "../env.js";
+import {
+  Bindings,
+  buildPubKey,
+  immutable,
+  ResponseOK,
+  resultSecretKey,
+} from "../env.js";
 import { env } from "hono/adapter";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import * as v from "valibot";
 import { sign, verify } from "hono/jwt";
 import { sValidatorHook } from "../error.js";
-import { deserializeResultParams, ResultParams } from "@falling-nikochan/chart";
+import {
+  deserializeResultParams,
+  isVerificationRequired,
+  ResultParams,
+  verifyResultParams,
+} from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
 import type { JsonWebKey } from "node:crypto";
 import { CidSchema } from "@falling-nikochan/chart";
@@ -76,7 +87,7 @@ const resultSigningApp = async (config: {
           "6. Server verifies the signature of token and record/result, verifies cid and timestamp, and stores the record anonymously / returns ResultSecret signature of result.\n" +
           // 6 at here and route/src/api/record.ts
           "7. Client saves and shares ResultParam with ResultSecret signature.\n" +
-          // "8. /og/result, /share, and /[locale]/share/placeholder verify ResultParam with GET /api/resultSigning/verify.",
+          "8. /og/result, /share, and /api/resultSigning/verify/:cid verify ResultParam.\n" +
           "\n" +
           "This API performs the step 4.",
         requestBody: {
@@ -231,10 +242,7 @@ const resultSigningApp = async (config: {
       ),
       async (c) => {
         const { key: sessionPubKey, cid: sessionCid } =
-          await verifyResultSessionPubKey(
-            env(c),
-            c.req.header("Authorization")
-          );
+          await verifyResultSessionPubKey(env(c), c.req.header("Authorization"));
 
         const { result, clientSign } = c.req.valid("json");
         const clientSignBin = Buffer.from(clientSign, "base64url");
@@ -278,6 +286,83 @@ const resultSigningApp = async (config: {
         );
 
         return c.json({ sign: Buffer.from(sign).toString("base64url") }, 200);
+      }
+    )
+    .get(
+      "/verify/:cid",
+      describeRoute({
+        description: "Verify the shared play result data.",
+        responses: {
+          204: {
+            description: "Successful verification",
+            headers: {
+              "Cache-Control": {
+                description: `immutable`,
+                schema: { type: "string" },
+              },
+            },
+          },
+          400: {
+            description: "invalid parameter",
+            content: {
+              "application/json": {
+                schema: resolver(await validationErrorSchema()),
+              },
+            },
+          },
+          409: {
+            description: "Verification not applicable for older results",
+            content: {
+              "application/json": {
+                schema: resolver(v.string()), // TODO
+              },
+            },
+          },
+          422: {
+            description: "Failed verification",
+            content: {
+              "application/json": {
+                schema: resolver(v.string()), // TODO
+              },
+            },
+          },
+        },
+      }),
+      validator(
+        "query",
+        v.object({
+          result: v.pipe(
+            v.string(),
+            v.description(
+              "ResultParam and signature encoded as Base64Url and concatenated with '.'"
+            )
+          ),
+        }),
+        sValidatorHook()
+      ),
+      async (c) => {
+        const { result } = c.req.valid("query");
+        let resultParams: ResultParams;
+        try {
+          resultParams = deserializeResultParams(result);
+        } catch {
+          throw new HTTPException(400, { message: "invalidResultParam" });
+        }
+        if (!isVerificationRequired(resultParams)) {
+          throw new HTTPException(409, {
+            message: "verificationNotApplicable",
+          });
+        }
+        if (!resultParams.cid || resultParams.cid !== c.req.param("cid")) {
+          throw new HTTPException(422, { message: "unauthorizedResultParam" });
+        }
+        if (await verifyResultParams(result, await resultSecretKey(env(c)))) {
+          return c.body(null, 204, {
+            "Cache-Control": immutable(),
+          });
+        } else {
+          throw new HTTPException(422, { message: "unauthorizedResultParam" });
+        }
       }
     );
 
