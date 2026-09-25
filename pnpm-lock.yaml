@@ -407,6 +407,9 @@ importers:
       dotenv:
         specifier: 'catalog:'
         version: 16.6.1
+      gnirts:
+        specifier: 1.1.8
+        version: 1.1.8
       postcss:
         specifier: 'catalog:'
         version: 8.5.26
@@ -3693,6 +3696,10 @@ packages:
   globalthis@1.0.4:
     resolution: {integrity: sha512-DpLKbNU4WylpxJykQujfCcwYWiV/Jhm50Goo0wrVILAv5jOr9d+H+UR3PhSCD2rCCEIg0uc+G+muBTwD54JhDQ==}
     engines: {node: '>= 0.4'}
+
+  gnirts@1.1.8:
+    resolution: {integrity: sha512-ZRdV2yfu6SBzFF9Fpql8cvbhj+u1Wj2bKQUvQAC4A596M3tZknSm695cc683UFmRAD0U+BWHY6QAa9vqfdwSLw==}
+    engines: {node: '>= 0.8.0'}
 
   gopd@1.2.0:
     resolution: {integrity: sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==}
@@ -8708,6 +8715,8 @@ snapshots:
     dependencies:
       define-properties: 1.2.1
       gopd: 1.2.0
+
+  gnirts@1.1.8: {}
 
   gopd@1.2.0: {}
 

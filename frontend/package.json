@@ -66,6 +66,7 @@
     "@types/react": "catalog:react",
     "@types/react-dom": "catalog:react",
     "dotenv": "catalog:",
+    "gnirts": "1.1.8",
     "postcss": "catalog:",
     "sass": "1.104.1",
     "svgo": "4.0.2",

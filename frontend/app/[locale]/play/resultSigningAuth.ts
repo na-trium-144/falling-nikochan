@@ -1,7 +1,35 @@
 import { captureAndWrap, fetchBackend } from "@/common/fetch";
 import { RecordPost } from "@falling-nikochan/chart";
 import { sign } from "hono/jwt";
-import { decodeBase64Url, encodeBase64Url } from "hono/utils/encode";
+import {
+  decodeBase64,
+  decodeBase64Url,
+  encodeBase64Url,
+} from "hono/utils/encode";
+
+async function buildPrivKey() {
+  return crypto.subtle.importKey(
+    "pkcs8",
+    resultBuildPrivPkcs8,
+    { name: "ECDSA", namedCurve: "P-256" },
+    false,
+    ["sign"]
+  );
+}
+// gnirtsの生成するコードはtoString()やfromCharCode()などの関数の繰り返しが多いので、
+// webpackがこれらを復元せず最適化できるよう、関数に切り出したり表現を置き換える
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _charCodeAt0 = (c: string) => "".charCodeAt.call(c, 0);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _fromCharCode = (c: number) => String.fromCharCode.apply(null, [c]);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _arraySlice = (a: unknown[]) => Array.prototype.slice.call(a);
+const _toString = (c: number, r: number) => c.toString(r);
+const _toString36LowerCase = (c: number) =>
+  _toString.call(null, c, 36).toLowerCase();
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _toString36LowerCaseSplit = (c: number) =>
+  _toString36LowerCase(c).split("");
 
 export async function initResultSigning(
   cid: string,
@@ -13,19 +41,12 @@ export async function initResultSigning(
     true,
     ["sign", "verify"]
   );
-  const buildPrivKey = await crypto.subtle.importKey(
-    "jwk",
-    JSON.parse(process.env.RESULT_BUILD_PRIVATE_JWK!),
-    { name: "ECDSA", namedCurve: "P-256" },
-    true,
-    ["sign"]
-  );
   const buildToken = await sign(
     {
       key: await crypto.subtle.exportKey("jwk", sessionKeyPair.publicKey),
       cid,
     },
-    buildPrivKey,
+    await buildPrivKey(),
     "ES256"
   );
   return fetchBackend()
@@ -83,3 +104,9 @@ export async function sendResultSerialized(
     .json(({ sign }) => setSign(sign))
     .catch((e: unknown) => captureAndWrap(e));
 }
+
+// defined with DefinePlugin in next.config.mjs
+declare const RESULT_BUILD_PRIVATE_PKCS8_BASE64: string;
+// インラインで書かない・呼び出し元から離す ことで読みづらくする
+const resultBuildPrivPkcs8Base64 = RESULT_BUILD_PRIVATE_PKCS8_BASE64;
+const resultBuildPrivPkcs8 = decodeBase64(resultBuildPrivPkcs8Base64);
