@@ -50,7 +50,6 @@ export const NoteSeqSchema = () =>
         v.number(),
         v.description("unique number of note, always equals to index in array")
       ),
-      big: v.pipe(v.boolean(), v.description("whether the note is big")),
       hitTimeSec: v.pipe(
         v.number(),
         v.description("hit judgement time in seconds (from chart start)")
@@ -61,12 +60,10 @@ export const NoteSeqSchema = () =>
       ),
       targetX: v.pipe(
         v.number(),
-        v.description(
-          "left edge: 0.0 - right edge: 1.0  (1 / 10 of NoteCommand.x)"
-        )
+        v.description("left edge: 0.0 - right edge: 1.0  (1 / 10 of hitX)")
       ),
-      vx: v.pipe(v.number(), v.description("1 / 4 of NoteCommand.vx")),
-      vy: v.pipe(v.number(), v.description("1 / 4 of NoteCommand.vy")),
+      vx: v.pipe(v.number(), v.description("1 / 4 of hitVX")),
+      vy: v.pipe(v.number(), v.description("1 / 4 of hitVY")),
       ay: v.pipe(v.number(), v.description("always 1 / 4")),
       uRange: v.pipe(
         v.optional(v.nullable(v.tuple([v.number(), v.number()]))),
@@ -90,15 +87,39 @@ export const NoteSeqSchema = () =>
         )
       ),
       step: StepSchema(),
-      hitX: v.pipe(v.number(), v.description("10 * targetX - 5")),
-      hitVX: v.pipe(v.number(), v.description("4 * vx")),
-      hitVY: v.pipe(v.number(), v.description("4 * vy")),
+      big: v.pipe(
+        v.boolean(),
+        v.description("Whether the note is a big note or not")
+      ),
+      hitX: v.pipe(
+        v.number(),
+        v.description(
+          "The x coordinate of the note when hit. " +
+            "left edge: -5.0 - right edge: +5.0"
+        )
+      ),
+      hitVX: v.pipe(
+        v.number(),
+        v.description("The x velocity of the note when hit")
+      ),
+      hitVY: v.pipe(
+        v.number(),
+        v.description("The y velocity of the note when hit")
+      ),
       fall: v.pipe(
         v.boolean(),
-        v.description("whether note falls down after hit")
+        v.description(
+          "Whether the note falls from the top of the screen, or thrown up from the bottom"
+        )
       ),
     }),
-    v.description("Note data used for judgement and display during play.")
+    v.description(
+      "Note data used for judgement and display during play.\n" +
+        "The `step`, `big`, `hitX`, `hitVX`, `hitVY`, and `fall` parameters are original values defined in the chart data, identical to those in `NoteCommand15`.\n" +
+        "The remaining parameters are calculated based on these values along with BPM and speed changes, " +
+        "via the internal `loadChart` function and the `/api/seqFile` and `/api/seqPreview` APIs, " +
+        "and are used for rendering during gameplay."
+    )
   );
 export async function NoteSeqDoc(): Promise<Schema> {
   const schema = (await resolver(NoteSeqSchema()).toOpenAPISchema()).schema;
@@ -107,10 +128,6 @@ export async function NoteSeqDoc(): Promise<Schema> {
     properties: {
       ...schema.properties,
       step: docRefs("Step"),
-      display: {
-        type: "array",
-        items: (await resolver(DisplayParamSchema()).toOpenAPISchema()).schema,
-      },
     },
   };
 }
