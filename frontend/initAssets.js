@@ -84,11 +84,10 @@ writeFileSync(
   "utf8"
 );
 writeFileSync(
-  ".resultBuildPrivKey.json",
-  JSON.stringify(
-    await crypto.subtle.exportKey("jwk", resultBuildKeyPair.privateKey)
-  ),
-  "utf8"
+  ".resultBuildPrivKey",
+  Buffer.from(
+    await crypto.subtle.exportKey("pkcs8", resultBuildKeyPair.privateKey)
+  )
 );
 if (!existsSync("out")) {
   mkdirSync("out");

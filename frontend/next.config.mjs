@@ -16,6 +16,7 @@ import parentPackageJson from "../package.json" with { type: "json" };
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { withLicense } from "next-license-list/config";
+import gnirts from "gnirts";
 import dotenv from "dotenv";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
@@ -115,6 +116,52 @@ copyFileSync(
   join(process.cwd(), "public/LICENSE")
 );
 
+env.RESULT_BUILD_PUBLIC_JWK = readFileSync(
+  "public/resultBuildKey.json",
+  "utf8"
+);
+const resultBuildPrivPkcs8Base64 = readFileSync(".resultBuildPrivKey").toString(
+  "base64"
+);
+let resultBuildPrivPkcs8Base64Encoded;
+if (process.env.NODE_ENV === "development") {
+  resultBuildPrivPkcs8Base64Encoded = JSON.stringify(
+    resultBuildPrivPkcs8Base64
+  );
+} else {
+  resultBuildPrivPkcs8Base64Encoded = gnirts.getCode(
+    resultBuildPrivPkcs8Base64
+  );
+  // gnirtsの生成するコードはtoString()やfromCharCode()などの関数の繰り返しが多いので、
+  // webpackがこれらを復元せず最適化できるよう、関数に切り出したり表現を置き換える
+  resultBuildPrivPkcs8Base64Encoded = resultBuildPrivPkcs8Base64Encoded
+    .replace(/function\(([^)]+)\){/g, "($1)=>{")
+    .replace(/(\w+)\.charCodeAt\(\)/g, "_charCodeAt0($1)")
+    .replaceAll("String.fromCharCode", "_fromCharCode")
+    .replaceAll("Array.prototype.slice.call", "_arraySlice")
+    .replace(
+      /\(([^)]+)\)\.toString\(36\)\.toLowerCase\(\)\.split\(''\)/g,
+      "_toString36LowerCaseSplit($1)"
+    )
+    .replace(
+      /\(([^)]+)\)\.toString\(36\)\.toLowerCase\(\)/g,
+      "_toString36LowerCase($1)"
+    );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _charCodeAt0 = (c) => "".charCodeAt.call(c, 0);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _fromCharCode = (c) => String.fromCharCode.apply(null, [c]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _arraySlice = (a) => Array.prototype.slice.call(a);
+  const _toString = (c, r) => c.toString(r);
+  const _toString36LowerCase = (c) => _toString.call(null, c, 36).toLowerCase();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _toString36LowerCaseSplit = (c) => _toString36LowerCase(c).split("");
+  if (eval(resultBuildPrivPkcs8Base64Encoded) !== resultBuildPrivPkcs8Base64) {
+    throw new Error("obfuscated private key does not match with actual key");
+  }
+}
+
 let nextConfig = {
   typescript: {
     // !! WARN !!
@@ -126,13 +173,7 @@ let nextConfig = {
   assetPrefix: process.env.ASSET_PREFIX || undefined,
   output: "export",
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
-  env: {
-    ...env,
-    // Do not show this in console
-    // TODO: obfuscation
-    RESULT_BUILD_PRIVATE_JWK: readFileSync(".resultBuildPrivKey.json", "utf8"),
-    RESULT_BUILD_PUBLIC_JWK: readFileSync("public/resultBuildKey.json", "utf8"),
-  },
+  env,
   sassOptions: {
     // pretty-checkbox と keyboard-css が出すwarning
     silenceDeprecations: [
@@ -149,6 +190,12 @@ let nextConfig = {
       // target: "browserslist",
       // ↑ somehow this breaks build: `unhandledRejection ReferenceError: self is not defined`
       //    but it seems like it's actually reading the browserslist config in ./package.json anyway
+      plugins: [
+        ...config.plugins,
+        new options.webpack.DefinePlugin({
+          RESULT_BUILD_PRIVATE_PKCS8_BASE64: resultBuildPrivPkcs8Base64Encoded,
+        }),
+      ],
       resolve: {
         ...config.resolve,
         extensionAlias: {
