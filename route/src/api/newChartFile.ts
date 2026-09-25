@@ -69,7 +69,7 @@ const newChartFileApp = async (config: {
         },
       ],
       responses: {
-        200: {
+        201: {
           description: "Successful response",
           content: {
             "application/json": {
@@ -225,7 +225,7 @@ const newChartFileApp = async (config: {
         );
 
       const newEntry = await getChartEntryCompressed(db, cid, null);
-      return c.json({ cid: cid }, 200, {
+      return c.json({ cid: cid }, 201, {
         "ETag": await calcETag(newEntry),
       });
     }

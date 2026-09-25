@@ -37,7 +37,7 @@ describe("POST /api/chartFile", () => {
           changePasswd: "p",
         }),
       });
-      expect(res1.status).to.equal(200);
+      expect(res1.status).to.equal(201);
 
       const res2 = await app.request("/api/chartFile", {
         method: "POST",
@@ -64,7 +64,7 @@ describe("POST /api/chartFile", () => {
       }),
     });
     const dateAfter = new Date();
-    expect(res.status).to.equal(200);
+    expect(res.status).to.equal(201);
     const body = await res.json();
     expect(body.cid).to.be.a("string");
 
@@ -89,7 +89,7 @@ describe("POST /api/chartFile", () => {
         changePasswd: "p",
       }),
     });
-    expect(res.status).to.equal(200);
+    expect(res.status).to.equal(201);
     const body = await res.json();
 
     const e = await db
@@ -195,7 +195,7 @@ describe("POST /api/chartFile", () => {
       }),
     });
     const dateAfter = new Date();
-    expect(res.status).to.equal(200);
+    expect(res.status).to.equal(201);
     const body = await res.json();
     expect(body.cid).to.be.a("string");
 
