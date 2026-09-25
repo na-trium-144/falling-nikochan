@@ -84,19 +84,15 @@ export function TopDemo(
         .get(`/api/seqFile/${props.cid}/${props.lvIndex}`)
         .arrayBuffer((buf) => {
           const seq = msgpack.decode(buf) as ChartSeqData;
-          if (seq.ver === 6 || seq.ver === 15 || seq.ver === currentChartVer) {
-            resetNotesAll(
-              seq.notes.map((n) => ({
-                ...n,
-                done: 0,
-                bigDone: false,
-              })),
-              props.offset! - seq.offset
-            );
-            currentTimeSec.current = props.offset! - seq.offset;
-          } else {
-            // ignore
-          }
+          resetNotesAll(
+            seq.notes.map((n) => ({
+              ...n,
+              done: 0,
+              bigDone: false,
+            })),
+            props.offset! - seq.offset
+          );
+          currentTimeSec.current = props.offset! - seq.offset;
         });
     }
   }, [notesAll, resetNotesAll, props.cid, props.lvIndex, props.offset]);

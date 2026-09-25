@@ -129,18 +129,9 @@ export function InitPlay({ locale }: { locale: string }) {
         })
         .arrayBuffer((buf) => {
           const seq = msgpack.decode(buf) as ChartSeqData;
-          console.log("seq.ver", seq.ver);
-          if (seq.ver === 6 || seq.ver === 15 || seq.ver === currentChartVer) {
-            addRecent("play", session.cid ?? "");
-            updatePlayCountForReview();
-            return { seq, error: undefined };
-          } else {
-            // seq satisfies never;
-            return {
-              seq: undefined,
-              error: te("chartVersion", { ver: (seq as any)?.ver }),
-            };
-          }
+          addRecent("play", session.cid ?? "");
+          updatePlayCountForReview();
+          return { seq, error: undefined };
         })
         .catch((e: unknown) => ({
           seq: undefined,
