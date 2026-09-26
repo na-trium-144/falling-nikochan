@@ -33,7 +33,7 @@ describe("GET /api/resultSigning/verify/:cid", () => {
       key,
       Buffer.from(serialized, "base64url")
     );
-    const signatureBase64Url = Buffer.from(signature).toString("base64url");
+    const signatureBase64Url = Buffer.from(signature.slice(0, 12)).toString("base64url");
     const param = `${serialized}.${signatureBase64Url}`;
 
     const res = await app.request(

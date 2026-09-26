@@ -1,9 +1,13 @@
 import { test, describe } from "node:test";
 import { expect } from "chai";
 import { app, createTestResultSigning, dummyCid } from "./init.js";
-import { ResultParams, serializeResultParams } from "@falling-nikochan/chart";
+import {
+  ResultParams,
+  serializeResultParams,
+  signResultParams,
+} from "@falling-nikochan/chart";
 import { resultSecretKey } from "../../src/env.js";
-import { decodeBase64Url } from "hono/utils/encode";
+import { decodeBase64Url, encodeBase64Url } from "hono/utils/encode";
 
 const testResultParams: ResultParams = {
   date: new Date(),
@@ -48,14 +52,14 @@ describe("POST /api/resultSigning/sign", () => {
     expect(res.status).to.equal(200);
     const body = await res.json();
 
-    expect(
-      await crypto.subtle.verify(
-        { name: "HMAC", hash: { name: "SHA-256" } },
-        await resultSecretKey(process.env as any),
-        decodeBase64Url(body.sign),
-        decodeBase64Url(resultSerialized)
-      )
-    ).to.be.true;
+    expect(body.sign).to.be.equal(
+      encodeBase64Url(
+        await signResultParams(
+          decodeBase64Url(resultSerialized),
+          await resultSecretKey(process.env as any)
+        )
+      ).replaceAll("=", "")
+    );
   });
 
   test("should return 401 when Authorization is missing", async () => {

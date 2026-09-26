@@ -306,11 +306,13 @@ export async function signResultParams(
   result: Uint8Array,
   resultSecretKey: webcrypto.CryptoKey
 ) {
-  return await crypto.subtle.sign(
-    { name: "HMAC", hash: { name: "SHA-256" } },
-    resultSecretKey,
-    result
-  );
+  return (
+    await crypto.subtle.sign(
+      { name: "HMAC", hash: { name: "SHA-256" } },
+      resultSecretKey,
+      result
+    )
+  ).slice(0, 12);
 }
 export async function verifyResultParams(
   parsed: { result: Uint8Array; sign?: Uint8Array },
@@ -319,19 +321,16 @@ export async function verifyResultParams(
   if (!parsed.sign) {
     return false;
   }
-  try {
-    if (
-      await crypto.subtle.verify(
-        { name: "HMAC", hash: { name: "SHA-256" } },
-        resultSecretKey,
-        parsed.sign,
-        parsed.result
-      )
-    ) {
-      return true;
-    }
-  } catch {
-    // pass
+  const expected = new Uint8Array(
+    await signResultParams(parsed.result, resultSecretKey)
+  );
+  if (parsed.sign.length !== expected.length) {
+    return false;
   }
-  return false;
+  // 定数時間比較
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) {
+    diff |= expected[i] ^ parsed.sign[i];
+  }
+  return diff === 0;
 }
