@@ -177,10 +177,51 @@ export function serializeResultParams(params: ResultParams): string {
     )
   ).replaceAll("=", "");
 }
-export function deserializeResultParams(serialized: string): ResultParams {
-  const serializedArr = decodeBase64Url(
-    serialized.split(".")[0].replace(/[^0-9a-zA-Z+/_-]/g, "")
+
+function isResultParamArray(serializedArr: Uint8Array) {
+  // resultはmsgpackのarrayなので、開始バイトは必ず 0x90-0x9f, 0xdc, 0xdd のいずれか。
+  return (
+    serializedArr.at(0) &&
+    ((serializedArr.at(0)! & 0xf0) === 0x90 ||
+      (serializedArr.at(0)! & 0xfe) === 0xdc)
   );
+}
+/**
+ * ピリオドで連結されたresultとsignを分割し、デコードする。
+ * deserializeはしない。
+ */
+export async function parseResultParams(
+  serialized: string
+): Promise<{ result: Uint8Array; sign?: Uint8Array }> {
+  let serializedArr: Uint8Array = decodeBase64Url(
+    serialized
+      .split(".")
+      .at(0)!
+      .replace(/[^0-9a-zA-Z+/_-]/g, "")
+  );
+  if (isResultParamArray(serializedArr)) {
+    // pass
+  } else {
+    throw new Error(
+      `The first byte of resultParam (${serializedArr.at(0)?.toString(16)} ${serializedArr.at(1)?.toString(16)}) is invalid`
+    );
+  }
+  const sign = serialized
+    .split(".")
+    .at(1)
+    ?.replace(/[^0-9a-zA-Z+/_-]/g, "");
+  let signArr: Uint8Array | undefined = undefined;
+  if (sign) {
+    signArr = decodeBase64Url(sign);
+  }
+  return { result: serializedArr, sign: signArr };
+}
+export function deserializeResultParams(
+  serializedArr: Uint8Array | string
+): ResultParams {
+  if (typeof serializedArr === "string") {
+    serializedArr = decodeBase64Url(serializedArr);
+  }
   const deserialized = v.parse(
     ResultSerializedSchema(),
     msgpack.decode(serializedArr)
@@ -262,18 +303,10 @@ export function isVerificationRequired(result: ResultParams) {
   );
 }
 export async function verifyResultParams(
-  serialized: string,
+  parsed: { result: Uint8Array; sign?: Uint8Array },
   resultSecretKey: webcrypto.CryptoKey
 ): Promise<boolean> {
-  const result = serialized
-    .split(".")
-    .at(0)
-    ?.replace(/[^0-9a-zA-Z+/_-]/g, "");
-  const sign = serialized
-    .split(".")
-    .at(1)
-    ?.replace(/[^0-9a-zA-Z+/_-]/g, "");
-  if (!result || !sign) {
+  if (!parsed.sign) {
     return false;
   }
   try {
@@ -281,8 +314,8 @@ export async function verifyResultParams(
       await crypto.subtle.verify(
         { name: "HMAC", hash: { name: "SHA-256" } },
         resultSecretKey,
-        decodeBase64Url(sign),
-        decodeBase64Url(result)
+        parsed.sign,
+        parsed.result
       )
     ) {
       return true;
