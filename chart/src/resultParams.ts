@@ -5,7 +5,7 @@ import { CidSchema } from "./chart.js";
 import type { webcrypto } from "node:crypto";
 
 const dateBase = new Date(2025, 2, 1);
-const dateBase4 = new Date(2026, 10, 1);
+export const dateBase4 = new Date(2026, 10, 1);
 export function serializeDate(date: Date, base: Date): number {
   const targetDate = new Date(
     date.getFullYear(),
@@ -152,6 +152,7 @@ export function serializeResultParamsLegacy(params: ResultParams): string {
     )
   ).replaceAll("=", "");
 }
+// TODO: これはなんと現在テストでしか使われていない。消す?
 export function serializeResultParams(params: ResultParams): string {
   const serialized = msgpack.encode([
     4,

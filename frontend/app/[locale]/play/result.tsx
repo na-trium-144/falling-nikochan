@@ -11,7 +11,6 @@ import {
   ChartBrief,
   rankStr,
   RecordGetSummary,
-  ResultParams,
 } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { useShareLink } from "@/common/shareLinkAndImage";
@@ -20,7 +19,7 @@ import { RecordHistogram } from "@/common/recordHistogram";
 
 export const resultAnimDelays = [100, 500, 500, 500, 750, 750, 500] as const;
 
-interface Props extends ResultParams {
+interface Props {
   className?: string;
   mainWindowHeight: number;
   hidden: boolean;
@@ -38,6 +37,12 @@ interface Props extends ResultParams {
   record: RecordGetSummary | Error | undefined;
   resultSerialized?: string;
   resultSign?: string;
+  date: Date | null;
+  baseScore100: number;
+  chainScore100: number;
+  bigScore100: number;
+  score100: number;
+  bigCount: number | null | false; // null: 存在しない(max=0), false: データがない、不明
 }
 export default function Result(props: Props) {
   const t = useTranslations("play.result");

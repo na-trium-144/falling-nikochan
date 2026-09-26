@@ -17,6 +17,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { withLicense } from "next-license-list/config";
 import gnirts from "gnirts";
+import { p256 } from "@noble/curves/nist.js";
 import dotenv from "dotenv";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
@@ -155,6 +156,16 @@ if (process.env.NODE_ENV === "development") {
   const _toString36LowerCaseSplit = (c) => _toString36LowerCase(c).split("");
   if (eval(resultBuildPrivKeyBase64Encoded) !== resultBuildPrivKeyBase64) {
     throw new Error("obfuscated private key does not match with actual key");
+  }
+
+  if (
+    // resultSigningAuth.ts で使っているものと同じものをチェックし、nobleのバージョンアップで仕様が変わったら検知
+    Object.values(p256)[6] !== p256.sign ||
+    Object.values(p256)[1] !== p256.getPublicKey ||
+    Object.values(p256)[3] !== p256.utils ||
+    Object.values(Object.values(p256)[3])[2] !== p256.utils.randomSecretKey
+  ) {
+    throw new Error("key order of p256 has been changed");
   }
 }
 
