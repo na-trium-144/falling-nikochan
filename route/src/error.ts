@@ -79,6 +79,7 @@ export function finalRoutePath(c: Context) {
  *    したがってそれぞれのAPIのハンドラーでは常に `v.parse()` を使用し、catchしたり手動でjsonにして返す必要はない
  * * `hono-openapi` のvalidatorを使用する場合は第3引数に `sValidatorHook()` を渡すことで
  *    バリデーションエラーが上記のValiErrorの処理と同じロジックに流れる。
+ * * HTTPException の cause に Error を渡すと、レスポンスに cause の文字列表現を追加する。
  * * cause に Response を含むエラーをthrowするとそのbodyをパースし、JSON形式で message が含まれていればそれを返す。
  */
 export const onError =
@@ -108,6 +109,11 @@ export const onError =
         status = err.status;
         message = err.message;
         err.name = `HTTPException-${status}`;
+        if (err.cause instanceof Error) {
+          others = {
+            cause: String(err.cause),
+          };
+        }
       }
       if (err instanceof Error && v.isValiError(err.cause)) {
         others = {

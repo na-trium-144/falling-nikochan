@@ -4,6 +4,7 @@ import {
   cacheControl,
   languageDetector,
   ResponseOK,
+  resultSecretKey,
 } from "./env.js";
 import { getTranslations, locales } from "@falling-nikochan/i18n/dynamic.js";
 import {
@@ -12,8 +13,11 @@ import {
   chainScoreRate,
   ChartBrief,
   deserializeResultParams,
+  isVerificationRequired,
   levelTypes,
+  parseResultParams,
   ResultParams,
+  verifyResultParams,
 } from "@falling-nikochan/chart";
 import packageJson from "../package.json" with { type: "json" };
 import { env } from "hono/adapter";
@@ -55,10 +59,23 @@ const shareApp = (config: {
       const qResult = c.req.query("result");
       let resultParams: ResultParams | null = null;
       if (qResult) {
+        let result: Uint8Array;
+        let sign: Uint8Array | undefined;
         try {
-          resultParams = deserializeResultParams(qResult);
-        } catch (e) {
-          c.var.logger.error(e);
+          const parsed = await parseResultParams(qResult);
+          result = parsed.result;
+          sign = parsed.sign;
+          resultParams = deserializeResultParams(result);
+          if (
+            isVerificationRequired(resultParams) &&
+            !(await verifyResultParams(
+              { result, sign },
+              await resultSecretKey(env(c))
+            ))
+          ) {
+            resultParams = null;
+          }
+        } catch {
           // throw new HTTPException(400, { message: "invalidResultParam" });
         }
       }

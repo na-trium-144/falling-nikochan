@@ -1,22 +1,27 @@
 import * as msgpack from "@msgpack/msgpack";
+import { decodeBase64Url, encodeBase64Url } from "hono/utils/encode";
 import * as v from "valibot";
+import { CidSchema } from "./chart.js";
+import type { webcrypto } from "node:crypto";
 
 const dateBase = new Date(2025, 2, 1);
-export function serializeDate3(date: Date): number {
+export const dateBase4 = new Date(2026, 10, 1);
+export function serializeDate(date: Date, base: Date): number {
   const targetDate = new Date(
     date.getFullYear(),
     date.getMonth(),
     date.getDate()
   ); // 時刻を切り捨て
-  const diffTime = targetDate.getTime() - dateBase.getTime();
+  const diffTime = targetDate.getTime() - base.getTime();
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
   return diffDays;
 }
-function deserializeDate3(diffDays: number): Date {
-  return new Date(dateBase.getTime() + diffDays * (1000 * 60 * 60 * 24));
+function deserializeDate(diffDays: number, base: Date): Date {
+  return new Date(base.getTime() + diffDays * (1000 * 60 * 60 * 24));
 }
 
 export interface ResultParams {
+  ver?: number;
   date: Date | null;
   lvName: string;
   lvType: number;
@@ -30,6 +35,7 @@ export interface ResultParams {
   bigCount: number | null | false; // null: 存在しない(max=0), false: データがない、不明
   inputType: number | null;
   playbackRate4: number; // 4倍して整数にする
+  cid: string | null;
 }
 export const inputTypes = {
   keyboard: 1,
@@ -81,7 +87,7 @@ export const ResultSerializedSchema = () =>
           v.number(),
           v.integer(),
           v.minValue(0),
-          v.maxValue(serializeDate3(new Date(2099, 12, 31)))
+          v.maxValue(serializeDate(new Date(2099, 12, 31), dateBase))
         )
       ), // [1] serializeDate3
       v.string(), // [2] lvName
@@ -101,15 +107,31 @@ export const ResultSerializedSchema = () =>
       v.nullable(v.pipe(v.number(), v.integer(), v.minValue(1))), // [11] inputType
       v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(8)), // [12] playbackRate4
     ]),
+    v.tuple([
+      v.literal(4),
+      v.pipe(v.number(), v.integer()), // [1] serializeDate4 (分単位)
+      v.string(), // [2] lvName
+      v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2)), // [3] lvType 0,1,2
+      v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(20)), // [4] lvDifficulty 0-20
+      v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(8000)), // [5] baseScore100
+      v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2000)), // [6] chainScore100
+      v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2000)), // [7] bigScore100
+      v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(12000)), // [8] score100
+      v.pipe(v.array(v.pipe(v.number(), v.integer())), v.length(4)), // [9] judgeCount
+      v.nullable(v.pipe(v.number(), v.integer(), v.minValue(0))), // [10] bigCount
+      v.nullable(v.pipe(v.number(), v.integer(), v.minValue(1))), // [11] inputType
+      v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(8)), // [12] playbackRate4
+      CidSchema(), // [13] cid
+    ]),
   ]);
 export type ResultSerialized = v.InferOutput<
   ReturnType<typeof ResultSerializedSchema>
 >;
-export function serializeResultParams(params: ResultParams): string {
+export function serializeResultParamsLegacy(params: ResultParams): string {
   const serialized = msgpack.encode([
     3,
     // params.date !== null ? params.date.getTime() - dateBase.getTime() : null,
-    params.date !== null ? serializeDate3(params.date) : null,
+    params.date !== null ? serializeDate(params.date, dateBase) : null,
     params.lvName,
     params.lvType,
     params.lvDifficulty,
@@ -122,25 +144,83 @@ export function serializeResultParams(params: ResultParams): string {
     params.inputType,
     params.playbackRate4,
   ] satisfies ResultSerialized);
-  let serializedBin = "";
-  for (let i = 0; i < serialized.length; i++) {
-    serializedBin += String.fromCharCode(serialized[i]);
-  }
-  return btoa(serializedBin)
-    .replaceAll("+", "-")
-    .replaceAll("/", "_")
-    .replaceAll("=", "");
+  // Buffer.toString("base64url") は末尾の=を消すが、 encodeBase64Url() は消してくれない。
+  return encodeBase64Url(
+    serialized.buffer.slice(
+      serialized.byteOffset,
+      serialized.byteOffset + serialized.byteLength
+    )
+  ).replaceAll("=", "");
 }
-export function deserializeResultParams(serialized: string): ResultParams {
-  const serializedBin = atob(
-    serialized
-      .replaceAll("-", "+")
-      .replaceAll("_", "/")
-      .replace(/[^0-9a-zA-Z+/]/g, "")
+// TODO: これはなんと現在テストでしか使われていない。消す?
+export function serializeResultParams(params: ResultParams): string {
+  const serialized = msgpack.encode([
+    4,
+    serializeDate(params.date!, dateBase4),
+    params.lvName,
+    params.lvType,
+    params.lvDifficulty,
+    params.baseScore100,
+    params.chainScore100,
+    params.bigScore100,
+    params.score100,
+    params.judgeCount.slice(),
+    params.bigCount as number | null,
+    params.inputType,
+    params.playbackRate4,
+    params.cid!,
+  ] satisfies ResultSerialized);
+  return encodeBase64Url(
+    serialized.buffer.slice(
+      serialized.byteOffset,
+      serialized.byteOffset + serialized.byteLength
+    )
+  ).replaceAll("=", "");
+}
+
+function isResultParamArray(serializedArr: Uint8Array) {
+  // resultはmsgpackのarrayなので、開始バイトは必ず 0x90-0x9f, 0xdc, 0xdd のいずれか。
+  return (
+    serializedArr.at(0) &&
+    ((serializedArr.at(0)! & 0xf0) === 0x90 ||
+      (serializedArr.at(0)! & 0xfe) === 0xdc)
   );
-  const serializedArr = new Uint8Array(serializedBin.length);
-  for (let i = 0; i < serializedBin.length; i++) {
-    serializedArr[i] = serializedBin.charCodeAt(i);
+}
+/**
+ * ピリオドで連結されたresultとsignを分割し、デコードする。
+ * deserializeはしない。
+ */
+export async function parseResultParams(
+  serialized: string
+): Promise<{ result: Uint8Array; sign?: Uint8Array }> {
+  let serializedArr: Uint8Array = decodeBase64Url(
+    serialized
+      .split(".")
+      .at(0)!
+      .replace(/[^0-9a-zA-Z+/_-]/g, "")
+  );
+  if (isResultParamArray(serializedArr)) {
+    // pass
+  } else {
+    throw new Error(
+      `The first byte of resultParam (${serializedArr.at(0)?.toString(16)} ${serializedArr.at(1)?.toString(16)}) is invalid`
+    );
+  }
+  const sign = serialized
+    .split(".")
+    .at(1)
+    ?.replace(/[^0-9a-zA-Z+/_-]/g, "");
+  let signArr: Uint8Array | undefined = undefined;
+  if (sign) {
+    signArr = decodeBase64Url(sign);
+  }
+  return { result: serializedArr, sign: signArr };
+}
+export function deserializeResultParams(
+  serializedArr: Uint8Array | string
+): ResultParams {
+  if (typeof serializedArr === "string") {
+    serializedArr = decodeBase64Url(serializedArr);
   }
   const deserialized = v.parse(
     ResultSerializedSchema(),
@@ -150,6 +230,7 @@ export function deserializeResultParams(serialized: string): ResultParams {
     case 1:
     case 2:
       return {
+        ver: deserialized[0],
         date:
           deserialized[1] !== null
             ? new Date(dateBase.getTime() + deserialized[1])
@@ -165,11 +246,15 @@ export function deserializeResultParams(serialized: string): ResultParams {
         bigCount: deserialized[10],
         inputType: deserialized[11] || null,
         playbackRate4: 4,
+        cid: null,
       };
     case 3:
       return {
+        ver: deserialized[0],
         date:
-          deserialized[1] !== null ? deserializeDate3(deserialized[1]) : null,
+          deserialized[1] !== null
+            ? deserializeDate(deserialized[1], dateBase)
+            : null,
         lvName: deserialized[2],
         lvType: deserialized[3],
         lvDifficulty: deserialized[4],
@@ -181,8 +266,62 @@ export function deserializeResultParams(serialized: string): ResultParams {
         bigCount: deserialized[10],
         inputType: deserialized[11] || null,
         playbackRate4: deserialized[12],
+        cid: null,
+      };
+    case 4:
+      return {
+        ver: deserialized[0],
+        date:
+          deserialized[1] !== null
+            ? deserializeDate(deserialized[1], dateBase4)
+            : null,
+        lvName: deserialized[2],
+        lvType: deserialized[3],
+        lvDifficulty: deserialized[4],
+        baseScore100: deserialized[5],
+        chainScore100: deserialized[6],
+        bigScore100: deserialized[7],
+        score100: deserialized[8],
+        judgeCount: deserialized[9] as [number, number, number, number],
+        bigCount: deserialized[10],
+        inputType: deserialized[11] || null,
+        playbackRate4: deserialized[12],
+        cid: deserialized[13],
       };
     default:
       throw new Error("Invalid version");
   }
+}
+export function isVerificationRequired(result: ResultParams) {
+  // ver3以前かつ日付が署名導入前なら署名は不要
+  if (typeof result.ver !== "number") {
+    throw new Error("result.ver must be a number");
+  }
+  return (
+    result.ver >= 4 ||
+    (result.date && result.date.getTime() >= dateBase4.getTime())
+  );
+}
+export async function verifyResultParams(
+  parsed: { result: Uint8Array; sign?: Uint8Array },
+  resultSecretKey: webcrypto.CryptoKey
+): Promise<boolean> {
+  if (!parsed.sign) {
+    return false;
+  }
+  try {
+    if (
+      await crypto.subtle.verify(
+        { name: "HMAC", hash: { name: "SHA-256" } },
+        resultSecretKey,
+        parsed.sign,
+        parsed.result
+      )
+    ) {
+      return true;
+    }
+  } catch {
+    // pass
+  }
+  return false;
 }

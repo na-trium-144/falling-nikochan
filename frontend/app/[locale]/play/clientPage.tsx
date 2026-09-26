@@ -21,7 +21,6 @@ import {
   chainScoreRate,
   levelTypes,
   RecordGetSummary,
-  RecordPost,
   inputTypes,
   emptyBrief,
   currentChartVer,
@@ -30,6 +29,10 @@ import {
   Level15Play,
   RecordGetSummarySchema,
   LevelPlay,
+  deserializeResultParams,
+  serializeDate,
+  ResultSerialized,
+  dateBase4,
 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
@@ -73,6 +76,12 @@ import { markAsExpected } from "@/common/apiError.js";
 import * as Sentry from "@sentry/nextjs";
 import { useDisplayMode } from "@/scale.js";
 import { refreshBrief } from "@/common/briefCache.js";
+import {
+  initResultSigning,
+  sendRecord,
+  sendResultSerialized,
+} from "./resultSigningAuth.js";
+import { encodeBase64Url } from "hono/utils/encode";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -245,6 +254,53 @@ function Play(props: Props) {
     setAutoOffset_(v);
     localStorage.setItem("autoOffset", v ? "1" : "0");
   }, []);
+  const [resultSessionPrivateKey, setResultSessionPrivateKey] =
+    useState<Uint8Array | null>(null);
+  const [resultSessionToken, setResultSessionToken] = useState<string | null>(
+    null
+  );
+  const [resultSessionError, setResultSessionError] = useState<Error | null>(
+    null
+  );
+  const [resultSessionExp, setResultSessionExp] = useState<number | null>(null);
+  const resultSessionExpired = useCallback(
+    () => resultSessionExp && Date.now() > resultSessionExp,
+    [resultSessionExp]
+  );
+
+  useEffect(() => {
+    let canceled = false;
+    if (cid && !queryOptions.nosigning) {
+      initResultSigning(
+        cid,
+        (key, token) => {
+          if (!canceled) {
+            setResultSessionPrivateKey(key);
+            setResultSessionToken(token);
+            // バックエンド側のトークン有効期限は3時間だが、切れないよう早めにエラーメッセージを出す
+            setResultSessionExp(Date.now() + 2.5 * 60 * 60 * 1000);
+            console.log(
+              "ResultSigning session successfully initialized at:",
+              new Date()
+            );
+          }
+        },
+        (e) => {
+          if (!canceled) {
+            setResultSessionError(e);
+            console.warn(
+              "Failed to initialize ResultSigning session. " +
+                "If you want to ignore and continue, add `nosigning=1` query parameter."
+            );
+          }
+        }
+      );
+      return () => {
+        canceled = true;
+      };
+    }
+  }, [cid, queryOptions.nosigning]);
+
   const [userOffset, setUserOffset_] = useState<number>(0);
   useEffect(() => {
     if (cid) {
@@ -292,10 +348,14 @@ function Play(props: Props) {
     cid && lvIndex !== undefined && chartBrief?.levels[lvIndex];
   const reloadBestScore = useCallback(() => {
     if (cid && lvIndex !== undefined && chartBrief?.levels[lvIndex]) {
-      const data = getBestScore(cid, chartBrief.levels[lvIndex].hash);
+      const data = getBestScore(cid, chartBrief.levels[lvIndex]);
       if (data) {
-        setBestScoreState(data.baseScore + data.chainScore + data.bigScore);
-        setBestScoreCounts([...data.judgeCount, data.bigCount ?? 0]);
+        const result = deserializeResultParams(data.result);
+        setBestScoreState(
+          (result.baseScore100 + result.chainScore100 + result.bigScore100) /
+            100
+        );
+        setBestScoreCounts([...result.judgeCount, result.bigCount || 0]);
       } else {
         setBestScoreState(0);
         setBestScoreCounts(null);
@@ -422,27 +482,29 @@ function Play(props: Props) {
 
   const { barFlash, flash } = useFlash();
 
-  const {
+  const [
+    notesAll,
+    resetNotesAll,
     baseScore,
     chainScore,
     bigScore,
     score,
     chain,
     maxChain,
-    notesAll,
-    resetNotesAll,
     notesDone,
     hit,
     iosRelease,
     judgeCount,
     bigCount,
     bigTotal,
-    lateTimes,
     chartEnd,
+    lateTimes,
     hitType,
     posOfs,
     timeOfsEstimator,
-  } = useGameLogic(
+    // judge,
+    // notesYetDone,
+  ] = useGameLogic(
     getCurrentTimeSec,
     auto,
     !!queryOptions.judgeAuto,
@@ -482,29 +544,31 @@ function Play(props: Props) {
 
   const reset = useCallback(() => setShowReady(true), []);
   const start = useCallback(() => {
-    // Space(スタートボタン)が押されたとき
-    switch (ytPlayer.current?.getPlayerState?.()) {
-      case 2:
-      case 0:
-        ytPlayer.current?.seekTo?.(begin, true);
-        ytPlayer.current?.playVideo?.();
-        break;
-      case 5:
-      default:
-        ytPlayer.current?.seekTo?.(begin, true);
-        break;
+    if (!resultSessionExpired()) {
+      // Space(スタートボタン)が押されたとき
+      switch (ytPlayer.current?.getPlayerState?.()) {
+        case 2:
+        case 0:
+          ytPlayer.current?.seekTo?.(begin, true);
+          ytPlayer.current?.playVideo?.();
+          break;
+        case 5:
+        default:
+          ytPlayer.current?.seekTo?.(begin, true);
+          break;
+      }
+      // startボタンを押して数秒経っても始まらなかったらloadingを表示
+      setCloseReadyAnim(true);
+      readyTimeout.current = setInterval(() => {
+        setLoadingAfterReady(true);
+        // iframe内など特殊な環境ではplayVideo()で開始せずstateが-1になる場合がある
+        setNeedManualStart(ytPlayer.current?.getPlayerState?.() === -1);
+      }, 1500);
+      // 再生中に呼んでもなにもしない
+      playSE("hit"); // ユーザー入力のタイミングで鳴らさないとaudioが有効にならないsafariの対策
+      // 譜面のリセットと開始はonStart()で処理
     }
-    // startボタンを押して数秒経っても始まらなかったらloadingを表示
-    setCloseReadyAnim(true);
-    readyTimeout.current = setInterval(() => {
-      setLoadingAfterReady(true);
-      // iframe内など特殊な環境ではplayVideo()で開始せずstateが-1になる場合がある
-      setNeedManualStart(ytPlayer.current?.getPlayerState?.() === -1);
-    }, 1500);
-    // 再生中に呼んでもなにもしない
-    playSE("hit"); // ユーザー入力のタイミングで鳴らさないとaudioが有効にならないsafariの対策
-    // 譜面のリセットと開始はonStart()で処理
-  }, [begin, playSE]);
+  }, [begin, playSE, resultSessionExpired]);
   const stop = useCallback(() => {
     // Escが押された時&Result表示時
     if (chartPlaying) {
@@ -618,6 +682,8 @@ function Play(props: Props) {
     if (!errorMsg) {
       if (apiErrorMsg) {
         setErrorMsg(apiErrorMsg);
+      } else if (resultSessionError) {
+        setErrorMsg(resultSessionError);
       } else if (ytError !== null) {
         setErrorMsg(te("ytError", { code: ytError }));
       } else if (chartBrief && !chartBrief.ytId) {
@@ -626,7 +692,15 @@ function Play(props: Props) {
         setErrorMsg(te("seqEmpty"));
       }
     }
-  }, [apiErrorMsg, ytError, chartBrief, chartSeq, errorMsg, te]);
+  }, [
+    apiErrorMsg,
+    resultSessionError,
+    ytError,
+    chartBrief,
+    chartSeq,
+    errorMsg,
+    te,
+  ]);
 
   const [endSecPassed, setEndSecPassed] = useState<boolean>(false);
   useEffect(() => {
@@ -643,6 +717,11 @@ function Play(props: Props) {
       return () => clearInterval(t);
     }
   }, [chartPlaying, chartSeq, endSecPassed, getCurrentTimeSec]);
+
+  const [resultSerialized, setResultSerialized] = useState<string | undefined>(
+    undefined
+  );
+  const [resultSign, setResultSign] = useState<string | undefined>(undefined);
   useEffect(() => {
     if (chartPlaying && chartEnd && endSecPassed) {
       if (!showResult) {
@@ -655,23 +734,6 @@ function Play(props: Props) {
           lvIndex !== undefined &&
           chartBrief?.levels.at(lvIndex)
         ) {
-          if (score > bestScoreState) {
-            setBestScore(cid, chartBrief.levels[lvIndex].hash, {
-              date: newResultDate.getTime(),
-              baseScore,
-              chainScore,
-              bigScore,
-              judgeCount: judgeCount.slice(0, 4) as [
-                number,
-                number,
-                number,
-                number,
-              ],
-              bigCount: bigCount,
-              inputType: hitType,
-            });
-            reloadBestScore();
-          }
           fetchBackend()
             .get(`/api/record/${cid}`)
             .json((record) =>
@@ -684,41 +746,6 @@ function Play(props: Props) {
         }
         const t = setTimeout(() => {
           setShowResult(true);
-          if (
-            cid &&
-            userBegin === null &&
-            playbackRate === 1 &&
-            chartBrief?.levels.at(lvIndex)
-          ) {
-            try {
-              const factor = updateRecordFactor(
-                cid,
-                chartBrief.levels[lvIndex].hash,
-                auto
-              );
-              fetchBackend()
-                .url(`/api/record/${cid}`)
-                .json({
-                  lvHash: chartBrief.levels[lvIndex].hash,
-                  auto,
-                  score,
-                  baseScore,
-                  chainScore,
-                  bigScore,
-                  fc: chainScore === chainScoreRate,
-                  fb: bigScore === bigScoreRate,
-                  editing,
-                  factor,
-                } satisfies RecordPost)
-                .post()
-                .notFound(() => undefined)
-                .error(429, () => undefined)
-                .res()
-                .catch((e: unknown) => captureAndWrap(e, { cid }));
-            } catch {
-              // ignore errors from updateRecordFactor
-            }
-          }
           setResultDate(newResultDate);
           setExitable((ex) =>
             Math.max(
@@ -727,6 +754,95 @@ function Play(props: Props) {
             )
           );
           stop();
+          if (
+            cid &&
+            resultSessionPrivateKey &&
+            resultSessionToken &&
+            chartBrief?.levels.at(lvIndex) &&
+            !queryOptions.result
+          ) {
+            if (oldUserBegin === null && oldPlaybackRate === 1) {
+              // こっちはautoは含む
+              try {
+                const factor = updateRecordFactor(
+                  cid,
+                  chartBrief.levels[lvIndex].hash,
+                  auto
+                );
+                sendRecord(
+                  cid,
+                  {
+                    lvHash: chartBrief.levels[lvIndex].hash,
+                    auto,
+                    score,
+                    baseScore,
+                    chainScore,
+                    bigScore,
+                    fc: chainScore === chainScoreRate,
+                    fb: bigScore === bigScoreRate,
+                    editing,
+                    factor,
+                    date: newResultDate.getTime(),
+                  },
+                  resultSessionPrivateKey,
+                  resultSessionToken
+                );
+              } catch {
+                // ignore errors from updateRecordFactor
+              }
+            }
+            if (!wasAutoPlay && oldUserBegin === null) {
+              // こっちはplaybackRate変更を含む
+              // serializeResultParams() と同一の処理をわざわざ再度書いている (結果の情報をオブジェクトに入れたくないため)
+              const serialized = msgpack.encode([
+                4,
+                serializeDate(newResultDate, dateBase4),
+                chartBrief.levels.at(lvIndex)!.name,
+                levelTypes.indexOf(chartBrief.levels.at(lvIndex)!.type),
+                chartBrief.levels.at(lvIndex)!.difficulty,
+                Math.floor(baseScore * 100),
+                Math.floor(chainScore * 100),
+                Math.floor(bigScore * 100),
+                Math.floor(score * 100),
+                judgeCount.slice(0, 4) as [number, number, number, number],
+                bigCount,
+                hitType,
+                oldPlaybackRate * 4,
+                cid,
+              ] satisfies ResultSerialized);
+              const resultSerialized = encodeBase64Url(
+                serialized.buffer.slice(
+                  serialized.byteOffset,
+                  serialized.byteOffset + serialized.byteLength
+                )
+              ).replaceAll("=", "");
+              sendResultSerialized(
+                resultSerialized,
+                resultSessionPrivateKey,
+                resultSessionToken,
+                (sign) => {
+                  setResultSerialized(resultSerialized);
+                  setResultSign(sign);
+                  if (
+                    score > bestScoreState &&
+                    // cid &&
+                    // !auto &&
+                    // userBegin === null &&
+                    // chartBrief?.levels.at(lvIndex) &&
+                    oldPlaybackRate === 1
+                  ) {
+                    setBestScore(
+                      cid,
+                      chartBrief.levels[lvIndex].hash,
+                      resultSerialized,
+                      sign
+                    );
+                    reloadBestScore();
+                  }
+                }
+              );
+            }
+          }
         }, 1000);
         return () => clearTimeout(t);
       }
@@ -1150,40 +1266,48 @@ function Play(props: Props) {
               exit={exit}
             />
           )}
-          {showReady && (
-            <ReadyMessage
-              className={clsx(
-                "isolate z-play-ready",
-                "transition-[scale,opacity] duration-200 ease-out",
-                !openReadyAnim && "opacity-0",
-                closeReadyAnim && "opacity-0 scale-0"
-              )}
-              isTouch={isTouch}
-              back={showResult ? () => setShowReady(false) : undefined}
-              start={start}
-              exit={exit}
-              auto={auto}
-              setAuto={setAuto}
-              userOffset={userOffset}
-              setUserOffset={setUserOffset}
-              autoOffset={autoOffset}
-              setAutoOffset={setAutoOffset}
-              enableSE={enableHitSE}
-              setEnableSE={setEnableHitSE}
-              enableIOSThru={enableIOSThru}
-              setEnableIOSThru={setEnableIOSThru}
-              audioLatency={audioLatency}
-              userBegin={userBegin}
-              setUserBegin={setUserBegin}
-              ytBegin={ytBegin}
-              ytEnd={ytEnd}
-              playbackRate={playbackRate}
-              setPlaybackRate={changePlaybackRate}
-              editing={editing}
-              lateTimes={lateTimes.current}
-              maxHeight={(mainWindowSpace.height || 0) - 10 * rem}
-            />
-          )}
+          {showReady &&
+            (resultSessionExpired() ? (
+              <InitErrorMessage
+                className="isolate z-play-error"
+                msg={te("resultSessionExpired")}
+                isTouch={isTouch}
+                exit={exit}
+              />
+            ) : (
+              <ReadyMessage
+                className={clsx(
+                  "isolate z-play-ready",
+                  "transition-[scale,opacity] duration-200 ease-out",
+                  !openReadyAnim && "opacity-0",
+                  closeReadyAnim && "opacity-0 scale-0"
+                )}
+                isTouch={isTouch}
+                back={showResult ? () => setShowReady(false) : undefined}
+                start={start}
+                exit={exit}
+                auto={auto}
+                setAuto={setAuto}
+                userOffset={userOffset}
+                setUserOffset={setUserOffset}
+                autoOffset={autoOffset}
+                setAutoOffset={setAutoOffset}
+                enableSE={enableHitSE}
+                setEnableSE={setEnableHitSE}
+                enableIOSThru={enableIOSThru}
+                setEnableIOSThru={setEnableIOSThru}
+                audioLatency={audioLatency}
+                userBegin={userBegin}
+                setUserBegin={setUserBegin}
+                ytBegin={ytBegin}
+                ytEnd={ytEnd}
+                playbackRate={playbackRate}
+                setPlaybackRate={changePlaybackRate}
+                editing={editing}
+                lateTimes={lateTimes.current}
+                maxHeight={(mainWindowSpace.height || 0) - 10 * rem}
+              />
+            ))}
           {showResult && (
             <Result
               className="isolate z-play-result"
@@ -1191,16 +1315,26 @@ function Play(props: Props) {
               hidden={showReady}
               auto={wasAutoPlay}
               lang={props.locale}
-              date={resultDate || new Date(2025, 6, 1)}
-              cid={cid || ""}
               brief={chartBrief || emptyBrief()}
-              lvName={chartBrief?.levels.at(lvIndex || 0)?.name || ""}
-              lvType={levelTypes.indexOf(
-                chartBrief?.levels.at(lvIndex || 0)?.type || ""
-              )}
-              lvDifficulty={
-                chartBrief?.levels.at(lvIndex || 0)?.difficulty || 0
+              reset={reset}
+              exit={exit}
+              isTouch={isTouch}
+              showShareButton={!wasAutoPlay && oldUserBegin === null}
+              showRecord={
+                !wasAutoPlay && oldUserBegin === null && oldPlaybackRate === 1
               }
+              newRecord={
+                score > oldBestScoreState &&
+                !wasAutoPlay &&
+                oldUserBegin === null &&
+                oldPlaybackRate === 1 &&
+                lvIndex !== undefined &&
+                chartBrief?.levels[lvIndex] !== undefined
+                  ? score - oldBestScoreState
+                  : 0
+              }
+              largeResult={largeResult}
+              record={record}
               baseScore100={
                 queryOptions.result
                   ? exampleResult.baseScore100
@@ -1221,33 +1355,11 @@ function Play(props: Props) {
                   ? exampleResult.score100
                   : Math.floor(score * 100)
               }
-              judgeCount={
-                queryOptions.result
-                  ? exampleResult.judgeCount
-                  : (judgeCount.slice(0, 4) as [number, number, number, number])
-              }
               bigCount={queryOptions.result ? exampleResult.bigCount : bigCount}
-              reset={reset}
-              exit={exit}
-              isTouch={isTouch}
-              showShareButton={!wasAutoPlay && oldUserBegin === null}
-              showRecord={
-                !wasAutoPlay && oldUserBegin === null && oldPlaybackRate === 1
-              }
-              newRecord={
-                score > oldBestScoreState &&
-                !wasAutoPlay &&
-                oldUserBegin === null &&
-                oldPlaybackRate === 1 &&
-                lvIndex !== undefined &&
-                chartBrief?.levels[lvIndex] !== undefined
-                  ? score - oldBestScoreState
-                  : 0
-              }
-              largeResult={largeResult}
-              record={record}
-              inputType={hitType}
-              playbackRate4={oldPlaybackRate * 4}
+              cid={cid || ""}
+              resultSerialized={resultSerialized}
+              resultSign={resultSign}
+              date={resultDate ?? null}
             />
           )}
           {showStopped && (

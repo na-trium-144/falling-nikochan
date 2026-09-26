@@ -30,6 +30,9 @@ try {
   // playRecord
   await db.collection("playRecord").createIndex({ cid: 1 });
   await db.collection("playRecord").createIndex({ playedAt: 1, editing: 1 });
+  await db
+    .collection("playRecord")
+    .createIndex({ cid: 1, playedAt: 1, score: 1 }, { unique: true });
 
   // ytData
   await db.collection("ytData").createIndex({ ytId: 1 });

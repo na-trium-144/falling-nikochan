@@ -67,7 +67,7 @@ export function TopDemo(
     prevTimeStamp.current = performance.now();
     return currentTimeSec.current;
   }, [props.visible]);
-  const { notesAll, resetNotesAll } = useGameLogic(
+  const [ notesAll, resetNotesAll /* , ... */ ] = useGameLogic(
     getCurrentTimeSec,
     true,
     false,

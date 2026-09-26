@@ -50,6 +50,8 @@ export default {
     ytError: "Error on the YouTube video ({code})",
     noYtId: "No YouTube video is specified",
     seqEmpty: "The chart data is empty",
+    resultSessionExpired:
+      "The session has timed out. Please close this screen and try again.",
     errorPage: {
       title: "An error has occurred 😢",
       goHome: "Return to top page",

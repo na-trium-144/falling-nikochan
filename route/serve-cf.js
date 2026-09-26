@@ -88,7 +88,7 @@ app
   .use(compress())
   .use(etag())
   .use(methodNotAllowed(app))
-  .route("/api", await apiApp({ getConnInfo, dbMiddleware }))
+  .route("/api", await apiApp({ getConnInfo, dbMiddleware, fetchStatic }))
   .get("/og/*", (c) => {
     const url = new URL(c.req.raw.url);
     return c.redirect(

@@ -4,6 +4,7 @@ import clsx from "clsx/lite";
 import {
   ChartBrief,
   deserializeResultParams,
+  isVerificationRequired,
   RecordGetSummary,
   RecordGetSummarySchema,
   ResultParams,
@@ -62,6 +63,9 @@ export default function ShareChart(props: Props) {
   const [sharedResult, setSharedResult] = useState<
     ResultParams | string | null
   >(null);
+  const [sharedResultVerified, setSharedResultVerified] = useState<
+    boolean | Error | null
+  >(null);
 
   useEffect(() => {
     const cid = window.location.pathname.split("/").pop()!;
@@ -99,8 +103,23 @@ export default function ShareChart(props: Props) {
       .catch((e: unknown) => captureAndWrap(e, { cid }))
       .then((record) => setRecord(record));
     if (searchParams.get("result")) {
+      const qResult = searchParams.get("result")!;
+      let resultParams: ResultParams;
       try {
-        setSharedResult(deserializeResultParams(searchParams.get("result")!));
+        resultParams = deserializeResultParams(qResult);
+        setSharedResult(resultParams);
+        setSharedResultVerified(null);
+        if (isVerificationRequired(resultParams)) {
+          fetchBackend()
+            .url(`/api/resultSigning/verify/${cid}`)
+            .query({ result: qResult })
+            .get()
+            .error(422, () => setSharedResultVerified(false))
+            .res(() => setSharedResultVerified(true))
+            .catch((e: unknown) => {
+              setSharedResultVerified(captureAndWrap(e));
+            });
+        }
       } catch (e) {
         console.error(e);
         setSharedResult(te("api.invalidResultParam"));
@@ -129,6 +148,7 @@ export default function ShareChart(props: Props) {
             brief={brief}
             record={record}
             sharedResult={sharedResult}
+            sharedResultVerified={sharedResultVerified}
             locale={locale}
             forceShowCId
           />
