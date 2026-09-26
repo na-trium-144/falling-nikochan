@@ -608,30 +608,41 @@ app
         new URLSearchParams(new URL(c.req.url).search).get("v");
     }
 
-    if (
-      !c.req.path.includes(".") ||
-      c.req.path.endsWith(".txt") ||
-      c.req.path === "/favicon.ico"
-    ) {
-      // キャッシュされた古いバージョンのページが読み込まれる問題を避けるために
-      // htmlとtxtについてはキャッシュよりも最新バージョンのfetchを優先する
-      // 1秒のタイムアウトを設け、fetchできなければキャッシュから返す
-      const abortController = new AbortController();
-      const timeout = setTimeout(() => abortController.abort(), 1000);
-      try {
-        const remoteRes = await fetch(
-          (process.env.ASSET_PREFIX || self.origin) + reqPath,
-          { cache: "no-cache", signal: abortController.signal }
-        ).catch(fetchError(e));
-        clearTimeout(timeout);
-        if (remoteRes.ok) {
-          return returnBody(remoteRes.body, remoteRes.headers);
+    if (/^\/[^/]*\/play/.test(c.req.path)) {
+      // /:lang/play ページ(.txt, __next...txt も含む)は署名・検証のために最新バージョンが必要なので、絶対にキャッシュにフォールバックしない
+      const remoteRes = await fetch(
+        (process.env.ASSET_PREFIX || self.origin) + reqPath,
+        {
+          cache: "no-cache",
         }
-      } catch {
-        // pass
+      ).catch(fetchError(e));
+      return returnBody(remoteRes.body, remoteRes.headers, remoteRes.status);
+    } else {
+      if (
+        !c.req.path.includes(".") ||
+        c.req.path.endsWith(".txt") ||
+        c.req.path === "/favicon.ico"
+      ) {
+        // キャッシュされた古いバージョンのページが読み込まれる問題を避けるために
+        // htmlとtxtについてはキャッシュよりも最新バージョンのfetchを優先する
+        // 1秒のタイムアウトを設け、fetchできなければキャッシュから返す
+        const abortController = new AbortController();
+        const timeout = setTimeout(() => abortController.abort(), 1000);
+        try {
+          const remoteRes = await fetch(
+            (process.env.ASSET_PREFIX || self.origin) + reqPath,
+            { cache: "no-cache", signal: abortController.signal }
+          ).catch(fetchError(e));
+          clearTimeout(timeout);
+          if (remoteRes.ok) {
+            return returnBody(remoteRes.body, remoteRes.headers);
+          }
+        } catch {
+          // pass
+        }
       }
+      return await fetchStatic(null, new URL(self.origin + reqPath));
     }
-    return await fetchStatic(null, new URL(self.origin + reqPath));
   })
   .use(languageDetector)
   .onError(
