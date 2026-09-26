@@ -177,10 +177,84 @@ export function serializeResultParams(params: ResultParams): string {
     )
   ).replaceAll("=", "");
 }
-export function deserializeResultParams(serialized: string): ResultParams {
+/**
+ * resultを圧縮する。
+ *
+ * 圧縮を行うのはフロントエンドで、そこではstateでもlocalStorageでもbase64urlエンコード済みの状態で使い回すので、
+ * uint8arrayではなくstringで受け取り、
+ * それを1回デコードして圧縮して再エンコードする仕様にしている
+ */
+export async function compressResultParam(serialized: string): Promise<string> {
   const serializedArr = decodeBase64Url(
     serialized.split(".")[0].replace(/[^0-9a-zA-Z+/_-]/g, "")
   );
+  const compressedArr = await new Response(
+    new Blob([serializedArr])
+      .stream()
+      .pipeThrough(new CompressionStream("gzip"))
+  ).arrayBuffer();
+  return encodeBase64Url(compressedArr).replaceAll("=", "");
+}
+
+function isResultParamArray(serializedArr: Uint8Array) {
+  return (
+    serializedArr.at(0) &&
+    ((serializedArr.at(0)! & 0xf0) === 0x90 ||
+      (serializedArr.at(0)! & 0xfe) === 0xdc)
+  );
+}
+/**
+ * ピリオドで連結されたresultとsignを分割し、デコードする。deserializeはしない。
+ * さらに、resultが圧縮されている場合は展開する。
+ *
+ * 圧縮していないresultはすべてarrayなので、開始バイトは必ず 0x90-0x9f, 0xdc, 0xdd のいずれか。
+ * gzip圧縮の場合はマジックナンバー 0x1f 0x8b があるはず。
+ */
+export async function parseResultParams(
+  serialized: string
+): Promise<{ result: Uint8Array; sign?: Uint8Array }> {
+  let serializedArr: Uint8Array = decodeBase64Url(
+    serialized
+      .split(".")
+      .at(0)!
+      .replace(/[^0-9a-zA-Z+/_-]/g, "")
+  );
+  if (serializedArr.at(0) === 0x1f && serializedArr.at(1) === 0x8b) {
+    serializedArr = new Uint8Array(
+      await new Response(
+        new Blob([serializedArr])
+          .stream()
+          .pipeThrough(new DecompressionStream("gzip"))
+      ).arrayBuffer()
+    );
+  } else if (isResultParamArray(serializedArr)) {
+    // pass
+  } else {
+    throw new Error(
+      `The first byte of resultParam (${serializedArr.at(0)?.toString(16)} ${serializedArr.at(1)?.toString(16)}) is invalid`
+    );
+  }
+  const sign = serialized
+    .split(".")
+    .at(1)
+    ?.replace(/[^0-9a-zA-Z+/_-]/g, "");
+  let signArr: Uint8Array | undefined = undefined;
+  if (sign) {
+    signArr = decodeBase64Url(sign);
+  }
+  return { result: serializedArr, sign: signArr };
+}
+export function deserializeResultParams(
+  serializedArr: Uint8Array | string
+): ResultParams {
+  if (typeof serializedArr === "string") {
+    serializedArr = decodeBase64Url(serializedArr);
+  }
+  if (!isResultParamArray(serializedArr)) {
+    throw new Error(
+      `The first byte of resultParam (${serializedArr.at(0)?.toString(16)} ${serializedArr.at(1)?.toString(16)}) is invalid`
+    );
+  }
   const deserialized = v.parse(
     ResultSerializedSchema(),
     msgpack.decode(serializedArr)
@@ -262,18 +336,10 @@ export function isVerificationRequired(result: ResultParams) {
   );
 }
 export async function verifyResultParams(
-  serialized: string,
+  parsed: { result: Uint8Array; sign?: Uint8Array },
   resultSecretKey: webcrypto.CryptoKey
 ): Promise<boolean> {
-  const result = serialized
-    .split(".")
-    .at(0)
-    ?.replace(/[^0-9a-zA-Z+/_-]/g, "");
-  const sign = serialized
-    .split(".")
-    .at(1)
-    ?.replace(/[^0-9a-zA-Z+/_-]/g, "");
-  if (!result || !sign) {
+  if (!parsed.sign) {
     return false;
   }
   try {
@@ -281,8 +347,8 @@ export async function verifyResultParams(
       await crypto.subtle.verify(
         { name: "HMAC", hash: { name: "SHA-256" } },
         resultSecretKey,
-        decodeBase64Url(sign),
-        decodeBase64Url(result)
+        parsed.sign,
+        parsed.result
       )
     ) {
       return true;

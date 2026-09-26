@@ -15,6 +15,7 @@ import {
   inputTypes,
   isVerificationRequired,
   levelTypes,
+  parseResultParams,
   ResultParams,
   verifyResultParams,
 } from "@falling-nikochan/chart";
@@ -159,15 +160,23 @@ const ogApp = (config: {
       const qResult = c.req.query("result");
       let resultParams: ResultParams | null = null;
       if (qResult) {
+        let result: Uint8Array;
+        let sign: Uint8Array | undefined;
         try {
-          resultParams = deserializeResultParams(qResult);
+          const parsed = await parseResultParams(qResult);
+          result = parsed.result;
+          sign = parsed.sign;
+          resultParams = deserializeResultParams(result);
         } catch (e) {
           c.var.logger.error(e);
           throw new HTTPException(400, { message: "invalidResultParam" });
         }
         if (
           isVerificationRequired(resultParams) &&
-          !(await verifyResultParams(qResult, await resultSecretKey(env(c))))
+          !(await verifyResultParams(
+            { result, sign },
+            await resultSecretKey(env(c))
+          ))
         ) {
           throw new HTTPException(422, { message: "unauthorizedResultParam" });
         }

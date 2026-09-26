@@ -1,7 +1,11 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { ChartBrief, ChartUntil17Min } from "@falling-nikochan/chart";
+import {
+  ChartBrief,
+  ChartUntil17Min,
+  compressResultParam,
+} from "@falling-nikochan/chart";
 import {
   createContext,
   useCallback,
@@ -34,10 +38,23 @@ export function useShareLink(
   const searchParams = new URLSearchParams();
   const t = useTranslations("share");
 
+  const [compressedResultParam, setCompressedResultParam] = useState<
+    string | null
+  >(null);
+  useEffect(() => {
+    if (resultParam) {
+      compressResultParam(resultParam).then((c) => setCompressedResultParam(c));
+    }
+  }, [resultParam]);
+
   // /route/src/share.ts 内で指定しているクエリパラメータと順番をあわせる
   searchParams.set("lang", lang || "en");
-  if (resultParam)
-    searchParams.set("result", resultParam + (sign ? "." + sign : ""));
+  if (resultParam && compressedResultParam) {
+    searchParams.set(
+      "result",
+      compressedResultParam + (sign ? "." + sign : "")
+    );
+  }
   // use encodeURIComponent to silence CodeQL false positive alert
   const sharePath = `/share/${encodeURIComponent(cid || "")}`;
   const shareParams = searchParams.toString();
