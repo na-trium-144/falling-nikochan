@@ -14,7 +14,7 @@ const exampleResult = {
 } as const;
 
 import clsx from "clsx/lite";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
 import {
   bigScoreRate,
@@ -29,9 +29,10 @@ import {
   Level15Play,
   RecordGetSummarySchema,
   LevelPlay,
-  ResultParams,
-  serializeResultParams,
   deserializeResultParams,
+  serializeDate,
+  ResultSerialized,
+  dateBase4,
 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
@@ -80,6 +81,7 @@ import {
   sendRecord,
   sendResultSerialized,
 } from "./resultSigningAuth.js";
+import { encodeBase64Url } from "hono/utils/encode";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -461,27 +463,29 @@ function Play(props: Props) {
 
   const { barFlash, flash } = useFlash();
 
-  const {
+  const [
+    notesAll,
+    resetNotesAll,
     baseScore,
     chainScore,
     bigScore,
     score,
     chain,
     maxChain,
-    notesAll,
-    resetNotesAll,
     notesDone,
     hit,
     iosRelease,
     judgeCount,
     bigCount,
     bigTotal,
-    lateTimes,
     chartEnd,
+    lateTimes,
     hitType,
     posOfs,
     timeOfsEstimator,
-  } = useGameLogic(
+    // judge,
+    // notesYetDone,
+  ] = useGameLogic(
     getCurrentTimeSec,
     auto,
     !!queryOptions.judgeAuto,
@@ -683,50 +687,6 @@ function Play(props: Props) {
     }
   }, [chartPlaying, chartSeq, endSecPassed, getCurrentTimeSec]);
 
-  const result = useMemo<Omit<ResultParams, "date">>(
-    () =>
-      ({
-        // date: resultDate,
-        lvName: chartBrief?.levels.at(lvIndex || 0)?.name || "",
-        lvType: levelTypes.indexOf(
-          chartBrief?.levels.at(lvIndex || 0)?.type || ""
-        ),
-        lvDifficulty: chartBrief?.levels.at(lvIndex || 0)?.difficulty || 0,
-        baseScore100: queryOptions.result
-          ? exampleResult.baseScore100
-          : Math.floor(baseScore * 100),
-        chainScore100: queryOptions.result
-          ? exampleResult.chainScore100
-          : Math.floor(chainScore * 100),
-        bigScore100: queryOptions.result
-          ? exampleResult.bigScore100
-          : Math.floor(bigScore * 100),
-        score100: queryOptions.result
-          ? exampleResult.score100
-          : Math.floor(score * 100),
-        judgeCount: queryOptions.result
-          ? exampleResult.judgeCount
-          : (judgeCount.slice(0, 4) as [number, number, number, number]),
-        bigCount: queryOptions.result ? exampleResult.bigCount : bigCount,
-        inputType: hitType,
-        playbackRate4: oldPlaybackRate * 4,
-        cid: cid || null,
-      }) satisfies Omit<ResultParams, "date">,
-    [
-      cid,
-      chartBrief,
-      queryOptions,
-      hitType,
-      oldPlaybackRate,
-      baseScore,
-      chainScore,
-      bigScore,
-      score,
-      judgeCount,
-      bigCount,
-      lvIndex,
-    ]
-  );
   const [resultSerialized, setResultSerialized] = useState<string | undefined>(
     undefined
   );
@@ -802,10 +762,29 @@ function Play(props: Props) {
             }
             if (!wasAutoPlay && oldUserBegin === null) {
               // こっちはplaybackRate変更を含む
-              const resultSerialized = serializeResultParams({
-                ...result,
-                date: newResultDate,
-              });
+              // serializeResultParams() と同一の処理をわざわざ再度書いている (結果の情報をオブジェクトに入れたくないため)
+              const serialized = msgpack.encode([
+                4,
+                serializeDate(newResultDate, dateBase4),
+                chartBrief.levels.at(lvIndex)!.name,
+                levelTypes.indexOf(chartBrief.levels.at(lvIndex)!.type),
+                chartBrief.levels.at(lvIndex)!.difficulty,
+                Math.floor(baseScore * 100),
+                Math.floor(chainScore * 100),
+                Math.floor(bigScore * 100),
+                Math.floor(score * 100),
+                judgeCount.slice(0, 4) as [number, number, number, number],
+                bigCount,
+                hitType,
+                oldPlaybackRate * 4,
+                cid,
+              ] satisfies ResultSerialized);
+              const resultSerialized = encodeBase64Url(
+                serialized.buffer.slice(
+                  serialized.byteOffset,
+                  serialized.byteOffset + serialized.byteLength
+                )
+              ).replaceAll("=", "");
               sendResultSerialized(
                 resultSerialized,
                 resultSessionPrivateKey,
@@ -1297,7 +1276,6 @@ function Play(props: Props) {
               hidden={showReady}
               auto={wasAutoPlay}
               lang={props.locale}
-              date={resultDate || new Date(2025, 6, 1)}
               brief={chartBrief || emptyBrief()}
               reset={reset}
               exit={exit}
@@ -1318,10 +1296,31 @@ function Play(props: Props) {
               }
               largeResult={largeResult}
               record={record}
-              {...result}
+              baseScore100={
+                queryOptions.result
+                  ? exampleResult.baseScore100
+                  : Math.floor(baseScore * 100)
+              }
+              chainScore100={
+                queryOptions.result
+                  ? exampleResult.chainScore100
+                  : Math.floor(chainScore * 100)
+              }
+              bigScore100={
+                queryOptions.result
+                  ? exampleResult.bigScore100
+                  : Math.floor(bigScore * 100)
+              }
+              score100={
+                queryOptions.result
+                  ? exampleResult.score100
+                  : Math.floor(score * 100)
+              }
+              bigCount={queryOptions.result ? exampleResult.bigCount : bigCount}
               cid={cid || ""}
               resultSerialized={resultSerialized}
               resultSign={resultSign}
+              date={resultDate ?? null}
             />
           )}
           {showStopped && (

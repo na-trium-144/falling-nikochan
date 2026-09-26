@@ -11,6 +11,17 @@ import type { SignatureAlgorithm } from "hono/utils/jwt/jwa";
 import type { TokenHeader } from "hono/utils/jwt/jwt";
 import type { JWTPayload } from "hono/utils/jwt/types";
 
+// sign や publicKey などの名前がビルド後のjsに出てこないよう、object.values経由でアクセスする
+// https://github.com/paulmillr/noble-curves/blob/main/src/abstract/weierstrass.ts#L1653-L1665
+const p256Sign = Object.values(p256)[6] as typeof p256.sign;
+const p256GetPublicKey = Object.values(p256)[1] as typeof p256.getPublicKey;
+const p256Utils = Object.values(p256)[3] as typeof p256.utils;
+// utils comes from ecdh()
+// https://github.com/paulmillr/noble-curves/blob/main/src/abstract/weierstrass.ts#L1224-L1228
+const p256UtilsRandomSecretKey = Object.values(
+  p256Utils
+)[2] as typeof p256.utils.randomSecretKey;
+
 function encodeUint8ArrayToBase64Url(bytes: Uint8Array): string {
   return encodeBase64Url(
     bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength)
@@ -64,13 +75,13 @@ export async function initResultSigning(
   setResultSessionPrivateKey: (key: Uint8Array) => void,
   setResultSessionToken: (token: string) => void
 ) {
-  const privateKey = p256.utils.randomSecretKey();
-  const publicKey = p256PublicKeyToJwk(p256.getPublicKey(privateKey, false));
+  const privateKey = p256UtilsRandomSecretKey();
+  const publicKey = p256PublicKeyToJwk(p256GetPublicKey(privateKey, false));
   const buildToken = signJwt(
     { key: publicKey, cid },
     resultBuildPrivKey,
     "ES256",
-    p256.sign
+    p256Sign
   );
   return fetchBackend()
     .url("/api/resultSigning/init")
@@ -88,7 +99,7 @@ export async function sendRecord(
   sessionPrivateKey: Uint8Array,
   resultSessionToken: string
 ) {
-  const recordSigned = signJwt(record, sessionPrivateKey, "ES256", p256.sign);
+  const recordSigned = signJwt(record, sessionPrivateKey, "ES256", p256Sign);
   return fetchBackend()
     .url(`/api/record/${cid}`)
     .body(recordSigned)
@@ -105,7 +116,7 @@ export async function sendResultSerialized(
   resultSessionToken: string,
   setSign: (sign: string) => void
 ) {
-  const clientSign = p256.sign(
+  const clientSign = p256Sign(
     decodeBase64Url(resultSerialized),
     sessionPrivateKey
   );

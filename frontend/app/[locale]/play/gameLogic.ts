@@ -650,20 +650,21 @@ export default function useGameLogic(
     judgeForAuto,
   ]);
 
-  return {
+  // ビルド後のjsから見つけづらくするためにオブジェクトではなくarrayにしている
+  return [
+    notesAll,
+    resetNotesAll,
     baseScore,
     chainScore,
     bigScore,
     score,
     chain,
     maxChain,
-    notesAll,
-    resetNotesAll,
     notesDone,
     hit,
     iosRelease,
     judgeCount,
-    bigCount: bigTotal === 0 ? null : bigCount,
+    bigTotal === 0 ? null : bigCount,
     bigTotal,
     chartEnd,
     lateTimes,
@@ -672,5 +673,5 @@ export default function useGameLogic(
     timeOfsEstimator,
     judge,
     notesYetDone,
-  };
+  ] as const;
 }
