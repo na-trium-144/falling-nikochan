@@ -31,6 +31,7 @@
     "@mdx-js/react": "3.1.1",
     "@msgpack/msgpack": "catalog:",
     "@next/mdx": "catalog:next",
+    "@noble/curves": "catalog:",
     "@sentry/browser": "catalog:sentry",
     "@sentry/nextjs": "catalog:sentry",
     "ace-builds": "1.44.0",
