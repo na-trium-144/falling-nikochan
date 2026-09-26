@@ -252,8 +252,8 @@ function Play(props: Props) {
     setAutoOffset_(v);
     localStorage.setItem("autoOffset", v ? "1" : "0");
   }, []);
-  const [resultSessionKeyPair, setResultSessionKeyPair] =
-    useState<CryptoKeyPair | null>(null);
+  const [resultSessionPrivateKey, setResultSessionPrivateKey] =
+    useState<Uint8Array | null>(null);
   const [resultSessionToken, setResultSessionToken] = useState<string | null>(
     null
   );
@@ -265,7 +265,7 @@ function Play(props: Props) {
         cid,
         (key) => {
           if (!canceled) {
-            setResultSessionKeyPair(key);
+            setResultSessionPrivateKey(key);
           }
         },
         (token) => {
@@ -765,7 +765,7 @@ function Play(props: Props) {
           stop();
           if (
             cid &&
-            resultSessionKeyPair &&
+            resultSessionPrivateKey &&
             resultSessionToken &&
             chartBrief?.levels.at(lvIndex) &&
             !queryOptions.result
@@ -793,7 +793,7 @@ function Play(props: Props) {
                     factor,
                     date: newResultDate.getTime(),
                   },
-                  resultSessionKeyPair,
+                  resultSessionPrivateKey,
                   resultSessionToken
                 );
               } catch {
@@ -808,7 +808,7 @@ function Play(props: Props) {
               });
               sendResultSerialized(
                 resultSerialized,
-                resultSessionKeyPair,
+                resultSessionPrivateKey,
                 resultSessionToken,
                 (sign) => {
                   setResultSerialized(resultSerialized);

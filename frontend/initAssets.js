@@ -14,6 +14,8 @@ import {
   MouseOne,
   Write,
 } from "@icon-park/svg";
+import { p256 } from "@noble/curves/nist.js";
+import { p256 as webcryptoP256 } from "@noble/curves/webcrypto.js";
 let nodeModulesDir;
 if (existsSync("./node_modules/@fontsource")) {
   nodeModulesDir = "./node_modules";
@@ -71,24 +73,20 @@ writeFileSync(
 );
 
 // Generate ephemeral BuildKey for this build (/api/resultSigning step 2)
-const resultBuildKeyPair = await crypto.subtle.generateKey(
-  { name: "ECDSA", namedCurve: "P-256" },
-  true,
-  ["sign", "verify"]
+const resultBuildPrivKey = p256.utils.randomSecretKey();
+const resultBuildPubKeyJwk = await webcryptoP256.getPublicKey(
+  resultBuildPrivKey,
+  {
+    formatSec: "raw",
+    formatPub: "jwk",
+  }
 );
 writeFileSync(
   "public/resultBuildKey.json",
-  JSON.stringify(
-    await crypto.subtle.exportKey("jwk", resultBuildKeyPair.publicKey)
-  ),
+  JSON.stringify(resultBuildPubKeyJwk),
   "utf8"
 );
-writeFileSync(
-  ".resultBuildPrivKey",
-  Buffer.from(
-    await crypto.subtle.exportKey("pkcs8", resultBuildKeyPair.privateKey)
-  )
-);
+writeFileSync(".resultBuildPrivKey", Buffer.from(resultBuildPrivKey));
 if (!existsSync("out")) {
   mkdirSync("out");
 }

@@ -120,21 +120,17 @@ env.RESULT_BUILD_PUBLIC_JWK = readFileSync(
   "public/resultBuildKey.json",
   "utf8"
 );
-const resultBuildPrivPkcs8Base64 = readFileSync(".resultBuildPrivKey").toString(
+const resultBuildPrivKeyBase64 = readFileSync(".resultBuildPrivKey").toString(
   "base64"
 );
-let resultBuildPrivPkcs8Base64Encoded;
+let resultBuildPrivKeyBase64Encoded;
 if (process.env.NODE_ENV === "development") {
-  resultBuildPrivPkcs8Base64Encoded = JSON.stringify(
-    resultBuildPrivPkcs8Base64
-  );
+  resultBuildPrivKeyBase64Encoded = JSON.stringify(resultBuildPrivKeyBase64);
 } else {
-  resultBuildPrivPkcs8Base64Encoded = gnirts.getCode(
-    resultBuildPrivPkcs8Base64
-  );
+  resultBuildPrivKeyBase64Encoded = gnirts.getCode(resultBuildPrivKeyBase64);
   // gnirtsの生成するコードはtoString()やfromCharCode()などの関数の繰り返しが多いので、
   // webpackがこれらを復元せず最適化できるよう、関数に切り出したり表現を置き換える
-  resultBuildPrivPkcs8Base64Encoded = resultBuildPrivPkcs8Base64Encoded
+  resultBuildPrivKeyBase64Encoded = resultBuildPrivKeyBase64Encoded
     .replace(/function\(([^)]+)\){/g, "($1)=>{")
     .replace(/(\w+)\.charCodeAt\(\)/g, "_charCodeAt0($1)")
     .replaceAll("String.fromCharCode", "_fromCharCode")
@@ -157,7 +153,7 @@ if (process.env.NODE_ENV === "development") {
   const _toString36LowerCase = (c) => _toString.call(null, c, 36).toLowerCase();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _toString36LowerCaseSplit = (c) => _toString36LowerCase(c).split("");
-  if (eval(resultBuildPrivPkcs8Base64Encoded) !== resultBuildPrivPkcs8Base64) {
+  if (eval(resultBuildPrivKeyBase64Encoded) !== resultBuildPrivKeyBase64) {
     throw new Error("obfuscated private key does not match with actual key");
   }
 }
@@ -193,7 +189,7 @@ let nextConfig = {
       plugins: [
         ...config.plugins,
         new options.webpack.DefinePlugin({
-          RESULT_BUILD_PRIVATE_PKCS8_BASE64: resultBuildPrivPkcs8Base64Encoded,
+          RESULT_BUILD_PRIVATE_BASE64: resultBuildPrivKeyBase64Encoded,
         }),
       ],
       resolve: {
