@@ -14,7 +14,9 @@ import { sValidatorHook } from "../error.js";
 import {
   deserializeResultParams,
   isVerificationRequired,
+  parseResultParams,
   ResultParams,
+  signResultParams,
   verifyResultParams,
 } from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
@@ -242,7 +244,10 @@ const resultSigningApp = async (config: {
       ),
       async (c) => {
         const { key: sessionPubKey, cid: sessionCid } =
-          await verifyResultSessionPubKey(env(c), c.req.header("Authorization"));
+          await verifyResultSessionPubKey(
+            env(c),
+            c.req.header("Authorization")
+          );
 
         const { result, clientSign } = c.req.valid("json");
         const clientSignBin = Buffer.from(clientSign, "base64url");
@@ -279,10 +284,9 @@ const resultSigningApp = async (config: {
           throw new HTTPException(422, { message: "unauthorizedSessionData" });
         }
 
-        const sign = await crypto.subtle.sign(
-          { name: "HMAC", hash: { name: "SHA-256" } },
-          await resultSecretKey(env(c)),
-          resultBin
+        const sign = await signResultParams(
+          resultBin,
+          await resultSecretKey(env(c))
         );
 
         return c.json({ sign: Buffer.from(sign).toString("base64url") }, 200);
@@ -341,9 +345,14 @@ const resultSigningApp = async (config: {
         sValidatorHook()
       ),
       async (c) => {
-        const { result } = c.req.valid("query");
+        const { result: qResult } = c.req.valid("query");
+        let result: Uint8Array;
+        let sign: Uint8Array | undefined;
         let resultParams: ResultParams;
         try {
+          const parsed = await parseResultParams(qResult);
+          result = parsed.result;
+          sign = parsed.sign;
           resultParams = deserializeResultParams(result);
         } catch {
           throw new HTTPException(400, { message: "invalidResultParam" });
@@ -356,7 +365,12 @@ const resultSigningApp = async (config: {
         if (!resultParams.cid || resultParams.cid !== c.req.param("cid")) {
           throw new HTTPException(422, { message: "unauthorizedResultParam" });
         }
-        if (await verifyResultParams(result, await resultSecretKey(env(c)))) {
+        if (
+          await verifyResultParams(
+            { result, sign },
+            await resultSecretKey(env(c))
+          )
+        ) {
           return c.body(null, 204, {
             "Cache-Control": immutable(),
           });

@@ -5,6 +5,7 @@ import {
   ChartBrief,
   deserializeResultParams,
   isVerificationRequired,
+  parseResultParams,
   RecordGetSummary,
   RecordGetSummarySchema,
   ResultParams,
@@ -103,27 +104,29 @@ export default function ShareChart(props: Props) {
       .catch((e: unknown) => captureAndWrap(e, { cid }))
       .then((record) => setRecord(record));
     if (searchParams.get("result")) {
-      const qResult = searchParams.get("result")!;
-      let resultParams: ResultParams;
-      try {
-        resultParams = deserializeResultParams(qResult);
-        setSharedResult(resultParams);
-        setSharedResultVerified(null);
-        if (isVerificationRequired(resultParams)) {
-          fetchBackend()
-            .url(`/api/resultSigning/verify/${cid}`)
-            .query({ result: qResult })
-            .get()
-            .error(422, () => setSharedResultVerified(false))
-            .res(() => setSharedResultVerified(true))
-            .catch((e: unknown) => {
-              setSharedResultVerified(captureAndWrap(e));
-            });
+      (async () => {
+        try {
+          const qResult = searchParams.get("result")!;
+          const { result } = await parseResultParams(qResult);
+          const resultParams = deserializeResultParams(result);
+          setSharedResult(resultParams);
+          setSharedResultVerified(null);
+          if (isVerificationRequired(resultParams)) {
+            fetchBackend()
+              .url(`/api/resultSigning/verify/${cid}`)
+              .query({ result: qResult })
+              .get()
+              .error(422, () => setSharedResultVerified(false))
+              .res(() => setSharedResultVerified(true))
+              .catch((e: unknown) => {
+                setSharedResultVerified(captureAndWrap(e));
+              });
+          }
+        } catch (e) {
+          console.error(e);
+          setSharedResult(te("api.invalidResultParam"));
         }
-      } catch (e) {
-        console.error(e);
-        setSharedResult(te("api.invalidResultParam"));
-      }
+      })();
     }
     return () => clearInterval(titleUpdate);
   }, [t, te]);

@@ -15,6 +15,7 @@ import {
   deserializeResultParams,
   isVerificationRequired,
   levelTypes,
+  parseResultParams,
   ResultParams,
   verifyResultParams,
 } from "@falling-nikochan/chart";
@@ -58,17 +59,24 @@ const shareApp = (config: {
       const qResult = c.req.query("result");
       let resultParams: ResultParams | null = null;
       if (qResult) {
+        let result: Uint8Array;
+        let sign: Uint8Array | undefined;
         try {
-          resultParams = deserializeResultParams(qResult);
+          const parsed = await parseResultParams(qResult);
+          result = parsed.result;
+          sign = parsed.sign;
+          resultParams = deserializeResultParams(result);
+          if (
+            isVerificationRequired(resultParams) &&
+            !(await verifyResultParams(
+              { result, sign },
+              await resultSecretKey(env(c))
+            ))
+          ) {
+            resultParams = null;
+          }
         } catch {
           // throw new HTTPException(400, { message: "invalidResultParam" });
-        }
-        if (
-          resultParams &&
-          isVerificationRequired(resultParams) &&
-          !(await verifyResultParams(qResult, await resultSecretKey(env(c))))
-        ) {
-          resultParams = null;
         }
       }
       const pBriefRes = config.fetchBrief(env(c), cid);
