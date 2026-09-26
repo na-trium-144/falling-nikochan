@@ -50,6 +50,8 @@ export default {
     ytError: "YouTube 動画再生のエラー ({code})",
     noYtId: "再生する YouTube 動画が指定されていません",
     seqEmpty: "譜面データが空です",
+    resultSessionExpired:
+      "セッションがタイムアウトしました。この画面を閉じてもう一度やり直してください",
     errorPage: {
       title: "エラーが発生しました 😢",
       goHome: "トップへ戻る",

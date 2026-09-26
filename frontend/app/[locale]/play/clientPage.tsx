@@ -259,20 +259,39 @@ function Play(props: Props) {
   const [resultSessionToken, setResultSessionToken] = useState<string | null>(
     null
   );
+  const [resultSessionError, setResultSessionError] = useState<Error | null>(
+    null
+  );
+  const [resultSessionExp, setResultSessionExp] = useState<number | null>(null);
+  const resultSessionExpired = useCallback(
+    () => resultSessionExp && Date.now() > resultSessionExp,
+    [resultSessionExp]
+  );
 
   useEffect(() => {
     let canceled = false;
-    if (cid) {
+    if (cid && !queryOptions.nosigning) {
       initResultSigning(
         cid,
-        (key) => {
+        (key, token) => {
           if (!canceled) {
             setResultSessionPrivateKey(key);
+            setResultSessionToken(token);
+            // バックエンド側のトークン有効期限は3時間だが、切れないよう早めにエラーメッセージを出す
+            setResultSessionExp(Date.now() + 2.5 * 60 * 60 * 1000);
+            console.log(
+              "ResultSigning session successfully initialized at:",
+              new Date()
+            );
           }
         },
-        (token) => {
+        (e) => {
           if (!canceled) {
-            setResultSessionToken(token);
+            setResultSessionError(e);
+            console.warn(
+              "Failed to initialize ResultSigning session. " +
+                "If you want to ignore and continue, add `nosigning=1` query parameter."
+            );
           }
         }
       );
@@ -280,7 +299,7 @@ function Play(props: Props) {
         canceled = true;
       };
     }
-  }, [cid]);
+  }, [cid, queryOptions.nosigning]);
 
   const [userOffset, setUserOffset_] = useState<number>(0);
   useEffect(() => {
@@ -525,29 +544,31 @@ function Play(props: Props) {
 
   const reset = useCallback(() => setShowReady(true), []);
   const start = useCallback(() => {
-    // Space(スタートボタン)が押されたとき
-    switch (ytPlayer.current?.getPlayerState?.()) {
-      case 2:
-      case 0:
-        ytPlayer.current?.seekTo?.(begin, true);
-        ytPlayer.current?.playVideo?.();
-        break;
-      case 5:
-      default:
-        ytPlayer.current?.seekTo?.(begin, true);
-        break;
+    if (!resultSessionExpired()) {
+      // Space(スタートボタン)が押されたとき
+      switch (ytPlayer.current?.getPlayerState?.()) {
+        case 2:
+        case 0:
+          ytPlayer.current?.seekTo?.(begin, true);
+          ytPlayer.current?.playVideo?.();
+          break;
+        case 5:
+        default:
+          ytPlayer.current?.seekTo?.(begin, true);
+          break;
+      }
+      // startボタンを押して数秒経っても始まらなかったらloadingを表示
+      setCloseReadyAnim(true);
+      readyTimeout.current = setInterval(() => {
+        setLoadingAfterReady(true);
+        // iframe内など特殊な環境ではplayVideo()で開始せずstateが-1になる場合がある
+        setNeedManualStart(ytPlayer.current?.getPlayerState?.() === -1);
+      }, 1500);
+      // 再生中に呼んでもなにもしない
+      playSE("hit"); // ユーザー入力のタイミングで鳴らさないとaudioが有効にならないsafariの対策
+      // 譜面のリセットと開始はonStart()で処理
     }
-    // startボタンを押して数秒経っても始まらなかったらloadingを表示
-    setCloseReadyAnim(true);
-    readyTimeout.current = setInterval(() => {
-      setLoadingAfterReady(true);
-      // iframe内など特殊な環境ではplayVideo()で開始せずstateが-1になる場合がある
-      setNeedManualStart(ytPlayer.current?.getPlayerState?.() === -1);
-    }, 1500);
-    // 再生中に呼んでもなにもしない
-    playSE("hit"); // ユーザー入力のタイミングで鳴らさないとaudioが有効にならないsafariの対策
-    // 譜面のリセットと開始はonStart()で処理
-  }, [begin, playSE]);
+  }, [begin, playSE, resultSessionExpired]);
   const stop = useCallback(() => {
     // Escが押された時&Result表示時
     if (chartPlaying) {
@@ -661,6 +682,8 @@ function Play(props: Props) {
     if (!errorMsg) {
       if (apiErrorMsg) {
         setErrorMsg(apiErrorMsg);
+      } else if (resultSessionError) {
+        setErrorMsg(resultSessionError);
       } else if (ytError !== null) {
         setErrorMsg(te("ytError", { code: ytError }));
       } else if (chartBrief && !chartBrief.ytId) {
@@ -669,7 +692,15 @@ function Play(props: Props) {
         setErrorMsg(te("seqEmpty"));
       }
     }
-  }, [apiErrorMsg, ytError, chartBrief, chartSeq, errorMsg, te]);
+  }, [
+    apiErrorMsg,
+    resultSessionError,
+    ytError,
+    chartBrief,
+    chartSeq,
+    errorMsg,
+    te,
+  ]);
 
   const [endSecPassed, setEndSecPassed] = useState<boolean>(false);
   useEffect(() => {
@@ -1235,40 +1266,48 @@ function Play(props: Props) {
               exit={exit}
             />
           )}
-          {showReady && (
-            <ReadyMessage
-              className={clsx(
-                "isolate z-play-ready",
-                "transition-[scale,opacity] duration-200 ease-out",
-                !openReadyAnim && "opacity-0",
-                closeReadyAnim && "opacity-0 scale-0"
-              )}
-              isTouch={isTouch}
-              back={showResult ? () => setShowReady(false) : undefined}
-              start={start}
-              exit={exit}
-              auto={auto}
-              setAuto={setAuto}
-              userOffset={userOffset}
-              setUserOffset={setUserOffset}
-              autoOffset={autoOffset}
-              setAutoOffset={setAutoOffset}
-              enableSE={enableHitSE}
-              setEnableSE={setEnableHitSE}
-              enableIOSThru={enableIOSThru}
-              setEnableIOSThru={setEnableIOSThru}
-              audioLatency={audioLatency}
-              userBegin={userBegin}
-              setUserBegin={setUserBegin}
-              ytBegin={ytBegin}
-              ytEnd={ytEnd}
-              playbackRate={playbackRate}
-              setPlaybackRate={changePlaybackRate}
-              editing={editing}
-              lateTimes={lateTimes.current}
-              maxHeight={(mainWindowSpace.height || 0) - 10 * rem}
-            />
-          )}
+          {showReady &&
+            (resultSessionExpired() ? (
+              <InitErrorMessage
+                className="isolate z-play-error"
+                msg={te("resultSessionExpired")}
+                isTouch={isTouch}
+                exit={exit}
+              />
+            ) : (
+              <ReadyMessage
+                className={clsx(
+                  "isolate z-play-ready",
+                  "transition-[scale,opacity] duration-200 ease-out",
+                  !openReadyAnim && "opacity-0",
+                  closeReadyAnim && "opacity-0 scale-0"
+                )}
+                isTouch={isTouch}
+                back={showResult ? () => setShowReady(false) : undefined}
+                start={start}
+                exit={exit}
+                auto={auto}
+                setAuto={setAuto}
+                userOffset={userOffset}
+                setUserOffset={setUserOffset}
+                autoOffset={autoOffset}
+                setAutoOffset={setAutoOffset}
+                enableSE={enableHitSE}
+                setEnableSE={setEnableHitSE}
+                enableIOSThru={enableIOSThru}
+                setEnableIOSThru={setEnableIOSThru}
+                audioLatency={audioLatency}
+                userBegin={userBegin}
+                setUserBegin={setUserBegin}
+                ytBegin={ytBegin}
+                ytEnd={ytEnd}
+                playbackRate={playbackRate}
+                setPlaybackRate={changePlaybackRate}
+                editing={editing}
+                lateTimes={lateTimes.current}
+                maxHeight={(mainWindowSpace.height || 0) - 10 * rem}
+              />
+            ))}
           {showResult && (
             <Result
               className="isolate z-play-result"

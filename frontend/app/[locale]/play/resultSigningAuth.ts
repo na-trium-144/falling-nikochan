@@ -10,6 +10,7 @@ import { utf8Encoder } from "hono/utils/jwt/utf8";
 import type { SignatureAlgorithm } from "hono/utils/jwt/jwa";
 import type { TokenHeader } from "hono/utils/jwt/jwt";
 import type { JWTPayload } from "hono/utils/jwt/types";
+import { markAsExpected } from "@/common/apiError";
 
 // sign や publicKey などの名前がビルド後のjsに出てこないよう、object.values経由でアクセスする
 // https://github.com/paulmillr/noble-curves/blob/main/src/abstract/weierstrass.ts#L1653-L1665
@@ -72,8 +73,8 @@ function signJwt(
 
 export async function initResultSigning(
   cid: string,
-  setResultSessionPrivateKey: (key: Uint8Array) => void,
-  setResultSessionToken: (token: string) => void
+  setResultSessionToken: (key: Uint8Array, token: string) => void,
+  onError: (e: Error) => void
 ) {
   const privateKey = p256UtilsRandomSecretKey();
   const publicKey = p256PublicKeyToJwk(p256GetPublicKey(privateKey, false));
@@ -87,9 +88,12 @@ export async function initResultSigning(
     .url("/api/resultSigning/init")
     .body(buildToken)
     .post()
+    .unauthorized((e) => markAsExpected(e))
     .text((token) => {
-      setResultSessionPrivateKey(privateKey);
-      setResultSessionToken(token);
+      setResultSessionToken(privateKey, token);
+    })
+    .catch((e) => {
+      onError(captureAndWrap(e));
     });
 }
 
