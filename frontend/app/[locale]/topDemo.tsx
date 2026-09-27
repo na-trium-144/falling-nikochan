@@ -3,11 +3,7 @@ import { useRealFPS } from "./common/fpsCalculator";
 import FallingWindow from "./play/fallingWindow";
 import { useFlash } from "./play/useFlash";
 import useGameLogic from "./play/gameLogic";
-import {
-  ChartBrief,
-  currentChartVer,
-  ChartSeqData,
-} from "@falling-nikochan/chart";
+import { ChartBrief, ChartSeqData } from "@falling-nikochan/chart";
 import * as msgpack from "@msgpack/msgpack";
 import { useColorThief } from "./common/colorThief";
 import clsx from "clsx/lite";

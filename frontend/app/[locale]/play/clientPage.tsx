@@ -24,7 +24,6 @@ import {
   RecordPost,
   inputTypes,
   emptyBrief,
-  currentChartVer,
   ChartSeqData,
   RecordGetSummarySchema,
 } from "@falling-nikochan/chart";
