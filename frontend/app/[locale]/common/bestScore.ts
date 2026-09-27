@@ -1,4 +1,5 @@
 import {
+  deserializeResultParams,
   levelTypes,
   ResultParams,
   serializeResultParamsLegacy,
@@ -56,19 +57,26 @@ export function getBestScore(
     type: string;
     difficulty: number;
   }
-): { result: string; sign?: string } | null {
+): { result: string; resultParams: ResultParams; sign?: string } | null {
+  const errors: { key: string; error: unknown }[] = [];
   try {
-    return v.parse(
+    const parsed = v.parse(
       v.nullable(
         v.object({ result: v.string(), sign: v.optional(v.string()) })
       ),
       JSON.parse(localStorage.getItem(bestKey(cid, level.hash)) || "null")
     );
+    if (parsed) {
+      return {
+        ...parsed,
+        resultParams: deserializeResultParams(parsed.result),
+      };
+    }
   } catch (e) {
-    console.error(
-      `Error parsing ${bestKey(cid, level.hash)}:`,
-      v.isValiError(e) ? v.flatten(e.issues) : e
-    );
+    errors.push({
+      key: bestKey(cid, level.hash),
+      error: v.isValiError(e) ? v.flatten(e.issues) : e,
+    });
   }
   // load and convert legacy save data to ResultParams
   let bestScore: ResultData | null = null;
@@ -78,10 +86,10 @@ export function getBestScore(
       JSON.parse(localStorage.getItem(bestKey(cid, level.hash)) || "null")
     );
   } catch (e) {
-    console.error(
-      `Error parsing ${bestKey(cid, level.hash)}:`,
-      v.isValiError(e) ? v.flatten(e.issues) : e
-    );
+    errors.push({
+      key: bestKey(cid, level.hash),
+      error: v.isValiError(e) ? v.flatten(e.issues) : e,
+    });
   }
   if (!bestScore) {
     for (let i = 0; i < 10; i++) {
@@ -103,20 +111,25 @@ export function getBestScore(
           break;
         }
       } catch (e) {
-        console.error(
-          `Error parsing ${oldKey}:`,
-          v.isValiError(e) ? v.flatten(e.issues) : e
-        );
+        errors.push({
+          key: oldKey,
+          error: v.isValiError(e) ? v.flatten(e.issues) : e,
+        });
       }
     }
   }
   if (bestScore) {
-    const result = serializeResultParamsLegacy(
-      toResultParams(bestScore, level)
-    );
+    const resultParams = toResultParams(bestScore, level);
+    const result = serializeResultParamsLegacy(resultParams);
     localStorage.setItem(bestKey(cid, level.hash), JSON.stringify({ result }));
-    return { result };
+    return { result, resultParams };
   } else {
+    if (errors.length > 0) {
+      console.error(
+        `Error while parsing bestScore for cid:${cid} level:${level.hash}`,
+        errors
+      );
+    }
     return bestScore satisfies null;
   }
 }

@@ -3,7 +3,6 @@
 import clsx from "clsx/lite";
 import {
   ChartBrief,
-  deserializeResultParams,
   levelTypes,
   rankStr,
   RecordGetSummary,
@@ -258,27 +257,13 @@ function SelectedLevelInfo(props: {
           );
 
   const [bestScoreState, setBestScoreState] = useState<
-    ({ deserialized: ResultParams; result: string; sign?: string } | null)[]
+    ({ resultParams: ResultParams; result: string; sign?: string } | null)[]
   >([]);
   useEffect(() => {
     const update = () => {
-      const bestScoreState: ({
-        deserialized: ResultParams;
-        result: string;
-        sign?: string;
-      } | null)[] = [];
-      for (let i = 0; i < props.brief.levels.length; i++) {
-        const bestScore = getBestScore(props.cid, props.brief.levels[i]);
-        bestScoreState.push(
-          bestScore
-            ? {
-                ...bestScore,
-                deserialized: deserializeResultParams(bestScore.result),
-              }
-            : null
-        );
-      }
-      setBestScoreState(bestScoreState);
+      setBestScoreState(
+        props.brief.levels.map((l) => getBestScore(props.cid, l))
+      );
     };
     const storageUpdate = (e: StorageEvent) => {
       if (
@@ -300,9 +285,9 @@ function SelectedLevelInfo(props: {
 
   const selectedBestScore = bestScoreState.at(props.selectedLevel);
   const totalScore = selectedBestScore
-    ? (selectedBestScore.deserialized.baseScore100 +
-        selectedBestScore.deserialized.chainScore100 +
-        selectedBestScore.deserialized.bigScore100) /
+    ? (selectedBestScore.resultParams.baseScore100 +
+        selectedBestScore.resultParams.chainScore100 +
+        selectedBestScore.resultParams.bigScore100) /
       100
     : 0;
 
@@ -312,7 +297,7 @@ function SelectedLevelInfo(props: {
     props.locale,
     selectedBestScore?.result,
     selectedBestScore?.sign,
-    selectedBestScore?.deserialized.date?.getTime()
+    selectedBestScore?.resultParams.date?.getTime()
   );
 
   return (
@@ -401,10 +386,10 @@ function SelectedLevelInfo(props: {
           </>
         )}
         <p className="">{t("bestScore")}</p>
-        {showBestDetail && selectedBestScore?.deserialized.date && (
+        {showBestDetail && selectedBestScore?.resultParams.date && (
           <span className="text-sm text-dim">
             (
-            {new Date(selectedBestScore.deserialized.date).toLocaleDateString()}
+            {new Date(selectedBestScore.resultParams.date).toLocaleDateString()}
             )
           </span>
         )}
@@ -442,39 +427,39 @@ function SelectedLevelInfo(props: {
           <>
             <span className="inline-block ">
               <span className="">
-                {Math.floor(selectedBestScore.deserialized.baseScore100 / 100)}
+                {Math.floor(selectedBestScore.resultParams.baseScore100 / 100)}
               </span>
               <span className="text-sm">.</span>
               <span className="text-sm">
-                {(Math.floor(selectedBestScore.deserialized.baseScore100) % 100)
+                {(Math.floor(selectedBestScore.resultParams.baseScore100) % 100)
                   .toString()
                   .padStart(2, "0")}
               </span>
               <span className="ml-0.5 mr-0.5">+</span>
               <span className="">
-                {Math.floor(selectedBestScore.deserialized.chainScore100 / 100)}
+                {Math.floor(selectedBestScore.resultParams.chainScore100 / 100)}
               </span>
               <span className="text-sm">.</span>
               <span className="text-sm">
                 {(
-                  Math.floor(selectedBestScore.deserialized.chainScore100) % 100
+                  Math.floor(selectedBestScore.resultParams.chainScore100) % 100
                 )
                   .toString()
                   .padStart(2, "0")}
               </span>
               <span className="ml-0.5 mr-0.5">+</span>
               <span className="">
-                {Math.floor(selectedBestScore.deserialized.bigScore100 / 100)}
+                {Math.floor(selectedBestScore.resultParams.bigScore100 / 100)}
               </span>
               <span className="text-sm">.</span>
               <span className="text-sm">
-                {(Math.floor(selectedBestScore.deserialized.bigScore100) % 100)
+                {(Math.floor(selectedBestScore.resultParams.bigScore100) % 100)
                   .toString()
                   .padStart(2, "0")}
               </span>
             </span>
             <span className="inline-block ml-2 mr-2 space-x-2 ">
-              {selectedBestScore?.deserialized.judgeCount.map((j, i) => (
+              {selectedBestScore?.resultParams.judgeCount.map((j, i) => (
                 <span key={i} className="inline-block">
                   <JudgeIcon
                     index={i}

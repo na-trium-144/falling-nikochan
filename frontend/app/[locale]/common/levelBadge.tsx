@@ -6,19 +6,22 @@ import CheckSmall from "@icon-park/react/lib/icons/CheckSmall";
 import {
   baseScoreRate,
   chainScoreRate,
-  deserializeResultParams,
+  ResultParams,
 } from "@falling-nikochan/chart";
 
 export type BadgeStatus = "pc" | "fc" | "b" | null | undefined;
-export function getBadge(s: { result: string } | null): BadgeStatus {
+export function getBadge(
+  s: { resultParams: ResultParams } | null
+): BadgeStatus {
   if (s) {
-    const result = deserializeResultParams(s.result);
-    if (result.baseScore100 === baseScoreRate * 100) {
+    if (s.resultParams.baseScore100 === baseScoreRate * 100) {
       return "pc";
-    } else if (result.chainScore100 === chainScoreRate * 100) {
+    } else if (s.resultParams.chainScore100 === chainScoreRate * 100) {
       return "fc";
     } else if (
-      result.baseScore100 + result.chainScore100 + result.bigScore100 >=
+      s.resultParams.baseScore100 +
+        s.resultParams.chainScore100 +
+        s.resultParams.bigScore100 >=
       7000
     ) {
       return "b";

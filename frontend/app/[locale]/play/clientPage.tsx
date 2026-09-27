@@ -29,10 +29,10 @@ import {
   Level15Play,
   RecordGetSummarySchema,
   LevelPlay,
-  deserializeResultParams,
   serializeDate,
   ResultSerialized,
   dateBase4,
+  serializeCid,
 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
@@ -350,12 +350,16 @@ function Play(props: Props) {
     if (cid && lvIndex !== undefined && chartBrief?.levels[lvIndex]) {
       const data = getBestScore(cid, chartBrief.levels[lvIndex]);
       if (data) {
-        const result = deserializeResultParams(data.result);
         setBestScoreState(
-          (result.baseScore100 + result.chainScore100 + result.bigScore100) /
+          (data.resultParams.baseScore100 +
+            data.resultParams.chainScore100 +
+            data.resultParams.bigScore100) /
             100
         );
-        setBestScoreCounts([...result.judgeCount, result.bigCount || 0]);
+        setBestScoreCounts([
+          ...data.resultParams.judgeCount,
+          data.resultParams.bigCount || 0,
+        ]);
       } else {
         setBestScoreState(0);
         setBestScoreCounts(null);
