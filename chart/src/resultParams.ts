@@ -3,7 +3,8 @@ import { decodeBase64Url, encodeBase64Url } from "hono/utils/encode";
 import * as v from "valibot";
 import type { webcrypto } from "node:crypto";
 
-const dateBase = new Date(2025, 2, 1); // 2 = March
+const dateBase = new Date(2025, 2, 1); // 2 = March, in local timezone
+// これはローカルタイムゾーンなので、serializeDate3を経由してサーバー・クライアント間で送受信した値を比較すると期待した結果が得られない。
 export function serializeDate3(date: Date): number {
   const targetDate = new Date(
     date.getFullYear(),
@@ -18,14 +19,14 @@ function deserializeDate3(diffDays: number): Date {
   return new Date(dateBase.getTime() + diffDays * (1000 * 60 * 60 * 24));
 }
 
-const dateBase4 = new Date(2026, 9, 1); // 9 = October
+const dateBase4 = new Date(Date.UTC(2026, 9, 1)); // 9 = October, in UTC
 export function serializeDate4(date: Date): number {
   const diffTime = date.getTime() - dateBase4.getTime();
   const diffHours = Math.round(diffTime / (1000 * 60 * 60));
   return diffHours;
 }
-function deserializeDate4(diffDays: number): Date {
-  return new Date(dateBase4.getTime() + diffDays * (1000 * 60 * 60));
+function deserializeDate4(diffHours: number): Date {
+  return new Date(dateBase4.getTime() + diffHours * (1000 * 60 * 60));
 }
 
 /**
@@ -312,6 +313,7 @@ export function deserializeResultParams(
 export function isVerificationRequired(result: ResultParams) {
   // ver3以前かつ日付が署名導入前なら署名は不要
   if (typeof result.ver !== "number") {
+    // deserializedResultParam経由で得られるResultParamは必ずverを含むはずで、そうでない場合を弾く(それはロジックのバグ)
     throw new Error("result.ver must be a number");
   }
   return (

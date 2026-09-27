@@ -213,10 +213,13 @@ const resultSigningApp = async (config: {
             content: {
               "application/json": {
                 schema: resolver(
-                  await validationErrorSchema(
-                    "badRequest",
-                    "invalidResultParam"
-                  )
+                  v.union([
+                    await validationErrorSchema(
+                      "badRequest",
+                      "invalidResultParam"
+                    ),
+                    await errorLiteral("verificationNotApplicable"),
+                  ])
                 ),
               },
             },
@@ -306,6 +309,12 @@ const resultSigningApp = async (config: {
           resultParams = deserializeResultParams(result);
         } catch {
           throw new HTTPException(400, { message: "invalidResultParam" });
+        }
+
+        if (!isVerificationRequired(resultParams)) {
+          throw new HTTPException(400, {
+            message: "verificationNotApplicable",
+          });
         }
 
         if (!resultParams.cid || resultParams.cid !== sessionCid) {
