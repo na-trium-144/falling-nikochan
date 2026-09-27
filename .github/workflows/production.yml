@@ -153,7 +153,7 @@ jobs:
           path: .vercel/output
           include-hidden-files: true
       - name: Deploy Project Artifacts to Vercel
-        run: pnpm dlx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: pnpm dlx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} --archive=tgz
 
   deploy-cf:
     needs: [docker-push-manifest]
