@@ -160,7 +160,12 @@ const resultSigningApp = async (config: {
         });
         const tokenPayload = v.parse(SessionTokenPayloadSchema(), payload); // ValiError -> 400
 
-        if (Math.abs(tokenPayload.date - Date.now()) > 1000 * 60 * 60) {
+        /*
+        /api/record は60分、 /api/resultSigning/sign は時間単位で四捨五入して誤差1以下 をチェックしているが、
+        initに成功したら確実にこの2つも成功して欲しいので、
+        initだけ若干チェックを厳しくする
+        */
+        if (Math.abs(tokenPayload.date - Date.now()) > 1000 * 60 * 55) {
           throw new HTTPException(409, { message: "timeMismatch" });
         }
 
