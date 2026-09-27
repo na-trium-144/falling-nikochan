@@ -6,9 +6,8 @@ import { dirname, join } from "node:path";
 import { Context, type Hono } from "hono";
 import { fetchError } from "./error.js";
 import { env } from "hono/adapter";
-import { Db } from "mongodb";
 import type { ErrorEvent, EventHint } from "@sentry/hono/node";
-import type { BaseLogger } from "@hono/structured-logger";
+import type { webcrypto } from "node:crypto";
 
 export interface Bindings {
   ASSETS?: { fetch: typeof fetch };
@@ -16,6 +15,7 @@ export interface Bindings {
   API_ENV?: "development";
   API_NO_RATELIMIT?: "1";
   SECRET_SALT?: string;
+  RESULT_SECRET_KEY?: string;
   API_CACHE_EDGE?: "1";
   ASSET_PREFIX?: string;
   BACKEND_PREFIX?: string;
@@ -44,6 +44,45 @@ export function secretSalt(e: Bindings) {
   }
 }
 
+export async function resultSecretKey(e: Bindings) {
+  let keyBase64: string;
+  if (e.RESULT_SECRET_KEY) {
+    keyBase64 = e.RESULT_SECRET_KEY;
+  } else if (e.API_ENV === "development") {
+    // This is an example key that can be used for development. In production, a different key is used.
+    keyBase64 = "u5Qz5x_24m6k6lG-J4X9Q0wF_89v2Zt6g5v2x2w6K5k";
+  } else {
+    throw new Error("RESULT_SECRET_KEY not set in production environment!");
+  }
+  return await crypto.subtle.importKey(
+    "raw",
+    Buffer.from(keyBase64, "base64url"),
+    { name: "HMAC", hash: { name: "SHA-256" } },
+    true,
+    ["sign", "verify"]
+  );
+}
+
+export async function buildPubKey(
+  c:
+    | Context<{ Bindings: Bindings }>
+    | Context<{ Bindings: Bindings; Variables: any }>,
+  fetchStatic: (e: Bindings, url: URL) => Promise<ResponseOK>
+) {
+  return await crypto.subtle.importKey(
+    "jwk",
+    (await (
+      await fetchStatic(
+        env(c),
+        new URL("/resultBuildKey.json", backendOrigin(c))
+      )
+    ).json()) as webcrypto.JsonWebKey,
+    { name: "ECDSA", namedCurve: "P-256" },
+    true,
+    ["verify"]
+  );
+}
+
 export function cacheControl(e: Bindings, age: number, private_?: boolean) {
   if (private_) {
     return `private, max-age=${age}, must-revalidate`;
@@ -60,8 +99,7 @@ export function immutable() {
 export function backendOrigin(
   c:
     | Context<{ Bindings: Bindings }>
-    | Context<{ Bindings: Bindings; Variables: { logger: BaseLogger } }>
-    | Context<{ Bindings: Bindings; Variables: { db: () => Promise<Db> } }>
+    | Context<{ Bindings: Bindings; Variables: any }>
 ): string {
   if (env(c).BACKEND_PREFIX) {
     return env(c).BACKEND_PREFIX!;
