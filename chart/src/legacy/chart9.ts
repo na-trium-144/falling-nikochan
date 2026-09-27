@@ -62,16 +62,6 @@ export const LevelEditSchema9 = () =>
     ...LevelMinSchema9().entries,
     ...LevelFreezeSchema9().entries,
   });
-export const LevelPlaySchema9 = () =>
-  v.object({
-    ver: v.union([v.literal(9), v.literal(10)]),
-    offset: v.pipe(v.number(), v.minValue(0)),
-    notes: v.array(NoteCommandSchema9()),
-    bpmChanges: v.array(BPMChangeSchema9()),
-    speedChanges: v.array(SpeedChangeSchema9()),
-    signature: v.array(SignatureSchema9()),
-  });
-
 export const ChartMinSchema9 = () =>
   v.object({
     falling: v.literal("nikochan"),
@@ -103,21 +93,9 @@ export type Signature9 = v.InferOutput<ReturnType<typeof SignatureSchema9>>;
 export type Level9Min = v.InferOutput<ReturnType<typeof LevelMinSchema9>>;
 export type Level9Freeze = v.InferOutput<ReturnType<typeof LevelFreezeSchema9>>;
 export type Level9Edit = v.InferOutput<ReturnType<typeof LevelEditSchema9>>;
-export type Level9Play = v.InferOutput<ReturnType<typeof LevelPlaySchema9>>;
 export type Chart9Min = v.InferOutput<ReturnType<typeof ChartMinSchema9>>;
 export type Chart9Edit = v.InferOutput<ReturnType<typeof ChartEditSchema9>>;
 
-export function convertToPlay9(chart: Chart9Edit, lvIndex: number): Level9Play {
-  const level = chart.levels.at(lvIndex);
-  return {
-    ver: 10,
-    offset: chart.offset,
-    notes: level?.notes || [],
-    bpmChanges: level?.bpmChanges || [],
-    speedChanges: level?.speedChanges || [],
-    signature: level?.signature || [],
-  };
-}
 export function convertToMin9(chart: Chart9Edit): Chart9Min {
   return {
     falling: "nikochan",

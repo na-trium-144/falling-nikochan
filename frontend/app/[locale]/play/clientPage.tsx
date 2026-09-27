@@ -23,12 +23,8 @@ import {
   RecordGetSummary,
   inputTypes,
   emptyBrief,
-  currentChartVer,
-  loadChart,
   ChartSeqData,
-  Level15Play,
   RecordGetSummarySchema,
-  LevelPlay,
   ResultSerialized,
   serializeCid,
   serializeDate4,
@@ -49,7 +45,6 @@ import { getBestScore, setBestScore } from "@/common/bestScore.js";
 import BPMSign from "./bpmSign.js";
 import { getSession } from "./session.js";
 import { MusicArea } from "./musicArea.js";
-import { Level6Play } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { SlimeSVG } from "@/common/slime.js";
 import { useSE } from "@/common/se.js";
@@ -120,7 +115,7 @@ export function InitPlay({ locale }: { locale: string }) {
     setEditing(session.editing);
 
     if (session.editing) {
-      setChartSeq(loadChart(session.level));
+      setChartSeq(session.level);
       setErrorMsg(undefined);
     } else {
       /*
@@ -131,7 +126,7 @@ export function InitPlay({ locale }: { locale: string }) {
       といった不都合がある
       */
       fetchBackend()
-        .url(`/api/playFile/${session.cid}/${session.lvIndex}`)
+        .url(`/api/seqFile/${session.cid}/${session.lvIndex}`)
         .headers({ "X-If-Match": `"${session.brief.etag}"` })
         .get()
         .badRequest(markAsExpected)
@@ -141,24 +136,10 @@ export function InitPlay({ locale }: { locale: string }) {
           markAsExpected(e);
         })
         .arrayBuffer((buf) => {
-          const playFile = msgpack.decode(buf) as
-            Level6Play | Level15Play | LevelPlay;
-          console.log("playFile.ver", playFile.ver);
-          if (
-            playFile.ver === 6 ||
-            playFile.ver === 15 ||
-            playFile.ver === currentChartVer
-          ) {
-            addRecent("play", session.cid ?? "");
-            updatePlayCountForReview();
-            return { seq: loadChart(playFile), error: undefined };
-          } else {
-            // playFile satisfies never;
-            return {
-              seq: undefined,
-              error: te("chartVersion", { ver: (playFile as any)?.ver }),
-            };
-          }
+          const seq = msgpack.decode(buf) as ChartSeqData;
+          addRecent("play", session.cid ?? "");
+          updatePlayCountForReview();
+          return { seq, error: undefined };
         })
         .catch((e: unknown) => ({
           seq: undefined,

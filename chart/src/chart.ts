@@ -15,10 +15,8 @@ chartFormat/ 内の定義
   * 旧バージョンからの変換: convertTo14(chart)
   * Min -> Edit: (await luaExec(level.lua.join("\n"))).levelFreezed
   * Entry -> Edit: entryToChart(chart)
-* LevelPlay: /api/playFile で使われる、プレイ時の譜面データ
-  * Edit -> Play: convertToPlay9(chart, lvIndex)
-* ChartSeqData, Note: プレイ中の譜面データ (過去 /api/seqFile でも使われていた)
-  * Play -> SeqData: loadChart9(level)
+* ChartSeqData, Note: プレイ時の譜面データ (/api/seqFile で使われる)
+  * Chart -> SeqData: loadChart(chart, lvIndex)
 
 route/ 内の定義
 
@@ -82,8 +80,6 @@ import {
   ChartUntil17,
   ChartUntil17Min,
   convertTo17,
-  convertToPlay17,
-  Level17Play,
 } from "./legacy/chart17.js";
 
 export const YoutubeIdSchema = () =>
@@ -187,20 +183,19 @@ export function emptyBrief(): ChartBrief {
     levels: [],
   };
 }
-export const currentChartVer = 17;
+export const currentChartVer = 18;
 // これ以前の譜面データがサーバーにアップロードされている場合に警告を出す。
 // ローカルファイル読み込みの場合、14以前のyml,mpkファイルはチェックされるが、15以降のluaファイルのバージョンはチェックしていない。
 export const lastIncompatibleVer = 16;
 export type ChartEdit = Chart17;
 export const ChartSchema = ChartSchema17;
-export type LevelPlay = Level17Play;
 export type LevelMin = Level15Meta;
 export type LevelFreeze = Level15Freeze;
 export const convertToMin = convertToMin14;
-export const convertToPlay = convertToPlay17;
 
 export async function convertToLatest(chart: ChartUntil17): Promise<ChartEdit> {
-  if (chart.ver !== 17) chart = await convertTo17(chart as ChartUntil15);
+  if (chart.ver !== 17 && chart.ver !== 18)
+    chart = await convertTo17(chart as ChartUntil15);
   return chart;
 }
 /*
@@ -221,6 +216,7 @@ export function validateChartWithoutConvert(chart: ChartUntil17): ChartUntil17 {
   chart = JSON.parse(JSON.stringify(chart));
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   switch (chart.ver) {
+    case 18:
     case 17:
       chart satisfies Chart17;
       return v.parse(ChartSchema(), chart);
@@ -244,7 +240,8 @@ export async function validateChartMin(
   chart = JSON.parse(JSON.stringify(chart));
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart.ver >= 15) {
-    if (chart.ver !== 17) chart = await convertTo17(chart as ChartUntil15);
+    if (chart.ver !== 17 && chart.ver !== 18)
+      chart = await convertTo17(chart as ChartUntil15);
     chart satisfies Chart17;
     chart = v.parse(ChartSchema(), chart);
     return { ...chart, ver: currentChartVer };
