@@ -24,6 +24,7 @@ import { captureAndWrap, fetchBackend } from "@/common/fetch.js";
 import * as v from "valibot";
 import { etagContentRegex } from "@/common/briefCache.js";
 import { SocialLinks } from "@/common/social.js";
+import { markAsExpected } from "@/common/apiError.js";
 
 const dummyBrief = {
   title: "placeholder",
@@ -65,7 +66,7 @@ export default function ShareChart(props: Props) {
     ResultParams | string | null
   >(null);
   const [sharedResultVerified, setSharedResultVerified] = useState<
-    boolean | Error | null
+    true | Error | null
   >(null);
 
   useEffect(() => {
@@ -116,7 +117,7 @@ export default function ShareChart(props: Props) {
               .url(`/api/resultSigning/verify/${cid}`)
               .query({ result: qResult })
               .get()
-              .error(422, () => setSharedResultVerified(false))
+              .error(422, markAsExpected)
               .res(() => setSharedResultVerified(true))
               .catch((e: unknown) => {
                 setSharedResultVerified(captureAndWrap(e));

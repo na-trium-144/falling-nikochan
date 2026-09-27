@@ -51,7 +51,7 @@ interface Props {
   brief: (ChartBrief & { etag: string }) | Error | null;
   record: RecordGetSummary[] | Error | null;
   sharedResult?: ResultParams | string | null;
-  sharedResultVerified?: boolean | Error | null;
+  sharedResultVerified?: true | Error | null;
   locale: string;
   backButton?: () => void;
   forceShowCId?: boolean; // 通常はPCでは表示、モバイルでは非表示だが、trueの場合モバイルでも表示する

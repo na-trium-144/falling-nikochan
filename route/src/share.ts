@@ -58,7 +58,7 @@ const shareApp = (config: {
       // c.req.param("cid_txt").slice(0, -4) for /share/:cid_txt{[0-9]+.txt}
       const qResult = c.req.query("result");
       let resultParams: ResultParams | null = null;
-      if (qResult) {
+      if (qResult && !env(c).IS_SERVICE_WORKER) {
         let result: Uint8Array;
         let sign: Uint8Array | undefined;
         try {
@@ -75,7 +75,8 @@ const shareApp = (config: {
           ) {
             resultParams = null;
           }
-        } catch {
+        } catch (e) {
+          c.var.logger.warn(e);
           // throw new HTTPException(400, { message: "invalidResultParam" });
         }
       }

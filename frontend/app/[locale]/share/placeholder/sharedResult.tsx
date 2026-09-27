@@ -21,7 +21,7 @@ import { formatError } from "@/common/fetch";
 
 interface Props {
   result: ResultParams | string;
-  verified: boolean | Error | null | undefined;
+  verified: true | Error | null | undefined;
 }
 export function SharedResultBox(props: Props) {
   const th = useTranslations("share");
@@ -43,10 +43,10 @@ export function SharedResultBox(props: Props) {
         <p className="text-center ">{result}</p>
       ) : (
         <>
-          {verified === false ? (
-            <WarningBox>{th("notVerified")}</WarningBox>
-          ) : verified instanceof Error ? (
-            <WarningBox>{formatError(verified, te)}</WarningBox>
+          {verified instanceof Error ? (
+            <WarningBox classNameOuter="w-max max-w-full mx-auto mb-2">
+              {formatError(verified, te)}
+            </WarningBox>
           ) : null}
           <p className="text-center ">
             {result.lvName && (
