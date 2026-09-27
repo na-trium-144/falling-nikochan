@@ -316,9 +316,14 @@ export async function signResultParams(
 }
 export async function verifyResultParams(
   parsed: { result: Uint8Array; sign?: Uint8Array },
+  resultParams: ResultParams,
+  cid: string,
   resultSecretKey: webcrypto.CryptoKey
 ): Promise<boolean> {
   if (!parsed.sign) {
+    return false;
+  }
+  if (!resultParams.cid || resultParams.cid !== cid) {
     return false;
   }
   const expected = new Uint8Array(

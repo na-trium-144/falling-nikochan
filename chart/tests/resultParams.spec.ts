@@ -208,8 +208,31 @@ describe("resultParams", () => {
       const result = msgpack.encode(expectedParams);
       const sign = new Uint8Array(await signResultParams(result, key));
 
-      const verified = await verifyResultParams({ result, sign }, key);
+      const verified = await verifyResultParams(
+        { result, sign },
+        expectedParams,
+        expectedParams.cid,
+        key
+      );
       expect(verified).to.be.true;
+    });
+    test("should return false for wrong cid", async () => {
+      const key = await crypto.subtle.generateKey(
+        { name: "HMAC", hash: { name: "SHA-256" } },
+        true,
+        ["sign", "verify"]
+      );
+
+      const result = msgpack.encode(expectedParams);
+      const sign = new Uint8Array(await signResultParams(result, key));
+
+      const verified = await verifyResultParams(
+        { result, sign },
+        expectedParams,
+        "differentCid",
+        key
+      );
+      expect(verified).to.be.false;
     });
 
     test("should return false for tampered signature", async () => {
@@ -222,7 +245,12 @@ describe("resultParams", () => {
       const result = msgpack.encode(expectedParams);
       const sign = new Uint8Array([1, 2, 3, 4, 5]);
 
-      const verified = await verifyResultParams({ result, sign }, key);
+      const verified = await verifyResultParams(
+        { result, sign },
+        expectedParams,
+        expectedParams.cid,
+        key
+      );
       expect(verified).to.be.false;
     });
 
@@ -243,6 +271,8 @@ describe("resultParams", () => {
 
       const verified = await verifyResultParams(
         { result: tamperedResult, sign },
+        expectedParams,
+        expectedParams.cid,
         key
       );
       expect(verified).to.be.false;
@@ -257,7 +287,12 @@ describe("resultParams", () => {
 
       const result = msgpack.encode(expectedParams);
 
-      const verified = await verifyResultParams({ result }, key);
+      const verified = await verifyResultParams(
+        { result },
+        expectedParams,
+        expectedParams.cid,
+        key
+      );
       expect(verified).to.be.false;
     });
   });

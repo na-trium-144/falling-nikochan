@@ -392,14 +392,11 @@ const resultSigningApp = async (config: {
             "Cache-Control": cacheControl(env(c), VERIFY_CACHE_MAX_AGE),
           });
         }
-        if (!resultParams.cid || resultParams.cid !== c.req.param("cid")) {
-          return c.json({ message: "unauthorizedResultParam" }, 422, {
-            "Cache-Control": cacheControl(env(c), VERIFY_CACHE_MAX_AGE),
-          });
-        }
         if (
           await verifyResultParams(
             { result, sign },
+            resultParams,
+            c.req.param("cid"),
             await resultSecretKey(env(c))
           )
         ) {

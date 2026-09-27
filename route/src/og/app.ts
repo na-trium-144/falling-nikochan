@@ -175,6 +175,8 @@ const ogApp = (config: {
           isVerificationRequired(resultParams) &&
           !(await verifyResultParams(
             { result, sign },
+            resultParams,
+            cid,
             await resultSecretKey(env(c))
           ))
         ) {
