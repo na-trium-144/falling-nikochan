@@ -1,7 +1,6 @@
 import { OpenAPIV3_1 } from "openapi-types";
 import {
   BPMChange15Doc,
-  Chart15Doc,
   CopyBufferDoc,
   CopyBufferEntrySchema,
   LevelFreeze15Doc,
@@ -33,7 +32,6 @@ export type Reference = OpenAPIV3_1.ReferenceObject;
 
 export const docSchemas = async () => ({
   Chart17: await Chart17Doc(),
-  Chart15: await Chart15Doc(),
   LevelMeta15: await LevelMeta15Doc(),
   LevelFreeze15: await LevelFreeze15Doc(),
   ChartBrief: (await resolver(ChartBriefSchema()).toOpenAPISchema()).schema,

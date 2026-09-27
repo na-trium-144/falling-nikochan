@@ -67,10 +67,25 @@ describe("GET /api/seqFile/:cid/:lvIndex", () => {
     expect(res.status).to.equal(412);
     expect(await res.json()).to.deep.equal({ message: "etagMismatch" });
   });
-  currentChartVer satisfies 17; // edit tests below when chart version is bumped
-  // for (const ver of []) {
-  //   test("should return ChartSeqData without upgrading to latest ChartPlay if chart version is " + ver, async () => {});
-  // }
+  currentChartVer satisfies 18; // edit tests below when chart version is bumped
+  for (const ver of [17]) {
+    test(
+      "should upgrade to latest Chart if chart version is " + ver,
+      async () => {
+        await initDb();
+        const res = await app.request(`/api/seqFile/${100000 + ver}/0`);
+        expect(res.status).to.equal(200);
+        const seqData = msgpack.decode(await res.arrayBuffer()) as ChartSeqData;
+        expect(seqData.notes).to.deep.equal(loadChart(dummyChart(), 0).notes);
+        expect(seqData.notes).to.not.deep.equal(
+          loadChart(dummyChart15(), 0).notes
+        );
+        expect(seqData.notes).to.not.deep.equal(
+          loadChart(dummyChart6(), 0).notes
+        );
+      }
+    );
+  }
   for (const ver of [16, 15, 14, 13, 12, 11, 10, 9, 8, 7]) {
     test(
       "should return ChartSeqData without upgrading to latest ChartPlay if chart version is " +

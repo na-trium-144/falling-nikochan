@@ -178,7 +178,10 @@ export function dummyChart(): Chart17 {
     ],
   };
 }
-currentChartVer satisfies 17;
+currentChartVer satisfies 18;
+export function dummyChart17(): Chart17 {
+  return { ...dummyChart(), ver: 17 };
+}
 export function dummyChart16(): Chart15 {
   return { ...dummyChart(), ver: 16 };
 }
@@ -419,204 +422,42 @@ export async function initDb() {
     },
     { upsert: true }
   );
-  await db.collection<ChartEntryCompressed>("chart").updateOne(
-    { cid: String(Number(dummyCid) + 5) },
-    {
-      $set: await zipEntry({
-        ...(await chartToEntry(
-          {
-            ...dummyChart(),
-            changePasswd: "p",
-          },
-          String(Number(dummyCid) + 5),
-          dummyDate.getTime(),
-          null,
-          undefined,
-          pSecretSalt,
-          null
-        )),
-        ver: 5,
-        levels: dummyChart5().levels,
-      }),
-    },
-    { upsert: true }
-  );
-  await db.collection<ChartEntryCompressed>("chart").updateOne(
-    { cid: String(Number(dummyCid) + 6) },
-    {
-      $set: await zipEntry({
-        ...(await chartToEntry(
-          {
-            ...dummyChart(),
-            changePasswd: "p",
-          },
-          String(Number(dummyCid) + 6),
-          dummyDate.getTime(),
-          null,
-          undefined,
-          pSecretSalt,
-          null
-        )),
-        ver: 6,
-        levels: dummyChart6().levels,
-      }),
-    },
-    { upsert: true }
-  );
-  await db.collection<ChartEntryCompressed>("chart").updateOne(
-    { cid: String(Number(dummyCid) + 7) },
-    {
-      $set: await zipEntry({
-        ...(await chartToEntry(
-          {
-            ...dummyChart(),
-            changePasswd: "p",
-          },
-          String(Number(dummyCid) + 7),
-          dummyDate.getTime(),
-          null,
-          undefined,
-          pSecretSalt,
-          null
-        )),
-        ver: 7,
-        levels: dummyChart7().levels,
-      }),
-    },
-    { upsert: true }
-  );
-  await db.collection<ChartEntryCompressed>("chart").updateOne(
-    { cid: String(Number(dummyCid) + 8) },
-    {
-      $set: await zipEntry({
-        ...(await chartToEntry(
-          {
-            ...dummyChart(),
-            changePasswd: "p",
-          },
-          String(Number(dummyCid) + 8),
-          dummyDate.getTime(),
-          null,
-          undefined,
-          pSecretSalt,
-          null
-        )),
-        ver: 8,
-        levels: dummyChart8().levels,
-      }),
-    },
-    { upsert: true }
-  );
-  await db.collection<ChartEntryCompressed>("chart").updateOne(
-    { cid: String(Number(dummyCid) + 9) },
-    {
-      $set: await zipEntry({
-        ...(await chartToEntry(
-          {
-            ...dummyChart(),
-            changePasswd: "p",
-          },
-          String(Number(dummyCid) + 9),
-          dummyDate.getTime(),
-          null,
-          undefined,
-          pSecretSalt,
-          null
-        )),
-        ver: 9,
-        levels: dummyChart9().levels,
-      }),
-    },
-    { upsert: true }
-  );
-  await db.collection<ChartEntryCompressed>("chart").updateOne(
-    { cid: String(Number(dummyCid) + 10) },
-    {
-      $set: await zipEntry({
-        ...(await chartToEntry(
-          {
-            ...dummyChart(),
-            changePasswd: "p",
-          },
-          String(Number(dummyCid) + 10),
-          dummyDate.getTime(),
-          null,
-          undefined,
-          pSecretSalt,
-          null
-        )),
-        ver: 10,
-        levels: dummyChart10().levels,
-      }),
-    },
-    { upsert: true }
-  );
-  await db.collection<ChartEntryCompressed>("chart").updateOne(
-    { cid: String(Number(dummyCid) + 11) },
-    {
-      $set: await zipEntry({
-        ...(await chartToEntry(
-          {
-            ...dummyChart(),
-            changePasswd: "p",
-          },
-          String(Number(dummyCid) + 11),
-          dummyDate.getTime(),
-          null,
-          undefined,
-          pSecretSalt,
-          null
-        )),
-        ver: 11,
-        levels: dummyChart11().levels,
-      }),
-    },
-    { upsert: true }
-  );
-  await db.collection<ChartEntryCompressed>("chart").updateOne(
-    { cid: String(Number(dummyCid) + 12) },
-    {
-      $set: await zipEntry({
-        ...(await chartToEntry(
-          {
-            ...dummyChart(),
-            changePasswd: "p",
-          },
-          String(Number(dummyCid) + 12),
-          dummyDate.getTime(),
-          null,
-          undefined,
-          pSecretSalt,
-          null
-        )),
-        ver: 12,
-        levels: dummyChart12().levels,
-      }),
-    },
-    { upsert: true }
-  );
-  await db.collection<ChartEntryCompressed>("chart").updateOne(
-    { cid: String(Number(dummyCid) + 13) },
-    {
-      $set: await zipEntry({
-        ...(await chartToEntry(
-          {
-            ...dummyChart(),
-            changePasswd: "p",
-          },
-          String(Number(dummyCid) + 13),
-          dummyDate.getTime(),
-          null,
-          undefined,
-          pSecretSalt,
-          null
-        )),
-        ver: 13,
-        levels: dummyChart13().levels,
-      }),
-    },
-    { upsert: true }
-  );
+  for (const chart of [
+    dummyChart4(),
+    dummyChart5(),
+    dummyChart6(),
+    dummyChart7(),
+    dummyChart8(),
+    dummyChart9(),
+    dummyChart10(),
+    dummyChart11(),
+    dummyChart12(),
+    dummyChart13(),
+  ] as const) {
+    await db.collection<ChartEntryCompressed>("chart").updateOne(
+      { cid: String(Number(dummyCid) + chart.ver) },
+      {
+        // @ts-expect-error 複雑すぎてわからんけどとにかくなんかエラーが出るけどうごく
+        $set: await zipEntry({
+          ...(await chartToEntry(
+            {
+              ...dummyChart(),
+              changePasswd: "p",
+            },
+            String(Number(dummyCid) + chart.ver),
+            dummyDate.getTime(),
+            null,
+            undefined,
+            pSecretSalt,
+            null
+          )),
+          ver: chart.ver,
+          levels: chart.levels,
+        }),
+      },
+      { upsert: true }
+    );
+  }
   await db.collection<ChartEntryCompressed>("chart").updateOne(
     { cid: String(Number(dummyCid) + 14) },
     {
@@ -643,57 +484,37 @@ export async function initDb() {
     },
     { upsert: true }
   );
-  await db.collection<ChartEntryCompressed>("chart").updateOne(
-    { cid: String(Number(dummyCid) + 15) },
-    {
-      $set: await zipEntry({
-        ...(await chartToEntry(
-          {
-            ...dummyChart(),
-            changePasswd: "p",
-          },
-          String(Number(dummyCid) + 15),
-          dummyDate.getTime(),
-          null,
-          undefined,
-          pSecretSalt,
-          null
-        )),
-        ver: 15,
-        levels: dummyChart15().levelsMeta.map((meta, i) => ({
-          ...meta,
-          ...dummyChart15().levelsFreeze![i],
-          lua: dummyChart15().lua![i],
-        })),
-      }),
-    },
-    { upsert: true }
-  );
-  await db.collection<ChartEntryCompressed>("chart").updateOne(
-    { cid: String(Number(dummyCid) + 16) },
-    {
-      $set: await zipEntry({
-        ...(await chartToEntry(
-          {
-            ...dummyChart(),
-            changePasswd: "p",
-          },
-          String(Number(dummyCid) + 16),
-          dummyDate.getTime(),
-          null,
-          undefined,
-          pSecretSalt,
-          null
-        )),
-        ver: 16,
-        levels: dummyChart16().levelsMeta.map((meta, i) => ({
-          ...meta,
-          ...dummyChart16().levelsFreeze![i],
-          lua: dummyChart16().lua![i],
-        })),
-      }),
-    },
-    { upsert: true }
-  );
-  currentChartVer satisfies 17;
+  for (const chart of [
+    dummyChart15(),
+    dummyChart16(),
+    dummyChart17(),
+  ] as const) {
+    currentChartVer satisfies 18;
+    await db.collection<ChartEntryCompressed>("chart").updateOne(
+      { cid: String(Number(dummyCid) + chart.ver) },
+      {
+        $set: await zipEntry({
+          ...(await chartToEntry(
+            {
+              ...dummyChart(),
+              changePasswd: "p",
+            },
+            String(Number(dummyCid) + chart.ver),
+            dummyDate.getTime(),
+            null,
+            undefined,
+            pSecretSalt,
+            null
+          )),
+          ver: chart.ver,
+          levels: chart.levelsMeta.map((meta, i) => ({
+            ...meta,
+            ...chart.levelsFreeze![i],
+            lua: chart.lua![i],
+          })),
+        }),
+      },
+      { upsert: true }
+    );
+  }
 }

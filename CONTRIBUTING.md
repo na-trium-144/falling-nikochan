@@ -113,7 +113,7 @@ The compiled files are also regenerated automatically when building the frontend
       * Update the ChartEntry and ChartEntryCompressed type to support the new version.
       * Update chartToEntry function to support the last 2 versions.
       * Update entryToChart function to support the new version.
-  * Update `route/src/api/chartFile.ts`, `newChartFile.ts`, `playFile.ts` and `seqPreview.ts` to support the last 2 versions, including the OpenAPI documentation (describeRoute).
+  * Update `route/src/api/chartFile.ts`, `newChartFile.ts` and `seqPreview.ts` to support the last 2 versions, including the OpenAPI documentation (describeRoute).
   * Fix any typecheck and lint errors.
       * Statements like `currentChartVer satisfies 15;` indicates that not only that statement but also the surrounding code needs to be updated when the version changes.
   * Release new version of `fn-commands` library

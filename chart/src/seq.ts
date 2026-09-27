@@ -246,7 +246,19 @@ export async function SignatureSeqDoc(): Promise<Schema> {
 
 export const ChartSeqDataSchema = () =>
   v.object({
-    ver: v.pipe(v.number(), v.description("Chart version, e.g. 17, 15, 6")),
+    ver: v.pipe(
+      v.union([
+        // 5以下はChart6までアップグレードされる
+        v.literal(6),
+        // 14以下はChart15までアップグレードされる
+        v.literal(15),
+        v.literal(16),
+        // 現行バージョン:
+        v.literal(17),
+        v.literal(18),
+      ]),
+      v.description("Chart version")
+    ),
     notes: v.array(NoteSeqSchema()),
     bpmChanges: v.array(BPMChangeSeqSchema()),
     speedChanges: v.array(SpeedChangeSeqSchema()),
@@ -341,7 +353,7 @@ export function loadLevel(
         ytEndSec?: number;
       },
   offset: number,
-  ver: number
+  ver: ChartSeqData["ver"]
 ): ChartSeqData {
   const { bpm: bpmChanges, speed: speedChanges } = updateBpmTimeSec(
     freeze.bpmChanges,

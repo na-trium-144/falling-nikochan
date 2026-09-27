@@ -183,7 +183,7 @@ export function emptyBrief(): ChartBrief {
     levels: [],
   };
 }
-export const currentChartVer = 17;
+export const currentChartVer = 18;
 // これ以前の譜面データがサーバーにアップロードされている場合に警告を出す。
 // ローカルファイル読み込みの場合、14以前のyml,mpkファイルはチェックされるが、15以降のluaファイルのバージョンはチェックしていない。
 export const lastIncompatibleVer = 16;
@@ -194,7 +194,8 @@ export type LevelFreeze = Level15Freeze;
 export const convertToMin = convertToMin14;
 
 export async function convertToLatest(chart: ChartUntil17): Promise<ChartEdit> {
-  if (chart.ver !== 17) chart = await convertTo17(chart as ChartUntil15);
+  if (chart.ver !== 17 && chart.ver !== 18)
+    chart = await convertTo17(chart as ChartUntil15);
   return chart;
 }
 /*
@@ -215,6 +216,7 @@ export function validateChartWithoutConvert(chart: ChartUntil17): ChartUntil17 {
   chart = JSON.parse(JSON.stringify(chart));
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   switch (chart.ver) {
+    case 18:
     case 17:
       chart satisfies Chart17;
       return v.parse(ChartSchema(), chart);
@@ -238,7 +240,8 @@ export async function validateChartMin(
   chart = JSON.parse(JSON.stringify(chart));
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart.ver >= 15) {
-    if (chart.ver !== 17) chart = await convertTo17(chart as ChartUntil15);
+    if (chart.ver !== 17 && chart.ver !== 18)
+      chart = await convertTo17(chart as ChartUntil15);
     chart satisfies Chart17;
     chart = v.parse(ChartSchema(), chart);
     return { ...chart, ver: currentChartVer };

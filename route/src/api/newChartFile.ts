@@ -6,7 +6,6 @@ import {
   chartMaxEvent,
   rateLimit,
   CidSchema,
-  Chart15,
   docRefs,
   Chart17,
 } from "@falling-nikochan/chart";
@@ -46,7 +45,7 @@ const newChartFileApp = async (config: {
       description:
         "Create a new chart. " +
         "The chart data should be in MessagePack format, and " +
-        `must be the latest format (Chart17) or one version earlier (Chart15). ` +
+        `must be the latest format (ver.18) or one version earlier (ver.17). ` +
         `The chart data may be compressed using ${supportedEncodings.join(", ")} (in that case Content-Encoding header must be set.) ` +
         "Returns the chart ID (cid) of the newly created chart. " +
         `This endpoint is rate limited to one request per ${rateLimit.newChartFile / 60} minutes. `,
@@ -56,7 +55,7 @@ const newChartFileApp = async (config: {
         required: true,
         content: {
           "application/vnd.msgpack": {
-            schema: { anyOf: [docRefs("Chart17"), docRefs("Chart15")] },
+            schema: { anyOf: [docRefs("Chart17") /*, docRefs("Chart15")*/] },
           },
         },
       },
@@ -163,13 +162,13 @@ const newChartFileApp = async (config: {
         );
       }
 
-      let newChart: Chart15 | Chart17;
+      let newChart: Chart17;
       try {
-        newChart = msgpack.decode(chartBuf) as Chart15 | Chart17;
+        newChart = msgpack.decode(chartBuf) as Chart17;
         if (newChart.ver < currentChartVer - 1) {
           return c.json({ message: "oldChartVersion" }, 409);
         }
-        newChart = validateChartWithoutConvert(newChart) as Chart15 | Chart17;
+        newChart = validateChartWithoutConvert(newChart) as Chart17;
       } catch (e) {
         throw new HTTPException(415, { message: "invalidChart", cause: e });
       }

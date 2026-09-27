@@ -149,6 +149,7 @@ const seqFileApp = new Hono<{
         seqData = loadChart(chart, lvIndex);
         break;
       case 17:
+      case 18:
         if (!chart.levelsMeta.at(lvIndex) || !chart.levelsFreeze.at(lvIndex)) {
           throw new HTTPException(404, { message: "levelNotFound" });
         }

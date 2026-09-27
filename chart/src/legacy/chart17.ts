@@ -18,7 +18,7 @@ export const ChartSchema17 = () =>
   v.pipe(
     v.object({
       falling: v.literal("nikochan"),
-      ver: v.union([v.literal(17)]),
+      ver: v.union([v.literal(17), v.literal(18)]),
       offset: OffsetSchema15(),
       ytId: v.string(),
       title: v.string(),

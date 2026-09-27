@@ -1,6 +1,6 @@
 import { test, describe } from "node:test";
 import { expect } from "chai";
-import { app, dummyChart } from "./init";
+import { app, dummyChart, dummyChart16 } from "./init";
 import {
   ChartSeqData,
   currentChartVer,
@@ -9,8 +9,7 @@ import {
 import msgpack from "@msgpack/msgpack";
 
 describe("POST /api/seqPreview", () => {
-  test("should return ChartSeqData from valid Chart17 data", async () => {
-    currentChartVer satisfies 17;
+  test("should return ChartSeqData from valid Chart data", async () => {
     const chartData = dummyChart();
     const encodedBody = msgpack.encode(chartData);
 
@@ -83,14 +82,9 @@ describe("POST /api/seqPreview", () => {
     expect(body.message).to.include("invalidChart");
   });
 
-  test("should return 409 for invalid ver field", async () => {
-    currentChartVer satisfies 17;
-    const chartData = dummyChart();
-    const invalidData = {
-      ...chartData,
-      ver: 14, // wrong version
-    };
-    const encodedBody = msgpack.encode(invalidData);
+  test("should return 409 for version older than 17", async () => {
+    currentChartVer satisfies 18;
+    const encodedBody = msgpack.encode(dummyChart16());
 
     const res = await app.request("/api/seqPreview?lvIndex=0", {
       method: "POST",
