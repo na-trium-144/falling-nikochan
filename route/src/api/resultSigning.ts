@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import {
   Bindings,
   buildPubKey,
-  immutable,
+  cacheControl,
   ResponseOK,
   resultSecretKey,
 } from "../env.js";
@@ -27,6 +27,8 @@ import { HTTPException } from "hono/http-exception";
 import type { JsonWebKey } from "node:crypto";
 import { CidSchema } from "@falling-nikochan/chart";
 import { validationErrorSchema } from "../error.js";
+
+const VERIFY_CACHE_MAX_AGE = 3600;
 
 const SessionTokenPayloadSchema = () =>
   v.object({
@@ -310,7 +312,7 @@ const resultSigningApp = async (config: {
             description: "Successful verification",
             headers: {
               "Cache-Control": {
-                description: `immutable`,
+                description: `max-age=${VERIFY_CACHE_MAX_AGE}`,
                 schema: { type: "string" },
               },
             },
@@ -339,7 +341,7 @@ const resultSigningApp = async (config: {
             },
             headers: {
               "Cache-Control": {
-                description: `immutable`,
+                description: `max-age=${VERIFY_CACHE_MAX_AGE}`,
                 schema: { type: "string" },
               },
             },
@@ -353,7 +355,7 @@ const resultSigningApp = async (config: {
             },
             headers: {
               "Cache-Control": {
-                description: `immutable`,
+                description: `max-age=${VERIFY_CACHE_MAX_AGE}`,
                 schema: { type: "string" },
               },
             },
@@ -386,14 +388,14 @@ const resultSigningApp = async (config: {
           throw new HTTPException(400, { message: "invalidResultParam" });
         }
         if (!isVerificationRequired(resultParams)) {
-          c.header("cache-control", immutable());
-          throw new HTTPException(409, {
-            message: "verificationNotApplicable",
+          return c.json({ message: "verificationNotApplicable" }, 409, {
+            "Cache-Control": cacheControl(env(c), VERIFY_CACHE_MAX_AGE),
           });
         }
         if (!resultParams.cid || resultParams.cid !== c.req.param("cid")) {
-          c.header("cache-control", immutable());
-          throw new HTTPException(422, { message: "unauthorizedResultParam" });
+          return c.json({ message: "unauthorizedResultParam" }, 422, {
+            "Cache-Control": cacheControl(env(c), VERIFY_CACHE_MAX_AGE),
+          });
         }
         if (
           await verifyResultParams(
@@ -401,10 +403,13 @@ const resultSigningApp = async (config: {
             await resultSecretKey(env(c))
           )
         ) {
-          return c.body(null, 200, { "Cache-Control": immutable() });
+          return c.body(null, 200, {
+            "Cache-Control": cacheControl(env(c), VERIFY_CACHE_MAX_AGE),
+          });
         } else {
-          c.header("cache-control", immutable());
-          throw new HTTPException(422, { message: "unauthorizedResultParam" });
+          return c.json({ message: "unauthorizedResultParam" }, 422, {
+            "Cache-Control": cacheControl(env(c), VERIFY_CACHE_MAX_AGE),
+          });
         }
       }
     );
