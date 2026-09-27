@@ -156,7 +156,8 @@ const recordApp = async (config: {
           {
             name: "Authorization",
             in: "header",
-            description: "`Bearer (JWT returned from /api/resultSigning/init)`.",
+            description:
+              "`Bearer (JWT returned from /api/resultSigning/init)`.",
             schema: { type: "string" },
           },
         ],
