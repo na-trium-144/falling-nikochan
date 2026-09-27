@@ -654,7 +654,7 @@ export function PoliciesAndLinks({
   const t = useTranslations("main");
   return (
     <>
-      <section className="fn-policies-and-links mb-3 main-wide:mb-24">
+      <section className="fn-policies-and-links mb-8">
         <div>
           <h2 className="fn-heading-sect text-2xl mb-3">
             {t("policies.title")}
@@ -714,6 +714,14 @@ export function PoliciesAndLinks({
           </ul>
         </div>
       </section>
+      <div className="mb-6 main-wide:mb-12 flex flex-col gap-1 main-wide:flex-row items-center justify-center">
+        <span>&copy; 2024-2026 na-trium-144</span>
+        <span className="no-mobile mx-1">/</span>
+        <span>
+          Powered by{" "}
+          <ExternalLink href="https://utcode.net">ut.code();</ExternalLink>
+        </span>
+      </div>
     </>
   );
 }
