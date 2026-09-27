@@ -5,6 +5,7 @@ import {
   isVerificationRequired,
   parseResultParams,
   ResultParams,
+  serializeCid,
   serializeDate,
   serializeResultParams,
   serializeResultParamsLegacy,
@@ -55,7 +56,7 @@ describe("resultParams", () => {
         expectedParams.bigCount,
         expectedParams.inputType,
         expectedParams.playbackRate4,
-        expectedParams.cid,
+        serializeCid(expectedParams.cid!),
       ]);
 
       const deserialized = deserializeResultParams(serialized);

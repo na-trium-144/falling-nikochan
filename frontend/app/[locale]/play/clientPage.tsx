@@ -808,7 +808,7 @@ function Play(props: Props) {
                 bigCount,
                 hitType,
                 oldPlaybackRate * 4,
-                cid,
+                serializeCid(cid),
               ] satisfies ResultSerialized);
               const resultSerialized = encodeBase64Url(
                 serialized.buffer.slice(

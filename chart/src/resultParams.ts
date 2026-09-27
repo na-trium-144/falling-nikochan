@@ -1,7 +1,6 @@
 import * as msgpack from "@msgpack/msgpack";
 import { decodeBase64Url, encodeBase64Url } from "hono/utils/encode";
 import * as v from "valibot";
-import { CidSchema } from "./chart.js";
 import type { webcrypto } from "node:crypto";
 
 const dateBase = new Date(2025, 2, 1); // 2 = March
@@ -18,6 +17,27 @@ export function serializeDate(date: Date, base: Date): number {
 }
 function deserializeDate(diffDays: number, base: Date): Date {
   return new Date(base.getTime() + diffDays * (1000 * 60 * 60 * 24));
+}
+
+/**
+ * cidは 100000-999999 なので、20bit
+ * msgpackは00-7fを1byteで表現するので、7bitで区切る
+ *
+ * 将来的に10進数でないcidに拡張する場合には、修正が必要
+ */
+export function serializeCid(cid: string) {
+  if (!/^[0-9]{6}$/.test(cid)) {
+    throw new Error("cannot serialize non-digit cid");
+  }
+  const numCid = Number(cid);
+  return [numCid >> 14, (numCid >> 7) & 0x7f, numCid & 0x7f] as [
+    number,
+    number,
+    number,
+  ];
+}
+export function deserializeCid(serialized: number[]) {
+  return String((serialized[0] << 14) | (serialized[1] << 7) | serialized[2]);
 }
 
 export interface ResultParams {
@@ -121,7 +141,7 @@ export const ResultSerializedSchema = () =>
       v.nullable(v.pipe(v.number(), v.integer(), v.minValue(0))), // [10] bigCount
       v.nullable(v.pipe(v.number(), v.integer(), v.minValue(1))), // [11] inputType
       v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(8)), // [12] playbackRate4
-      CidSchema(), // [13] cid
+      v.pipe(v.array(v.pipe(v.number(), v.integer())), v.length(3)), // [13] cid 7bit*3
     ]),
   ]);
 export type ResultSerialized = v.InferOutput<
@@ -168,7 +188,7 @@ export function serializeResultParams(params: ResultParams): string {
     params.bigCount as number | null,
     params.inputType,
     params.playbackRate4,
-    params.cid!,
+    serializeCid(params.cid!),
   ] satisfies ResultSerialized);
   return encodeBase64Url(
     serialized.buffer.slice(
@@ -286,7 +306,7 @@ export function deserializeResultParams(
         bigCount: deserialized[10],
         inputType: deserialized[11] || null,
         playbackRate4: deserialized[12],
-        cid: deserialized[13],
+        cid: deserializeCid(deserialized[13]),
       };
     default:
       throw new Error("Invalid version");
