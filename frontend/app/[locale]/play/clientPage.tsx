@@ -1366,7 +1366,9 @@ function Play(props: Props) {
               isTouch={isTouch}
               showShareButton={!wasAutoPlay && oldUserBegin === null}
               showRecord={
-                !wasAutoPlay && oldUserBegin === null && minActualPlaybackRate === 1
+                !wasAutoPlay &&
+                oldUserBegin === null &&
+                minActualPlaybackRate === 1
               }
               newRecord={
                 score > oldBestScoreState &&
