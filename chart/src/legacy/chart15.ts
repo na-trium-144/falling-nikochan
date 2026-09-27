@@ -7,7 +7,6 @@ import {
   ArrayOrEmptyObj,
   levelTypesConst,
   LuaLineSchema,
-  ArrayDoc,
 } from "../chart.js";
 import { ChartUntil13 } from "./chart13.js";
 import {
@@ -259,34 +258,6 @@ export async function LevelFreeze15Doc(): Promise<Schema> {
   };
 }
 
-export const LevelPlaySchema15 = () =>
-  v.object({
-    ver: v.union([v.literal(15), v.literal(16)]),
-    offset: OffsetSchema15(),
-    notes: v.array(NoteCommandSchema15()),
-    bpmChanges: v.array(BPMChangeSchema15()),
-    speedChanges: v.array(SpeedChangeSchema15()),
-    signature: v.array(SignatureSchema15()),
-    ytBegin: YTBeginSchema15(),
-    ytEndSec: YTEndSecSchema15(),
-  });
-export async function LevelPlay15Doc(): Promise<Schema> {
-  const schema = (await resolver(LevelPlaySchema15()).toOpenAPISchema()).schema;
-  return {
-    ...schema,
-    properties: {
-      ...schema.properties,
-      offset: docRefs("Offset15"),
-      notes: ArrayDoc(docRefs("NoteCommand15")),
-      bpmChanges: ArrayDoc(docRefs("BPMChange15")),
-      speedChanges: ArrayDoc(docRefs("SpeedChange15")),
-      signature: ArrayDoc(docRefs("Signature15")),
-      ytBegin: docRefs("YTBegin15"),
-      ytEndSec: docRefs("YTEndSec15"),
-    },
-  };
-}
-
 export const CopyBufferEntrySchema = () =>
   v.tuple([
     v.pipe(v.number(), v.description("hitX value")),
@@ -420,23 +391,7 @@ export type Level15Meta = v.InferOutput<ReturnType<typeof LevelMetaSchema15>>;
 export type Level15Freeze = v.InferOutput<
   ReturnType<typeof LevelFreezeSchema15>
 >;
-export type Level15Play = v.InferOutput<ReturnType<typeof LevelPlaySchema15>>;
 export type Chart15 = v.InferOutput<ReturnType<typeof ChartSchema15>>;
-
-export function convertToPlay15(chart: Chart15, lvIndex: number): Level15Play {
-  const levelMin = chart.levelsMeta.at(lvIndex);
-  const levelFreeze = chart.levelsFreeze.at(lvIndex);
-  return {
-    ver: 15,
-    offset: chart.offset,
-    notes: levelFreeze?.notes || [],
-    bpmChanges: levelFreeze?.bpmChanges || [],
-    speedChanges: levelFreeze?.speedChanges || [],
-    signature: levelFreeze?.signature || [],
-    ytBegin: levelMin?.ytBegin || 0,
-    ytEndSec: levelMin?.ytEndSec || 0,
-  };
-}
 
 export type ChartUntil15 = ChartUntil14 | Chart15;
 export type ChartUntil15Min = ChartUntil14Min | Chart15;

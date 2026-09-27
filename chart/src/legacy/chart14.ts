@@ -17,7 +17,6 @@ import {
   ChartUntil13Min,
   convertTo13,
   convertTo13Min,
-  Level13Play,
   LevelFreezeSchema13,
 } from "./chart13.js";
 
@@ -63,24 +62,6 @@ export type Level14Min = v.InferOutput<ReturnType<typeof LevelMinSchema14>>;
 export type Chart14Min = v.InferOutput<ReturnType<typeof ChartMinSchema14>>;
 export type Chart14Edit = v.InferOutput<ReturnType<typeof ChartEditSchema14>>;
 
-export function convertToPlay14(
-  chart: Chart14Edit,
-  lvIndex: number
-): Level13Play {
-  const levelMin = chart.levelsMin.at(lvIndex);
-  const levelFreeze = chart.levelsFreeze.at(lvIndex);
-  return {
-    ver: 13,
-    offset: chart.offset,
-    notes: levelFreeze?.notes || [],
-    bpmChanges: levelFreeze?.bpmChanges || [],
-    speedChanges: levelFreeze?.speedChanges || [],
-    signature: levelFreeze?.signature || [],
-    ytBegin: levelMin?.ytBegin || 0,
-    ytEnd: levelMin?.ytEnd || "note",
-    ytEndSec: levelMin?.ytEndSec || 0,
-  };
-}
 export function convertToMin14(chart: Chart14Edit): Chart14Min {
   return {
     falling: "nikochan",
