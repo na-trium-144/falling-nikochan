@@ -4,8 +4,8 @@ import * as v from "valibot";
 import { CidSchema } from "./chart.js";
 import type { webcrypto } from "node:crypto";
 
-const dateBase = new Date(2025, 2, 1);
-export const dateBase4 = new Date(2026, 10, 1);
+const dateBase = new Date(2025, 2, 1); // 2 = March
+export const dateBase4 = new Date(2026, 9, 1); // 9 = October
 export function serializeDate(date: Date, base: Date): number {
   const targetDate = new Date(
     date.getFullYear(),

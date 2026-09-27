@@ -40,7 +40,7 @@ describe("resultParams", () => {
     });
 
     test("should parse result params version 4", async () => {
-      const dateBase4 = new Date(2026, 10, 1);
+      const dateBase4 = new Date(2026, 9, 1);
       const serialized = msgpack.encode([
         4,
         serializeDate(expectedParams.date, dateBase4),
