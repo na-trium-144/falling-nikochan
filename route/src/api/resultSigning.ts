@@ -10,7 +10,11 @@ import { env } from "hono/adapter";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import * as v from "valibot";
 import { sign, verify } from "hono/jwt";
-import { sValidatorHook } from "../error.js";
+import {
+  errorLiteral,
+  errorLiteralWithCause,
+  sValidatorHook,
+} from "../error.js";
 import {
   deserializeResultParams,
   isVerificationRequired,
@@ -22,23 +26,12 @@ import {
 import { HTTPException } from "hono/http-exception";
 import type { JsonWebKey } from "node:crypto";
 import { CidSchema } from "@falling-nikochan/chart";
-import { JWTPayload } from "hono/utils/jwt/types";
 import { validationErrorSchema } from "../error.js";
 
 const SessionTokenPayloadSchema = () =>
   v.object({
-    key: v.pipe(
-      v.looseObject({}),
-      v.transform((key) =>
-        crypto.subtle.importKey(
-          "jwk",
-          key as JsonWebKey,
-          { name: "ECDSA", namedCurve: "P-256" },
-          true,
-          ["verify"]
-        )
-      )
-    ),
+    // ここにはJWTの標準クレームを含まず、looseObjectにもしない。/initで元のリクエストに含まれるexpやnbfがコピーされるのを防ぐため
+    key: v.pipe(v.looseObject({}), v.description("JsonWebKey")),
     cid: CidSchema(),
   });
 
@@ -50,20 +43,27 @@ export async function verifyResultSessionPubKey(
   if (!bearerToken) {
     throw new HTTPException(401, { message: "unauthorizedSessionToken" });
   }
-  let sessionPayload: JWTPayload;
-  try {
-    sessionPayload = await verify(
-      bearerToken,
-      await resultSecretKey(e),
-      "HS256"
-    );
-  } catch (err) {
+  const sessionPayload = await verify(
+    bearerToken,
+    await resultSecretKey(e),
+    "HS256"
+  ).catch((e) => {
     throw new HTTPException(401, {
       message: "unauthorizedSessionToken",
-      cause: err,
+      cause: e,
     });
-  }
-  return v.parse(SessionTokenPayloadSchema(), sessionPayload);
+  });
+  const { key, cid } = v.parse(SessionTokenPayloadSchema(), sessionPayload);
+  return {
+    key: await crypto.subtle.importKey(
+      "jwk",
+      key as JsonWebKey,
+      { name: "ECDSA", namedCurve: "P-256" },
+      true,
+      ["verify"]
+    ),
+    cid,
+  };
 }
 
 const resultSigningApp = async (config: {
@@ -99,12 +99,7 @@ const resultSigningApp = async (config: {
           content: {
             "application/jwt": {
               schema: (
-                await resolver(
-                  v.object({
-                    key: v.pipe(v.looseObject({}), v.description("JsonWebKey")),
-                    cid: CidSchema(),
-                  })
-                ).toOpenAPISchema()
+                await resolver(SessionTokenPayloadSchema()).toOpenAPISchema()
               ).schema,
             },
           },
@@ -115,7 +110,7 @@ const resultSigningApp = async (config: {
               "A payload with 3-hour expiration (exp) signed with ResultSecret key as a JWT",
             content: {
               "application/jwt": {
-                schema: resolver(v.string()),
+                schema: resolver(SessionTokenPayloadSchema()),
               },
             },
           },
@@ -123,7 +118,7 @@ const resultSigningApp = async (config: {
             description: "invalid payload",
             content: {
               "application/json": {
-                schema: resolver(await validationErrorSchema()),
+                schema: resolver(await validationErrorSchema("badRequest")),
               },
             },
           },
@@ -132,31 +127,30 @@ const resultSigningApp = async (config: {
               "Verification of request body with ResultBuildKey failed",
             content: {
               "application/json": {
-                schema: resolver(v.string()), // TODO
+                schema: resolver(
+                  await errorLiteralWithCause("unauthorizedResultBuildKey")
+                ),
               },
             },
           },
         },
       }),
       async (c) => {
-        let payload: JWTPayload;
-        try {
-          payload = await verify(
-            await c.req.text(),
-            await buildPubKey(c, config.fetchStatic),
-            "ES256"
-          );
-        } catch (err) {
+        const payload = await verify(
+          await c.req.text(),
+          await buildPubKey(c, config.fetchStatic),
+          "ES256"
+        ).catch((e) => {
           throw new HTTPException(401, {
             message: "unauthorizedResultBuildKey",
-            cause: err,
+            cause: e,
           });
-        }
-        v.parse(SessionTokenPayloadSchema(), payload); // ValiError -> 400
+        });
+        const tokenPayload = v.parse(SessionTokenPayloadSchema(), payload); // ValiError -> 400
 
         const sessionToken = await sign(
           {
-            ...payload,
+            ...tokenPayload,
             exp: Math.floor(Date.now() / 1000) + 60 * 60 * 3, // 3 hours
           },
           await resultSecretKey(env(c)),
@@ -202,7 +196,12 @@ const resultSigningApp = async (config: {
             description: "invalid token payload or result data",
             content: {
               "application/json": {
-                schema: resolver(await validationErrorSchema()),
+                schema: resolver(
+                  await validationErrorSchema(
+                    "badRequest",
+                    "invalidResultParam"
+                  )
+                ),
               },
             },
           },
@@ -210,7 +209,9 @@ const resultSigningApp = async (config: {
             description: "Verification of token failed",
             content: {
               "application/json": {
-                schema: resolver(v.string()), // TODO
+                schema: resolver(
+                  await errorLiteralWithCause("unauthorizedSessionToken")
+                ),
               },
             },
           },
@@ -218,7 +219,9 @@ const resultSigningApp = async (config: {
             description: "Verification of result data failed",
             content: {
               "application/json": {
-                schema: resolver(v.string()), // TODO
+                schema: resolver(
+                  await errorLiteralWithCause("unauthorizedSessionData")
+                ),
               },
             },
           },
@@ -253,20 +256,26 @@ const resultSigningApp = async (config: {
         const clientSignBin = Buffer.from(clientSign, "base64url");
         const resultBin = Buffer.from(result, "base64url");
 
-        try {
-          if (
-            !(await crypto.subtle.verify(
-              { name: "ECDSA", hash: { name: "SHA-256" } },
-              await sessionPubKey,
-              clientSignBin,
-              resultBin
-            ))
-          ) {
-            throw "not verified";
-          }
-        } catch {
-          throw new HTTPException(422, { message: "unauthorizedSessionData" });
-        }
+        await crypto.subtle
+          .verify(
+            { name: "ECDSA", hash: { name: "SHA-256" } },
+            sessionPubKey,
+            clientSignBin,
+            resultBin
+          )
+          .catch((e) => {
+            throw new HTTPException(422, {
+              message: "unauthorizedSessionData",
+              cause: e,
+            });
+          })
+          .then((verified) => {
+            if (!verified) {
+              throw new HTTPException(422, {
+                message: "unauthorizedSessionData",
+              });
+            }
+          });
 
         let resultParams: ResultParams;
         try {
@@ -297,7 +306,7 @@ const resultSigningApp = async (config: {
       describeRoute({
         description: "Verify the shared play result data.",
         responses: {
-          204: {
+          200: {
             description: "Successful verification",
             headers: {
               "Cache-Control": {
@@ -310,7 +319,12 @@ const resultSigningApp = async (config: {
             description: "invalid parameter",
             content: {
               "application/json": {
-                schema: resolver(await validationErrorSchema()),
+                schema: resolver(
+                  await validationErrorSchema(
+                    "badRequest",
+                    "invalidResultParam"
+                  )
+                ),
               },
             },
           },
@@ -318,7 +332,15 @@ const resultSigningApp = async (config: {
             description: "Verification not applicable for older results",
             content: {
               "application/json": {
-                schema: resolver(v.string()), // TODO
+                schema: resolver(
+                  await errorLiteral("verificationNotApplicable")
+                ),
+              },
+            },
+            headers: {
+              "Cache-Control": {
+                description: `immutable`,
+                schema: { type: "string" },
               },
             },
           },
@@ -326,7 +348,13 @@ const resultSigningApp = async (config: {
             description: "Failed verification",
             content: {
               "application/json": {
-                schema: resolver(v.string()), // TODO
+                schema: resolver(await errorLiteral("unauthorizedResultParam")),
+              },
+            },
+            headers: {
+              "Cache-Control": {
+                description: `immutable`,
+                schema: { type: "string" },
               },
             },
           },
@@ -358,11 +386,13 @@ const resultSigningApp = async (config: {
           throw new HTTPException(400, { message: "invalidResultParam" });
         }
         if (!isVerificationRequired(resultParams)) {
+          c.header("cache-control", immutable());
           throw new HTTPException(409, {
             message: "verificationNotApplicable",
           });
         }
         if (!resultParams.cid || resultParams.cid !== c.req.param("cid")) {
+          c.header("cache-control", immutable());
           throw new HTTPException(422, { message: "unauthorizedResultParam" });
         }
         if (
@@ -371,10 +401,9 @@ const resultSigningApp = async (config: {
             await resultSecretKey(env(c))
           )
         ) {
-          return c.body(null, 204, {
-            "Cache-Control": immutable(),
-          });
+          return c.body(null, 200, { "Cache-Control": immutable() });
         } else {
+          c.header("cache-control", immutable());
           throw new HTTPException(422, { message: "unauthorizedResultParam" });
         }
       }

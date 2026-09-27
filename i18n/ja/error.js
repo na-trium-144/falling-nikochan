@@ -1,3 +1,4 @@
+// フロントエンドで表示されることを想定していないものは訳さずキーをそのまま書く
 export default {
   error: {
     api: {
@@ -6,7 +7,10 @@ export default {
       noPasswd: "パスワードが指定されていません",
       invalidChartId: "譜面 ID が正しくありません",
       invalidResultParam: "result パラメータが正しくありません",
-      missingResultParam: "result パラメータが指定されていません",
+      missingResultParam: "missingResultParam",
+      unauthorizedResultBuildKey:
+        "セッションキーを検証できませんでした。もう一度やり直すか、アプリを閉じて開きなおしてみてください。",
+      unauthorizedSessionToken: "unauthorizedSessionToken",
       // 401
       badPassword: "パスワードが違います",
       // 404
@@ -20,8 +24,8 @@ export default {
       // 409
       oldChartVersion: "譜面データのバージョンが最新ではありません",
       unsupportedChartVersion: "サポートされていない譜面バージョンです",
-      // 410
-      noLongerSupportedAPI: "サポートされていない API です",
+      recordAlreadyPosted: "recordAlreadyPosted",
+      verificationNotApplicable: "プレイ記録を検証できませんでした。",
       // 412
       etagMismatch: "譜面データが更新されています。もう一度やり直してください",
       // 413
@@ -29,13 +33,17 @@ export default {
       tooManyEvent: "譜面データ内のイベント数が多すぎます",
       // 415
       invalidChart: "譜面データのフォーマットが正しくありません",
-      unsupportedContentEncoding: "サポートされていない content-encoding です",
-      invalidContentEncoding: "content-encoding が不正です",
+      unsupportedContentEncoding: "unsupportedContentEncoding",
+      invalidContentEncoding: "invalidContentEncoding",
       // 418
       noCORSCredentialsOnProd:
         "production サーバーで cookie を使ったクロスオリジンの認証はできません",
+      // 422
+      unauthorizedSessionData: "unauthorizedSessionData",
+      unauthorizedResultParam:
+        "プレイ記録を検証できませんでした。URLが間違っているか、改変されている可能性があります",
       // 424
-      ytMetaNotFound: "YouTube から情報を取得できませんでした",
+      ytMetaNotFound: "ytMetaNotFound",
       // 429
       tooManyRequest: "しばらく待ってからやり直してください",
       // 500

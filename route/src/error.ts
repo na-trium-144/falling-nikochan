@@ -243,13 +243,30 @@ export async function errorLiteral(...message: string[]) {
   });
 }
 
-export async function validationErrorSchema(m: string = "badRequest") {
+export async function errorLiteralWithCause(...message: string[]) {
+  const t = await getTranslations("en", "error");
+  if (message.some((m) => !t.has("api." + m))) {
+    throw new Error("Unknown error message key in " + message);
+  }
+  return v.object({
+    message: v.union([...message.map((m) => v.literal(m))]),
+    cause: v.optional(v.string()),
+  });
+}
+
+export async function validationErrorSchema(
+  m: string = "badRequest",
+  ...message: string[]
+) {
   const t = await getTranslations("en", "error");
   if (!t.has("api." + m)) {
     throw new Error("Unknown error message key in " + m);
   }
+  if (message.some((m) => !t.has("api." + m))) {
+    throw new Error("Unknown error message key in " + message);
+  }
   return v.object({
-    message: v.literal(m),
+    message: v.union([v.literal(m), ...message.map((m) => v.literal(m))]),
     flattened: v.pipe(
       v.object({
         root: v.optional(v.unknown()),

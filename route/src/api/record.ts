@@ -14,6 +14,7 @@ import { env } from "hono/adapter";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import {
   errorLiteral,
+  errorLiteralWithCause,
   sValidatorHook,
   validationErrorSchema,
 } from "../error.js";
@@ -22,7 +23,6 @@ import { ConnInfo } from "hono/conninfo";
 import { verifyResultSessionPubKey } from "./resultSigning.js";
 import { verify } from "hono/jwt";
 import { HTTPException } from "hono/http-exception";
-import { JWTPayload } from "hono/utils/jwt/types";
 
 // Cache duration for this API endpoint (in seconds)
 const CACHE_MAX_AGE = 600;
@@ -168,7 +168,12 @@ const recordApp = async (config: {
             description: "invalid chart id, body or token payload",
             content: {
               "application/json": {
-                schema: resolver(await validationErrorSchema()),
+                schema: resolver(
+                  await validationErrorSchema(
+                    "badRequest",
+                    "invalidResultParam"
+                  )
+                ),
               },
             },
           },
@@ -176,7 +181,9 @@ const recordApp = async (config: {
             description: "Verification of token failed",
             content: {
               "application/json": {
-                schema: resolver(v.string()), // TODO
+                schema: resolver(
+                  await errorLiteralWithCause("unauthorizedSessionToken")
+                ),
               },
             },
           },
@@ -192,7 +199,7 @@ const recordApp = async (config: {
             description: "Same record already posted",
             content: {
               "application/json": {
-                schema: resolver(v.string()), // TODO
+                schema: resolver(await errorLiteral("recordAlreadyPosted")),
               },
             },
           },
@@ -200,7 +207,9 @@ const recordApp = async (config: {
             description: "Verification of record data failed",
             content: {
               "application/json": {
-                schema: resolver(v.string()), // TODO
+                schema: resolver(
+                  await errorLiteralWithCause("unauthorizedSessionData")
+                ),
               },
             },
           },
@@ -229,19 +238,16 @@ const recordApp = async (config: {
           throw new HTTPException(401, { message: "unauthorizedSessionToken" });
         }
 
-        let payload: JWTPayload;
-        try {
-          payload = await verify(
-            await c.req.text(),
-            await sessionPubKey,
-            "ES256"
-          );
-        } catch (err) {
+        const payload = await verify(
+          await c.req.text(),
+          sessionPubKey,
+          "ES256"
+        ).catch((e) => {
           throw new HTTPException(422, {
             message: "unauthorizedSessionData",
-            cause: err,
+            cause: e,
           });
-        }
+        });
 
         const {
           lvHash,

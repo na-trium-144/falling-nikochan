@@ -25,7 +25,7 @@ const testResultParams: ResultParams = {
 };
 
 describe("GET /api/resultSigning/verify/:cid", () => {
-  test("should return 204 for valid signed result", async () => {
+  test("should return 200 for valid signed result", async () => {
     const serialized = serializeResultParams(testResultParams);
     const key = await resultSecretKey(process.env as any);
     const signature = await crypto.subtle.sign(
@@ -39,7 +39,7 @@ describe("GET /api/resultSigning/verify/:cid", () => {
     const res = await app.request(
       `/api/resultSigning/verify/${dummyCid}?result=${encodeURIComponent(param)}`
     );
-    expect(res.status).to.equal(204);
+    expect(res.status).to.equal(200);
   });
 
   test("should return 422 for tampered signature", async () => {
