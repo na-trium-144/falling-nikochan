@@ -25,6 +25,8 @@ export default {
       unsupportedChartVersion: "Unsupported chart data version",
       recordAlreadyPosted: "recordAlreadyPosted",
       verificationNotApplicable: "Unable to verify the play record. ",
+      timeMismatch:
+        "The device clock is out of sync. Please check your time settings and try again.",
       // 412
       etagMismatch: "Chart data has been updated. Please try again",
       // 413

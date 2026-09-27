@@ -79,7 +79,7 @@ export async function initResultSigning(
   const privateKey = p256UtilsRandomSecretKey();
   const publicKey = p256PublicKeyToJwk(p256GetPublicKey(privateKey, false));
   const buildToken = signJwt(
-    { key: publicKey, cid },
+    { key: publicKey, cid, date: Date.now() },
     resultBuildPrivKey,
     "ES256",
     p256Sign
@@ -89,6 +89,7 @@ export async function initResultSigning(
     .body(buildToken)
     .post()
     .unauthorized((e) => markAsExpected(e))
+    .error(409, (e) => markAsExpected(e))
     .text((token) => {
       setResultSessionToken(privateKey, token);
     })
@@ -132,8 +133,6 @@ export async function sendResultSerialized(
     })
     .headers({ Authorization: `Bearer ${resultSessionToken}` })
     .post()
-    .notFound(() => undefined)
-    .error(429, () => undefined)
     .json(({ sign }) => setSign(sign))
     .catch((e: unknown) => captureAndWrap(e));
 }

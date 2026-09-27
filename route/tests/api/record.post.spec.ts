@@ -265,7 +265,7 @@ describe("POST /api/record/:cid", () => {
     expect(res.status).to.equal(422);
   });
 
-  /*test("should return 422 when timestamp is older than 5 minutes", async () => {
+  test("should return 409 when timestamp differs by more than 1 hour", async () => {
     const { sessionToken, sessionKeyPair } =
       await createTestResultSigning(dummyCid);
 
@@ -281,7 +281,7 @@ describe("POST /api/record/:cid", () => {
         fb: false,
         factor: 0.5,
         editing: false,
-        date: Date.now() - 1000 * 60 * 10, // 10 minutes ago
+        date: Date.now() - (1000 * 60 * 60 + 1000), // 1 hour + 1 sec ago
       },
       sessionKeyPair.privateKey,
       "ES256"
@@ -292,7 +292,8 @@ describe("POST /api/record/:cid", () => {
       headers: { Authorization: `Bearer ${sessionToken}` },
       body: signedBody,
     });
-    expect(res.status).to.equal(422);
+    expect(res.status).to.equal(409);
+    const body = (await res.json()) as { message: string };
+    expect(body).to.have.property("message", "timeMismatch");
   });
-  */
 });

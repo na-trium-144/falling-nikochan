@@ -131,13 +131,13 @@ describe("POST /api/resultSigning/sign", () => {
     expect(res.status).to.equal(422);
   });
 
-  /*test("should return 422 when date is older than 5 minutes", async () => {
+  test("should return 409 when date differs by more than 1 hour", async () => {
     const { sessionToken, sessionKeyPair } =
       await createTestResultSigning(dummyCid);
 
     const oldResultParams: ResultParams = {
       ...testResultParams,
-      date: new Date(Date.now() - 1000 * 60 * 10), // 10 minutes ago
+      date: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
     };
     const resultSerialized = serializeResultParams(oldResultParams);
     const clientSign = await crypto.subtle.sign(
@@ -157,8 +157,10 @@ describe("POST /api/resultSigning/sign", () => {
         clientSign: Buffer.from(clientSign).toString("base64url"),
       }),
     });
-    expect(res.status).to.equal(422);
-  });*/
+    expect(res.status).to.equal(409);
+    const body = (await res.json()) as { message: string };
+    expect(body).to.have.property("message", "timeMismatch");
+  });
 
   test("should return 400 for invalid result format", async () => {
     const { sessionToken, sessionKeyPair } =

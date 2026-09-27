@@ -197,10 +197,12 @@ const recordApp = async (config: {
             },
           },
           409: {
-            description: "Same record already posted",
+            description: "Same record already posted or clock is out of sync",
             content: {
               "application/json": {
-                schema: resolver(await errorLiteral("recordAlreadyPosted")),
+                schema: resolver(
+                  await errorLiteral("recordAlreadyPosted", "timeMismatch")
+                ),
               },
             },
           },
@@ -264,12 +266,9 @@ const recordApp = async (config: {
           date,
         } = v.parse(RecordPostSchema(), payload);
 
-        // if (
-        //   Math.abs(date - Date.now()) >
-        //   1000 * 60 * 5 // 5 min
-        // ) {
-        //   throw new HTTPException(422, { message: "unauthorizedSessionData" });
-        // }
+        if (Math.abs(date - Date.now()) > 1000 * 60 * 60) {
+          throw new HTTPException(409, { message: "timeMismatch" });
+        }
 
         const ip = getIp(c, config.getConnInfo);
         const db = await c.get("db")();

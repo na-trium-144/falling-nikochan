@@ -21,6 +21,7 @@ describe("POST /api/resultSigning/init", () => {
       {
         key: sessionPubJWK,
         cid: dummyCid,
+        date: Date.now(),
       },
       buildKeyPair.privateKey,
       "ES256"
@@ -48,6 +49,38 @@ describe("POST /api/resultSigning/init", () => {
       Math.floor(Date.now() / 1000) + 60 * 60 * 3,
       10
     );
+  });
+
+  test("should return 409 when client date differs by more than 1 hour", async () => {
+    const sessionKeyPair = await crypto.subtle.generateKey(
+      { name: "ECDSA", namedCurve: "P-256" },
+      true,
+      ["sign", "verify"]
+    );
+    const buildKeyPair = await getTestResultBuildKeyPair();
+    const sessionPubJWK = await crypto.subtle.exportKey(
+      "jwk",
+      sessionKeyPair.publicKey
+    );
+
+    const buildToken = await sign(
+      {
+        key: sessionPubJWK,
+        cid: dummyCid,
+        date: Date.now() - (1000 * 60 * 60 + 1000), // 1 hour + 1 sec ago
+      },
+      buildKeyPair.privateKey,
+      "ES256"
+    );
+
+    const res = await app.request("/api/resultSigning/init", {
+      method: "POST",
+      body: buildToken,
+    });
+
+    expect(res.status).to.equal(409);
+    const body = (await res.json()) as { message: string };
+    expect(body).to.have.property("message", "timeMismatch");
   });
 
   test("should return 400 for invalid payload with valid signature", async () => {

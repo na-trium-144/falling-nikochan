@@ -151,6 +151,7 @@ export async function createTestResultSigning(cid = dummyCid) {
     {
       key: await crypto.subtle.exportKey("jwk", sessionKeyPair.publicKey),
       cid,
+      date: Date.now(),
     },
     buildKeyPair.privateKey,
     "ES256"

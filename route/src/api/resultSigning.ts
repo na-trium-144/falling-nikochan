@@ -20,6 +20,7 @@ import {
   isVerificationRequired,
   parseResultParams,
   ResultParams,
+  serializeDate4,
   signResultParams,
   verifyResultParams,
 } from "@falling-nikochan/chart";
@@ -35,6 +36,7 @@ const SessionTokenPayloadSchema = () =>
     // ここにはJWTの標準クレームを含まず、looseObjectにもしない。/initで元のリクエストに含まれるexpやnbfがコピーされるのを防ぐため
     key: v.pipe(v.looseObject({}), v.description("JsonWebKey")),
     cid: CidSchema(),
+    date: v.pipe(v.number(), v.integer(), v.description("Epoch milliseconds")),
   });
 
 export async function verifyResultSessionPubKey(
@@ -96,7 +98,7 @@ const resultSigningApp = async (config: {
           "This API performs the step 4.",
         requestBody: {
           description:
-            "A payload of `key` and `cid` signed with ResultBuildKey as a JWT",
+            "A payload of `key`, `cid`, and `date` signed with ResultBuildKey as a JWT",
           required: true,
           content: {
             "application/jwt": {
@@ -135,6 +137,14 @@ const resultSigningApp = async (config: {
               },
             },
           },
+          409: {
+            description: "Client clock is out of sync with server",
+            content: {
+              "application/json": {
+                schema: resolver(await errorLiteral("timeMismatch")),
+              },
+            },
+          },
         },
       }),
       async (c) => {
@@ -149,6 +159,10 @@ const resultSigningApp = async (config: {
           });
         });
         const tokenPayload = v.parse(SessionTokenPayloadSchema(), payload); // ValiError -> 400
+
+        if (Math.abs(tokenPayload.date - Date.now()) > 1000 * 60 * 60) {
+          throw new HTTPException(409, { message: "timeMismatch" });
+        }
 
         const sessionToken = await sign(
           {
@@ -214,6 +228,14 @@ const resultSigningApp = async (config: {
                 schema: resolver(
                   await errorLiteralWithCause("unauthorizedSessionToken")
                 ),
+              },
+            },
+          },
+          409: {
+            description: "Client clock is out of sync with server",
+            content: {
+              "application/json": {
+                schema: resolver(await errorLiteral("timeMismatch")),
               },
             },
           },
@@ -286,13 +308,17 @@ const resultSigningApp = async (config: {
           throw new HTTPException(400, { message: "invalidResultParam" });
         }
 
-        if (
-          !resultParams.cid ||
-          resultParams.cid !== sessionCid
-          // !resultParams.date ||
-          // Math.abs(resultParams.date.getTime() - Date.now()) > 1000 * 60 * 5 // 5 min
-        ) {
+        if (!resultParams.cid || resultParams.cid !== sessionCid) {
           throw new HTTPException(422, { message: "unauthorizedSessionData" });
+        }
+
+        if (
+          !resultParams.date ||
+          Math.abs(
+            serializeDate4(new Date()) - serializeDate4(resultParams.date)
+          ) > 1
+        ) {
+          throw new HTTPException(409, { message: "timeMismatch" });
         }
 
         const sign = await signResultParams(

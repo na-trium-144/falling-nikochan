@@ -26,6 +26,8 @@ export default {
       unsupportedChartVersion: "サポートされていない譜面バージョンです",
       recordAlreadyPosted: "recordAlreadyPosted",
       verificationNotApplicable: "プレイ記録を検証できませんでした。",
+      timeMismatch:
+        "端末の時刻が合っていません。時計を正しい時刻に合わせてから再度お試しください",
       // 412
       etagMismatch: "譜面データが更新されています。もう一度やり直してください",
       // 413

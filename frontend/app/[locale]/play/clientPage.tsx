@@ -29,10 +29,9 @@ import {
   Level15Play,
   RecordGetSummarySchema,
   LevelPlay,
-  serializeDate,
   ResultSerialized,
-  dateBase4,
   serializeCid,
+  serializeDate4,
 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
@@ -800,7 +799,7 @@ function Play(props: Props) {
               // serializeResultParams() と同一の処理をわざわざ再度書いている (結果の情報をオブジェクトに入れたくないため)
               const serialized = msgpack.encode([
                 4,
-                serializeDate(newResultDate, dateBase4),
+                serializeDate4(newResultDate),
                 chartBrief.levels.at(lvIndex)!.name,
                 levelTypes.indexOf(chartBrief.levels.at(lvIndex)!.type),
                 chartBrief.levels.at(lvIndex)!.difficulty,

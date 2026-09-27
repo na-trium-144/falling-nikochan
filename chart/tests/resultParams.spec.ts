@@ -6,7 +6,8 @@ import {
   parseResultParams,
   ResultParams,
   serializeCid,
-  serializeDate,
+  serializeDate3,
+  serializeDate4,
   serializeResultParams,
   serializeResultParamsLegacy,
   signResultParams,
@@ -44,7 +45,7 @@ describe("resultParams", () => {
       const dateBase4 = new Date(2026, 9, 1);
       const serialized = msgpack.encode([
         4,
-        serializeDate(expectedParams.date, dateBase4),
+        serializeDate4(expectedParams.date),
         expectedParams.lvName,
         expectedParams.lvType,
         expectedParams.lvDifficulty,
@@ -67,7 +68,7 @@ describe("resultParams", () => {
       const dateBase = new Date(2025, 2, 1);
       const serialized = msgpack.encode([
         3,
-        serializeDate(expectedParams.date, dateBase),
+        serializeDate3(expectedParams.date),
         expectedParams.lvName,
         expectedParams.lvType,
         expectedParams.lvDifficulty,

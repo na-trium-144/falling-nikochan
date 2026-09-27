@@ -4,19 +4,28 @@ import * as v from "valibot";
 import type { webcrypto } from "node:crypto";
 
 const dateBase = new Date(2025, 2, 1); // 2 = March
-export const dateBase4 = new Date(2026, 9, 1); // 9 = October
-export function serializeDate(date: Date, base: Date): number {
+export function serializeDate3(date: Date): number {
   const targetDate = new Date(
     date.getFullYear(),
     date.getMonth(),
     date.getDate()
   ); // 時刻を切り捨て
-  const diffTime = targetDate.getTime() - base.getTime();
+  const diffTime = targetDate.getTime() - dateBase.getTime();
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
   return diffDays;
 }
-function deserializeDate(diffDays: number, base: Date): Date {
-  return new Date(base.getTime() + diffDays * (1000 * 60 * 60 * 24));
+function deserializeDate3(diffDays: number): Date {
+  return new Date(dateBase.getTime() + diffDays * (1000 * 60 * 60 * 24));
+}
+
+const dateBase4 = new Date(2026, 9, 1); // 9 = October
+export function serializeDate4(date: Date): number {
+  const diffTime = date.getTime() - dateBase4.getTime();
+  const diffHours = Math.round(diffTime / (1000 * 60 * 60));
+  return diffHours;
+}
+function deserializeDate4(diffDays: number): Date {
+  return new Date(dateBase4.getTime() + diffDays * (1000 * 60 * 60));
 }
 
 /**
@@ -102,14 +111,7 @@ export const ResultSerializedSchema = () =>
     ]),
     v.tuple([
       v.literal(3),
-      v.nullable(
-        v.pipe(
-          v.number(),
-          v.integer(),
-          v.minValue(0),
-          v.maxValue(serializeDate(new Date(2099, 12, 31), dateBase))
-        )
-      ), // [1] serializeDate3
+      v.nullable(v.pipe(v.number(), v.integer(), v.minValue(0))), // [1] serializeDate3
       v.string(), // [2] lvName
       v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2)), // [3] lvType 0,1,2
       v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(20)), // [4] lvDifficulty 0-20
@@ -129,7 +131,7 @@ export const ResultSerializedSchema = () =>
     ]),
     v.tuple([
       v.literal(4),
-      v.pipe(v.number(), v.integer()), // [1] serializeDate4
+      v.pipe(v.number(), v.integer()), // [1] serializeDate4 (in hours)
       v.string(), // [2] lvName
       v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2)), // [3] lvType 0,1,2
       v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(20)), // [4] lvDifficulty 0-20
@@ -151,7 +153,7 @@ export function serializeResultParamsLegacy(params: ResultParams): string {
   const serialized = msgpack.encode([
     3,
     // params.date !== null ? params.date.getTime() - dateBase.getTime() : null,
-    params.date !== null ? serializeDate(params.date, dateBase) : null,
+    params.date !== null ? serializeDate3(params.date) : null,
     params.lvName,
     params.lvType,
     params.lvDifficulty,
@@ -176,7 +178,7 @@ export function serializeResultParamsLegacy(params: ResultParams): string {
 export function serializeResultParams(params: ResultParams): string {
   const serialized = msgpack.encode([
     4,
-    serializeDate(params.date!, dateBase4),
+    serializeDate4(params.date!),
     params.lvName,
     params.lvType,
     params.lvDifficulty,
@@ -272,9 +274,7 @@ export function deserializeResultParams(
       return {
         ver: deserialized[0],
         date:
-          deserialized[1] !== null
-            ? deserializeDate(deserialized[1], dateBase)
-            : null,
+          deserialized[1] !== null ? deserializeDate3(deserialized[1]) : null,
         lvName: deserialized[2],
         lvType: deserialized[3],
         lvDifficulty: deserialized[4],
@@ -291,10 +291,7 @@ export function deserializeResultParams(
     case 4:
       return {
         ver: deserialized[0],
-        date:
-          deserialized[1] !== null
-            ? deserializeDate(deserialized[1], dateBase4)
-            : null,
+        date: deserializeDate4(deserialized[1]),
         lvName: deserialized[2],
         lvType: deserialized[3],
         lvDifficulty: deserialized[4],
