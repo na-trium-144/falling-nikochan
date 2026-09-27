@@ -1,3 +1,15 @@
+## ver. 18.0 - 2026/09/27
+
+* /api/playFile を廃止し、 /api/seqFile に統合 [#1376](https://github.com/na-trium-144/falling-nikochan/pull/1376)
+    * ついでにnewChartFileのレスポンスを201に変更
+* プレイ記録の署名検証 [#1315](https://github.com/na-trium-144/falling-nikochan/pull/1315)
+    * バックエンドのエラーハンドラで cause フィールドをレスポンスに出力できるようにする
+    * ゲームロジックの変数とp256の関数をarrayに置き換えてビルド後のjsに名前が出ないようにする
+    * playページはservice workerでキャッシュしない
+    * resultParamsの関数のリファクタ
+    * i18nから想定外のエラーメッセージの翻訳を削除
+* 拡張機能などで上書きされた実際の再生速度を計測する [#1375](https://github.com/na-trium-144/falling-nikochan/pull/1375)
+
 ## ver. 17.13 - 2026/09/24
 
 * 不要なBaggage,Sentry-Trace,X-Request-Idヘッダーを削除
