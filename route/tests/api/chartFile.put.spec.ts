@@ -4,11 +4,10 @@ import {
   app,
   db,
   dummyChart,
-  dummyChart12,
-  dummyChart13,
   dummyChart14,
   dummyChart15,
   dummyChart16,
+  dummyChart17,
   dummyChart4,
   dummyCid,
   dummyDate,
@@ -217,60 +216,44 @@ describe("PUT /api/chartFile/:cid", () => {
     const body = await res.json();
     expect(body).to.deep.equal({ message: "tooManyEvent" });
   });
-  describe("should return 409 for chart version older than 15", () => {
-    currentChartVer satisfies 17; // edit this test when chart version is bumped
-    test("version 14", async () => {
-      await initDb();
-      const res = await requestChartFile("/api/chartFile/100000", {
-        method: "PUT",
-        headers: { "Content-Type": "application/vnd.msgpack" },
-        body: msgpack.encode({ ...dummyChart14() }),
+  describe("should return 409 for chart version older than 17", () => {
+    currentChartVer satisfies 18; // edit this test when chart version is bumped
+    for (const chart of [
+      dummyChart16(),
+      dummyChart15(),
+      dummyChart14(),
+      // dummyChart13(),
+      // dummyChart12(),
+      // dummyChart11(),
+      // dummyChart10(),
+      // dummyChart9(),
+      // dummyChart8(),
+      // dummyChart7(),
+      // dummyChart6(),
+      // dummyChart5(),
+      dummyChart4(),
+      // 不等号で分岐しているだけで、複雑なロジックじゃないし全部やらなくても
+    ] as const) {
+      test(`version ${chart.ver}`, async () => {
+        await initDb();
+        const res = await requestChartFile("/api/chartFile/100000", {
+          method: "PUT",
+          headers: { "Content-Type": "application/vnd.msgpack" },
+          body: msgpack.encode(chart),
+        });
+        expect(res.status).to.equal(409);
+        const body = await res.json();
+        expect(body).to.deep.equal({ message: "oldChartVersion" });
       });
-      expect(res.status).to.equal(409);
-      const body = await res.json();
-      expect(body).to.deep.equal({ message: "oldChartVersion" });
-    });
-    test("version 13", async () => {
-      await initDb();
-      const res = await requestChartFile("/api/chartFile/100000", {
-        method: "PUT",
-        headers: { "Content-Type": "application/vnd.msgpack" },
-        body: msgpack.encode({ ...dummyChart13() }),
-      });
-      expect(res.status).to.equal(409);
-      const body = await res.json();
-      expect(body).to.deep.equal({ message: "oldChartVersion" });
-    });
-    test("version 12", async () => {
-      await initDb();
-      const res = await requestChartFile("/api/chartFile/100000", {
-        method: "PUT",
-        headers: { "Content-Type": "application/vnd.msgpack" },
-        body: msgpack.encode({ ...dummyChart12() }),
-      });
-      expect(res.status).to.equal(409);
-      const body = await res.json();
-      expect(body).to.deep.equal({ message: "oldChartVersion" });
-    });
-    test("version 4", async () => {
-      await initDb();
-      const res = await requestChartFile("/api/chartFile/100000", {
-        method: "PUT",
-        headers: { "Content-Type": "application/vnd.msgpack" },
-        body: msgpack.encode({ ...dummyChart4() }),
-      });
-      expect(res.status).to.equal(409);
-      const body = await res.json();
-      expect(body).to.deep.equal({ message: "oldChartVersion" });
-    });
+    }
   });
-  test("should update chart for chart version 16", async () => {
-    currentChartVer satisfies 17; // edit this test when chart version is bumped
+  test("should update chart for chart version 17", async () => {
+    currentChartVer satisfies 18; // edit this test when chart version is bumped
     await initDb();
     const res = await requestChartFile("/api/chartFile/100000", {
       method: "PUT",
       headers: { "Content-Type": "application/vnd.msgpack" },
-      body: msgpack.encode({ ...dummyChart16(), title: "updated" }),
+      body: msgpack.encode({ ...dummyChart17(), title: "updated" }),
     });
     expect(res.status).to.equal(204);
 

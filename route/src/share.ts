@@ -4,6 +4,7 @@ import {
   cacheControl,
   languageDetector,
   ResponseOK,
+  resultSecretKey,
 } from "./env.js";
 import { getTranslations, locales } from "@falling-nikochan/i18n/dynamic.js";
 import {
@@ -12,14 +13,18 @@ import {
   chainScoreRate,
   ChartBrief,
   deserializeResultParams,
+  isVerificationRequired,
   levelTypes,
+  parseResultParams,
   ResultParams,
+  verifyResultParams,
 } from "@falling-nikochan/chart";
 import packageJson from "../package.json" with { type: "json" };
 import { env } from "hono/adapter";
 import { Context, Hono } from "hono";
 import { etagContentRegex } from "./api/chart.js";
 import { BaseLogger } from "@hono/structured-logger";
+import { ContentfulStatusCode } from "hono/utils/http-status";
 
 /*
 OGPの見た目を優先するため、shareページではクエリのlangを優先する。
@@ -36,6 +41,7 @@ const shareApp = (config: {
   ) => Promise<{ brief: ChartBrief; etag: string }>;
   fetchStatic: (e: Bindings, url: URL) => Promise<ResponseOK>;
   languageDetector?: (c: Context, next: () => Promise<void>) => Promise<void>;
+  successStatus?: ContentfulStatusCode;
 }) =>
   new Hono<{ Bindings: Bindings; Variables: { logger: BaseLogger } }>({
     strict: false,
@@ -52,11 +58,27 @@ const shareApp = (config: {
       // c.req.param("cid_txt").slice(0, -4) for /share/:cid_txt{[0-9]+.txt}
       const qResult = c.req.query("result");
       let resultParams: ResultParams | null = null;
-      if (qResult) {
+      if (qResult && !env(c).IS_SERVICE_WORKER) {
+        let result: Uint8Array;
+        let sign: Uint8Array | undefined;
         try {
-          resultParams = deserializeResultParams(qResult);
+          const parsed = await parseResultParams(qResult);
+          result = parsed.result;
+          sign = parsed.sign;
+          resultParams = deserializeResultParams(result);
+          if (
+            isVerificationRequired(resultParams) &&
+            !(await verifyResultParams(
+              { result, sign },
+              resultParams,
+              cid,
+              await resultSecretKey(env(c))
+            ))
+          ) {
+            resultParams = null;
+          }
         } catch (e) {
-          c.var.logger.error(e);
+          c.var.logger.warn(e);
           // throw new HTTPException(400, { message: "invalidResultParam" });
         }
       }
@@ -178,7 +200,7 @@ const shareApp = (config: {
           "</script></body></html>";
       }
 
-      return c.text(replacedBody, 200, {
+      return c.text(replacedBody, config.successStatus ?? 200, {
         "Content-Type": res.headers.get("Content-Type") || "text/plain",
         "Cache-Control": cacheControl(env(c), CACHE_MAX_AGE, true),
         /*

@@ -8,6 +8,10 @@
   "trailingSlash": false,
   "rewrites": [
     {
+      "source": "/_next/static/chunks/app/%5Blocale%5D/main/guide/%5Bindex%5D/:path*",
+      "destination": "/_next/static/chunks/app/[locale]/main/guide/[index]/:path*"
+    },
+    {
       "source": "/_next/static/chunks/app/%5Blocale%5D/main/about/%5BaboutIndex%5D/:path*",
       "destination": "/_next/static/chunks/app/[locale]/main/about/[aboutIndex]/:path*"
     },

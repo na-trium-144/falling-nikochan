@@ -621,7 +621,7 @@ function ChartListItemChildren(props: CProps) {
         setStatus(
           props.brief?.levels
             .filter((l) => !l.unlisted)
-            .map((l) => getBadge(getBestScore(props.cid, l.hash))) || []
+            .map((l) => getBadge(getBestScore(props.cid, l))) || []
         );
       };
       const storageUpdate = (e: StorageEvent) => {

@@ -4,6 +4,8 @@ import clsx from "clsx/lite";
 import {
   ChartBrief,
   deserializeResultParams,
+  isVerificationRequired,
+  parseResultParams,
   RecordGetSummary,
   RecordGetSummarySchema,
   ResultParams,
@@ -22,6 +24,7 @@ import { captureAndWrap, fetchBackend } from "@/common/fetch.js";
 import * as v from "valibot";
 import { etagContentRegex } from "@/common/briefCache.js";
 import { SocialLinks } from "@/common/social.js";
+import { markAsExpected } from "@/common/apiError.js";
 
 const dummyBrief = {
   title: "placeholder",
@@ -62,6 +65,9 @@ export default function ShareChart(props: Props) {
   const [sharedResult, setSharedResult] = useState<
     ResultParams | string | null
   >(null);
+  const [sharedResultVerified, setSharedResultVerified] = useState<
+    true | Error | null
+  >(null);
 
   useEffect(() => {
     const cid = window.location.pathname.split("/").pop()!;
@@ -99,12 +105,29 @@ export default function ShareChart(props: Props) {
       .catch((e: unknown) => captureAndWrap(e, { cid }))
       .then((record) => setRecord(record));
     if (searchParams.get("result")) {
-      try {
-        setSharedResult(deserializeResultParams(searchParams.get("result")!));
-      } catch (e) {
-        console.error(e);
-        setSharedResult(te("api.invalidResultParam"));
-      }
+      (async () => {
+        try {
+          const qResult = searchParams.get("result")!;
+          const { result } = await parseResultParams(qResult);
+          const resultParams = deserializeResultParams(result);
+          setSharedResult(resultParams);
+          setSharedResultVerified(null);
+          if (isVerificationRequired(resultParams)) {
+            fetchBackend()
+              .url(`/api/resultSigning/verify/${cid}`)
+              .query({ result: qResult })
+              .get()
+              .error(422, markAsExpected)
+              .res(() => setSharedResultVerified(true))
+              .catch((e: unknown) => {
+                setSharedResultVerified(captureAndWrap(e));
+              });
+          }
+        } catch (e) {
+          console.error(e);
+          setSharedResult(te("api.invalidResultParam"));
+        }
+      })();
     }
     return () => clearInterval(titleUpdate);
   }, [t, te]);
@@ -114,20 +137,22 @@ export default function ShareChart(props: Props) {
       className={clsx(
         "fn-body-scrollable",
         "flex flex-col items-center",
-        "relative"
+        "relative",
+        "pt-sai"
       )}
     >
       <PCHeader2 className="fixed top-0 right-0" locale={locale} backdropBlur />
 
       <TitleAsLink className="grow-3 shrink-0" locale={props.locale} />
       <RedirectedWarning className="mx-3 main-wide:mx-6 mb-2" />
-      <div className="w-full max-w-main px-3 main-wide:px-6 grid-centering mb-12">
+      <div className="w-full max-w-main px-sai-3 main-wide:px-sai-6 grid-centering mb-12">
         <Box classNameOuter="w-full main-wide:w-max h-max max-w-full p-6">
           <ShareBox
             cid={cid}
             brief={brief}
             record={record}
             sharedResult={sharedResult}
+            sharedResultVerified={sharedResultVerified}
             locale={locale}
             forceShowCId
           />
@@ -140,12 +165,7 @@ export default function ShareChart(props: Props) {
       <PoliciesAndLinks locale={locale} />
 
       <div className="flex-none basis-mobile-footer no-pc" />
-      <MobileFooter
-        className="fixed bottom-0"
-        blurBg
-        locale={locale}
-        tabKey={null}
-      />
+      <MobileFooter fixed locale={locale} tabKey={null} />
     </main>
   );
 }

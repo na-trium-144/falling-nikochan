@@ -19,7 +19,7 @@ const fnCommandsVer = JSON.parse(
 ).version;
 
 describe("luaTable", () => {
-  test("should restore Chart15 except for lua by executing luaTable", async () => {
+  test("should restore Chart17 except for lua by executing luaTable", async () => {
     const code = chartToLuaTableCode(dummyChartData, fnCommandsVer);
     const factory = new LuaFactory();
     await factory.mountFile(
@@ -32,7 +32,7 @@ describe("luaTable", () => {
     const lua = await factory.createEngine();
     const result = await lua.doString(code);
     console.log(result);
-    currentChartVer satisfies 17;
+    currentChartVer satisfies 18;
     v.parse(ChartSchema(), { ...result, lua: dummyChartData.lua });
   });
   test("should restore original lua code with findLuaLevelCode()", () => {

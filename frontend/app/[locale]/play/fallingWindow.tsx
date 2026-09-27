@@ -490,14 +490,14 @@ export default function FallingWindow(props: Props) {
         <TargetLine
           className={clsx("z-fw-target-line", props.blur && "blur-2xs")}
           barFlash={
-            props.barFlash === undefined || marginX === undefined
+            props.barFlash === undefined || canvasMarginX === undefined
               ? undefined
               : "targetX" in props.barFlash
-                ? props.barFlash.targetX * boxSize + marginX
+                ? props.barFlash.targetX * boxSize + canvasMarginX
                 : props.barFlash.clientX
           }
-          left={0}
-          right="-100%"
+          left={canvasRect.left}
+          width={canvasRect.width}
           bottom={targetY * boxSize + marginY}
         />
       )}

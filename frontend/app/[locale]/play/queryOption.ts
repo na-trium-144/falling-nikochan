@@ -7,6 +7,8 @@ export interface QueryOptions {
   // session idで譜面を指定
   sid?: number;
 
+  nosigning?: boolean;
+
   fps?: boolean; // fps表示
   speed?: boolean; // 音符の速度変化を表示 (ver13以降のなめらか速度変化に対応していません)
   result?: boolean; // ページを開いた直後にダミーのリザルト画面に遷移する
@@ -27,6 +29,7 @@ export function getQueryOptions(): QueryOptions {
   );
   return {
     sid: q.has("sid") ? Number(q.get("sid")) : undefined,
+    nosigning: toBoolean(q.get("nosigning")),
     fps: toBoolean(q.get("fps")),
     speed: toBoolean(q.get("speed")),
     result: toBoolean(q.get("result")),

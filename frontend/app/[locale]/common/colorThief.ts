@@ -62,7 +62,10 @@ export function useColorThief() {
     ready: color !== null,
     boxStyle: clsx(colorAdjusted ? "fn-color-thief" : "fn-plain"),
     currentColor: colorAdjusted
-      ? `rgb(${colorAdjusted[0]}, ${colorAdjusted[1]}, ${colorAdjusted[2]})`
+      ? "#" +
+        colorAdjusted[0].toString(16).padStart(2, "0") +
+        colorAdjusted[1].toString(16).padStart(2, "0") +
+        colorAdjusted[2].toString(16).padStart(2, "0")
       : isDark
         ? "var(--color-stone-700)"
         : "var(--color-white)",

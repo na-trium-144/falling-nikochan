@@ -83,3 +83,129 @@
 @utility min-h-* {
   min-height: --value(--container-*);
 }
+
+@utility pr-sai-* {
+  padding-right: max(
+    var(--sai-r),
+    calc(var(--spacing) * --value(number, --default(0)))
+  );
+}
+@utility pl-sai-* {
+  padding-left: max(
+    var(--sai-l),
+    calc(var(--spacing) * --value(number, --default(0)))
+  );
+}
+@utility px-sai-* {
+  padding-left: max(
+    var(--sai-l),
+    calc(var(--spacing) * --value(number, --default(0)))
+  );
+  padding-right: max(
+    var(--sai-r),
+    calc(var(--spacing) * --value(number, --default(0)))
+  );
+}
+@utility pt-sai-* {
+  padding-top: max(
+    var(--sai-t),
+    calc(var(--spacing) * --value(number, --default(0)))
+  );
+}
+@utility pb-sai-* {
+  padding-bottom: max(
+    var(--sai-b),
+    calc(var(--spacing) * --value(number, --default(0)))
+  );
+}
+@utility py-sai-* {
+  padding-top: max(
+    var(--sai-t),
+    calc(var(--spacing) * --value(number, --default(0)))
+  );
+  padding-bottom: max(
+    var(--sai-b),
+    calc(var(--spacing) * --value(number, --default(0)))
+  );
+}
+@utility p-sai-* {
+  padding-left: max(
+    var(--sai-l),
+    calc(var(--spacing) * --value(number, --default(0)))
+  );
+  padding-right: max(
+    var(--sai-r),
+    calc(var(--spacing) * --value(number, --default(0)))
+  );
+  padding-top: max(
+    var(--sai-t),
+    calc(var(--spacing) * --value(number, --default(0)))
+  );
+  padding-bottom: max(
+    var(--sai-b),
+    calc(var(--spacing) * --value(number, --default(0)))
+  );
+}
+
+@utility mr-sai-* {
+  margin-right: max(
+    var(--sai-r),
+    calc(var(--spacing) * --value(number, --default(0)))
+  );
+}
+@utility ml-sai-* {
+  margin-left: max(
+    var(--sai-l),
+    calc(var(--spacing) * --value(number, --default(0)))
+  );
+}
+@utility mx-sai-* {
+  margin-left: max(
+    var(--sai-l),
+    calc(var(--spacing) * --value(number, --default(0)))
+  );
+  margin-right: max(
+    var(--sai-r),
+    calc(var(--spacing) * --value(number, --default(0)))
+  );
+}
+@utility mt-sai-* {
+  margin-top: max(
+    var(--sai-t),
+    calc(var(--spacing) * --value(number, --default(0)))
+  );
+}
+@utility mb-sai-* {
+  margin-bottom: max(
+    var(--sai-b),
+    calc(var(--spacing) * --value(number, --default(0)))
+  );
+}
+@utility my-sai-* {
+  margin-top: max(
+    var(--sai-t),
+    calc(var(--spacing) * --value(number, --default(0)))
+  );
+  margin-bottom: max(
+    var(--sai-b),
+    calc(var(--spacing) * --value(number, --default(0)))
+  );
+}
+@utility m-sai-* {
+  margin-left: max(
+    var(--sai-l),
+    calc(var(--spacing) * --value(number, --default(0)))
+  );
+  margin-right: max(
+    var(--sai-r),
+    calc(var(--spacing) * --value(number, --default(0)))
+  );
+  margin-top: max(
+    var(--sai-t),
+    calc(var(--spacing) * --value(number, --default(0)))
+  );
+  margin-bottom: max(
+    var(--sai-b),
+    calc(var(--spacing) * --value(number, --default(0)))
+  );
+}

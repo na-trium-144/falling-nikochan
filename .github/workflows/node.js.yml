@@ -206,7 +206,7 @@ jobs:
         name: vercel-output
         path: .vercel/output
     - name: Deploy Project Artifacts to Vercel
-      run: pnpm dlx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+      run: pnpm dlx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --archive=tgz
 
   notify-failure:
     # lint, test, format のいずれかが失敗した場合に実行

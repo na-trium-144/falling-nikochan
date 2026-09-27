@@ -159,7 +159,7 @@ export interface ChartEntryCompressed {
   levelsCompressed: Binary | null; // <- ChartLevelCore をjson/msgpack化&gzip圧縮したもの
   deleted: boolean;
   published: boolean;
-  ver: 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17;
+  ver: 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18;
   offset: number;
   ytId: string;
   title: string;
@@ -273,7 +273,7 @@ export type ChartEntry = ChartEntryCompressed &
     | { ver: 11 | 12; levels: ChartLevelCore11[] }
     | { ver: 13; levels: ChartLevelCore13[] }
     | { ver: 14; levels: ChartLevelCore14[] }
-    | { ver: 15 | 16 | 17; levels: ChartLevelCore15[] }
+    | { ver: 15 | 16 | 17 | 18; levels: ChartLevelCore15[] }
   );
 
 export async function calcETag(entry: ChartEntryCompressed) {
@@ -692,6 +692,7 @@ export function entryToChart(
     case 15:
     case 16:
     case 17:
+    case 18:
       return {
         falling: "nikochan",
         ver: entry.ver,

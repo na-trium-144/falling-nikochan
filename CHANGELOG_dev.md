@@ -1,3 +1,32 @@
+## ver. 17.13 - 2026/09/24
+
+* 不要なBaggage,Sentry-Trace,X-Request-Idヘッダーを削除
+* service workerが生成するレスポンスを203として区別
+
+## ver. 17.12 - 2026/09/20 [#1381](https://github.com/na-trium-144/falling-nikochan/pull/1381)
+
+* トップページのgrassの高さを半分にする
+* iOS26用に上下端にダミーの固定ブロックを置く
+* プレイ画面の上下端の色を動的に変更してみる
+* ナビゲーション時にupdateThemeを再実行する
+
+## ver. 17.10 - 2026/09/20 [#1380](https://github.com/na-trium-144/falling-nikochan/pull/1380)
+
+* iOS27では2点タッチのバグが修正されているため、無反応補正を無効化
+
+## ver. 17.9 - 2026/09/18 [#1367](https://github.com/na-trium-144/falling-nikochan/pull/1367)
+
+* 譜面編集ヘルプを /main/guide/1-7 ページとして追加
+
+## ver. 17.8 - 2026/09/18 [#1371](https://github.com/na-trium-144/falling-nikochan/pull/1371)
+
+* viewport-fit=cover指定、safe-area-inset対応の修正
+* safari用にhtmlにフォールバック背景色を追加
+* 小さい画面や正方形に近い画面でのUIのサイズを調整
+* Twitterのアプリ内ブラウザではsafe-area-inset-topを無視しbottomのスペースを強制
+* Twitterのアプリ内ブラウザが勝手にfooterの位置を変更するので、高さを変えてTwitterを騙す
+* webviewをiframeと同様の単一画面モードで扱う
+
 ## ver. 17.6 - 2026/09/06
 
 * エラー時にフォームに内容を自動入力 [#1364](https://github.com/na-trium-144/falling-nikochan/pull/1364)

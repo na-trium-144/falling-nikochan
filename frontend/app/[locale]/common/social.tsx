@@ -38,7 +38,7 @@ export function SocialLinks() {
     <section
       className={clsx(
         "w-full max-w-main",
-        "px-3 gap-4 mb-8 main-wide:mb-12",
+        "px-sai-3 gap-4 mb-8 main-wide:mb-12",
         "flex flex-col items-center"
       )}
     >

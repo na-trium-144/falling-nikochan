@@ -19,29 +19,43 @@ window.fnCurrentThemeIsDark = () => {
 };
 window.fnApplyTheme = () => {
   document.body.classList.add("fn-csr-ready");
+  if (
+    navigator.userAgent.includes("Twitter for iPhone") ||
+    navigator.userAgent.includes("TwitterAndroid")
+  ) {
+    document.body.classList.add("ua-twitter");
+  }
   if (window.fnCurrentThemeIsDark()) {
     document.body.classList.add("dark");
   } else {
     document.body.classList.remove("dark");
   }
   const metaThemeColor = document.querySelectorAll("meta[name=theme-color]");
-  switch (window.fnGetCurrentTheme()) {
-    case "dark": {
-      for (let i = 0; i < metaThemeColor.length; i++) {
-        metaThemeColor[i].setAttribute("content", themeColorDark);
+  const playCurrentColor = document.documentElement.style.getPropertyValue(
+    "--fn-play-current-color"
+  );
+  if (playCurrentColor.startsWith("#")) {
+    metaThemeColor[0].setAttribute("content", playCurrentColor);
+    metaThemeColor[1].setAttribute("content", playCurrentColor);
+  } else {
+    switch (window.fnGetCurrentTheme()) {
+      case "dark": {
+        for (let i = 0; i < metaThemeColor.length; i++) {
+          metaThemeColor[i].setAttribute("content", themeColorDark);
+        }
+        break;
       }
-      break;
-    }
-    case "light": {
-      for (let i = 0; i < metaThemeColor.length; i++) {
-        metaThemeColor[i].setAttribute("content", themeColorLight);
+      case "light": {
+        for (let i = 0; i < metaThemeColor.length; i++) {
+          metaThemeColor[i].setAttribute("content", themeColorLight);
+        }
+        break;
       }
-      break;
+      default:
+        metaThemeColor[0].setAttribute("content", themeColorLight);
+        metaThemeColor[1].setAttribute("content", themeColorDark);
+        break;
     }
-    default:
-      metaThemeColor[0].setAttribute("content", themeColorLight);
-      metaThemeColor[1].setAttribute("content", themeColorDark);
-      break;
   }
 };
 

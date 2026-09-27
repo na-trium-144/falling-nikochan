@@ -1,13 +1,13 @@
 import { EventEmitter } from "eventemitter3";
 import { EventType, eventTypes, LuaExecutorRef } from "./types.js";
 import { CursorState } from "./cursor.js";
-import { currentChartVer, LevelFreeze, LevelMin, LevelPlay } from "../chart.js";
+import { currentChartVer, LevelFreeze, LevelMin } from "../chart.js";
 import { LevelForLuaEditLatest } from "../lua/edit.js";
 import {
   findBpmIndexFromStep,
   getSignatureState,
   getTimeSec,
-  loadChart,
+  loadLevel,
   NoteInGame,
 } from "../seq.js";
 import { difficulty } from "../difficulty.js";
@@ -236,12 +236,12 @@ export class LevelEditing extends EventEmitter<EventType> {
 
   #seqNotes: NoteInGame[];
   #resetSeqNotes() {
-    this.#seqNotes = loadChart({
-      ver: currentChartVer,
-      offset: this.#offset(),
-      ...this.#freeze,
-      ...this.#meta,
-    } satisfies LevelPlay).notes.map((n) => ({
+    this.#seqNotes = loadLevel(
+      this.#freeze,
+      this.#meta,
+      this.#offset(),
+      currentChartVer
+    ).notes.map((n) => ({
       ...n,
       done: 0,
       bigDone: false,

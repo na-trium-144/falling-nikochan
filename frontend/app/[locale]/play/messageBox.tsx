@@ -10,14 +10,14 @@ import Caution from "@icon-park/react/lib/icons/Caution";
 import Pause from "@icon-park/react/lib/icons/Pause";
 import RightOne from "@icon-park/react/lib/icons/RightOne";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   badFastSec,
   badLateSec,
   goodSec,
   okSec,
 } from "@falling-nikochan/chart";
-import { detectOS } from "@/common/pwaInstall";
+import { useOSDetector } from "@/common/pwaInstall";
 import { useDisplayMode } from "@/scale";
 import { useDelayedDisplayState } from "@/common/delayedDisplayState";
 import Range from "@/common/range";
@@ -196,8 +196,8 @@ export function ReadyMessage(props: MessageProps) {
 }
 function OptionMenu(props: MessageProps & { header?: boolean }) {
   const t = useTranslations("play.message");
-  const [isIOS, setIsIOS] = useState<boolean>(false);
-  useEffect(() => setIsIOS(detectOS() === "ios"), []);
+  const { os, iOS27OrLater } = useOSDetector();
+  const showIOSThru = os === "ios" && !iOS27OrLater;
   return (
     <div className="relative pr-8 shrink min-h-0 max-w-full flex flex-col items-center ">
       {props.header && <p className="mb-2">{t("option")}</p>}
@@ -218,7 +218,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
               {t("auto")}
             </CheckBox>
           </li>
-          {isIOS && (
+          {showIOSThru && (
             <li>
               <div className="flex items-center">
                 <CheckBox
@@ -238,14 +238,14 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
             <CheckBox
               id="enable-se"
               className=""
-              value={!(isIOS && props.enableIOSThru) && props.enableSE}
+              value={!(showIOSThru && props.enableIOSThru) && props.enableSE}
               onChange={(v) => props.setEnableSE(v)}
-              disabled={isIOS && props.enableIOSThru}
+              disabled={showIOSThru && props.enableIOSThru}
             >
               {t("enableSE")}
             </CheckBox>
             {props.enableSE &&
-              !(isIOS && props.enableIOSThru) &&
+              !(showIOSThru && props.enableIOSThru) &&
               props.audioLatency !== undefined && (
                 <p className="text-sm max-w-80 text-justify ">
                   <Caution className="inline-block align-middle mr-1" />

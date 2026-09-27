@@ -11,10 +11,12 @@ import {
   dummyChart14,
   dummyChart15,
   dummyChart16,
+  dummyChart17,
   dummyChart6,
   dummyChart7,
   dummyChart8,
   dummyChart9,
+  dummyCid,
   initDb,
 } from "./init";
 import {
@@ -171,106 +173,33 @@ describe("GET /api/chartFile/:cid", () => {
     expect(res.status).to.equal(412);
     expect(await res.json()).to.deep.equal({ message: "etagMismatch" });
   });
-  currentChartVer satisfies 17; // edit tests below when chart version is bumped
-  test("should return Chart16 if chart version is 16", async () => {
-    await initDb();
-    const res = await app.request("/api/chartFile/100016", {
-      headers: { Authorization: basicAuth("p") },
+  currentChartVer satisfies 18; // edit tests below when chart version is bumped
+  for (const chart of [
+    dummyChart17(),
+    dummyChart16(),
+    dummyChart15(),
+    dummyChart14(),
+    dummyChart13(),
+    dummyChart12(),
+    dummyChart11(),
+    dummyChart10(),
+    dummyChart9(),
+    dummyChart8(),
+    dummyChart7(),
+    dummyChart6(),
+  ] as const) {
+    test(`should return Chart${chart.ver} if chart version is ${chart.ver}`, async () => {
+      await initDb();
+      const res = await app.request(
+        "/api/chartFile/" + String(Number(dummyCid) + chart.ver),
+        {
+          headers: { Authorization: basicAuth("p") },
+        }
+      );
+      expect(res.status).to.equal(200);
+      expect(msgpack.decode(await res.arrayBuffer())).to.deep.equal(chart);
     });
-    expect(res.status).to.equal(200);
-    const chart = msgpack.decode(await res.arrayBuffer()) as Chart15;
-    expect(chart).to.deep.equal(dummyChart16());
-  });
-  test("should return Chart15 if chart version is 15", async () => {
-    await initDb();
-    const res = await app.request("/api/chartFile/100015", {
-      headers: { Authorization: basicAuth("p") },
-    });
-    expect(res.status).to.equal(200);
-    const chart = msgpack.decode(await res.arrayBuffer()) as Chart15;
-    expect(chart).to.deep.equal(dummyChart15());
-  });
-  test("should return Chart14 if chart version is 14", async () => {
-    await initDb();
-    const res = await app.request("/api/chartFile/100014", {
-      headers: { Authorization: basicAuth("p") },
-    });
-    expect(res.status).to.equal(200);
-    const chart = msgpack.decode(await res.arrayBuffer()) as Chart14Edit;
-    expect(chart).to.deep.equal(dummyChart14());
-  });
-  test("should return Chart13 if chart version is 13", async () => {
-    await initDb();
-    const res = await app.request("/api/chartFile/100013", {
-      headers: { Authorization: basicAuth("p") },
-    });
-    expect(res.status).to.equal(200);
-    const chart = msgpack.decode(await res.arrayBuffer()) as Chart13Edit;
-    expect(chart).to.deep.equal(dummyChart13());
-  });
-  test("should return Chart12 if chart version is 12", async () => {
-    await initDb();
-    const res = await app.request("/api/chartFile/100012", {
-      headers: { Authorization: basicAuth("p") },
-    });
-    expect(res.status).to.equal(200);
-    const chart = msgpack.decode(await res.arrayBuffer()) as Chart11Edit;
-    expect(chart).to.deep.equal(dummyChart12());
-  });
-  test("should return Chart11 if chart version is 11", async () => {
-    await initDb();
-    const res = await app.request("/api/chartFile/100011", {
-      headers: { Authorization: basicAuth("p") },
-    });
-    expect(res.status).to.equal(200);
-    const chart = msgpack.decode(await res.arrayBuffer()) as Chart11Edit;
-    expect(chart).to.deep.equal(dummyChart11());
-  });
-  test("should return Chart10 if chart version is 10", async () => {
-    await initDb();
-    const res = await app.request("/api/chartFile/100010", {
-      headers: { Authorization: basicAuth("p") },
-    });
-    expect(res.status).to.equal(200);
-    const chart = msgpack.decode(await res.arrayBuffer()) as Chart9Edit;
-    expect(chart).to.deep.equal(dummyChart10());
-  });
-  test("should return Chart9 if chart version is 9", async () => {
-    await initDb();
-    const res = await app.request("/api/chartFile/100009", {
-      headers: { Authorization: basicAuth("p") },
-    });
-    expect(res.status).to.equal(200);
-    const chart = msgpack.decode(await res.arrayBuffer()) as Chart9Edit;
-    expect(chart).to.deep.equal(dummyChart9());
-  });
-  test("should return Chart8 if chart version is 8", async () => {
-    await initDb();
-    const res = await app.request("/api/chartFile/100008", {
-      headers: { Authorization: basicAuth("p") },
-    });
-    expect(res.status).to.equal(200);
-    const chart = msgpack.decode(await res.arrayBuffer()) as Chart8Edit;
-    expect(chart).to.deep.equal(dummyChart8());
-  });
-  test("should return Chart7 if chart version is 7", async () => {
-    await initDb();
-    const res = await app.request("/api/chartFile/100007", {
-      headers: { Authorization: basicAuth("p") },
-    });
-    expect(res.status).to.equal(200);
-    const chart = msgpack.decode(await res.arrayBuffer()) as Chart7;
-    expect(chart).to.deep.equal(dummyChart7());
-  });
-  test("should return Chart6 if chart version is 6", async () => {
-    await initDb();
-    const res = await app.request("/api/chartFile/100006", {
-      headers: { Authorization: basicAuth("p") },
-    });
-    expect(res.status).to.equal(200);
-    const chart = msgpack.decode(await res.arrayBuffer()) as Chart6;
-    expect(chart).to.deep.equal(dummyChart6());
-  });
+  }
   test("should return Chart5 if chart version is 5", async () => {
     await initDb();
     const res = await app.request("/api/chartFile/100005", {
@@ -291,6 +220,7 @@ describe("GET /api/chartFile/:cid", () => {
     // expect(chart).to.deep.equal(dummyChart4());
     expect(chart.ver).to.equal(4);
   });
+
   test("should return 400 for invalid cid", async () => {
     await initDb();
     const res = await app.request("/api/chartFile/100000a", {

@@ -23,8 +23,7 @@ const tabURLs = {
 } as const;
 
 interface MobileProps {
-  className?: string;
-  blurBg?: boolean;
+  fixed?: boolean;
   locale: string;
   tabKey: TabKeys;
 }
@@ -43,10 +42,10 @@ export function MobileFooter(props: MobileProps) {
 
   return (
     <>
-      {props.blurBg && (
-        <div className={clsx("fn-mf-blur no-pc", props.className)} />
-      )}
-      <footer className={clsx("fn-mobile-footer no-pc", props.className)}>
+      {props.fixed && <div className="fn-mf-blur no-pc" />}
+      <footer
+        className={clsx("fn-mobile-footer no-pc", props.fixed && "fn-mf-fixed")}
+      >
         {mobileTabTitleKeys.map((key, i) => (
           <LinkWithReview
             key={i}
