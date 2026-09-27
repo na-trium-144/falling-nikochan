@@ -18,6 +18,7 @@ import { useTheme } from "@/common/theme";
 interface Props {
   ready: boolean;
   playing: boolean;
+  minActualPlaybackRate: number;
   playbackRate: number;
   className?: string;
   lvType: string;
@@ -342,10 +343,11 @@ export function MusicArea(props: Props) {
                 : "flex flex-row gap-[0.5em]",
               veryLargeTitle ? "text-xl" : largeTitle ? "text-base" : "text-sm",
               "text-dim",
-              props.playbackRate > 1
-                ? "text-rose-600 dark:text-rose-400"
-                : props.playbackRate < 1
-                  ? "text-emerald-600 dark:text-emerald-400"
+              props.minActualPlaybackRate < 1 ||
+                props.minActualPlaybackRate < props.playbackRate
+                ? "text-emerald-600 dark:text-emerald-400"
+                : props.minActualPlaybackRate > 1
+                  ? "text-rose-600 dark:text-rose-400"
                   : ""
             )}
           >
@@ -370,12 +372,16 @@ export function MusicArea(props: Props) {
                 </span>
               </span>
             </span>
-            {props.playbackRate !== 1 && (
+            {(props.minActualPlaybackRate !== 1 ||
+              props.minActualPlaybackRate < props.playbackRate) && (
               <span className="flex-none w-max">
                 <span style={{ fontSize: "0.875em", lineHeight: 0 }}>
                   {t("playbackRateDisplay")}:
                 </span>
-                <span className="ml-[0.25em]">{props.playbackRate}</span>
+                <span className="ml-[0.25em]">
+                  {props.minActualPlaybackRate}
+                  {props.minActualPlaybackRate < props.playbackRate && "?"}
+                </span>
               </span>
             )}
           </p>

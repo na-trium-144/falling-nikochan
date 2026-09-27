@@ -3,17 +3,27 @@
 import clsx from "clsx/lite";
 import FiveStarBadge from "@icon-park/react/lib/icons/FiveStarBadge";
 import CheckSmall from "@icon-park/react/lib/icons/CheckSmall";
-import { ResultData } from "./bestScore";
-import { baseScoreRate, chainScoreRate } from "@falling-nikochan/chart";
+import {
+  baseScoreRate,
+  chainScoreRate,
+  ResultParams,
+} from "@falling-nikochan/chart";
 
 export type BadgeStatus = "pc" | "fc" | "b" | null | undefined;
-export function getBadge(s: ResultData | null): BadgeStatus {
+export function getBadge(
+  s: { resultParams: ResultParams } | null
+): BadgeStatus {
   if (s) {
-    if (s.baseScore === baseScoreRate) {
+    if (s.resultParams.baseScore100 === baseScoreRate * 100) {
       return "pc";
-    } else if (s.chainScore === chainScoreRate) {
+    } else if (s.resultParams.chainScore100 === chainScoreRate * 100) {
       return "fc";
-    } else if (s.baseScore + s.chainScore + s.bigScore >= 70) {
+    } else if (
+      s.resultParams.baseScore100 +
+        s.resultParams.chainScore100 +
+        s.resultParams.bigScore100 >=
+      7000
+    ) {
       return "b";
     }
   }

@@ -6,9 +6,13 @@ export default {
       noPasswd: "Password is not specified",
       invalidChartId: "Chart ID is invalid",
       invalidResultParam: "Result parameter is invalid",
-      missingResultParam: "Result parameter is missing",
+      missingResultParam: "missingResultParam",
+      verificationNotApplicable: "Unable to verify the play record.",
       // 401
       badPassword: "Password is incorrect",
+      unauthorizedResultBuildKey:
+        "The session key could not be verified. Please try again, or close and reopen the app.",
+      unauthorizedSessionToken: "unauthorizedSessionToken",
       // 404
       notFound: "The specified URL does not exist",
       chartIdNotFound: "The specified chart ID does not exist",
@@ -20,8 +24,9 @@ export default {
       // 409
       oldChartVersion: "The chart data version is not up to date",
       unsupportedChartVersion: "Unsupported chart data version",
-      // 410
-      noLongerSupportedAPI: "This API is no longer supported",
+      recordAlreadyPosted: "recordAlreadyPosted",
+      timeMismatch:
+        "The device clock is out of sync. Please check your time settings and try again.",
       // 412
       etagMismatch: "Chart data has been updated. Please try again",
       // 413
@@ -29,13 +34,17 @@ export default {
       tooManyEvent: "Too many events in the chart data",
       // 415
       invalidChart: "Invalid chart data format",
-      unsupportedContentEncoding: "Unsupported content encoding",
-      invalidContentEncoding: "Invalid content encoding",
+      unsupportedContentEncoding: "unsupportedContentEncoding",
+      invalidContentEncoding: "invalidContentEncoding",
       // 418
       noCORSCredentialsOnProd:
         "Cross-origin authentication using cookie is not allowed on the production server",
+      // 422
+      unauthorizedSessionData: "unauthorizedSessionData",
+      unauthorizedResultParam:
+        "Unable to verify the play record. The URL may be incorrect or has been altered.",
       // 424
-      ytMetaNotFound: "Failed to get metadata from YouTube",
+      ytMetaNotFound: "ytMetaNotFound",
       // 429
       tooManyRequest: "Please wait a while and try again",
       // 500
@@ -50,6 +59,8 @@ export default {
     ytError: "Error on the YouTube video ({code})",
     noYtId: "No YouTube video is specified",
     seqEmpty: "The chart data is empty",
+    resultSessionExpired:
+      "The session has timed out. Please close this screen and try again.",
     errorPage: {
       title: "An error has occurred 😢",
       goHome: "Return to top page",

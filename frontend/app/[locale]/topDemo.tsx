@@ -3,14 +3,7 @@ import { useRealFPS } from "./common/fpsCalculator";
 import FallingWindow from "./play/fallingWindow";
 import { useFlash } from "./play/useFlash";
 import useGameLogic from "./play/gameLogic";
-import {
-  ChartBrief,
-  currentChartVer,
-  Level15Play,
-  Level6Play,
-  LevelPlay,
-  loadChart,
-} from "@falling-nikochan/chart";
+import { ChartBrief, ChartSeqData } from "@falling-nikochan/chart";
 import * as msgpack from "@msgpack/msgpack";
 import { useColorThief } from "./common/colorThief";
 import clsx from "clsx/lite";
@@ -67,7 +60,7 @@ export function TopDemo(
     prevTimeStamp.current = performance.now();
     return currentTimeSec.current;
   }, [props.visible]);
-  const { notesAll, resetNotesAll } = useGameLogic(
+  const [notesAll, resetNotesAll /* , ... */] = useGameLogic(
     getCurrentTimeSec,
     true,
     false,
@@ -86,28 +79,18 @@ export function TopDemo(
       props.offset !== undefined
     ) {
       fetchBackend()
-        .get(`/api/playFile/${props.cid}/${props.lvIndex}`)
+        .get(`/api/seqFile/${props.cid}/${props.lvIndex}`)
         .arrayBuffer((buf) => {
-          const playFile = msgpack.decode(buf) as
-            Level6Play | Level15Play | LevelPlay;
-          if (
-            playFile.ver === 6 ||
-            playFile.ver === 15 ||
-            playFile.ver === currentChartVer
-          ) {
-            const seq = loadChart(playFile);
-            resetNotesAll(
-              seq.notes.map((n) => ({
-                ...n,
-                done: 0,
-                bigDone: false,
-              })),
-              props.offset! - seq.offset
-            );
-            currentTimeSec.current = props.offset! - seq.offset;
-          } else {
-            // ignore
-          }
+          const seq = msgpack.decode(buf) as ChartSeqData;
+          resetNotesAll(
+            seq.notes.map((n) => ({
+              ...n,
+              done: 0,
+              bigDone: false,
+            })),
+            props.offset! - seq.offset
+          );
+          currentTimeSec.current = props.offset! - seq.offset;
         });
     }
   }, [notesAll, resetNotesAll, props.cid, props.lvIndex, props.offset]);
