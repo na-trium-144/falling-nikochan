@@ -119,7 +119,8 @@ export async function sendResultSerialized(
   resultSerialized: string,
   sessionPrivateKey: Uint8Array,
   resultSessionToken: string,
-  setSign: (sign: string) => void
+  setSign: (sign: string) => void,
+  onError: (e: Error) => void
 ) {
   const clientSign = p256Sign(
     decodeBase64Url(resultSerialized),
@@ -134,7 +135,9 @@ export async function sendResultSerialized(
     .headers({ Authorization: `Bearer ${resultSessionToken}` })
     .post()
     .json(({ sign }) => setSign(sign))
-    .catch((e: unknown) => captureAndWrap(e));
+    .catch((e) => {
+      onError(captureAndWrap(e));
+    });
 }
 
 // defined with DefinePlugin in next.config.mjs

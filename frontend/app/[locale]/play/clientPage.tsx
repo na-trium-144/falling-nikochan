@@ -724,7 +724,9 @@ function Play(props: Props) {
   const [resultSerialized, setResultSerialized] = useState<string | undefined>(
     undefined
   );
-  const [resultSign, setResultSign] = useState<string | undefined>(undefined);
+  const [resultSign, setResultSign] = useState<string | Error | undefined>(
+    undefined
+  );
   useEffect(() => {
     if (chartPlaying && chartEnd && endSecPassed) {
       if (!showResult) {
@@ -842,6 +844,9 @@ function Play(props: Props) {
                     );
                     reloadBestScore();
                   }
+                },
+                (e) => {
+                  setResultSign(e);
                 }
               );
             }

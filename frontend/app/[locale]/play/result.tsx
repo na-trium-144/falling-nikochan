@@ -16,6 +16,7 @@ import { useTranslations } from "next-intl";
 import { useShareLink } from "@/common/shareLinkAndImage";
 import { useDisplayMode } from "@/scale";
 import { RecordHistogram } from "@/common/recordHistogram";
+import { formatError } from "@/common/fetch";
 
 export const resultAnimDelays = [100, 500, 500, 500, 750, 750, 500] as const;
 
@@ -36,7 +37,7 @@ interface Props {
   largeResult: boolean;
   record: RecordGetSummary | Error | undefined;
   resultSerialized?: string;
-  resultSign?: string;
+  resultSign?: string | Error;
   date: Date | null;
   baseScore100: number;
   chainScore100: number;
@@ -46,6 +47,7 @@ interface Props {
 }
 export default function Result(props: Props) {
   const t = useTranslations("play.result");
+  const te = useTranslations("error");
   const { rem } = useDisplayMode();
   const ref = useRef<HTMLDivElement>(null);
   const refTotal = useRef<HTMLDivElement>(null);
@@ -74,7 +76,7 @@ export default function Result(props: Props) {
     props.brief,
     props.lang,
     props.resultSerialized,
-    props.resultSign,
+    typeof props.resultSign === "string" ? props.resultSign : undefined,
     props.date ? props.date.getTime() : null
   );
 
@@ -229,40 +231,54 @@ export default function Result(props: Props) {
                 )}
               </div>
             )}
-            {props.newRecord > 0 && (
-              <div ref={refBest} style={{ ...appearingAnimation2(6) }}>
-                <span className={clsx(props.largeResult && "text-xl")}>
-                  {t("newRecord")}
-                </span>
-                <span className={clsx("ml-1", props.largeResult || "text-sm")}>
-                  (+
-                  {Math.floor(props.newRecord)}.
-                  {(Math.floor(props.newRecord * 100) % 100)
-                    .toString()
-                    .padStart(2, "0")}
-                  )
-                </span>
-              </div>
-            )}
+            {props.newRecord > 0 &&
+              typeof props.resultSerialized === "string" &&
+              typeof props.resultSign === "string" && (
+                <div ref={refBest} style={{ ...appearingAnimation2(6) }}>
+                  <span className={clsx(props.largeResult && "text-xl")}>
+                    {t("newRecord")}
+                  </span>
+                  <span
+                    className={clsx("ml-1", props.largeResult || "text-sm")}
+                  >
+                    (+
+                    {Math.floor(props.newRecord)}.
+                    {(Math.floor(props.newRecord * 100) % 100)
+                      .toString()
+                      .padStart(2, "0")}
+                    )
+                  </span>
+                </div>
+              )}
           </div>
         </div>
-        {props.showShareButton && (
+        {props.resultSign instanceof Error && (
           <div
-            className={clsx(
-              "mb-2",
-              props.largeResult
-                ? "flex flex-row items-baseline justify-center space-x-2"
-                : "flex flex-col items-center"
-            )}
+            className="mb-2 text-center"
             style={{ ...appearingAnimation3(7) }}
           >
-            <span>{t("shareResult")}</span>
-            <span className="inline-block">
-              {shareLink.buttons}
-              {shareLink.modalButton}
-            </span>
+            {formatError(props.resultSign, te)}
           </div>
         )}
+        {props.showShareButton &&
+          typeof props.resultSerialized === "string" &&
+          typeof props.resultSign === "string" && (
+            <div
+              className={clsx(
+                "mb-2",
+                props.largeResult
+                  ? "flex flex-row items-baseline justify-center space-x-2"
+                  : "flex flex-col items-center"
+              )}
+              style={{ ...appearingAnimation3(7) }}
+            >
+              <span>{t("shareResult")}</span>
+              <span className="inline-block">
+                {shareLink.buttons}
+                {shareLink.modalButton}
+              </span>
+            </div>
+          )}
         {props.showRecord &&
           !(props.record instanceof Error) &&
           props.record?.histogram &&
