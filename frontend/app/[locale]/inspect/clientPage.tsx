@@ -4,7 +4,6 @@ import clsx from "clsx/lite";
 import {
   ChartBrief,
   ChartSeqData,
-  currentChartVer,
   getBarLength,
   getSignatureState,
   getStep,
@@ -215,7 +214,6 @@ export function InitInspect() {
             .url(`/api/seqFile/${session.cid}/${index}`)
             .headers({ "X-If-Match": `"${session.brief.etag}"` })
             .get()
-            .badRequest(markAsExpected)
             .notFound(markAsExpected)
             .error(412, (e) => {
               refreshBrief(session.cid);
@@ -223,19 +221,7 @@ export function InitInspect() {
             })
             .arrayBuffer((buf) => {
               const seq = msgpack.decode(buf) as ChartSeqData;
-              if (
-                seq.ver === 6 ||
-                seq.ver === 15 ||
-                seq.ver === currentChartVer
-              ) {
-                return { index, seq, error: undefined };
-              } else {
-                return {
-                  index,
-                  seq: undefined,
-                  error: te("chartVersion", { ver: (seq as any)?.ver }),
-                };
-              }
+              return { index, seq, error: undefined };
             })
             .catch((e: unknown) => ({
               index,
