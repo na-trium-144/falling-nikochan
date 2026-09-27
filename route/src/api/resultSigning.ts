@@ -344,31 +344,19 @@ const resultSigningApp = async (config: {
             },
           },
           400: {
-            description: "invalid parameter",
+            description:
+              "invalid parameter or verification not applicable for this result",
             content: {
               "application/json": {
                 schema: resolver(
-                  await validationErrorSchema(
-                    "badRequest",
-                    "invalidResultParam"
-                  )
+                  v.union([
+                    await validationErrorSchema(
+                      "badRequest",
+                      "invalidResultParam"
+                    ),
+                    await errorLiteral("verificationNotApplicable"),
+                  ])
                 ),
-              },
-            },
-          },
-          409: {
-            description: "Verification not applicable for older results",
-            content: {
-              "application/json": {
-                schema: resolver(
-                  await errorLiteral("verificationNotApplicable")
-                ),
-              },
-            },
-            headers: {
-              "Cache-Control": {
-                description: `max-age=${VERIFY_CACHE_MAX_AGE}`,
-                schema: { type: "string" },
               },
             },
           },
@@ -414,7 +402,7 @@ const resultSigningApp = async (config: {
           throw new HTTPException(400, { message: "invalidResultParam" });
         }
         if (!isVerificationRequired(resultParams)) {
-          return c.json({ message: "verificationNotApplicable" }, 409, {
+          return c.json({ message: "verificationNotApplicable" }, 400, {
             "Cache-Control": cacheControl(env(c), VERIFY_CACHE_MAX_AGE),
           });
         }

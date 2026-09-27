@@ -54,12 +54,12 @@ describe("GET /api/resultSigning/verify/:cid", () => {
     expect(res.status).to.equal(422);
   });
 
-  test("should return 409 for legacy result version (ver < 4)", async () => {
+  test("should return 400 for legacy result version (ver < 4)", async () => {
     const legacySerialized = serializeResultParamsLegacy(testResultParams);
     const res = await app.request(
       `/api/resultSigning/verify/${dummyCid}?result=${encodeURIComponent(legacySerialized)}`
     );
-    expect(res.status).to.equal(409);
+    expect(res.status).to.equal(400);
   });
 
   test("should return 400 for invalid result parameter", async () => {

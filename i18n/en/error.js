@@ -7,11 +7,12 @@ export default {
       invalidChartId: "Chart ID is invalid",
       invalidResultParam: "Result parameter is invalid",
       missingResultParam: "missingResultParam",
+      verificationNotApplicable: "Unable to verify the play record.",
+      // 401
+      badPassword: "Password is incorrect",
       unauthorizedResultBuildKey:
         "The session key could not be verified. Please try again, or close and reopen the app.",
       unauthorizedSessionToken: "unauthorizedSessionToken",
-      // 401
-      badPassword: "Password is incorrect",
       // 404
       notFound: "The specified URL does not exist",
       chartIdNotFound: "The specified chart ID does not exist",
@@ -24,7 +25,6 @@ export default {
       oldChartVersion: "The chart data version is not up to date",
       unsupportedChartVersion: "Unsupported chart data version",
       recordAlreadyPosted: "recordAlreadyPosted",
-      verificationNotApplicable: "Unable to verify the play record. ",
       timeMismatch:
         "The device clock is out of sync. Please check your time settings and try again.",
       // 412

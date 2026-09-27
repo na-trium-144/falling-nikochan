@@ -8,11 +8,12 @@ export default {
       invalidChartId: "譜面 ID が正しくありません",
       invalidResultParam: "result パラメータが正しくありません",
       missingResultParam: "missingResultParam",
+      verificationNotApplicable: "プレイ記録を検証できませんでした。",
+      // 401
+      badPassword: "パスワードが違います",
       unauthorizedResultBuildKey:
         "セッションキーを検証できませんでした。もう一度やり直すか、アプリを閉じて開きなおしてみてください。",
       unauthorizedSessionToken: "unauthorizedSessionToken",
-      // 401
-      badPassword: "パスワードが違います",
       // 404
       notFound: "指定したURLは存在しません",
       chartIdNotFound: "指定した譜面IDのデータはありません",
@@ -25,7 +26,6 @@ export default {
       oldChartVersion: "譜面データのバージョンが最新ではありません",
       unsupportedChartVersion: "サポートされていない譜面バージョンです",
       recordAlreadyPosted: "recordAlreadyPosted",
-      verificationNotApplicable: "プレイ記録を検証できませんでした。",
       timeMismatch:
         "端末の時刻が合っていません。時計を正しい時刻に合わせてから再度お試しください",
       // 412
