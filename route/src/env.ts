@@ -6,6 +6,7 @@ import { dirname, join } from "node:path";
 import { Context, type Hono } from "hono";
 import { fetchError } from "./error.js";
 import { env } from "hono/adapter";
+import { etag as honoETag, RETAINED_304_HEADERS } from "hono/etag";
 import type { ErrorEvent, EventHint } from "@sentry/hono/node";
 import type { webcrypto } from "node:crypto";
 
@@ -163,6 +164,17 @@ export function methodNotAllowed(app: Hono<{ Bindings: any }>) {
       c.json({ message: "methodNotAllowed" }, 405, {
         Allow: methods.join(", "),
       }),
+  });
+}
+
+export function etag() {
+  return honoETag({
+    retainedHeaders: [
+      ...RETAINED_304_HEADERS,
+      "access-control-allow-origin",
+      "access-control-allow-credentials",
+      "access-control-expose-headers",
+    ],
   });
 }
 

@@ -16,6 +16,7 @@ import {
   getBrief,
   sentryBeforeSend,
   methodNotAllowed,
+  etag,
 } from "@falling-nikochan/route";
 import { Hono } from "hono";
 import { ImageResponse } from "@vercel/og";
@@ -27,7 +28,6 @@ import { MongoClient } from "mongodb";
 import { createMiddleware } from "hono/factory";
 import { attachDatabasePool } from "@vercel/functions";
 import { structuredLogger } from "@hono/structured-logger";
-import { etag } from "hono/etag";
 
 // export const config = {
 //   runtime: "nodejs",

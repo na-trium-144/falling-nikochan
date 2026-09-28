@@ -15,6 +15,7 @@ import {
   sentryBeforeSend,
   finalRoutePath,
   methodNotAllowed,
+  etag,
 } from "./src/index.js";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
@@ -28,7 +29,6 @@ import { compress } from "hono/compress";
 import { requestId } from "hono/request-id";
 import { structuredLogger } from "@hono/structured-logger";
 import pino from "pino";
-import { etag } from "hono/etag";
 
 const port = 8787;
 
