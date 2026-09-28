@@ -310,6 +310,9 @@ importers:
       '@next/mdx':
         specifier: catalog:next
         version: 16.1.7(@mdx-js/loader@3.1.1)(@mdx-js/react@3.1.1)
+      '@noble/ciphers':
+        specifier: 2.4.0
+        version: 2.4.0
       '@noble/curves':
         specifier: 'catalog:'
         version: 2.4.0
@@ -1681,6 +1684,10 @@ packages:
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [win32]
+
+  '@noble/ciphers@2.4.0':
+    resolution: {integrity: sha512-AnjFn0Jv92laAkvMrghlFZq4qQCIN/4DxFV/eooqtC2YTjB7kBeLMS2T9KJX4Dn+ZVXLOwK0lSgqDtx9gvxtiw==}
+    engines: {node: '>= 20.19.0'}
 
   '@noble/curves@2.4.0':
     resolution: {integrity: sha512-P4/62zrgfH33CneE3Dn4WhJVA22YUU0eR51wKIan4NVRvwsA0YnPTwWGpNbpuacSujmSFLvyzpyuR30+fbq2Ew==}
@@ -6696,6 +6703,8 @@ snapshots:
 
   '@next/swc-win32-x64-msvc@16.1.7':
     optional: true
+
+  '@noble/ciphers@2.4.0': {}
 
   '@noble/curves@2.4.0':
     dependencies:

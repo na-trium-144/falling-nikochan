@@ -1,6 +1,8 @@
 import { captureAndWrap, fetchBackend } from "@/common/fetch";
 import { RecordPost } from "@falling-nikochan/chart";
 import { p256 } from "@noble/curves/nist.js";
+import { chacha20poly1305 } from "@noble/ciphers/chacha.js";
+import { randomBytes, managedNonce } from "@noble/ciphers/utils.js";
 import {
   decodeBase64,
   decodeBase64Url,
@@ -44,6 +46,18 @@ const _toString36LowerCase = (c: number) =>
 const _toString36LowerCaseSplit = (c: number) =>
   _toString36LowerCase(c).split("");
 
+function sessionKeyGenerator() {
+  const chacha = managedNonce(chacha20poly1305)(randomBytes()); // manages nonces for you
+  function getEncryptedPrivateKey() {
+    return chacha[atob("ZW5jcnlwdA") as "encrypt"](p256UtilsRandomSecretKey());
+  }
+  function decryptPrivateKey(encrypted: Uint8Array) {
+    return chacha[atob("ZGVjcnlwdA") as "decrypt"](encrypted);
+  }
+  return [getEncryptedPrivateKey, decryptPrivateKey] as const;
+}
+const [getEncryptedPrivateKey, decryptPrivateKey] = sessionKeyGenerator();
+
 function p256PublicKeyToJwk(publicKey: Uint8Array) {
   return {
     kty: "EC",
@@ -71,31 +85,42 @@ function signJwt(
   return `${partialToken}.${signature}`;
 }
 
+/*
+fetchにブレークポイントを置いてトレースしたときに簡単に鍵を取り出せないように、
+initResultSigningとinitResultSigning2に関数を分割している (あんまり意味ないかもだけど)
+record送信とsignに関しても同様
+*/
 export async function initResultSigning(
   cid: string,
   setResultSessionToken: (key: Uint8Array, token: string) => void,
   onError: (e: Error) => void
 ) {
-  const privateKey = p256UtilsRandomSecretKey();
-  const publicKey = p256PublicKeyToJwk(p256GetPublicKey(privateKey, false));
+  const privateKey = getEncryptedPrivateKey();
+  const publicKey = p256PublicKeyToJwk(
+    p256GetPublicKey(decryptPrivateKey(privateKey), false)
+  );
   const buildToken = signJwt(
     { key: publicKey, cid, date: Date.now() },
-    resultBuildPrivKey,
+    await resultBuildPrivKey(),
     "ES256",
     p256Sign
   );
-  return fetchBackend()
-    .url("/api/resultSigning/init")
-    .body(buildToken)
-    .post()
-    .unauthorized((e) => markAsExpected(e))
-    .error(409, (e) => markAsExpected(e))
-    .text((token) => {
+  return initResultSigning2(buildToken)
+    .then((token) => {
       setResultSessionToken(privateKey, token);
     })
     .catch((e) => {
       onError(captureAndWrap(e));
     });
+}
+async function initResultSigning2(buildToken: string) {
+  return await fetchBackend()
+    .url("/api/resultSigning/init")
+    .body(buildToken)
+    .post()
+    .unauthorized((e) => markAsExpected(e))
+    .error(409, (e) => markAsExpected(e))
+    .text();
 }
 
 export async function sendRecord(
@@ -104,17 +129,33 @@ export async function sendRecord(
   sessionPrivateKey: Uint8Array,
   resultSessionToken: string
 ) {
-  const recordSigned = signJwt(record, sessionPrivateKey, "ES256", p256Sign);
-  return fetchBackend()
+  async function recordSigned() {
+    return signJwt(
+      record,
+      decryptPrivateKey(sessionPrivateKey),
+      "ES256",
+      p256Sign
+    );
+  }
+  return sendRecord2(cid, await recordSigned(), resultSessionToken).catch(
+    (e: unknown) => captureAndWrap(e, { cid })
+  );
+}
+async function sendRecord2(
+  cid: string,
+  recordSigned: string,
+  resultSessionToken: string
+) {
+  return await fetchBackend()
     .url(`/api/record/${cid}`)
     .body(recordSigned)
     .headers({ Authorization: `Bearer ${resultSessionToken}` })
     .post()
     .notFound(() => undefined)
     .error(429, () => undefined)
-    .res()
-    .catch((e: unknown) => captureAndWrap(e, { cid }));
+    .res();
 }
+
 export async function sendResultSerialized(
   resultSerialized: string,
   sessionPrivateKey: Uint8Array,
@@ -122,11 +163,28 @@ export async function sendResultSerialized(
   setSign: (sign: string) => void,
   onError: (e: Error) => void
 ) {
-  const clientSign = p256Sign(
-    decodeBase64Url(resultSerialized),
-    sessionPrivateKey
-  );
-  return fetchBackend()
+  async function clientSign() {
+    return p256Sign(
+      decodeBase64Url(resultSerialized),
+      decryptPrivateKey(sessionPrivateKey)
+    );
+  }
+  return sendResultSerialized2(
+    resultSerialized,
+    await clientSign(),
+    resultSessionToken
+  )
+    .then((sign) => setSign(sign))
+    .catch((e) => {
+      onError(captureAndWrap(e));
+    });
+}
+async function sendResultSerialized2(
+  resultSerialized: string,
+  clientSign: Uint8Array,
+  resultSessionToken: string
+) {
+  return await fetchBackend()
     .url("/api/resultSigning/sign")
     .json({
       result: resultSerialized,
@@ -134,14 +192,13 @@ export async function sendResultSerialized(
     })
     .headers({ Authorization: `Bearer ${resultSessionToken}` })
     .post()
-    .json(({ sign }) => setSign(sign))
-    .catch((e) => {
-      onError(captureAndWrap(e));
-    });
+    .json(({ sign }) => sign as string);
 }
 
 // defined with DefinePlugin in next.config.mjs
 declare const RESULT_BUILD_PRIVATE_BASE64: string;
 // インラインで書かない・呼び出し元から離す ことで読みづらくする
-const resultBuildPrivKeyBase64 = RESULT_BUILD_PRIVATE_BASE64;
-const resultBuildPrivKey = decodeBase64(resultBuildPrivKeyBase64);
+async function resultBuildPrivKey() {
+  const resultBuildPrivKeyBase64 = RESULT_BUILD_PRIVATE_BASE64;
+  return decodeBase64(resultBuildPrivKeyBase64);
+}
