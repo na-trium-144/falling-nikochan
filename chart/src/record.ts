@@ -1,5 +1,6 @@
 import * as v from "valibot";
-import { HashSchema } from "./chart.js";
+import { ChartBrief, HashSchema } from "./chart.js";
+import { bigScoreRate, chainScoreRate } from "./gameConstant.js";
 
 // GET /api/record -> RecordGetSummary[]
 export const RecordGetSummarySchema = () =>
@@ -67,3 +68,34 @@ export const RecordPostSchema = () =>
     }, "score !== base + chain + big")
   );
 export type RecordPost = v.InferOutput<ReturnType<typeof RecordPostSchema>>;
+
+export function createRecordPost(
+  date: Date,
+  level: ChartBrief["levels"][number],
+  baseScore: number,
+  chainScore: number,
+  bigScore: number,
+  score: number,
+  // judgeCount: [number, number, number, number],
+  // bigCount: number | null,
+  // hitType: number | null,
+  // playbackRate: number,
+  // cid: string,
+  auto: boolean,
+  editing: boolean,
+  factor: number
+) {
+  return {
+    lvHash: level.hash,
+    auto,
+    score,
+    baseScore,
+    chainScore,
+    bigScore,
+    fc: chainScore === chainScoreRate,
+    fb: bigScore === bigScoreRate,
+    editing,
+    factor,
+    date: date.getTime(),
+  } satisfies RecordPost;
+}

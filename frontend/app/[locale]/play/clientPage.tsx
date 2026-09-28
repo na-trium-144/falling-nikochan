@@ -17,17 +17,14 @@ import clsx from "clsx/lite";
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
 import {
-  bigScoreRate,
-  chainScoreRate,
   levelTypes,
   RecordGetSummary,
   inputTypes,
   emptyBrief,
   ChartSeqData,
   RecordGetSummarySchema,
-  ResultSerialized,
-  serializeCid,
-  serializeDate4,
+  serializeResultParams,
+  createRecordPost,
 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
@@ -75,7 +72,6 @@ import {
   sendRecord,
   sendResultSerialized,
 } from "./resultSigningAuth.js";
-import { encodeBase64Url } from "hono/utils/encode";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -796,59 +792,57 @@ function Play(props: Props) {
           ) {
             if (oldUserBegin === null && minActualPlaybackRate === 1) {
               // こっちはautoは含む
+              let factor: number | null = null;
               try {
-                const factor = updateRecordFactor(
+                factor = updateRecordFactor(
                   cid,
                   chartBrief.levels[lvIndex].hash,
                   auto
                 );
+              } catch (e) {
+                console.error(e);
+                // ignore errors from updateRecordFactor
+              }
+              if (factor !== null) {
+                const record = createRecordPost(
+                  newResultDate,
+                  chartBrief.levels.at(lvIndex)!,
+                  baseScore,
+                  chainScore,
+                  bigScore,
+                  score,
+                  // judgeCount.slice(0, 4) as [number, number, number, number],
+                  // bigCount,
+                  // hitType,
+                  // minActualPlaybackRate,
+                  // cid,
+                  auto,
+                  editing,
+                  factor
+                );
                 sendRecord(
                   cid,
-                  {
-                    lvHash: chartBrief.levels[lvIndex].hash,
-                    auto,
-                    score,
-                    baseScore,
-                    chainScore,
-                    bigScore,
-                    fc: chainScore === chainScoreRate,
-                    fb: bigScore === bigScoreRate,
-                    editing,
-                    factor,
-                    date: newResultDate.getTime(),
-                  },
+                  record,
                   resultSessionPrivateKey,
                   resultSessionToken
                 );
-              } catch {
-                // ignore errors from updateRecordFactor
               }
             }
             if (!wasAutoPlay && oldUserBegin === null) {
               // こっちはplaybackRate変更を含む
-              // serializeResultParams() と同一の処理をわざわざ再度書いている (結果の情報をオブジェクトに入れたくないため)
-              const serialized = msgpack.encode([
-                4,
-                serializeDate4(newResultDate),
-                chartBrief.levels.at(lvIndex)!.name,
-                levelTypes.indexOf(chartBrief.levels.at(lvIndex)!.type),
-                chartBrief.levels.at(lvIndex)!.difficulty,
-                Math.floor(baseScore * 100),
-                Math.floor(chainScore * 100),
-                Math.floor(bigScore * 100),
-                Math.floor(score * 100),
+              const resultSerialized = serializeResultParams(
+                newResultDate,
+                chartBrief.levels.at(lvIndex)!,
+                baseScore,
+                chainScore,
+                bigScore,
+                score,
                 judgeCount.slice(0, 4) as [number, number, number, number],
                 bigCount,
                 hitType,
-                minActualPlaybackRate * 4,
-                serializeCid(cid),
-              ] satisfies ResultSerialized);
-              const resultSerialized = encodeBase64Url(
-                serialized.buffer.slice(
-                  serialized.byteOffset,
-                  serialized.byteOffset + serialized.byteLength
-                )
-              ).replaceAll("=", "");
+                minActualPlaybackRate,
+                cid
+              );
               sendResultSerialized(
                 resultSerialized,
                 resultSessionPrivateKey,

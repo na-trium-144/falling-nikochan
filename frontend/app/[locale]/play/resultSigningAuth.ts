@@ -1,6 +1,7 @@
 import { captureAndWrap, fetchBackend } from "@/common/fetch";
 import { RecordPost } from "@falling-nikochan/chart";
 import { p256 } from "@noble/curves/nist.js";
+import { randomBytes } from "@noble/curves/utils.js";
 import {
   decodeBase64,
   decodeBase64Url,
@@ -14,14 +15,14 @@ import { markAsExpected } from "@/common/apiError";
 
 // sign や publicKey などの名前がビルド後のjsに出てこないよう、object.values経由でアクセスする
 // https://github.com/paulmillr/noble-curves/blob/main/src/abstract/weierstrass.ts#L1653-L1665
-const p256Sign = Object.values(p256)[6] as typeof p256.sign;
-const p256GetPublicKey = Object.values(p256)[1] as typeof p256.getPublicKey;
-const p256Utils = Object.values(p256)[3] as typeof p256.utils;
+const p256v = Object.values(p256);
+const p256Sign = p256v[6] as typeof p256.sign;
+const p256GetPublicKey = p256v[1] as typeof p256.getPublicKey;
+const p256Utilsv = Object.values(p256v[3] as typeof p256.utils);
 // utils comes from ecdh()
 // https://github.com/paulmillr/noble-curves/blob/main/src/abstract/weierstrass.ts#L1224-L1228
-const p256UtilsRandomSecretKey = Object.values(
-  p256Utils
-)[2] as typeof p256.utils.randomSecretKey;
+const p256UtilsRandomSecretKey =
+  p256Utilsv[2] as typeof p256.utils.randomSecretKey;
 
 function encodeUint8ArrayToBase64Url(bytes: Uint8Array): string {
   return encodeBase64Url(
@@ -43,6 +44,18 @@ const _toString36LowerCase = (c: number) =>
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _toString36LowerCaseSplit = (c: number) =>
   _toString36LowerCase(c).split("");
+
+function sessionKeyGenerator() {
+  const mask = randomBytes(32); // p256.utils.randomSecretKey().length === 32
+  function getMaskedPrivateKey() {
+    return p256UtilsRandomSecretKey().map((k, i) => k ^ mask[i]);
+  }
+  function unmaskPrivateKey(masked: Uint8Array) {
+    return masked.map((k, i) => k ^ mask[i]);
+  }
+  return [getMaskedPrivateKey, unmaskPrivateKey] as const;
+}
+const [getMaskedPrivateKey, unmaskPrivateKey] = sessionKeyGenerator();
 
 function p256PublicKeyToJwk(publicKey: Uint8Array) {
   return {
@@ -71,31 +84,44 @@ function signJwt(
   return `${partialToken}.${signature}`;
 }
 
+/*
+fetchにブレークポイントを置いてトレースしたときに簡単に鍵を取り出せないように、
+fetch以外の処理(ここではbuildTokenのみ)とinitResultSigning2に関数を分割している (あんまり意味ないかもだけど)
+record送信とsignに関しても同様
+*/
 export async function initResultSigning(
   cid: string,
   setResultSessionToken: (key: Uint8Array, token: string) => void,
   onError: (e: Error) => void
 ) {
-  const privateKey = p256UtilsRandomSecretKey();
-  const publicKey = p256PublicKeyToJwk(p256GetPublicKey(privateKey, false));
-  const buildToken = signJwt(
-    { key: publicKey, cid, date: Date.now() },
-    resultBuildPrivKey,
-    "ES256",
-    p256Sign
-  );
-  return fetchBackend()
-    .url("/api/resultSigning/init")
-    .body(buildToken)
-    .post()
-    .unauthorized((e) => markAsExpected(e))
-    .error(409, (e) => markAsExpected(e))
-    .text((token) => {
+  const privateKey = getMaskedPrivateKey();
+  async function buildToken() {
+    const publicKey = p256PublicKeyToJwk(
+      p256GetPublicKey(unmaskPrivateKey(privateKey), false)
+    );
+    return signJwt(
+      { key: publicKey, cid, date: Date.now() },
+      await resultBuildPrivKey(),
+      "ES256",
+      p256Sign
+    );
+  }
+  return initResultSigning2(await buildToken())
+    .then((token) => {
       setResultSessionToken(privateKey, token);
     })
     .catch((e) => {
       onError(captureAndWrap(e));
     });
+}
+async function initResultSigning2(buildToken: string) {
+  return await fetchBackend()
+    .url(atob("L2FwaS9yZXN1bHRTaWduaW5nL2luaXQ") as "/api/resultSigning/init")
+    .body(buildToken)
+    .post()
+    .unauthorized((e) => markAsExpected(e))
+    .error(409, (e) => markAsExpected(e))
+    .text();
 }
 
 export async function sendRecord(
@@ -104,17 +130,33 @@ export async function sendRecord(
   sessionPrivateKey: Uint8Array,
   resultSessionToken: string
 ) {
-  const recordSigned = signJwt(record, sessionPrivateKey, "ES256", p256Sign);
-  return fetchBackend()
-    .url(`/api/record/${cid}`)
+  async function recordSigned() {
+    return signJwt(
+      record,
+      unmaskPrivateKey(sessionPrivateKey),
+      "ES256",
+      p256Sign
+    );
+  }
+  return sendRecord2(cid, await recordSigned(), resultSessionToken).catch(
+    (e: unknown) => captureAndWrap(e, { cid })
+  );
+}
+async function sendRecord2(
+  cid: string,
+  recordSigned: string,
+  resultSessionToken: string
+) {
+  return await fetchBackend()
+    .url((atob("L2FwaS9yZWNvcmQv") as "/api/record/") + cid)
     .body(recordSigned)
     .headers({ Authorization: `Bearer ${resultSessionToken}` })
     .post()
     .notFound(() => undefined)
     .error(429, () => undefined)
-    .res()
-    .catch((e: unknown) => captureAndWrap(e, { cid }));
+    .res();
 }
+
 export async function sendResultSerialized(
   resultSerialized: string,
   sessionPrivateKey: Uint8Array,
@@ -122,26 +164,42 @@ export async function sendResultSerialized(
   setSign: (sign: string) => void,
   onError: (e: Error) => void
 ) {
-  const clientSign = p256Sign(
-    decodeBase64Url(resultSerialized),
-    sessionPrivateKey
-  );
-  return fetchBackend()
-    .url("/api/resultSigning/sign")
+  async function clientSign() {
+    return p256Sign(
+      decodeBase64Url(resultSerialized),
+      unmaskPrivateKey(sessionPrivateKey)
+    );
+  }
+  return sendResultSerialized2(
+    resultSerialized,
+    await clientSign(),
+    resultSessionToken
+  )
+    .then((sign) => setSign(sign))
+    .catch((e) => {
+      onError(captureAndWrap(e));
+    });
+}
+async function sendResultSerialized2(
+  resultSerialized: string,
+  clientSign: Uint8Array,
+  resultSessionToken: string
+) {
+  return await fetchBackend()
+    .url(atob("L2FwaS9yZXN1bHRTaWduaW5nL3NpZ24") as "/api/resultSigning/sign")
     .json({
       result: resultSerialized,
       clientSign: encodeUint8ArrayToBase64Url(clientSign),
     })
     .headers({ Authorization: `Bearer ${resultSessionToken}` })
     .post()
-    .json(({ sign }) => setSign(sign))
-    .catch((e) => {
-      onError(captureAndWrap(e));
-    });
+    .json(({ sign }) => sign as string);
 }
 
 // defined with DefinePlugin in next.config.mjs
 declare const RESULT_BUILD_PRIVATE_BASE64: string;
 // インラインで書かない・呼び出し元から離す ことで読みづらくする
-const resultBuildPrivKeyBase64 = RESULT_BUILD_PRIVATE_BASE64;
-const resultBuildPrivKey = decodeBase64(resultBuildPrivKeyBase64);
+async function resultBuildPrivKey() {
+  const resultBuildPrivKeyBase64 = RESULT_BUILD_PRIVATE_BASE64;
+  return decodeBase64(resultBuildPrivKeyBase64);
+}

@@ -2,6 +2,7 @@ import * as msgpack from "@msgpack/msgpack";
 import { decodeBase64Url, encodeBase64Url } from "hono/utils/encode";
 import * as v from "valibot";
 import type { webcrypto } from "node:crypto";
+import { ChartBrief, levelTypes } from "./chart.js";
 
 const dateBase = new Date(2025, 2, 1); // 2 = March, in local timezone
 // これはローカルタイムゾーンなので、serializeDate3を経由してサーバー・クライアント間で送受信した値を比較すると期待した結果が得られない。
@@ -175,23 +176,38 @@ export function serializeResultParamsLegacy(params: ResultParams): string {
     )
   ).replaceAll("=", "");
 }
-// TODO: これはなんと現在テストでしか使われていない。消す?
-export function serializeResultParams(params: ResultParams): string {
+/**
+ * これは play/clientPage.tsx でしか使われておらず、そこではparamsオブジェクトを新しく生成するので、
+ * 引数をResultParams型にする必要はなく、play側の仕様に合わせられる
+ **/
+export function serializeResultParams(
+  date: Date,
+  level: ChartBrief["levels"][number],
+  baseScore: number,
+  chainScore: number,
+  bigScore: number,
+  score: number,
+  judgeCount: [number, number, number, number],
+  bigCount: number | null,
+  hitType: number | null,
+  playbackRate: number,
+  cid: string
+): string {
   const serialized = msgpack.encode([
     4,
-    serializeDate4(params.date!),
-    params.lvName,
-    params.lvType,
-    params.lvDifficulty,
-    params.baseScore100,
-    params.chainScore100,
-    params.bigScore100,
-    params.score100,
-    params.judgeCount.slice(),
-    params.bigCount as number | null,
-    params.inputType,
-    params.playbackRate4,
-    serializeCid(params.cid!),
+    serializeDate4(date),
+    level.name,
+    levelTypes.indexOf(level.type),
+    level.difficulty,
+    Math.floor(baseScore * 100),
+    Math.floor(chainScore * 100),
+    Math.floor(bigScore * 100),
+    Math.floor(score * 100),
+    judgeCount.slice(0, 4) as [number, number, number, number],
+    bigCount,
+    hitType,
+    playbackRate * 4,
+    serializeCid(cid),
   ] satisfies ResultSerialized);
   return encodeBase64Url(
     serialized.buffer.slice(

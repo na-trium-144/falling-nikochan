@@ -3,10 +3,12 @@ import { expect } from "chai";
 import { app, dummyCid } from "./init.js";
 import {
   ResultParams,
-  serializeResultParams,
+  serializeCid,
+  serializeDate4,
   serializeResultParamsLegacy,
 } from "@falling-nikochan/chart";
 import { resultSecretKey } from "../../src/env.js";
+import * as msgpack from "@msgpack/msgpack";
 
 const testResultParams: ResultParams = {
   date: new Date(2026, 4, 1),
@@ -23,20 +25,37 @@ const testResultParams: ResultParams = {
   playbackRate4: 4,
   cid: dummyCid,
 };
+const resultSerialized = Buffer.from(
+  msgpack.encode([
+    4,
+    serializeDate4(testResultParams.date!),
+    testResultParams.lvName,
+    testResultParams.lvType,
+    testResultParams.lvDifficulty,
+    testResultParams.baseScore100,
+    testResultParams.chainScore100,
+    testResultParams.bigScore100,
+    testResultParams.score100,
+    testResultParams.judgeCount.slice(),
+    testResultParams.bigCount,
+    testResultParams.inputType,
+    testResultParams.playbackRate4,
+    serializeCid(testResultParams.cid!),
+  ])
+).toString("base64url");
 
 describe("GET /api/resultSigning/verify/:cid", () => {
   test("should return 200 for valid signed result", async () => {
-    const serialized = serializeResultParams(testResultParams);
     const key = await resultSecretKey(process.env as any);
     const signature = await crypto.subtle.sign(
       { name: "HMAC", hash: { name: "SHA-256" } },
       key,
-      Buffer.from(serialized, "base64url")
+      Buffer.from(resultSerialized, "base64url")
     );
     const signatureBase64Url = Buffer.from(signature.slice(0, 12)).toString(
       "base64url"
     );
-    const param = `${serialized}.${signatureBase64Url}`;
+    const param = `${resultSerialized}.${signatureBase64Url}`;
 
     const res = await app.request(
       `/api/resultSigning/verify/${dummyCid}?result=${encodeURIComponent(param)}`
@@ -45,8 +64,7 @@ describe("GET /api/resultSigning/verify/:cid", () => {
   });
 
   test("should return 422 for tampered signature", async () => {
-    const serialized = serializeResultParams(testResultParams);
-    const param = `${serialized}.invalidSignature`;
+    const param = `${resultSerialized}.invalidSignature`;
 
     const res = await app.request(
       `/api/resultSigning/verify/${dummyCid}?result=${encodeURIComponent(param)}`
