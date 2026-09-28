@@ -116,7 +116,7 @@ export async function initResultSigning(
 }
 async function initResultSigning2(buildToken: string) {
   return await fetchBackend()
-    .url("/api/resultSigning/init")
+    .url(atob("L2FwaS9yZXN1bHRTaWduaW5nL2luaXQ") as "/api/resultSigning/init")
     .body(buildToken)
     .post()
     .unauthorized((e) => markAsExpected(e))
@@ -148,7 +148,7 @@ async function sendRecord2(
   resultSessionToken: string
 ) {
   return await fetchBackend()
-    .url(`/api/record/${cid}`)
+    .url((atob("L2FwaS9yZWNvcmQv") as "/api/record/") + cid)
     .body(recordSigned)
     .headers({ Authorization: `Bearer ${resultSessionToken}` })
     .post()
@@ -186,7 +186,7 @@ async function sendResultSerialized2(
   resultSessionToken: string
 ) {
   return await fetchBackend()
-    .url("/api/resultSigning/sign")
+    .url(atob("L2FwaS9yZXN1bHRTaWduaW5nL3NpZ24") as "/api/resultSigning/sign")
     .json({
       result: resultSerialized,
       clientSign: encodeUint8ArrayToBase64Url(clientSign),
