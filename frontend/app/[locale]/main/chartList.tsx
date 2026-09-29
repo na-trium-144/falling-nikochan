@@ -1,5 +1,9 @@
 "use client";
-import { ChartBrief, levelTypes } from "@falling-nikochan/chart";
+import {
+  ChartBrief,
+  levelTypes,
+  RecordGetSummarySchema,
+} from "@falling-nikochan/chart";
 import clsx from "clsx/lite";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useTranslations } from "next-intl";
@@ -87,6 +91,7 @@ export type ChartListType = "recent" | "recentEdit" | "popular" | "latest";
 export interface ChartLineBrief {
   cid: string;
   count?: number;
+  countTotal?: number;
   updatedAt?: number; // searchAPIのレスポンスにこれがある場合はbrief.updatedAtよりも優先する
   fetching?: boolean;
   fetched: boolean;
@@ -285,17 +290,32 @@ export function ChartList(props: Props) {
           changed = true;
           fetchBrief(b.cid, {
             onResult: (brief) =>
-              setBriefs((briefs) => {
-                if (Array.isArray(briefs)) {
-                  briefs = briefs.slice();
-                  const i = briefs.findIndex((b2) => b2?.cid === b.cid);
-                  if (i >= 0) {
-                    briefs[i]!.fetched = true;
-                    briefs[i]!.brief = brief;
-                  }
-                }
-                return briefs;
-              }),
+              fetchBackend()
+                .get(`/api/record/${b.cid}`)
+                .json((record) =>
+                  v
+                    .parse(v.array(RecordGetSummarySchema()), record)
+                    .reduce(
+                      (countTotal, lvRecord) =>
+                        countTotal + lvRecord.count + lvRecord.countAuto,
+                      0
+                    )
+                )
+                .catch(() => undefined)
+                .then((countTotal) =>
+                  setBriefs((briefs) => {
+                    if (Array.isArray(briefs)) {
+                      briefs = briefs.slice();
+                      const i = briefs.findIndex((b2) => b2?.cid === b.cid);
+                      if (i >= 0) {
+                        briefs[i]!.fetched = true;
+                        briefs[i]!.brief = brief;
+                        briefs[i]!.countTotal = countTotal;
+                      }
+                    }
+                    return briefs;
+                  })
+                ),
             onNotFound: () =>
               setBriefs((briefs) => {
                 if (Array.isArray(briefs)) {
@@ -326,7 +346,7 @@ export function ChartList(props: Props) {
         setBriefs(briefs.slice());
       }
     }
-  }, [briefs, props.type, maxRow, fetchAll]);
+  }, [briefs, props.type, maxRow, fetchAll, props.showCount]);
   useEffect(() => {
     if (Array.isArray(briefs)) {
       if (props.type === "recent") {
@@ -458,8 +478,9 @@ export function ChartList(props: Props) {
                 original={filteredBriefs.at(i)!.original}
                 newTab={props.newTab}
                 dateDiff={props.dateDiff}
-                showCount={props.showCount ?? props.type === "popular"}
+                showCount={props.showCount}
                 count={filteredBriefs.at(i)!.count}
+                countTotal={filteredBriefs.at(i)!.countTotal}
                 badge={props.badge}
                 small={props.small}
                 big={props.big}
@@ -570,6 +591,7 @@ interface CProps {
   style?: object;
   cid: string;
   count?: number;
+  countTotal?: number;
   updatedAt?: number;
   brief?: ChartBrief;
   href: string;
@@ -693,7 +715,7 @@ function ChartListItemChildren(props: CProps) {
       <div className="fn-cl-content">
         {props.big ? (
           <>
-            <div className="h-4 **:leading-4">
+            <div className="relative h-4 **:leading-4">
               <span className="text-xs text-dim">{props.cid}</span>
               {props.dateDiff && (
                 <DateDiff
@@ -704,10 +726,18 @@ function ChartListItemChildren(props: CProps) {
               {props.showCount &&
                 props.count !== undefined &&
                 props.count > 0 && (
-                  <span className="ml-2 text-xs">
-                    (
-                    <PlayOne className="inline-block align-middle mr-0.5" />
-                    {Math.ceil(props.count)})
+                  <span className="absolute top-0 right-0 text-sm">
+                    <PlayOne
+                      theme="filled"
+                      className="inline-block align-middle mr-0.5"
+                    />
+                    {Math.ceil(props.count)}
+                    {props.countTotal && (
+                      <>
+                        <span className="mx-0.5">/</span>
+                        {Math.ceil(props.countTotal)}
+                      </>
+                    )}
                   </span>
                 )}
               {props.original && (
@@ -787,8 +817,18 @@ function ChartListItemChildren(props: CProps) {
                 props.count > 0 && (
                   <span className="ml-2 text-xs/3">
                     (
-                    <PlayOne className="inline-block align-middle mr-0.5" />
-                    {Math.ceil(props.count)})
+                    <PlayOne
+                      theme="filled"
+                      className="inline-block align-middle mr-0.5"
+                    />
+                    {Math.ceil(props.count)}
+                    {props.countTotal && (
+                      <>
+                        <span className="mx-0.5">/</span>
+                        {Math.ceil(props.countTotal)}
+                      </>
+                    )}
+                    )
                   </span>
                 )}
               {props.original && (
@@ -834,8 +874,18 @@ function ChartListItemChildren(props: CProps) {
                 props.count > 0 && (
                   <span className="ml-2 text-xs">
                     (
-                    <PlayOne className="inline-block align-middle mr-0.5" />
-                    {Math.ceil(props.count)})
+                    <PlayOne
+                      theme="filled"
+                      className="inline-block align-middle mr-0.5"
+                    />
+                    {Math.ceil(props.count)}
+                    {props.countTotal && (
+                      <>
+                        <span className="mx-0.5">/</span>
+                        {Math.ceil(props.countTotal)}
+                      </>
+                    )}
+                    )
                   </span>
                 )}
               {props.original && (
