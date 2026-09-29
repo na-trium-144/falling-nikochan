@@ -287,6 +287,8 @@ function Play(props: Props) {
       return () => {
         canceled = true;
       };
+    } else {
+      setResultSessionPrivateKey("ignore");
     }
   }, [cid, queryOptions.nosigning]);
 
