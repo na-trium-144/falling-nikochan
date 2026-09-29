@@ -358,7 +358,10 @@ export function aggeratePopularCounts(
     const l = r.levelBrief.find((l) => l.hash === rc.lvHash);
     if (l) {
       // 曲の長さに応じて重み付けの上限を制限。 2min => 1, 1min => 0.7, 30s => 0.5, 10s => 0.3
-      const lengthFactor = Math.max(0.3, Math.sqrt(l.length / 120));
+      const lengthFactor = Math.max(
+        0.3,
+        Math.min(1, Math.sqrt(l.length / 120))
+      );
       score += rc.count * lengthFactor;
     }
   }
