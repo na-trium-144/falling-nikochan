@@ -230,12 +230,10 @@ function Play(props: Props) {
     setAutoOffset_(v);
     localStorage.setItem("autoOffset", v ? "1" : "0");
   }, []);
-  const [resultSessionPrivateKey, setResultSessionPrivateKey] =
-    useState<Uint8Array | null>(null);
+  const [resultSessionPrivateKey, setResultSessionPrivateKey] = useState<
+    Uint8Array | Error | "ignore" | null
+  >(null);
   const [resultSessionToken, setResultSessionToken] = useState<string | null>(
-    null
-  );
-  const [resultSessionError, setResultSessionError] = useState<Error | null>(
     null
   );
   const [resultSessionExp, setResultSessionExp] = useState<number | null>(null);
@@ -263,11 +261,26 @@ function Play(props: Props) {
         },
         (e) => {
           if (!canceled) {
-            setResultSessionError(e);
-            console.warn(
-              "Failed to initialize ResultSigning session. " +
-                "If you want to ignore and continue, add `nosigning=1` query parameter."
-            );
+            if (
+              process.env.BACKEND_PREFIX &&
+              process.env.BACKEND_PREFIX !== window.location.origin
+            ) {
+              // 開発環境など、別のバックエンドに接続している場合は、BuildKeyが異なるため認証できない。その場合は認証を必須にしない。
+              setResultSessionPrivateKey("ignore");
+              console.warn(
+                "Failed to initialize ResultSigning session, " +
+                  "but ignored because BACKEND_PREFIX is set and different from location.origin. ",
+                "Record will not be sent and ResultParam will not be signed. ",
+                e
+              );
+            } else {
+              setResultSessionPrivateKey(e);
+              console.warn(
+                "Failed to initialize ResultSigning session. " +
+                  "If you want to ignore and continue, add `nosigning=1` query parameter.",
+                e
+              );
+            }
           }
         }
       );
@@ -648,7 +661,11 @@ function Play(props: Props) {
   const [giveUpWaitingFps, setGiveUpWaitingFps] = useState<boolean>(false);
   const giveUpFpsTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isReadyAll =
-    ytReady && !!chartSeq && (realFpsStable || giveUpWaitingFps);
+    ytReady &&
+    !!chartSeq &&
+    (realFpsStable || giveUpWaitingFps) &&
+    resultSessionPrivateKey !== null &&
+    !(resultSessionPrivateKey instanceof Error);
   useEffect(() => {
     if (errorMsg) {
       if (showLoadingTimeout.current !== null) {
@@ -709,8 +726,8 @@ function Play(props: Props) {
     if (!errorMsg) {
       if (apiErrorMsg) {
         setErrorMsg(apiErrorMsg);
-      } else if (resultSessionError) {
-        setErrorMsg(resultSessionError);
+      } else if (resultSessionPrivateKey instanceof Error) {
+        setErrorMsg(resultSessionPrivateKey);
       } else if (ytError !== null) {
         setErrorMsg(te("ytError", { code: ytError }));
       } else if (chartBrief && !chartBrief.ytId) {
@@ -721,7 +738,7 @@ function Play(props: Props) {
     }
   }, [
     apiErrorMsg,
-    resultSessionError,
+    resultSessionPrivateKey,
     ytError,
     chartBrief,
     chartSeq,
@@ -783,13 +800,7 @@ function Play(props: Props) {
             )
           );
           stop();
-          if (
-            cid &&
-            resultSessionPrivateKey &&
-            resultSessionToken &&
-            chartBrief?.levels.at(lvIndex) &&
-            !queryOptions.result
-          ) {
+          if (cid && chartBrief?.levels.at(lvIndex) && !queryOptions.result) {
             if (oldUserBegin === null && minActualPlaybackRate === 1) {
               // こっちはautoは含む
               let factor: number | null = null;
@@ -803,7 +814,11 @@ function Play(props: Props) {
                 console.error(e);
                 // ignore errors from updateRecordFactor
               }
-              if (factor !== null) {
+              if (
+                factor !== null &&
+                resultSessionPrivateKey instanceof Uint8Array &&
+                resultSessionToken
+              ) {
                 const record = createRecordPost(
                   newResultDate,
                   chartBrief.levels.at(lvIndex)!,
@@ -843,34 +858,56 @@ function Play(props: Props) {
                 minActualPlaybackRate,
                 cid
               );
-              sendResultSerialized(
-                resultSerialized,
-                resultSessionPrivateKey,
-                resultSessionToken,
-                (sign) => {
-                  setResultSerialized(resultSerialized);
-                  setResultSign(sign);
-                  if (
-                    score > bestScoreState &&
-                    // cid &&
-                    // !auto &&
-                    // userBegin === null &&
-                    // chartBrief?.levels.at(lvIndex) &&
-                    minActualPlaybackRate === 1
-                  ) {
-                    setBestScore(
-                      cid,
-                      chartBrief.levels[lvIndex].hash,
-                      resultSerialized,
-                      sign
-                    );
-                    reloadBestScore();
+              // sessionTokenがない場合でもbestScoreだけ先に保存する
+              if (
+                score > bestScoreState &&
+                // cid &&
+                // !auto &&
+                // userBegin === null &&
+                // chartBrief?.levels.at(lvIndex) &&
+                minActualPlaybackRate === 1
+              ) {
+                setBestScore(
+                  cid,
+                  chartBrief.levels[lvIndex].hash,
+                  resultSerialized,
+                  undefined
+                );
+                reloadBestScore();
+              }
+              if (
+                resultSessionPrivateKey instanceof Uint8Array &&
+                resultSessionToken
+              ) {
+                sendResultSerialized(
+                  resultSerialized,
+                  resultSessionPrivateKey,
+                  resultSessionToken,
+                  (sign) => {
+                    setResultSerialized(resultSerialized);
+                    setResultSign(sign);
+                    if (
+                      score > bestScoreState &&
+                      // cid &&
+                      // !auto &&
+                      // userBegin === null &&
+                      // chartBrief?.levels.at(lvIndex) &&
+                      minActualPlaybackRate === 1
+                    ) {
+                      setBestScore(
+                        cid,
+                        chartBrief.levels[lvIndex].hash,
+                        resultSerialized,
+                        sign
+                      );
+                      // reloadBestScore();
+                    }
+                  },
+                  (e) => {
+                    setResultSign(e);
                   }
-                },
-                (e) => {
-                  setResultSign(e);
-                }
-              );
+                );
+              }
             }
           }
         }, 1000);

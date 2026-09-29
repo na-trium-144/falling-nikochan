@@ -231,25 +231,21 @@ export default function Result(props: Props) {
                 )}
               </div>
             )}
-            {props.newRecord > 0 &&
-              typeof props.resultSerialized === "string" &&
-              typeof props.resultSign === "string" && (
-                <div ref={refBest} style={{ ...appearingAnimation2(6) }}>
-                  <span className={clsx(props.largeResult && "text-xl")}>
-                    {t("newRecord")}
-                  </span>
-                  <span
-                    className={clsx("ml-1", props.largeResult || "text-sm")}
-                  >
-                    (+
-                    {Math.floor(props.newRecord)}.
-                    {(Math.floor(props.newRecord * 100) % 100)
-                      .toString()
-                      .padStart(2, "0")}
-                    )
-                  </span>
-                </div>
-              )}
+            {props.newRecord > 0 && (
+              <div ref={refBest} style={{ ...appearingAnimation2(6) }}>
+                <span className={clsx(props.largeResult && "text-xl")}>
+                  {t("newRecord")}
+                </span>
+                <span className={clsx("ml-1", props.largeResult || "text-sm")}>
+                  (+
+                  {Math.floor(props.newRecord)}.
+                  {(Math.floor(props.newRecord * 100) % 100)
+                    .toString()
+                    .padStart(2, "0")}
+                  )
+                </span>
+              </div>
+            )}
           </div>
         </div>
         {props.resultSign instanceof Error && (

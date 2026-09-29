@@ -137,7 +137,7 @@ export function setBestScore(
   cid: string,
   lvHash: string,
   result: string,
-  sign: string
+  sign: string | undefined
 ) {
   localStorage.setItem(bestKey(cid, lvHash), JSON.stringify({ result, sign }));
 }
