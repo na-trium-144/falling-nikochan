@@ -59,7 +59,6 @@ export default function TopPage(props: Props) {
     1 * rem;
   const [initAnim, setInitAnim] = useState<boolean>(false);
   const [demoVisible, setDemoVisible] = useState<boolean>(false);
-  const [statsVisible, setStatsVisible] = useState<boolean>(false);
   const [demoChart, setDemoChart] = useState<DemoChart>();
   useEffect(() => {
     if (isSafari !== undefined) {
@@ -92,10 +91,6 @@ export default function TopPage(props: Props) {
           }
         }
         setDemoVisible(window.scrollY < window.innerHeight);
-        setStatsVisible(
-          window.scrollY >= 36 && // padding 4 + <span text-sm>の高さ20px
-            window.scrollY < window.innerHeight + 36 + 32 // ↑ + <span text-2xl>の高さ32px
-        );
         req = null;
       };
       const onScroll = () => {
@@ -327,7 +322,7 @@ export default function TopPage(props: Props) {
         </div>
       </div>
 
-      <StatsDisplay statsVisible={statsVisible} />
+      <StatsDisplay />
 
       <div
         id="popular"
