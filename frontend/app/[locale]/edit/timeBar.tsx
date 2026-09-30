@@ -10,6 +10,8 @@ import {
   getSignatureState,
   getStep,
   getTimeSec,
+  Signature,
+  SignatureWithBarNum,
   Step,
   stepAdd,
   stepCmp,
@@ -33,6 +35,7 @@ import { useTranslations } from "next-intl";
 import { Scrollable } from "@/common/scrollable.jsx";
 
 export type TimeBarProps = {
+  className?: string;
   setAndSeekCurrentTimeWithoutOffset: (
     timeSec: number,
     focus?: boolean,
@@ -278,25 +281,40 @@ export default function TimeBar(props: TimeBarProps) {
     return false;
   };
 
-  const currentBpm = chart
-    ? (currentLevel?.currentBpm ?? 120)
-    : (bpmChanges[findBpmIndexFromSec(bpmChanges, currentTimeSec)]?.bpm ?? 120);
-
-  const currentSpeed = chart
-    ? (currentLevel?.currentSpeed ?? 120)
-    : (speedChanges[findBpmIndexFromSec(speedChanges, currentTimeSec)]?.bpm ??
-      120);
-
-  const currentSignature = chart
-    ? currentLevel?.currentSignature
-    : signature[findBpmIndexFromStep(signature, currentStep)];
+  let currentBpm: number;
+  let currentSpeed: number;
+  let currentSpeedChangeTimeSec: number;
+  let nextSpeed: number;
+  let nextSpeedChangeTimeSec: number;
+  let nextSpeedInterp: boolean;
+  let currentSignature: Signature | undefined;
+  if (chart) {
+    currentBpm = currentLevel?.currentBpm ?? 120;
+    currentSpeed = currentLevel?.currentSpeed ?? 120;
+    currentSpeedChangeTimeSec = currentLevel?.currentSpeedChange?.timeSec ?? 0;
+    nextSpeed = currentLevel?.nextSpeed ?? 120;
+    nextSpeedChangeTimeSec = currentLevel?.nextSpeedChange?.timeSec ?? 0;
+    nextSpeedInterp = !!currentLevel?.nextSpeedInterp;
+    currentSignature = currentLevel?.currentSignature;
+  } else {
+    const bpmIndex = findBpmIndexFromSec(bpmChanges, currentTimeSec);
+    currentBpm = bpmChanges[bpmIndex]?.bpm ?? 120;
+    const speedIndex = findBpmIndexFromSec(speedChanges, currentTimeSec);
+    currentSpeed = speedChanges[speedIndex]?.bpm ?? 120;
+    currentSpeedChangeTimeSec = speedChanges[speedIndex]?.timeSec ?? 0;
+    nextSpeed = speedChanges[speedIndex + 1]?.bpm ?? 120;
+    nextSpeedChangeTimeSec = speedChanges[speedIndex + 1]?.timeSec ?? 0;
+    nextSpeedInterp = !!speedChanges[speedIndex + 1]?.interp;
+    const signatureIndex = findBpmIndexFromStep(signature, currentStep);
+    currentSignature = signature[signatureIndex];
+  }
 
   const barTop = 2.5 * rem;
   const barHeight = 1.5 * rem;
   const barBottom = 6 * rem; // including scrollbar
 
   return (
-    <div className="relative w-full **:leading-4">
+    <div className={clsx("relative w-full **:leading-4", props.className)}>
       <Scrollable
         className={clsx(
           "min-w-0 w-full overflow-x-scroll overflow-y-visible",
@@ -580,7 +598,7 @@ export default function TimeBar(props: TimeBarProps) {
             <div
               className={clsx(
                 "absolute w-max pr-1 rounded-md backdrop-blur-2xs",
-                currentLevel?.nextSpeedInterp &&
+                nextSpeedInterp &&
                   clsx(
                     "-translate-x-1.5 px-1.5 translate-y-0.5 py-0.5",
                     "bg-white/50 dark:bg-stone-700/50",
@@ -592,13 +610,12 @@ export default function TimeBar(props: TimeBarProps) {
                 left: 0,
               }}
             >
-              {currentLevel?.nextSpeedInterp && cur
+              {nextSpeedInterp
                 ? (
-                    currentLevel.currentSpeed! +
-                    ((currentLevel.nextSpeed! - currentLevel.currentSpeed!) /
-                      (currentLevel.nextSpeedChange!.timeSec -
-                        currentLevel.currentSpeedChange!.timeSec)) *
-                      (cur.timeSec - currentLevel.currentSpeedChange!.timeSec)
+                    currentSpeed +
+                    ((nextSpeed - currentSpeed) /
+                      (nextSpeedChangeTimeSec - currentSpeedChangeTimeSec)) *
+                      (currentTimeSec - currentSpeedChangeTimeSec)
                   ).toFixed(2)
                 : currentSpeed}
             </div>

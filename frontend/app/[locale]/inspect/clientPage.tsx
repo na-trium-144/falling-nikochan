@@ -347,7 +347,10 @@ function Inspect(props: InspectProps) {
 
   const onReady = useCallback(() => {
     setReady(true);
-  }, []);
+    if (chartSeq) {
+      setCurrentTimeSec(-chartSeq.offset);
+    }
+  }, [chartSeq]);
   const onStart = useCallback(() => {
     setPlaying(true);
   }, []);
@@ -375,14 +378,12 @@ function Inspect(props: InspectProps) {
 
   const setAndSeekCurrentTimeWithoutOffset = useCallback(
     (timeSec: number, focus = true, allowSeekAhead = true) => {
-      const clampedTime = Math.max(0, timeSec - (chartSeq?.offset || 0));
-      setCurrentTimeSec(clampedTime);
-      if (
-        !playing &&
-        ytPlayer.current &&
-        ytPlayer.current.getPlayerState?.() !== 5
-      ) {
-        ytPlayer.current.seekTo?.(timeSec, allowSeekAhead);
+      if (!playing) {
+        const clampedTime = timeSec - (chartSeq?.offset || 0);
+        setCurrentTimeSec(clampedTime);
+        if (ytPlayer.current && ytPlayer.current.getPlayerState?.() !== 5) {
+          ytPlayer.current.seekTo?.(timeSec, allowSeekAhead);
+        }
       }
       if (focus) {
         ref.current?.focus();
@@ -397,7 +398,7 @@ function Inspect(props: InspectProps) {
       const i = setInterval(() => {
         if (ytPlayer.current?.getCurrentTime && chartSeq) {
           const ytTime = ytPlayer.current.getCurrentTime();
-          setCurrentTimeSec(Math.max(0, ytTime - chartSeq.offset));
+          setCurrentTimeSec(ytTime - chartSeq.offset);
         }
       }, 50);
       return () => clearInterval(i);
@@ -406,7 +407,7 @@ function Inspect(props: InspectProps) {
 
   const getCurrentTimeSec = useCallback(() => {
     if (playing && ytPlayer.current?.getCurrentTime && chartSeq) {
-      return Math.max(0, ytPlayer.current.getCurrentTime() - chartSeq.offset);
+      return ytPlayer.current.getCurrentTime() - chartSeq.offset;
     }
     return currentTimeSecRef.current;
   }, [playing, chartSeq]);
@@ -682,24 +683,6 @@ function Inspect(props: InspectProps) {
               )}
             </div>
           </div>
-          {/* レベル選択 */}
-          {levelOptions.length > 0 && (
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-semibold whitespace-nowrap">
-                {t("level")}:
-              </span>
-              <Select
-                className="flex-1 min-w-0"
-                options={levelOptions}
-                value={selectedLvIndex}
-                onSelect={(idx: number) => {
-                  setSelectedLvIndex(idx);
-                }}
-                disabled={levelOptions.length <= 1}
-                showValue
-              />
-            </div>
-          )}
 
           {/* 操作ボタン */}
           <div className="flex flex-wrap items-center gap-1">
@@ -737,19 +720,6 @@ function Inspect(props: InspectProps) {
               text={t("playerControls.nextEvent")}
               keyName="→"
             />
-            <div className="flex items-center ml-auto gap-0.5">
-              <span className="text-xs mr-0.5">{t("zoom")}</span>
-              <Button
-                small
-                text="-"
-                onClick={() => setZoom((z) => Math.max(-2, z - 1))}
-              />
-              <Button
-                small
-                text="+"
-                onClick={() => setZoom((z) => Math.min(3, z + 1))}
-              />
-            </div>
           </div>
 
           {/* 音量調整 */}
@@ -825,13 +795,14 @@ function Inspect(props: InspectProps) {
           {/* 音符・イベントの詳細情報表示 */}
           <Box
             classNameOuter="w-full mt-1"
-            classNameInner="p-2 text-xs flex flex-col gap-1"
+            classNameInner="p-4 flex flex-col gap-1"
           >
-            <div className="font-semibold flex items-center justify-between">
+            <div className="flex items-center justify-between">
               <span>{t("step")}:</span>
-              <span className="font-mono text-sm">{currentStepStr}</span>
+              <span>{currentStepStr}</span>
             </div>
-            <div className="border-t border-slate-300 dark:border-stone-600 pt-1 flex flex-col gap-1 max-h-28 overflow-y-auto">
+            <hr className="fn-hr my-2" />
+            <div className="flex flex-col gap-1">
               {selectedNotes.length === 0 &&
               selectedBpmChanges.length === 0 &&
               selectedSpeedChanges.length === 0 &&
@@ -842,7 +813,7 @@ function Inspect(props: InspectProps) {
                   {selectedBpmChanges.map((b, i) => (
                     <div
                       key={`bpm-${i}`}
-                      className="flex items-center justify-between font-mono bg-slate-100 dark:bg-stone-800 px-1.5 py-0.5 rounded"
+                      className="flex items-center justify-between"
                     >
                       <span>{t("bpmChange")}:</span>
                       <span>{b.bpm}</span>
@@ -851,7 +822,7 @@ function Inspect(props: InspectProps) {
                   {selectedSpeedChanges.map((s, i) => (
                     <div
                       key={`speed-${i}`}
-                      className="flex items-center justify-between font-mono bg-slate-100 dark:bg-stone-800 px-1.5 py-0.5 rounded"
+                      className="flex items-center justify-between"
                     >
                       <span>{t("speedChange")}:</span>
                       <span>
@@ -864,7 +835,7 @@ function Inspect(props: InspectProps) {
                   {selectedSignatureChanges.map((sig, i) => (
                     <div
                       key={`sig-${i}`}
-                      className="flex items-center justify-between font-mono bg-slate-100 dark:bg-stone-800 px-1.5 py-0.5 rounded"
+                      className="flex items-center justify-between"
                     >
                       <span>{t("signatureChange")}:</span>
                       <span>{formatSignature(sig)}</span>
@@ -873,7 +844,7 @@ function Inspect(props: InspectProps) {
                   {selectedNotes.map((note) => (
                     <div
                       key={note.id}
-                      className="flex items-center justify-between font-mono bg-slate-100 dark:bg-stone-800 px-1.5 py-0.5 rounded"
+                      className="flex items-center justify-between"
                     >
                       <span>
                         #{note.id + 1}
@@ -906,34 +877,45 @@ function Inspect(props: InspectProps) {
       </div>
 
       {/* 下部: 草と TimeBar */}
-      <div
-        className="relative w-full overflow-hidden flex-none"
-        style={{
-          height: isMobile ? 6 * rem : "10vh",
-          minHeight: "5.5rem",
-          maxHeight: "15vh",
-        }}
-      >
-        <div className="absolute inset-x-0 bottom-0 pointer-events-none opacity-80">
-          <IrasutoyaLikeGrass
-            height={
-              (isMobile
-                ? Math.min(6 * rem, 0.15 * screenHeight)
-                : 0.1 * screenHeight) +
-              1 * rem
-            }
+      <div className="relative w-full flex-none flex items-center">
+        <IrasutoyaLikeGrass height={10 * rem + 1 * rem} />
+        <TimeBar
+          className="z-10"
+          chartSeq={chartSeq}
+          currentTimeSec={currentTimeSec}
+          setAndSeekCurrentTimeWithoutOffset={
+            setAndSeekCurrentTimeWithoutOffset
+          }
+          zoom={zoom}
+          isNoteSelected={isNoteSelected}
+        />
+        <div className="absolute left-3 bottom-3 z-15 flex items-baseline">
+          <span className="whitespace-nowrap">{t("level")}:</span>
+          <Select
+            className=""
+            options={levelOptions}
+            value={selectedLvIndex}
+            onSelect={(idx: number) => {
+              setSelectedLvIndex(idx);
+            }}
+            disabled={levelOptions.length <= 1}
+            showValue
           />
         </div>
-        <div className="relative z-10 w-full h-full">
-          <TimeBar
-            chartSeq={chartSeq}
-            currentTimeSec={currentTimeSec}
-            setAndSeekCurrentTimeWithoutOffset={
-              setAndSeekCurrentTimeWithoutOffset
-            }
-            zoom={zoom}
-            isNoteSelected={isNoteSelected}
-          />
+        <div className="absolute right-3 bottom-3 z-15 flex items-baseline">
+          <span className="">{t("zoom")}</span>
+          <div>
+            <Button
+              small
+              text="-"
+              onClick={() => setZoom((z) => Math.max(-2, z - 1))}
+            />
+            <Button
+              small
+              text="+"
+              onClick={() => setZoom((z) => Math.min(3, z + 1))}
+            />
+          </div>
         </div>
       </div>
     </main>

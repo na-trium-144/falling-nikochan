@@ -70,7 +70,9 @@ export default function InspectFallingWindow(props: Props) {
 
   // chartSeqの変更時または停止時に状態をリセット
   useEffect(() => {
-    displayNikochan.current = [];
+    if (!playing) {
+      displayNikochan.current = [];
+    }
   }, [chartSeq, playing]);
 
   const renderCanvas = useCallback(
@@ -122,90 +124,74 @@ export default function InspectFallingWindow(props: Props) {
           currentTimeSec
         );
 
-        if (playing) {
-          // 巻き戻し/シークを検知して未来の音符のアニメーション状態をリセット
-          if (currentTimeSec < lastNow.current) {
-            for (let ni = 0; ni < chartSeq.notes.length; ni++) {
-              if (chartSeq.notes[ni].hitTimeSec > currentTimeSec) {
-                displayNikochan.current[ni] = null;
-              }
-            }
-          }
+        const c = {
+          noteSize,
+          boxSize,
+          playUIScale,
+          canvasMarginX,
+          canvasMarginY,
+          marginY,
+          playbackRate,
+          rem,
+          now: playing ? currentTimeSec : undefined,
+          nikochanBitmap: nikochanBitmap.current,
+          lastNow: playing ? lastNow.current : undefined,
+          dark: isDark,
+          noFadeIn: playing ? false : true,
+        };
 
-          const c = {
-            noteSize,
-            boxSize,
-            playUIScale,
-            canvasMarginX,
-            canvasMarginY,
-            marginY,
-            playbackRate,
-            rem,
-            now: currentTimeSec,
-            nikochanBitmap: nikochanBitmap.current,
-            lastNow: lastNow.current,
-            dark: isDark,
-            noFadeIn: false,
+        for (let ni = chartSeq.notes.length - 1; ni >= 0; ni--) {
+          const n = chartSeq.notes[ni];
+          const isHit = currentTimeSec >= n.hitTimeSec;
+          const noteInGame: NoteInGame = {
+            ...n,
+            done: playing && isHit ? 1 : 0,
+            bigDone: playing && isHit ? n.big : false,
+            hitPos: playing && isHit ? { x: n.targetX, y: 0 } : undefined,
+            chain: playing && isHit ? n.id + 1 : 0,
           };
-
-          const displayNotes: DisplayNote[] = [];
-          for (let ni = 0; ni < chartSeq.notes.length; ni++) {
-            const n = chartSeq.notes[ni];
-            const isHit = currentTimeSec >= n.hitTimeSec;
-            const noteInGame: NoteInGame = {
-              ...n,
-              done: isHit ? 1 : 0,
-              bigDone: isHit ? n.big : false,
-              hitPos: isHit ? { x: n.targetX, y: 0 } : undefined,
-              chain: isHit ? n.id + 1 : 0,
-            };
-            const dn = displayNote(noteInGame, currentTimeSec);
-            if (dn !== null) {
-              displayNotes.push(dn);
+          const dn = displayNote(noteInGame, currentTimeSec);
+          if (dn !== null) {
+            let dns: DisplayNikochan;
+            if (playing) {
+              if (!displayNikochan.current[dn.id]) {
+                displayNikochan.current[dn.id] = new DisplayNikochan(
+                  noteInGame,
+                  dn,
+                  c
+                );
+              }
+              dns = displayNikochan.current[dn.id]!;
+              dns.update(dn, c);
+            } else {
+              dns = new DisplayNikochan(noteInGame, dn, c);
             }
-          }
-          displayNotes.reverse();
 
-          for (const dn of displayNotes) {
-            const note = chartSeq.notes[dn.id];
-            const isHit = currentTimeSec >= note.hitTimeSec;
-            const noteInGame: NoteInGame = {
-              ...note,
-              done: isHit ? 1 : 0,
-              bigDone: isHit ? note.big : false,
-              hitPos: isHit ? { x: note.targetX, y: 0 } : undefined,
-              chain: isHit ? note.id + 1 : 0,
-            };
-
-            if (!displayNikochan.current[dn.id]) {
-              displayNikochan.current[dn.id] = new DisplayNikochan(
-                noteInGame,
-                dn,
-                c
-              );
-            }
-            const dns = displayNikochan.current[dn.id]!;
-            dns.update(dn, c);
-
-            const isSelected = stepCmp(note.step, currentStep) === 0;
+            const isSelected = stepCmp(n.step, currentStep) === 0;
 
             if (tctx) {
-              dns.drawTrail(
-                tctx,
-                tailsCanvasDPR,
-                isSelected
-                  ? "oklch(80.8% 0.114 19.571)" // red-300
-                  : "oklch(87.2% 0.01 258.338)" // gray-300
-              );
-              dns.drawTail(tctx, tailsCanvasDPR);
+              if (!playing) {
+                dns.drawTrail(
+                  tctx,
+                  tailsCanvasDPR,
+                  isSelected
+                    ? "oklch(80.8% 0.114 19.571)" // red-300
+                    : "oklch(87.2% 0.01 258.338)" // gray-300
+                );
+              }
+              if (playing) {
+                dns.drawTail(tctx, tailsCanvasDPR);
+              }
             }
             if (ectx) {
-              dns.drawRipple(ectx, effectsCanvasDPR);
-              dns.drawParticle(ectx, effectsCanvasDPR);
+              if (playing) {
+                dns.drawRipple(ectx, effectsCanvasDPR);
+                dns.drawParticle(ectx, effectsCanvasDPR);
+              }
             }
             if (nctx) {
               dns.drawNikochan(nctx, nikochanCanvasDPR);
-              if (isSelected) {
+              if (!playing && isSelected) {
                 dns.drawCircle(
                   nctx,
                   nikochanCanvasDPR,
@@ -214,74 +200,8 @@ export default function InspectFallingWindow(props: Props) {
               }
             }
           }
-          lastNow.current = currentTimeSec;
-        } else {
-          // 停止中: アニメーション状態はリセットし、Tail, Ripple, Particleは描画しない
-          displayNikochan.current = [];
-
-          const c = {
-            noteSize,
-            boxSize,
-            playUIScale,
-            canvasMarginX,
-            canvasMarginY,
-            marginY,
-            playbackRate,
-            rem,
-            nikochanBitmap: nikochanBitmap.current,
-            dark: isDark,
-            noFadeIn: true,
-          };
-
-          const displayNotes: DisplayNote[] = [];
-          for (let ni = 0; ni < chartSeq.notes.length; ni++) {
-            const n = chartSeq.notes[ni];
-            const noteInGame: NoteInGame = {
-              ...n,
-              done: 0,
-              bigDone: false,
-              chain: 0,
-            };
-            const dn = displayNote(noteInGame, currentTimeSec);
-            if (dn !== null) {
-              displayNotes.push(dn);
-            }
-          }
-          displayNotes.reverse();
-
-          for (const dn of displayNotes) {
-            const note = chartSeq.notes[dn.id];
-            const noteInGame: NoteInGame = {
-              ...note,
-              done: 0,
-              bigDone: false,
-              chain: 0,
-            };
-            const dns = new DisplayNikochan(noteInGame, dn, c);
-            const isSelected = stepCmp(note.step, currentStep) === 0;
-
-            if (tctx) {
-              dns.drawTrail(
-                tctx,
-                tailsCanvasDPR,
-                isSelected
-                  ? "oklch(80.8% 0.114 19.571)" // red-300
-                  : "oklch(87.2% 0.01 258.338)" // gray-300
-              );
-            }
-            if (nctx) {
-              dns.drawNikochan(nctx, nikochanCanvasDPR);
-              if (isSelected) {
-                dns.drawCircle(
-                  nctx,
-                  nikochanCanvasDPR,
-                  "oklch(70.4% 0.191 22.216)" // red-400
-                );
-              }
-            }
-          }
-          lastNow.current = currentTimeSec;
         }
+        lastNow.current = currentTimeSec;
       }
     },
     [
