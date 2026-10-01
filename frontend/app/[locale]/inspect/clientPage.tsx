@@ -27,7 +27,7 @@ import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { useResizeDetector } from "react-resize-detector";
 import { useDisplayMode } from "@/scale.js";
 import { useColorThief } from "@/common/colorThief.js";
-import Button from "@/common/button.js";
+import Button, { ButtonHighlight } from "@/common/button.js";
 import Select from "@/common/select.js";
 import CheckBox from "@/common/checkBox.js";
 import Range from "@/common/range.js";
@@ -48,14 +48,16 @@ import {
 } from "@/common/pwaInstall.jsx";
 import { titleWithSiteName } from "@/common/title.js";
 import { InitErrorMessage } from "@/play/messageBox.js";
+import { VolumeControlArea } from "@/play/musicArea.js";
+import { CurrentStepText } from "@/edit/noteTab.js";
 
-export interface ChartEvent {
+interface ChartEvent {
   step: Step;
   timeSec: number;
   type: "note" | "bpm" | "speed" | "signature";
 }
 
-export function getAllEvents(chartSeq: ChartSeqData): ChartEvent[] {
+function getAllEvents(chartSeq: ChartSeqData): ChartEvent[] {
   const events: ChartEvent[] = [];
   for (const n of chartSeq.notes) {
     events.push({
@@ -93,7 +95,7 @@ export function getAllEvents(chartSeq: ChartSeqData): ChartEvent[] {
   return events;
 }
 
-export function getUniqueEventTimes(
+function getUniqueEventTimes(
   events: readonly ChartEvent[]
 ): { step: Step; timeSec: number }[] {
   const result: { step: Step; timeSec: number }[] = [];
@@ -108,7 +110,7 @@ export function getUniqueEventTimes(
   return result;
 }
 
-export function findClosestEvent(
+function findClosestEvent(
   events: readonly ChartEvent[],
   currentTimeSec: number
 ): ChartEvent | null {
@@ -165,7 +167,7 @@ export function getInspectCurrentStep(
   return stepSnap4th;
 }
 
-export function formatSignature(sig: Signature): string {
+function formatSignature(sig: Signature): string {
   const barLengths = getBarLength(sig);
   return barLengths
     .map((len) => `${stepImproper(len)}/${len.denominator * 4}`)
@@ -432,6 +434,8 @@ function Inspect(props: InspectProps) {
     beatVolumeCid: cid ? `beatVolume-${cid}` : undefined,
     enableBeatSE: "enableBeatInspect",
   });
+  const [volumeCtrlOpen, setVolumeCtrlOpen] = useState(false);
+  const [pointerInVolumeCtrl, setPointerInVolumeCtrl] = useState(false);
 
   useSETimer({
     playing,
@@ -515,18 +519,21 @@ function Inspect(props: InspectProps) {
     ? getSignatureState(signatureWithBarNum, currentStep)
     : null;
 
-  const currentStepStr = currentSignatureState
-    ? currentSignatureState.barNum +
-      1 +
-      ";" +
-      (currentSignatureState.count.fourth + 1) +
-      (currentSignatureState.count.numerator > 0
-        ? "+" +
-          currentSignatureState.count.numerator +
-          "/" +
-          currentSignatureState.count.denominator * 4
-        : "")
-    : "-";
+  const notesBigId: (number | null)[] = useMemo(() => {
+    const notesBigId: (number | null)[] = [];
+    let id = 0;
+    for (const n of chartSeq?.notes ?? []) {
+      if (n.big) {
+        notesBigId[n.id] = id;
+        id++;
+      }
+    }
+    return notesBigId;
+  }, [chartSeq]);
+  const bigCount = useMemo(
+    () => chartSeq?.notes.filter((n) => n.big).length,
+    [chartSeq]
+  );
 
   // 選択中の音符（現在カーソル位置と一致する音符）
   const selectedNotes = useMemo(
@@ -723,142 +730,136 @@ function Inspect(props: InspectProps) {
           </div>
 
           {/* 音量調整 */}
-          <div className="flex flex-col gap-1 text-xs">
-            <div className="relative flex items-center">
-              <CheckBox
-                id="enableHitSE"
-                value={enableHitSE}
-                onChange={(v) => setEnableHitSE(v)}
-              >
-                <span className="inline-block w-4" />
-                {t("se")}
-              </CheckBox>
-              <SmilingFace className="absolute left-5 inline-block inset-y-0 h-max m-auto" />
+          <div className="relative">
+            <button
+              className={clsx("fn-icon-button", "fg-base")}
+              onClick={() => setVolumeCtrlOpen(!volumeCtrlOpen)}
+              onPointerDown={(e) => e.stopPropagation()}
+              onPointerUp={(e) => e.stopPropagation()}
+            >
+              <ButtonHighlight />
               <VolumeNotice
                 theme="filled"
-                className={clsx(
-                  "inline-block align-middle ml-2 text-sm",
-                  enableHitSE || "text-dim"
-                )}
+                className="inline-block align-middle"
               />
-              <span
-                className={clsx(
-                  "inline-block w-6 text-center",
-                  enableHitSE || "text-dim"
-                )}
-              >
-                {hitVolume}
-              </span>
-              <Range
-                className="align-middle flex-1 ml-1"
-                min={0}
-                max={100}
-                disabled={!enableHitSE}
-                value={hitVolume}
-                onChange={setHitVolume}
-              />
-            </div>
-            <div className="relative flex items-center">
-              <CheckBox
-                id="enableBeatSE"
-                value={enableBeatSE}
-                onChange={(v) => setEnableBeatSE(v)}
-              >
-                {t("beatSE")}
-              </CheckBox>
-              <VolumeNotice
-                theme="filled"
-                className={clsx(
-                  "inline-block align-middle ml-2 text-sm",
-                  enableBeatSE || "text-dim"
-                )}
-              />
-              <span
-                className={clsx(
-                  "inline-block w-6 text-center",
-                  enableBeatSE || "text-dim"
-                )}
-              >
-                {beatVolume}
-              </span>
-              <Range
-                className="align-middle flex-1 ml-1"
-                min={0}
-                max={100}
-                disabled={!enableBeatSE}
-                value={beatVolume}
-                onChange={setBeatVolume}
-              />
-            </div>
+            </button>
+            <VolumeControlArea
+              className={clsx("absolute z-1 right-0 top-full")}
+              isMobile={isMobile}
+              large={true}
+              isOpen={volumeCtrlOpen}
+              setOpen={setVolumeCtrlOpen}
+              pointerInVolumeCtrl={pointerInVolumeCtrl}
+              setPointerInVolumeCtrl={setPointerInVolumeCtrl}
+              ytVolume={0} // todo?
+              setYtVolume={() => undefined}
+              enableSE={enableHitSE}
+              setEnableSE={setEnableHitSE}
+              seVolume={hitVolume}
+              setSEVolume={setHitVolume}
+              enableBeatSE={enableBeatSE}
+              setEnableBeatSE={setEnableBeatSE}
+              beatVolume={beatVolume}
+              setBeatVolume={setBeatVolume}
+              ready={ready}
+              playing={playing}
+            />
           </div>
 
           {/* 音符・イベントの詳細情報表示 */}
+          <div className="flex items-center justify-center">
+            <span className="min-w-20 text-right">{t("step")}</span>
+            <CurrentStepText ss={currentSignatureState} />
+          </div>
           <Box
             classNameOuter="w-full mt-1"
             classNameInner="p-4 flex flex-col gap-1"
           >
-            <div className="flex items-center justify-between">
-              <span>{t("step")}:</span>
-              <span>{currentStepStr}</span>
-            </div>
-            <hr className="fn-hr my-2" />
             <div className="flex flex-col gap-1">
               {selectedNotes.length === 0 &&
-              selectedBpmChanges.length === 0 &&
-              selectedSpeedChanges.length === 0 &&
-              selectedSignatureChanges.length === 0 ? (
-                <span className="text-dim">{t("noSelection")}</span>
-              ) : (
-                <>
-                  {selectedBpmChanges.map((b, i) => (
-                    <div
-                      key={`bpm-${i}`}
-                      className="flex items-center justify-between"
-                    >
-                      <span>{t("bpmChange")}:</span>
-                      <span>{b.bpm}</span>
-                    </div>
-                  ))}
-                  {selectedSpeedChanges.map((s, i) => (
-                    <div
-                      key={`speed-${i}`}
-                      className="flex items-center justify-between"
-                    >
-                      <span>{t("speedChange")}:</span>
-                      <span>
-                        {s.type === "interp"
-                          ? `${s.prevBpm} → ${s.bpm}`
-                          : s.bpm}
-                      </span>
-                    </div>
-                  ))}
-                  {selectedSignatureChanges.map((sig, i) => (
-                    <div
-                      key={`sig-${i}`}
-                      className="flex items-center justify-between"
-                    >
-                      <span>{t("signatureChange")}:</span>
-                      <span>{formatSignature(sig)}</span>
-                    </div>
-                  ))}
-                  {selectedNotes.map((note) => (
-                    <div
-                      key={note.id}
-                      className="flex items-center justify-between"
-                    >
-                      <span>
-                        #{note.id + 1}
-                        {note.big ? " (Big)" : ""}:
-                      </span>
-                      <span className="space-x-2">
-                        <span>x: {note.hitX}</span>
-                        <span>vx: {note.hitVX}</span>
-                        <span>vy: {note.hitVY}</span>
-                      </span>
-                    </div>
-                  ))}
-                </>
-              )}
+                selectedBpmChanges.length === 0 &&
+                selectedSpeedChanges.length === 0 &&
+                selectedSignatureChanges.length === 0 && (
+                  <span className="text-dim">{t("noSelection")}</span>
+                )}
+              {selectedBpmChanges.map((b, i) => (
+                <div
+                  key={`bpm-${i}`}
+                  className="flex items-center justify-between"
+                >
+                  <span className="text-sm mr-2">{t("bpmChange")}:</span>
+                  <span>{b.bpm}</span>
+                </div>
+              ))}
+              {selectedSpeedChanges.map((s, i) => (
+                <div
+                  key={`speed-${i}`}
+                  className="flex items-center justify-between"
+                >
+                  <span className="text-sm mr-2">{t("speedChange")}:</span>
+                  <span>
+                    {s.type === "interp" ? `${s.prevBpm} → ${s.bpm}` : s.bpm}
+                  </span>
+                </div>
+              ))}
+              {selectedSignatureChanges.map((sig, i) => (
+                <div
+                  key={`sig-${i}`}
+                  className="flex items-center justify-between"
+                >
+                  <span className="text-sm mr-2">{t("signatureChange")}:</span>
+                  <span>{formatSignature(sig)}</span>
+                </div>
+              ))}
+              {selectedNotes.map((note) => (
+                <div key={note.id} className="flex items-center justify-end flex-wrap">
+                  <span>#</span>
+                  <span className="ml-1 min-w-6">
+                    {note.id + 1}
+                  </span>
+                  {note.big && (
+                    <span className="text-sm ml-2">
+                      (Big#
+                      <span className="ml-1">{notesBigId[note.id]! + 1}</span>)
+                    </span>
+                  )}
+                  <span className="flex-1" />
+                  <span className="ml-2">
+                    <span className="text-sm text-dim mr-1">
+                      <var className="italic">x</var>:
+                    </span>
+                    <span className="inline-block min-w-6 text-center">
+                      {note.hitX}
+                    </span>
+                  </span>
+                  <span className="ml-2">
+                    <span className="text-sm text-dim mr-1">
+                      <var className="italic">vx</var>:
+                    </span>
+                    <span className="inline-block min-w-6 text-center">
+                      {note.hitVX}
+                    </span>
+                  </span>
+                  <span className="ml-2">
+                    <span className="text-sm text-dim mr-1">
+                      <var className="italic">vy</var>:
+                    </span>
+                    <span className="inline-block min-w-6 text-center">
+                      {note.hitVY}
+                    </span>
+                  </span>
+                </div>
+              ))}
+              <hr className="fn-hr my-1" />
+              <div className="flex items-center">
+                <span className="ml-2">/</span>
+                <span className="ml-1 min-w-8 text-center">
+                  {chartSeq?.notes.length}
+                </span>
+                <span className="text-sm ml-2">
+                  (Big<span className="text-sm ml-1">{bigCount}</span>)
+                </span>
+              </div>
             </div>
           </Box>
         </div>

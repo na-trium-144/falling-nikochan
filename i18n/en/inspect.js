@@ -8,7 +8,7 @@ export default {
     noSelection: "No event selected",
     bpmChange: "BPM Change",
     speedChange: "Speed Change",
-    signatureChange: "Time Signature Change",
+    signatureChange: "Beat Change",
     speed: "Player Control",
     se: "Tap SE",
     beatSE: "Metronome SE",

@@ -6,10 +6,37 @@ import CheckBox from "@/common/checkBox.js";
 import Select from "@/common/select";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
-import { ChartEditing } from "@falling-nikochan/chart";
+import { ChartEditing, SignatureState } from "@falling-nikochan/chart";
 import type { Ace } from "ace-builds";
 import { RefObject } from "react";
 
+export function CurrentStepText({
+  ss,
+}: {
+  ss: SignatureState | undefined | null;
+}) {
+  return (
+    <>
+      <span className="inline-block text-right w-8">{ss && ss.barNum + 1}</span>
+      <span className="ml-1 ">;</span>
+      <span className="inline-block text-right w-6">
+        {ss && ss.count.fourth + 1}
+      </span>
+      <div className="min-w-20 inline-block">
+        {ss && ss.count.numerator > 0 && (
+          <>
+            <span className="ml-2 ">+</span>
+            <span className="inline-block text-right w-6">
+              {ss.count.numerator}
+            </span>
+            <span className="ml-1 mr-1">/</span>
+            <span>{ss.count.denominator * 4}</span>
+          </>
+        )}
+      </div>
+    </>
+  );
+}
 interface Props {
   chart?: ChartEditing;
   aceSessionRef: RefObject<(Ace.EditSession | null)[]>;
@@ -24,25 +51,7 @@ export default function NoteTab(props: Props) {
     <div className="flex flex-col h-full">
       <div>
         <span>{t("step")}</span>
-        <span className="inline-block text-right w-6">
-          {ss && ss.barNum + 1}
-        </span>
-        <span className="ml-1 ">;</span>
-        <span className="inline-block text-right w-6">
-          {ss && ss.count.fourth + 1}
-        </span>
-        <div className="w-20 inline-block">
-          {ss && ss.count.numerator > 0 && (
-            <>
-              <span className="ml-2 ">+</span>
-              <span className="inline-block text-right w-6">
-                {ss?.count.numerator}
-              </span>
-              <span className="ml-1 mr-1">/</span>
-              <span>{ss && ss.count.denominator * 4}</span>
-            </>
-          )}
-        </div>
+        <CurrentStepText ss={ss} />
         <div className="inline-block ml-2 w-28">
           <span>{t("noteNum")}</span>
           <span className="inline-block text-right w-6">
