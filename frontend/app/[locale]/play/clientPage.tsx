@@ -17,19 +17,14 @@ import clsx from "clsx/lite";
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
 import {
-  bigScoreRate,
-  chainScoreRate,
   levelTypes,
   RecordGetSummary,
-  RecordPost,
   inputTypes,
   emptyBrief,
-  currentChartVer,
-  loadChart,
   ChartSeqData,
-  Level15Play,
   RecordGetSummarySchema,
-  LevelPlay,
+  serializeResultParams,
+  createRecordPost,
 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
@@ -47,13 +42,13 @@ import { getBestScore, setBestScore } from "@/common/bestScore.js";
 import BPMSign from "./bpmSign.js";
 import { getSession } from "./session.js";
 import { MusicArea } from "./musicArea.js";
-import { Level6Play } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { SlimeSVG } from "@/common/slime.js";
 import { useSE } from "@/common/se.js";
 import Pause from "@icon-park/react/lib/icons/Pause.js";
 import { Key } from "@/common/key.js";
 import {
+  detectiOS27OrLater,
   detectOS,
   historyBackWithReview,
   isInsideFrame,
@@ -72,6 +67,11 @@ import { markAsExpected } from "@/common/apiError.js";
 import * as Sentry from "@sentry/nextjs";
 import { useDisplayMode } from "@/scale.js";
 import { refreshBrief } from "@/common/briefCache.js";
+import {
+  initResultSigning,
+  sendRecord,
+  sendResultSerialized,
+} from "./resultSigningAuth.js";
 import { RecOverlay } from "./recOverlay.js";
 
 export function InitPlay({ locale }: { locale: string }) {
@@ -112,7 +112,7 @@ export function InitPlay({ locale }: { locale: string }) {
     setEditing(session.editing);
 
     if (session.editing) {
-      setChartSeq(loadChart(session.level));
+      setChartSeq(session.level);
       setErrorMsg(undefined);
     } else {
       /*
@@ -123,7 +123,7 @@ export function InitPlay({ locale }: { locale: string }) {
       といった不都合がある
       */
       fetchBackend()
-        .url(`/api/playFile/${session.cid}/${session.lvIndex}`)
+        .url(`/api/seqFile/${session.cid}/${session.lvIndex}`)
         .headers({ "X-If-Match": `"${session.brief.etag}"` })
         .get()
         .badRequest(markAsExpected)
@@ -133,24 +133,10 @@ export function InitPlay({ locale }: { locale: string }) {
           markAsExpected(e);
         })
         .arrayBuffer((buf) => {
-          const playFile = msgpack.decode(buf) as
-            Level6Play | Level15Play | LevelPlay;
-          console.log("playFile.ver", playFile.ver);
-          if (
-            playFile.ver === 6 ||
-            playFile.ver === 15 ||
-            playFile.ver === currentChartVer
-          ) {
-            addRecent("play", session.cid ?? "");
-            updatePlayCountForReview();
-            return { seq: loadChart(playFile), error: undefined };
-          } else {
-            // playFile satisfies never;
-            return {
-              seq: undefined,
-              error: te("chartVersion", { ver: (playFile as any)?.ver }),
-            };
-          }
+          const seq = msgpack.decode(buf) as ChartSeqData;
+          addRecent("play", session.cid ?? "");
+          updatePlayCountForReview();
+          return { seq, error: undefined };
         })
         .catch((e: unknown) => ({
           seq: undefined,
@@ -245,6 +231,68 @@ function Play(props: Props) {
     setAutoOffset_(v);
     localStorage.setItem("autoOffset", v ? "1" : "0");
   }, []);
+  const [resultSessionPrivateKey, setResultSessionPrivateKey] = useState<
+    Uint8Array | Error | "ignore" | null
+  >(null);
+  const [resultSessionToken, setResultSessionToken] = useState<string | null>(
+    null
+  );
+  const [resultSessionExp, setResultSessionExp] = useState<number | null>(null);
+  const resultSessionExpired = useCallback(
+    () => resultSessionExp && Date.now() > resultSessionExp,
+    [resultSessionExp]
+  );
+
+  useEffect(() => {
+    let canceled = false;
+    if (cid && !queryOptions.nosigning) {
+      initResultSigning(
+        cid,
+        (key, token) => {
+          if (!canceled) {
+            setResultSessionPrivateKey(key);
+            setResultSessionToken(token);
+            // バックエンド側のトークン有効期限は3時間だが、切れないよう早めにエラーメッセージを出す
+            setResultSessionExp(Date.now() + 2.5 * 60 * 60 * 1000);
+            console.log(
+              "ResultSigning session successfully initialized at:",
+              new Date()
+            );
+          }
+        },
+        (e) => {
+          if (!canceled) {
+            if (
+              process.env.BACKEND_PREFIX &&
+              process.env.BACKEND_PREFIX !== window.location.origin
+            ) {
+              // 開発環境など、別のバックエンドに接続している場合は、BuildKeyが異なるため認証できない。その場合は認証を必須にしない。
+              setResultSessionPrivateKey("ignore");
+              console.warn(
+                "Failed to initialize ResultSigning session, " +
+                  "but ignored because BACKEND_PREFIX is set and different from location.origin. ",
+                "Record will not be sent and ResultParam will not be signed. ",
+                e
+              );
+            } else {
+              setResultSessionPrivateKey(e);
+              console.warn(
+                "Failed to initialize ResultSigning session. " +
+                  "If you want to ignore and continue, add `nosigning=1` query parameter.",
+                e
+              );
+            }
+          }
+        }
+      );
+      return () => {
+        canceled = true;
+      };
+    } else {
+      setResultSessionPrivateKey("ignore");
+    }
+  }, [cid, queryOptions.nosigning]);
+
   const [userOffset, setUserOffset_] = useState<number>(0);
   useEffect(() => {
     if (cid) {
@@ -292,10 +340,18 @@ function Play(props: Props) {
     cid && lvIndex !== undefined && chartBrief?.levels[lvIndex];
   const reloadBestScore = useCallback(() => {
     if (cid && lvIndex !== undefined && chartBrief?.levels[lvIndex]) {
-      const data = getBestScore(cid, chartBrief.levels[lvIndex].hash);
+      const data = getBestScore(cid, chartBrief.levels[lvIndex]);
       if (data) {
-        setBestScoreState(data.baseScore + data.chainScore + data.bigScore);
-        setBestScoreCounts([...data.judgeCount, data.bigCount ?? 0]);
+        setBestScoreState(
+          (data.resultParams.baseScore100 +
+            data.resultParams.chainScore100 +
+            data.resultParams.bigScore100) /
+            100
+        );
+        setBestScoreCounts([
+          ...data.resultParams.judgeCount,
+          data.resultParams.bigCount || 0,
+        ]);
       } else {
         setBestScoreState(0);
         setBestScoreCounts(null);
@@ -310,7 +366,7 @@ function Play(props: Props) {
 
   const [chartPlaying, setChartPlaying] = useState<boolean>(false);
   const [wasAutoPlay, setWasAutoPlay] = useState<boolean>(false); // start時点でautoだったかどうか
-  const [oldPlaybackRate, setOldPlaybackRate] = useState<number>(1);
+  // const [oldPlaybackRate, setOldPlaybackRate] = useState<number>(1);  use minActualPlaybackRate instead
   const [oldUserBegin, setOldUserBegin] = useState<number | null>(null);
   // 終了ボタンが押せるようになる時刻をセット
   const [exitable, setExitable] = useState<DOMHighResTimeStamp | null>(null);
@@ -382,7 +438,7 @@ function Play(props: Props) {
     localStorage.setItem("enableIOSThru", v ? "1" : "0");
   }, []);
   useEffect(() => {
-    if (detectOS() === "ios") {
+    if (detectOS() === "ios" && !detectiOS27OrLater()) {
       const enableIOSThruInitial =
         localStorage.getItem("enableIOSThru") === "1" ||
         localStorage.getItem("enableIOSThru") == null;
@@ -399,53 +455,102 @@ function Play(props: Props) {
   const rawStartTimeStamp = useRef<DOMHighResTimeStamp | null>(null);
   const filteredStartTimeStamp = useRef<DOMHighResTimeStamp | null>(null);
   const timeStampLastAdjusted = useRef<DOMHighResTimeStamp>(0);
+  const perfStarted = useRef<DOMHighResTimeStamp | null>(null);
+  const actualPlaybackRateRef = useRef<number>(playbackRate);
+  const minActualPlaybackRateRef = useRef<number>(playbackRate);
+  const [minActualPlaybackRate, setMinActualPlaybackRate] =
+    useState<number>(playbackRate);
+  const sampleTimestamps = useRef<{ perf: DOMHighResTimeStamp; yt: number }[]>(
+    []
+  );
   const getCurrentTimeSec = useCallback(() => {
     if (ytPlayer.current?.getCurrentTime && chartSeq && chartPlaying) {
+      const ytCurrentTime = ytPlayer.current.getCurrentTime();
+      const perfNow = performance.now();
       const ytNow =
-        ytPlayer.current?.getCurrentTime() -
-        chartSeq.offset -
-        offsetPlusLatency * playbackRate;
-      rawStartTimeStamp.current =
-        performance.now() - (ytNow * 1000) / playbackRate;
+        ytCurrentTime - chartSeq.offset - offsetPlusLatency * playbackRate;
+      rawStartTimeStamp.current = perfNow - (ytNow * 1000) / playbackRate;
       if (filteredStartTimeStamp.current === null) {
         filteredStartTimeStamp.current = rawStartTimeStamp.current;
       }
+      if (perfStarted.current === null) {
+        perfStarted.current = perfNow;
+        actualPlaybackRateRef.current = playbackRate;
+      }
+
       const now =
-        ((performance.now() - filteredStartTimeStamp.current) / 1000) *
-        playbackRate;
-      const dt = (performance.now() - timeStampLastAdjusted.current) / 1000;
+        ((perfNow - filteredStartTimeStamp.current) / 1000) * playbackRate;
+      const dt = (perfNow - timeStampLastAdjusted.current) / 1000;
+
+      // 再生速度改ざん検知
+      if (
+        ytPlayer.current?.getPlayerState?.() === 1 &&
+        sampleTimestamps.current.length > 2 &&
+        perfNow - sampleTimestamps.current[0].perf > 1000
+      ) {
+        const actualPlaybackRate =
+          ((ytCurrentTime - sampleTimestamps.current[0].yt) /
+            (perfNow - sampleTimestamps.current[0].perf)) *
+          1000;
+        actualPlaybackRateRef.current =
+          actualPlaybackRateRef.current * Math.exp(-dt / 5.0) +
+          actualPlaybackRate * (1 - Math.exp(-dt / 5.0));
+        const actualPlaybackRateRounded =
+          Math.round(actualPlaybackRateRef.current * 20) / 20; // x0.05単位;
+        if (
+          perfNow - perfStarted.current > 5000 && // スマホなどで再生開始直後は不安定なため待つ
+          actualPlaybackRateRounded < minActualPlaybackRateRef.current &&
+          actualPlaybackRateRounded < playbackRate * 0.96 // 設定速度から-5%までの誤差は許容する
+        ) {
+          setMinActualPlaybackRate(
+            (minActualPlaybackRateRef.current = actualPlaybackRateRounded)
+          );
+        }
+
+        // 1000msのリングバッファ
+        while (
+          sampleTimestamps.current.length > 2 &&
+          perfNow - sampleTimestamps.current[0].perf > 1000
+        ) {
+          sampleTimestamps.current.shift();
+        }
+      }
+      sampleTimestamps.current.push({ perf: perfNow, yt: ytCurrentTime });
+
       // ずれを少しずつ補正する (ローパスフィルタ)
       filteredStartTimeStamp.current =
         filteredStartTimeStamp.current * Math.exp(-dt / 1.0) +
         rawStartTimeStamp.current * (1 - Math.exp(-dt / 1.0));
-      timeStampLastAdjusted.current = performance.now();
+      timeStampLastAdjusted.current = perfNow;
       return now;
     }
   }, [chartSeq, chartPlaying, offsetPlusLatency, playbackRate]);
 
   const { barFlash, flash } = useFlash();
 
-  const {
+  const [
+    notesAll,
+    resetNotesAll,
     baseScore,
     chainScore,
     bigScore,
     score,
     chain,
     maxChain,
-    notesAll,
-    resetNotesAll,
     notesDone,
     hit,
     iosRelease,
     judgeCount,
     bigCount,
     bigTotal,
-    lateTimes,
     chartEnd,
+    lateTimes,
     hitType,
     posOfs,
     timeOfsEstimator,
-  } = useGameLogic(
+    // judge,
+    // notesYetDone,
+  ] = useGameLogic(
     getCurrentTimeSec,
     auto,
     !!queryOptions.judgeAuto,
@@ -487,29 +592,31 @@ function Play(props: Props) {
 
   const reset = useCallback(() => setShowReady(true), []);
   const start = useCallback(() => {
-    // Space(スタートボタン)が押されたとき
-    switch (ytPlayer.current?.getPlayerState?.()) {
-      case 2:
-      case 0:
-        ytPlayer.current?.seekTo?.(begin, true);
-        ytPlayer.current?.playVideo?.();
-        break;
-      case 5:
-      default:
-        ytPlayer.current?.seekTo?.(begin, true);
-        break;
+    if (!resultSessionExpired()) {
+      // Space(スタートボタン)が押されたとき
+      switch (ytPlayer.current?.getPlayerState?.()) {
+        case 2:
+        case 0:
+          ytPlayer.current?.seekTo?.(begin, true);
+          ytPlayer.current?.playVideo?.();
+          break;
+        case 5:
+        default:
+          ytPlayer.current?.seekTo?.(begin, true);
+          break;
+      }
+      // startボタンを押して数秒経っても始まらなかったらloadingを表示
+      setCloseReadyAnim(true);
+      readyTimeout.current = setInterval(() => {
+        setLoadingAfterReady(true);
+        // iframe内など特殊な環境ではplayVideo()で開始せずstateが-1になる場合がある
+        setNeedManualStart(ytPlayer.current?.getPlayerState?.() === -1);
+      }, 1500);
+      // 再生中に呼んでもなにもしない
+      playSE("hit"); // ユーザー入力のタイミングで鳴らさないとaudioが有効にならないsafariの対策
+      // 譜面のリセットと開始はonStart()で処理
     }
-    // startボタンを押して数秒経っても始まらなかったらloadingを表示
-    setCloseReadyAnim(true);
-    readyTimeout.current = setInterval(() => {
-      setLoadingAfterReady(true);
-      // iframe内など特殊な環境ではplayVideo()で開始せずstateが-1になる場合がある
-      setNeedManualStart(ytPlayer.current?.getPlayerState?.() === -1);
-    }, 1500);
-    // 再生中に呼んでもなにもしない
-    playSE("hit"); // ユーザー入力のタイミングで鳴らさないとaudioが有効にならないsafariの対策
-    // 譜面のリセットと開始はonStart()で処理
-  }, [begin, playSE]);
+  }, [begin, playSE, resultSessionExpired]);
   const stop = useCallback(() => {
     // Escが押された時&Result表示時
     if (chartPlaying) {
@@ -562,7 +669,11 @@ function Play(props: Props) {
   const [giveUpWaitingFps, setGiveUpWaitingFps] = useState<boolean>(false);
   const giveUpFpsTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isReadyAll =
-    ytReady && !!chartSeq && (realFpsStable || giveUpWaitingFps);
+    ytReady &&
+    !!chartSeq &&
+    (realFpsStable || giveUpWaitingFps) &&
+    resultSessionPrivateKey !== null &&
+    !(resultSessionPrivateKey instanceof Error);
   useEffect(() => {
     if (errorMsg) {
       if (showLoadingTimeout.current !== null) {
@@ -623,6 +734,8 @@ function Play(props: Props) {
     if (!errorMsg) {
       if (apiErrorMsg) {
         setErrorMsg(apiErrorMsg);
+      } else if (resultSessionPrivateKey instanceof Error) {
+        setErrorMsg(resultSessionPrivateKey);
       } else if (ytError !== null) {
         setErrorMsg(te("ytError", { code: ytError }));
       } else if (chartBrief && !chartBrief.ytId) {
@@ -631,7 +744,15 @@ function Play(props: Props) {
         setErrorMsg(te("seqEmpty"));
       }
     }
-  }, [apiErrorMsg, ytError, chartBrief, chartSeq, errorMsg, te]);
+  }, [
+    apiErrorMsg,
+    resultSessionPrivateKey,
+    ytError,
+    chartBrief,
+    chartSeq,
+    errorMsg,
+    te,
+  ]);
 
   const [endSecPassed, setEndSecPassed] = useState<boolean>(false);
   useEffect(() => {
@@ -648,6 +769,13 @@ function Play(props: Props) {
       return () => clearInterval(t);
     }
   }, [chartPlaying, chartSeq, endSecPassed, getCurrentTimeSec]);
+
+  const [resultSerialized, setResultSerialized] = useState<string | undefined>(
+    undefined
+  );
+  const [resultSign, setResultSign] = useState<string | Error | undefined>(
+    undefined
+  );
   useEffect(() => {
     if (chartPlaying && chartEnd && endSecPassed) {
       if (!showResult) {
@@ -656,27 +784,10 @@ function Play(props: Props) {
           cid &&
           !auto &&
           userBegin === null &&
-          playbackRate === 1 &&
+          minActualPlaybackRate === 1 &&
           lvIndex !== undefined &&
           chartBrief?.levels.at(lvIndex)
         ) {
-          if (score > bestScoreState) {
-            setBestScore(cid, chartBrief.levels[lvIndex].hash, {
-              date: newResultDate.getTime(),
-              baseScore,
-              chainScore,
-              bigScore,
-              judgeCount: judgeCount.slice(0, 4) as [
-                number,
-                number,
-                number,
-                number,
-              ],
-              bigCount: bigCount,
-              inputType: hitType,
-            });
-            reloadBestScore();
-          }
           fetchBackend()
             .get(`/api/record/${cid}`)
             .json((record) =>
@@ -689,41 +800,6 @@ function Play(props: Props) {
         }
         const t = setTimeout(() => {
           setShowResult(true);
-          if (
-            cid &&
-            userBegin === null &&
-            playbackRate === 1 &&
-            chartBrief?.levels.at(lvIndex)
-          ) {
-            try {
-              const factor = updateRecordFactor(
-                cid,
-                chartBrief.levels[lvIndex].hash,
-                auto
-              );
-              fetchBackend()
-                .url(`/api/record/${cid}`)
-                .json({
-                  lvHash: chartBrief.levels[lvIndex].hash,
-                  auto,
-                  score,
-                  baseScore,
-                  chainScore,
-                  bigScore,
-                  fc: chainScore === chainScoreRate,
-                  fb: bigScore === bigScoreRate,
-                  editing,
-                  factor,
-                } satisfies RecordPost)
-                .post()
-                .notFound(() => undefined)
-                .error(429, () => undefined)
-                .res()
-                .catch((e: unknown) => captureAndWrap(e, { cid }));
-            } catch {
-              // ignore errors from updateRecordFactor
-            }
-          }
           setResultDate(newResultDate);
           setExitable((ex) =>
             Math.max(
@@ -732,6 +808,116 @@ function Play(props: Props) {
             )
           );
           stop();
+          if (cid && chartBrief?.levels.at(lvIndex) && !queryOptions.result) {
+            if (oldUserBegin === null && minActualPlaybackRate === 1) {
+              // こっちはautoは含む
+              let factor: number | null = null;
+              try {
+                factor = updateRecordFactor(
+                  cid,
+                  chartBrief.levels[lvIndex].hash,
+                  auto
+                );
+              } catch (e) {
+                console.error(e);
+                // ignore errors from updateRecordFactor
+              }
+              if (
+                factor !== null &&
+                resultSessionPrivateKey instanceof Uint8Array &&
+                resultSessionToken
+              ) {
+                const record = createRecordPost(
+                  newResultDate,
+                  chartBrief.levels.at(lvIndex)!,
+                  baseScore,
+                  chainScore,
+                  bigScore,
+                  score,
+                  // judgeCount.slice(0, 4) as [number, number, number, number],
+                  // bigCount,
+                  // hitType,
+                  // minActualPlaybackRate,
+                  // cid,
+                  auto,
+                  editing,
+                  factor
+                );
+                sendRecord(
+                  cid,
+                  record,
+                  resultSessionPrivateKey,
+                  resultSessionToken
+                );
+              }
+            }
+            if (!wasAutoPlay && oldUserBegin === null) {
+              // こっちはplaybackRate変更を含む
+              const resultSerialized = serializeResultParams(
+                newResultDate,
+                chartBrief.levels.at(lvIndex)!,
+                baseScore,
+                chainScore,
+                bigScore,
+                score,
+                judgeCount.slice(0, 4) as [number, number, number, number],
+                bigCount,
+                hitType,
+                minActualPlaybackRate,
+                cid
+              );
+              // sessionTokenがない場合でもbestScoreだけ先に保存する
+              if (
+                score > bestScoreState &&
+                // cid &&
+                // !auto &&
+                // userBegin === null &&
+                // chartBrief?.levels.at(lvIndex) &&
+                minActualPlaybackRate === 1
+              ) {
+                setBestScore(
+                  cid,
+                  chartBrief.levels[lvIndex].hash,
+                  resultSerialized,
+                  undefined
+                );
+                reloadBestScore();
+              }
+              if (
+                resultSessionPrivateKey instanceof Uint8Array &&
+                resultSessionToken
+              ) {
+                sendResultSerialized(
+                  resultSerialized,
+                  resultSessionPrivateKey,
+                  resultSessionToken,
+                  (sign) => {
+                    setResultSerialized(resultSerialized);
+                    setResultSign(sign);
+                    if (
+                      score > bestScoreState &&
+                      // cid &&
+                      // !auto &&
+                      // userBegin === null &&
+                      // chartBrief?.levels.at(lvIndex) &&
+                      minActualPlaybackRate === 1
+                    ) {
+                      setBestScore(
+                        cid,
+                        chartBrief.levels[lvIndex].hash,
+                        resultSerialized,
+                        sign
+                      );
+                      // reloadBestScore();
+                    }
+                  },
+                  (e) => {
+                    setResultSign(e);
+                  }
+                );
+              }
+            }
+          }
         }, 1000);
         return () => clearTimeout(t);
       }
@@ -762,7 +948,7 @@ function Play(props: Props) {
       setNeedManualStart(false);
       setChartPlaying(true);
       setWasAutoPlay(auto);
-      setOldPlaybackRate(playbackRate);
+      // setOldPlaybackRate(playbackRate);
       setOldUserBegin(userBegin);
       // setChartStarted(true);
       setExitable(null);
@@ -786,7 +972,9 @@ function Play(props: Props) {
       setTimeout(() => setShowGuidanceText(false), 6000);
     }
     ref.current?.focus();
-    filteredStartTimeStamp.current = null;
+    filteredStartTimeStamp.current = perfStarted.current = null;
+    setMinActualPlaybackRate((minActualPlaybackRateRef.current = playbackRate));
+    sampleTimestamps.current = [];
   }, [
     chartSeq,
     lateTimes,
@@ -816,7 +1004,9 @@ function Play(props: Props) {
         break;
     }
     ref.current?.focus();
-    filteredStartTimeStamp.current = null;
+    filteredStartTimeStamp.current = perfStarted.current = null;
+    // setMinActualPlaybackRate(minActualPlaybackRateRef.current = playbackRate);
+    sampleTimestamps.current = [];
   }, [chartPlaying, ref]);
   const onError = useCallback((ec: number) => {
     setYtError(ec);
@@ -915,6 +1105,7 @@ function Play(props: Props) {
           isReadyAll &&
           e.pointerType === "touch" &&
           detectOS() === "ios" &&
+          !detectiOS27OrLater() &&
           enableIOSThru
         ) {
           iosRelease();
@@ -949,10 +1140,17 @@ function Play(props: Props) {
             thumb={!!queryOptions.thumb}
             className={clsx(
               "isolate z-play-music-area transition-transform duration-500 ease-in-out",
-              musicAreaOk ? "translate-y-0" : "translate-y-[-40vw]"
+              musicAreaOk
+                ? "fn-play-music-area-ok translate-y-0"
+                : "translate-y-[-40vw]"
             )}
             ready={musicAreaOk}
             playing={chartPlaying}
+            minActualPlaybackRate={
+              chartPlaying || (showResult && !showReady)
+                ? minActualPlaybackRate
+                : playbackRate
+            }
             playbackRate={playbackRate}
             ytBeginSec={ytBegin}
             offset={(chartSeq?.offset || 0) + offsetPlusLatency}
@@ -1015,7 +1213,7 @@ function Play(props: Props) {
                 showResultDiff={
                   !wasAutoPlay &&
                   oldUserBegin === null &&
-                  oldPlaybackRate === 1 &&
+                  minActualPlaybackRate === 1 &&
                   showResult &&
                   !showReady
                 }
@@ -1175,40 +1373,48 @@ function Play(props: Props) {
               exit={exit}
             />
           )}
-          {showReady && (
-            <ReadyMessage
-              className={clsx(
-                "isolate z-play-ready",
-                "transition-[scale,opacity] duration-200 ease-out",
-                !openReadyAnim && "opacity-0",
-                closeReadyAnim && "opacity-0 scale-0"
-              )}
-              isTouch={isTouch}
-              back={showResult ? () => setShowReady(false) : undefined}
-              start={start}
-              exit={exit}
-              auto={auto}
-              setAuto={setAuto}
-              userOffset={userOffset}
-              setUserOffset={setUserOffset}
-              autoOffset={autoOffset}
-              setAutoOffset={setAutoOffset}
-              enableSE={enableHitSE}
-              setEnableSE={setEnableHitSE}
-              enableIOSThru={enableIOSThru}
-              setEnableIOSThru={setEnableIOSThru}
-              audioLatency={audioLatency}
-              userBegin={userBegin}
-              setUserBegin={setUserBegin}
-              ytBegin={ytBegin}
-              ytEnd={ytEnd}
-              playbackRate={playbackRate}
-              setPlaybackRate={changePlaybackRate}
-              editing={editing}
-              lateTimes={lateTimes.current}
-              maxHeight={(mainWindowSpace.height || 0) - 10 * rem}
-            />
-          )}
+          {showReady &&
+            (resultSessionExpired() ? (
+              <InitErrorMessage
+                className="isolate z-play-error"
+                msg={te("resultSessionExpired")}
+                isTouch={isTouch}
+                exit={exit}
+              />
+            ) : (
+              <ReadyMessage
+                className={clsx(
+                  "isolate z-play-ready",
+                  "transition-[scale,opacity] duration-200 ease-out",
+                  !openReadyAnim && "opacity-0",
+                  closeReadyAnim && "opacity-0 scale-0"
+                )}
+                isTouch={isTouch}
+                back={showResult ? () => setShowReady(false) : undefined}
+                start={start}
+                exit={exit}
+                auto={auto}
+                setAuto={setAuto}
+                userOffset={userOffset}
+                setUserOffset={setUserOffset}
+                autoOffset={autoOffset}
+                setAutoOffset={setAutoOffset}
+                enableSE={enableHitSE}
+                setEnableSE={setEnableHitSE}
+                enableIOSThru={enableIOSThru}
+                setEnableIOSThru={setEnableIOSThru}
+                audioLatency={audioLatency}
+                userBegin={userBegin}
+                setUserBegin={setUserBegin}
+                ytBegin={ytBegin}
+                ytEnd={ytEnd}
+                playbackRate={playbackRate}
+                setPlaybackRate={changePlaybackRate}
+                editing={editing}
+                lateTimes={lateTimes.current}
+                maxHeight={(mainWindowSpace.height || 0) - 10 * rem}
+              />
+            ))}
           {showResult && (
             <Result
               className="isolate z-play-result"
@@ -1216,16 +1422,28 @@ function Play(props: Props) {
               hidden={showReady}
               auto={wasAutoPlay}
               lang={props.locale}
-              date={resultDate || new Date(2025, 6, 1)}
-              cid={cid || ""}
               brief={chartBrief || emptyBrief()}
-              lvName={chartBrief?.levels.at(lvIndex || 0)?.name || ""}
-              lvType={levelTypes.indexOf(
-                chartBrief?.levels.at(lvIndex || 0)?.type || ""
-              )}
-              lvDifficulty={
-                chartBrief?.levels.at(lvIndex || 0)?.difficulty || 0
+              reset={reset}
+              exit={exit}
+              isTouch={isTouch}
+              showShareButton={!wasAutoPlay && oldUserBegin === null}
+              showRecord={
+                !wasAutoPlay &&
+                oldUserBegin === null &&
+                minActualPlaybackRate === 1
               }
+              newRecord={
+                score > oldBestScoreState &&
+                !wasAutoPlay &&
+                oldUserBegin === null &&
+                minActualPlaybackRate === 1 &&
+                lvIndex !== undefined &&
+                chartBrief?.levels[lvIndex] !== undefined
+                  ? score - oldBestScoreState
+                  : 0
+              }
+              largeResult={largeResult}
+              record={record}
               baseScore100={
                 queryOptions.result
                   ? exampleResult.baseScore100
@@ -1246,33 +1464,11 @@ function Play(props: Props) {
                   ? exampleResult.score100
                   : Math.floor(score * 100)
               }
-              judgeCount={
-                queryOptions.result
-                  ? exampleResult.judgeCount
-                  : (judgeCount.slice(0, 4) as [number, number, number, number])
-              }
               bigCount={queryOptions.result ? exampleResult.bigCount : bigCount}
-              reset={reset}
-              exit={exit}
-              isTouch={isTouch}
-              showShareButton={!wasAutoPlay && oldUserBegin === null}
-              showRecord={
-                !wasAutoPlay && oldUserBegin === null && oldPlaybackRate === 1
-              }
-              newRecord={
-                score > oldBestScoreState &&
-                !wasAutoPlay &&
-                oldUserBegin === null &&
-                oldPlaybackRate === 1 &&
-                lvIndex !== undefined &&
-                chartBrief?.levels[lvIndex] !== undefined
-                  ? score - oldBestScoreState
-                  : 0
-              }
-              largeResult={largeResult}
-              record={record}
-              inputType={hitType}
-              playbackRate4={oldPlaybackRate * 4}
+              cid={cid || ""}
+              resultSerialized={resultSerialized}
+              resultSign={resultSign}
+              date={resultDate ?? null}
             />
           )}
           {showStopped && (
@@ -1390,7 +1586,7 @@ function Play(props: Props) {
               showResultDiff={
                 !wasAutoPlay &&
                 oldUserBegin === null &&
-                oldPlaybackRate === 1 &&
+                minActualPlaybackRate === 1 &&
                 showResult &&
                 !showReady
               }
@@ -1437,11 +1633,15 @@ function Play(props: Props) {
             best={bestScoreAvailable ? oldBestScoreState : null}
             bestCount={oldBestScoreCounts}
             showBestScore={
-              !wasAutoPlay && oldUserBegin === null && oldPlaybackRate === 1
+              !wasAutoPlay &&
+              oldUserBegin === null &&
+              minActualPlaybackRate === 1
             }
             countMode={"judge"}
             showResultDiff={
-              !wasAutoPlay && oldUserBegin === null && oldPlaybackRate === 1
+              !wasAutoPlay &&
+              oldUserBegin === null &&
+              minActualPlaybackRate === 1
             }
           />
         </div>

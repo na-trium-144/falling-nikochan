@@ -1,3 +1,31 @@
+## ver. 18.0 - 2026/09/27
+
+* /api/playFile を廃止し、 /api/seqFile に統合 [#1376](https://github.com/na-trium-144/falling-nikochan/pull/1376)
+    * ついでにnewChartFileのレスポンスを201に変更
+* プレイ記録の署名検証 [#1315](https://github.com/na-trium-144/falling-nikochan/pull/1315)
+    * バックエンドのエラーハンドラで cause フィールドをレスポンスに出力できるようにする
+    * ゲームロジックの変数とp256の関数をarrayに置き換えてビルド後のjsに名前が出ないようにする
+    * playページはservice workerでキャッシュしない
+    * resultParamsの関数のリファクタ
+    * i18nから想定外のエラーメッセージの翻訳を削除
+* 拡張機能などで上書きされた実際の再生速度を計測する [#1375](https://github.com/na-trium-144/falling-nikochan/pull/1375)
+
+## ver. 17.13 - 2026/09/24
+
+* 不要なBaggage,Sentry-Trace,X-Request-Idヘッダーを削除
+* service workerが生成するレスポンスを203として区別
+
+## ver. 17.12 - 2026/09/20 [#1381](https://github.com/na-trium-144/falling-nikochan/pull/1381)
+
+* トップページのgrassの高さを半分にする
+* iOS26用に上下端にダミーの固定ブロックを置く
+* プレイ画面の上下端の色を動的に変更してみる
+* ナビゲーション時にupdateThemeを再実行する
+
+## ver. 17.10 - 2026/09/20 [#1380](https://github.com/na-trium-144/falling-nikochan/pull/1380)
+
+* iOS27では2点タッチのバグが修正されているため、無反応補正を無効化
+
 ## ver. 17.9 - 2026/09/18 [#1367](https://github.com/na-trium-144/falling-nikochan/pull/1367)
 
 * 譜面編集ヘルプを /main/guide/1-7 ページとして追加

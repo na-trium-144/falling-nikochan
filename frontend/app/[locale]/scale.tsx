@@ -18,7 +18,6 @@ interface DisplayMode {
 }
 export function useDisplayMode(): DisplayMode {
   const [size, setSize] = useState([1, 1]);
-  const [viewportSize, setViewportSize] = useState([1, 1]);
   const [rem, setRem] = useState<number>(16);
   useEffect(() => {
     if (window.location.pathname.includes("ogTemplate")) {
@@ -26,10 +25,6 @@ export function useDisplayMode(): DisplayMode {
     } else {
       function updateSize() {
         setSize([window.innerWidth, window.innerHeight]);
-        setViewportSize([
-          window.visualViewport?.width ?? window.innerWidth,
-          window.visualViewport?.height ?? window.innerHeight,
-        ]);
         setRem(parseFloat(getComputedStyle(document.documentElement).fontSize));
       }
       window.addEventListener("resize", updateSize);
@@ -39,8 +34,6 @@ export function useDisplayMode(): DisplayMode {
   }, []);
 
   const [width, height] = size;
-  const [vWidth, vHeight] = viewportSize;
-  // モードの切り替えは動的なviewportではなく従来のinnerWidthで判定
 
   const isMobileMain = width < 48 * rem; // global.css と合わせる
   const isMobileEdit = width < 50 * rem; // global.css と合わせる
@@ -88,8 +81,8 @@ export function useDisplayMode(): DisplayMode {
 
   return {
     isTouch,
-    screenWidth: vWidth,
-    screenHeight: vHeight,
+    screenWidth: width,
+    screenHeight: height,
     isMobileMain,
     isMobileEdit,
     isMobileGame,

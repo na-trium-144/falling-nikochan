@@ -7,6 +7,8 @@ export interface QueryOptions {
   // session idで譜面を指定
   sid?: number;
 
+  nosigning?: boolean;
+  
   thumb?: boolean;
 
   fps?: boolean; // fps表示
@@ -29,6 +31,7 @@ export function getQueryOptions(): QueryOptions {
   );
   return {
     sid: q.has("sid") ? Number(q.get("sid")) : undefined,
+    nosigning: toBoolean(q.get("nosigning")),
     thumb: toBoolean(q.get("thumb")),
     fps: toBoolean(q.get("fps")),
     speed: toBoolean(q.get("speed")),

@@ -15,6 +15,7 @@ import {
   sentryBeforeSend,
   finalRoutePath,
   methodNotAllowed,
+  etag,
 } from "./src/index.js";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
@@ -28,7 +29,6 @@ import { compress } from "hono/compress";
 import { requestId } from "hono/request-id";
 import { structuredLogger } from "@hono/structured-logger";
 import pino from "pino";
-import { etag } from "hono/etag";
 
 const port = 8787;
 
@@ -72,7 +72,7 @@ const fetchBrief = (_e: Bindings, cid: string) => getBrief(db!, cid);
 const app = new Hono<{ Bindings: Bindings }>({ strict: false });
 app.use(sentryMiddleware(app));
 app
-  .use(requestId())
+  .use(requestId({ headerName: "" }))
   .use(
     structuredLogger({
       createLogger: (c) => rootLogger.child({ requestId: c.var.requestId }),
@@ -96,7 +96,7 @@ app
   .use(compress())
   .use(etag())
   .use(methodNotAllowed(app))
-  .route("/api", await apiApp({ getConnInfo, dbMiddleware }))
+  .route("/api", await apiApp({ getConnInfo, dbMiddleware, fetchStatic }))
   .route("/og", ogApp({ ImageResponse, fetchBrief, fetchStatic }))
   .route("/sitemap.xml", await sitemapApp({ dbMiddleware }))
   .route("/rss.xml", await rssApp({ dbMiddleware }))

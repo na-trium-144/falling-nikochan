@@ -21,6 +21,8 @@ export default async function NotFoundPage() {
             <GoHomeButton goHome={t("errorPage.goHome")} />
           </CenterBox>
         </ThemeProvider>
+        <div className="fn-ios-dummy-block fn-ios-dummy-block-top" />
+        <div className="fn-ios-dummy-block fn-ios-dummy-block-bottom" />
         {process.env.NODE_ENV === "development" && (
           <>
             <div className="fn-dev-safe-area fn-dev-sai-t" />

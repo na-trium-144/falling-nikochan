@@ -81,7 +81,7 @@
       themeInit.js がUAを見てua-twitterクラスをbodyに追加
     */
     --sai-t: 0px;
-    --sai-b: 3rem;
+    /*--sai-b: 3rem;*/
   }
 }
 @custom-variant dark (&:where(.dark, .dark *));

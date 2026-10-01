@@ -24,11 +24,6 @@ export interface Level6 {
   lua: string[];
   unlisted: boolean;
 }
-export interface Level6Play extends Level6 {
-  ver: 6;
-  offset: number;
-}
-
 export type ChartUntil6 = ChartUntil5 | Chart6;
 export async function convertTo6(chart: ChartUntil5): Promise<Chart6> {
   if (chart.ver !== 5) chart = await convertTo5(chart);

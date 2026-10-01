@@ -11,17 +11,16 @@ import {
   ChartBrief,
   rankStr,
   RecordGetSummary,
-  ResultParams,
-  serializeResultParams,
 } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { useShareLink } from "@/common/shareLinkAndImage";
 import { useDisplayMode } from "@/scale";
 import { RecordHistogram } from "@/common/recordHistogram";
+import { formatError } from "@/common/fetch";
 
 export const resultAnimDelays = [100, 500, 500, 500, 750, 750, 500] as const;
 
-interface Props extends ResultParams {
+interface Props {
   className?: string;
   mainWindowHeight: number;
   hidden: boolean;
@@ -37,9 +36,18 @@ interface Props extends ResultParams {
   exit: () => void;
   largeResult: boolean;
   record: RecordGetSummary | Error | undefined;
+  resultSerialized?: string;
+  resultSign?: string | Error;
+  date: Date | null;
+  baseScore100: number;
+  chainScore100: number;
+  bigScore100: number;
+  score100: number;
+  bigCount: number | null | false; // null: 存在しない(max=0), false: データがない、不明
 }
 export default function Result(props: Props) {
   const t = useTranslations("play.result");
+  const te = useTranslations("error");
   const { rem } = useDisplayMode();
   const ref = useRef<HTMLDivElement>(null);
   const refTotal = useRef<HTMLDivElement>(null);
@@ -60,33 +68,17 @@ export default function Result(props: Props) {
       }),
   ]);
 
+  // eslint-disable-next-line react-hooks/purity
   const messageRandom = useRef<number>(Math.random());
 
-  const [serializedParam, setSerializedParam] = useState<string>("");
   const shareLink = useShareLink(
     props.cid,
     props.brief,
     props.lang,
-    serializedParam,
+    props.resultSerialized,
+    typeof props.resultSign === "string" ? props.resultSign : undefined,
     props.date ? props.date.getTime() : null
   );
-  useEffect(() => {
-    setSerializedParam(serializeResultParams(props));
-    /* eslint-disable react-hooks/exhaustive-deps */
-  }, [
-    props.date,
-    props.lvName,
-    props.lvType,
-    props.lvDifficulty,
-    props.baseScore100,
-    props.chainScore100,
-    props.bigScore100,
-    props.score100,
-    ...props.judgeCount,
-    props.bigCount,
-    props.playbackRate4,
-    /* eslint-enable react-hooks/exhaustive-deps */
-  ]);
 
   const [showing, setShowing] = useState<number>(0);
   useEffect(() => {
@@ -256,23 +248,33 @@ export default function Result(props: Props) {
             )}
           </div>
         </div>
-        {props.showShareButton && (
+        {props.resultSign instanceof Error && (
           <div
-            className={clsx(
-              "mb-2",
-              props.largeResult
-                ? "flex flex-row items-baseline justify-center space-x-2"
-                : "flex flex-col items-center"
-            )}
+            className="mb-2 text-center"
             style={{ ...appearingAnimation3(7) }}
           >
-            <span>{t("shareResult")}</span>
-            <span className="inline-block">
-              {shareLink.buttons}
-              {shareLink.modalButton}
-            </span>
+            {formatError(props.resultSign, te)}
           </div>
         )}
+        {props.showShareButton &&
+          typeof props.resultSerialized === "string" &&
+          typeof props.resultSign === "string" && (
+            <div
+              className={clsx(
+                "mb-2",
+                props.largeResult
+                  ? "flex flex-row items-baseline justify-center space-x-2"
+                  : "flex flex-col items-center"
+              )}
+              style={{ ...appearingAnimation3(7) }}
+            >
+              <span>{t("shareResult")}</span>
+              <span className="inline-block">
+                {shareLink.buttons}
+                {shareLink.modalButton}
+              </span>
+            </div>
+          )}
         {props.showRecord &&
           !(props.record instanceof Error) &&
           props.record?.histogram &&

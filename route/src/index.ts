@@ -8,6 +8,7 @@ export { default as rssApp } from "./rss.js";
 export {
   languageDetector,
   methodNotAllowed,
+  etag,
   fetchStatic,
   sentryBeforeSend,
   type ResponseOK,

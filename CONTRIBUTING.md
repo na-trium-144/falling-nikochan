@@ -113,7 +113,7 @@ The compiled files are also regenerated automatically when building the frontend
       * Update the ChartEntry and ChartEntryCompressed type to support the new version.
       * Update chartToEntry function to support the last 2 versions.
       * Update entryToChart function to support the new version.
-  * Update `route/src/api/chartFile.ts`, `newChartFile.ts`, `playFile.ts` and `seqPreview.ts` to support the last 2 versions, including the OpenAPI documentation (describeRoute).
+  * Update `route/src/api/chartFile.ts`, `newChartFile.ts` and `seqPreview.ts` to support the last 2 versions, including the OpenAPI documentation (describeRoute).
   * Fix any typecheck and lint errors.
       * Statements like `currentChartVer satisfies 15;` indicates that not only that statement but also the surrounding code needs to be updated when the version changes.
   * Release new version of `fn-commands` library
@@ -248,6 +248,7 @@ The service worker ([`worker/entry.ts`](worker/entry.ts), bundled into `/sw.js`)
 | `API_ENV` |  |  | DO NOT SET | if set to `development`, development-specific behaviors such as password bypass will be enabled |
 | `API_NO_RATELIMIT` |  |  | DO NOT SET | |
 | `SECRET_SALT` |  |  | required | any string |
+| `RESULT_SECRET_KEY` |  |  | required | HMAC SHA-256 key in base64url format. Generate with `pnpm exec tsx ./route/generateSecretKey.ts` |
 | `VERCEL_PROTECTION_BYPASS_SECRET` |  |  | optional | needed only when deploy to vercel as preview |
 | `API_CACHE_EDGE` |  |  | optional | `1` or unset, if set `s-maxage` is added to response cache-control |
 | `ASSET_PREFIX` | vars.`PRODUCTION_ASSET_PREFIX`, `STAGING_ASSET_PREFIX` | optional | optional | `https://domain-of-your-assets` or unset, if you want to use different domain for assets |

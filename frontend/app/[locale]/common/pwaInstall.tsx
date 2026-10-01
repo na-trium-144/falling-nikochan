@@ -189,13 +189,19 @@ export function detectOS(): "android" | "ios" | null {
 export function useOSDetector() {
   // undefined: 未検出、null: PCなど、"android" | "ios": 各OS
   const [os, setOS] = useState<"android" | "ios" | null | undefined>(undefined);
+  const [iOS27OrLater, setiOS27OrLater] = useState<boolean>(false);
   useEffect(() => {
+    setiOS27OrLater(detectiOS27OrLater());
     setOS(detectOS());
   }, []);
-  return os;
+  return { os, iOS27OrLater };
 }
 export function detectSafari() {
   return detectOS() === "ios" || navigator.vendor.includes("Apple");
+}
+export function detectiOS27OrLater() {
+  // https://developer.apple.com/documentation/safari-release-notes/safari-27-release-notes の一番上にあったので
+  return "ariaNotify" in Element.prototype;
 }
 export function useSafariDetector() {
   const [isSafari, setIsSafari] = useState<boolean | undefined>(undefined);
