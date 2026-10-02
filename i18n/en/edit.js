@@ -14,7 +14,7 @@ export default {
     bypassPasswd: "Skip password input (dev only)",
     confirmUnsaved: "There are unsaved changes.",
     touchMode:
-      "Touch mode: {mode, select, p {Move x} v {Move vx, vy} other {Off}}",
+      "Touch mode: {mode, select, p {Move <var>x</var>} v {Move <var>vx</var>, <var>vy</var>} other {Off}}",
     playerControl: "Player controls",
     playerControls: {
       play: "Play",
@@ -258,12 +258,12 @@ export default {
         "in the Timing, Note, and Code tabs.",
       position: "Position",
       positionHelp:
-        "x is the final position to hit the note.<br></br>" +
+        "<var>x</var> is the final position to hit the note.<br></br>" +
         "Values from -5 (left) to 5 (right) can be set.<br></br>" +
         "(Default is -3)",
       velocity: "Velocity",
       velocityHelp1:
-        "vx, vy are the speed at which the notes fall.<br></br>" +
+        "<var>vx</var>, <var>vy</var> are the speed at which the notes fall.<br></br>" +
         "(Default is 1, 3)<br></br>" +
         "Edit while watching the trajectory <br></br>" +
         "of the notes displayed on the left.<br></br>" +

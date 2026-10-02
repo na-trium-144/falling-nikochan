@@ -200,10 +200,15 @@ function NoteEdit(props: Props) {
                   (<Mouse className="inline-block" />)
                 </span>
                 <HelpIcon>
-                  {t.rich("positionHelp", { br: () => <br /> })}
+                  {t.rich("positionHelp", {
+                    var: (c) => <var className="italic">{c}</var>,
+                    br: () => <br />,
+                  })}
                 </HelpIcon>
               </td>
-              <td>x =</td>
+              <td>
+                <var className="italic">x</var> =
+              </td>
               <td>
                 <MathInput
                   className="w-20"
@@ -250,13 +255,23 @@ function NoteEdit(props: Props) {
                   <Mouse className="inline-block" />)
                 </span>
                 <HelpIcon>
-                  <p>{t.rich("velocityHelp1", { br: () => <br /> })}</p>
+                  <p>
+                    {t.rich("velocityHelp1", {
+                      var: (c) => <var className="italic">{c}</var>,
+                      br: () => <br />,
+                    })}
+                  </p>
                   <p className="mt-2">
-                    {t.rich("velocityHelp2", { br: () => <br /> })}
+                    {t.rich("velocityHelp2", {
+                      var: (c) => <var className="italic">{c}</var>,
+                      br: () => <br />,
+                    })}
                   </p>
                 </HelpIcon>
               </td>
-              <td>vx =</td>
+              <td>
+                <var className="italic">vx</var> =
+              </td>
               <td>
                 <MathInput
                   className="w-20"
@@ -272,7 +287,9 @@ function NoteEdit(props: Props) {
                 />
               </td>
               <td>,</td>
-              <td>vy =</td>
+              <td>
+                <var className="italic">vy</var> =
+              </td>
               <td>
                 <MathInput
                   className="w-20"
@@ -290,7 +307,9 @@ function NoteEdit(props: Props) {
             </tr>
             <tr>
               <td></td>
-              <td>|v| =</td>
+              <td>
+                |<var className="italic">v</var>| =
+              </td>
               <td>
                 <MathInput
                   className="w-20"

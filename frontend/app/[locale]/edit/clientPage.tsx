@@ -703,7 +703,10 @@ export default function Edit(props: {
                   )}
                 </span>
                 <span className="">
-                  {t("touchMode", { mode: dragMode || "null" })}
+                  {t.rich("touchMode", {
+                    mode: dragMode || "null",
+                    var: (c) => <var className="italic">{c}</var>,
+                  })}
                 </span>
               </button>
             )}

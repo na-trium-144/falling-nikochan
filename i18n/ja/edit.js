@@ -14,7 +14,7 @@ export default {
     bypassPasswd: "パスワード入力をスキップ (dev環境限定)",
     confirmUnsaved: "未保存の変更があります",
     touchMode:
-      "タッチ操作モード: {mode, select, p {x 移動} v {vx, vy 移動} other {オフ}}",
+      "タッチ操作モード: {mode, select, p {<var>x</var> 移動} v {<var>vx</var>, <var>vy</var> 移動} other {オフ}}",
     playerControl: "動画の操作",
     playerControls: {
       play: "再生",
@@ -236,19 +236,19 @@ export default {
         "このレベルに対する変更を元に戻します。",
       position: "位置",
       positionHelp:
-        "x は音符を最終的に叩く位置です。<br></br>" +
+        "<var>x</var> は音符を最終的に叩く位置です。<br></br>" +
         "-5 (左端) 〜 5 (右端)の値が設定できます。<br></br>" +
         "(デフォルトは -3)",
       velocity: "速度",
       velocityHelp1:
-        "vx, vy は音符が飛んでくる速度です。<br></br>" +
+        "<var>vx</var>, <var>vy</var> は音符が飛んでくる速度です。<br></br>" +
         "(デフォルトは 1, 3)<br></br>" +
         "左に表示されている音符の軌道を<br></br>" +
         "見ながら編集しましょう。<br></br>" +
         "いじりすぎるとクソゲーになるので注意",
       velocityHelp2:
-        "|v| は音符の速度の絶対値、 angle は角度です。<br></br>" +
-        "こちらを変更した場合も vx, vy に反映されます。",
+        "|<var>v</var>| は音符の速度の絶対値、 angle は角度です。<br></br>" +
+        "こちらを変更した場合も <var>vx</var>, <var>vy</var> に反映されます。",
       big: "Big (大きい音符)",
       fallMode: "音符の出現位置",
       fallModeFalse: "下から",
