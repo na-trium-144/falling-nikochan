@@ -15,6 +15,7 @@ import { DisplayNikochan } from "@/play/displayNikochan.js";
 import { useDisplayMode } from "@/scale.js";
 import { useTheme } from "@/common/theme.js";
 import { ChartEvent, getInspectCurrentStep } from "./clientPage.js";
+import TargetLine from "@/common/targetLine.js";
 
 interface Props {
   className?: string;
@@ -51,9 +52,10 @@ export default function InspectFallingWindow(props: Props) {
     fetchNikochanBitmap,
   } = useCanvasProps();
 
-  const effectsCanvasDPR = Math.min(2, dpr);
-  const tailsCanvasDPR = Math.min(2, dpr);
-  const nikochanCanvasDPR = dpr;
+  // devicePixelRatioを無視するどころか、あえて小さくすることで、ぼかす
+  const tailsCanvasDPR = Math.min(1, 6.5 / noteSize);
+  const effectsCanvasDPR = 0.5;
+  const nikochanCanvasDPR = dpr * (false ? 0.17 : 1);
 
   const { rem, playUIScale } = useDisplayMode();
   const { isDark } = useTheme();
@@ -170,20 +172,20 @@ export default function InspectFallingWindow(props: Props) {
             const isSelected = stepCmp(n.step, currentStep) === 0;
 
             if (tctx) {
-              if (!playing) {
-                dns.drawTrail(
-                  tctx,
-                  tailsCanvasDPR,
-                  isSelected
-                    ? "oklch(80.8% 0.114 19.571)" // red-300
-                    : "oklch(87.2% 0.01 258.338)" // gray-300
-                );
-              }
               if (playing) {
                 dns.drawTail(tctx, tailsCanvasDPR);
               }
             }
             if (ectx) {
+              if (!playing) {
+                dns.drawTrail(
+                  ectx,
+                  effectsCanvasDPR,
+                  isSelected
+                    ? "oklch(80.8% 0.114 19.571)" // red-300
+                    : "oklch(87.2% 0.01 258.338)" // gray-300
+                );
+              }
               if (playing) {
                 dns.drawRipple(ectx, effectsCanvasDPR);
                 dns.drawParticle(ectx, effectsCanvasDPR);
@@ -237,11 +239,7 @@ export default function InspectFallingWindow(props: Props) {
   }, [getCurrentTimeSec, renderCanvas]);
 
   return (
-    <div
-      className={clsx("relative isolate w-full h-full", props.className)}
-      style={props.style}
-      ref={ref}
-    >
+    <div className={props.className} style={props.style} ref={ref}>
       {/* For effects */}
       <canvas
         ref={effectsCanvasRef}
@@ -274,17 +272,12 @@ export default function InspectFallingWindow(props: Props) {
       />
       {/* 判定線 */}
       {boxSize && marginY !== undefined && (
-        <div
-          className={clsx(
-            "z-fw-target-line",
-            "absolute h-0.5 transition duration-100",
-            "bg-gray-400 shadow-none pointer-events-none"
-          )}
-          style={{
-            left: 0,
-            right: 0,
-            bottom: targetY * boxSize + marginY,
-          }}
+        <TargetLine
+          className={clsx("z-fw-target-line", false && "blur-2xs")}
+          barFlash={undefined}
+          left={canvasRect.left}
+          width={canvasRect.width}
+          bottom={targetY * boxSize + marginY}
         />
       )}
     </div>

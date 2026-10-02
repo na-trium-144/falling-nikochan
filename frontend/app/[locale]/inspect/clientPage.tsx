@@ -28,7 +28,7 @@ import { useResizeDetector } from "react-resize-detector";
 import { useDisplayMode } from "@/scale.js";
 import { useColorThief } from "@/common/colorThief.js";
 import Button, { ButtonHighlight } from "@/common/button.js";
-import Select from "@/common/select.js";
+import Select, { SmallSelect } from "@/common/select.js";
 import CheckBox from "@/common/checkBox.js";
 import Range from "@/common/range.js";
 import { Box, CenterBox } from "@/common/box.js";
@@ -50,6 +50,9 @@ import { titleWithSiteName } from "@/common/title.js";
 import { InitErrorMessage } from "@/play/messageBox.js";
 import { VolumeControlArea } from "@/play/musicArea.js";
 import { CurrentStepText } from "@/edit/noteTab.js";
+import Pause from "@icon-park/react/lib/icons/Pause.js";
+import PlayOne from "@icon-park/react/lib/icons/PlayOne.js";
+import { Key } from "@/common/key.js";
 
 interface ChartEvent {
   step: Step;
@@ -639,131 +642,169 @@ function Inspect(props: InspectProps) {
           )}
         >
           {/* ヘッダー */}
-          <div className="flex flex-row items-center justify-between">
-            {(standalone || insideFrame) && (
-              <button
-                className="fn-link-1 text-sm mr-2 flex items-center"
-                onClick={() => historyBackWithReview()}
-              >
-                <ArrowLeft className="mr-1" />
-                {t("back")}
-              </button>
-            )}
+          {/*<div className="flex flex-row items-center justify-between">
             <span className="font-title truncate text-sm flex-1">
               {chartBrief?.title}
             </span>
             <span className="text-xs text-dim ml-2 whitespace-nowrap">
               ID: {cid}
             </span>
-          </div>
+          </div>*/}
 
           {/* YouTube 埋め込み */}
-          <div ref={youtubeSpace.ref} className="w-full aspect-video flex-none">
+          <div
+            className={clsx(
+              isMobile
+                ? "flex flex-row-reverse gap-3"
+                : "flex flex-col items-stretch gap-2 shrink-0",
+              "mb-3"
+            )}
+          >
             <div
+              ref={youtubeSpace.ref}
               className={clsx(
-                "w-full h-full relative p-2 rounded-sq-xl",
-                colorThief.boxStyle
+                isMobile ? "w-1/2" : "w-full",
+                "aspect-video flex-none"
               )}
-              style={{ color: colorThief.currentColor }}
             >
-              <span className="fn-glass-1" />
-              <span className="fn-glass-2" />
-              <FlexYouTube
-                fixedSide={youtubeFitToWidth ? "width" : "height"}
-                className={youtubeFitToWidth ? "w-full" : "h-full"}
-                control={true}
-                id={ytId}
-                ytPlayer={ytPlayer}
-                onReady={onReady}
-                onStart={onStart}
-                onStop={onStop}
-                onPlaybackRateChange={setPlaybackRate}
-              />
-              {ytId && (
-                <img
-                  ref={colorThief.imgRef}
-                  className="hidden"
-                  src={`https://i.ytimg.com/vi/${ytId}/mqdefault.jpg`}
-                  crossOrigin="anonymous"
-                  alt=""
+              <div
+                className={clsx(
+                  "w-full h-full relative p-2 rounded-sq-xl",
+                  colorThief.boxStyle
+                )}
+                style={{ color: colorThief.currentColor }}
+              >
+                <span className="fn-glass-1" />
+                <span className="fn-glass-2" />
+                <FlexYouTube
+                  fixedSide={youtubeFitToWidth ? "width" : "height"}
+                  className={youtubeFitToWidth ? "w-full" : "h-full"}
+                  control={true}
+                  id={ytId}
+                  ytPlayer={ytPlayer}
+                  onReady={onReady}
+                  onStart={onStart}
+                  onStop={onStop}
+                  onPlaybackRateChange={setPlaybackRate}
                 />
-              )}
+                {ytId && (
+                  <img
+                    ref={colorThief.imgRef}
+                    className="hidden"
+                    src={`https://i.ytimg.com/vi/${ytId}/mqdefault.jpg`}
+                    crossOrigin="anonymous"
+                    alt=""
+                  />
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* 操作ボタン */}
-          <div className="flex flex-wrap items-center gap-1">
-            <Select
-              options={["0.25", "0.5", "0.75", "1", "1.5", "2"].map((s) => ({
-                label: <>×{s}</>,
-                value: s,
-              }))}
-              value={playbackRate.toString()}
-              onSelect={(s: string) => changePlaybackRate(Number(s))}
-              showValue
-            />
-            <Button
-              onClick={() => {
-                if (ready) {
-                  if (!playing) {
-                    start();
-                  } else {
-                    stop();
-                  }
-                }
-              }}
-              text={
-                playing ? t("playerControls.pause") : t("playerControls.play")
-              }
-              keyName="Space"
-            />
-            <Button
-              onClick={seekPrevEvent}
-              text={t("playerControls.prevEvent")}
-              keyName="←"
-            />
-            <Button
-              onClick={seekNextEvent}
-              text={t("playerControls.nextEvent")}
-              keyName="→"
-            />
-          </div>
-
-          {/* 音量調整 */}
-          <div className="relative">
-            <button
-              className={clsx("fn-icon-button", "fg-base")}
-              onClick={() => setVolumeCtrlOpen(!volumeCtrlOpen)}
-              onPointerDown={(e) => e.stopPropagation()}
-              onPointerUp={(e) => e.stopPropagation()}
-            >
-              <ButtonHighlight />
-              <VolumeNotice
-                theme="filled"
-                className="inline-block align-middle"
+            {/* 操作ボタン */}
+            <div className="relative flex flex-wrap items-center justify-end gap-1">
+              {(standalone || insideFrame) && (
+                <button
+                  className="fn-link-1 text-sm mr-2 flex items-center"
+                  onClick={() => historyBackWithReview()}
+                >
+                  <ArrowLeft className="mr-1" />
+                  {t("back")}
+                </button>
+              )}
+              <SmallSelect
+                options={["0.5", "0.75", "1", "1.25", "1.5", "1.75", "2"].map(
+                  (s) => ({
+                    label: (
+                      <>
+                        ×
+                        <span className="inline-block text-left ml-1 w-9">
+                          {s}
+                        </span>
+                      </>
+                    ),
+                    value: s,
+                  })
+                )}
+                value={playbackRate.toString()}
+                onSelect={(s: string) => changePlaybackRate(Number(s))}
+                showValue
               />
-            </button>
-            <VolumeControlArea
-              className={clsx("absolute z-1 right-0 top-full")}
-              isMobile={isMobile}
-              large={true}
-              isOpen={volumeCtrlOpen}
-              setOpen={setVolumeCtrlOpen}
-              pointerInVolumeCtrl={pointerInVolumeCtrl}
-              setPointerInVolumeCtrl={setPointerInVolumeCtrl}
-              ytVolume={0} // todo?
-              setYtVolume={() => undefined}
-              enableSE={enableHitSE}
-              setEnableSE={setEnableHitSE}
-              seVolume={hitVolume}
-              setSEVolume={setHitVolume}
-              enableBeatSE={enableBeatSE}
-              setEnableBeatSE={setEnableBeatSE}
-              beatVolume={beatVolume}
-              setBeatVolume={setBeatVolume}
-              ready={ready}
-              playing={playing}
-            />
+              <button
+                className={clsx("fn-icon-button", isTouch ? "fn-with-bg" : "")}
+                onClick={() => {
+                  if (ready) {
+                    if (!playing) {
+                      start();
+                    } else {
+                      stop();
+                    }
+                  }
+                }}
+              >
+                <ButtonHighlight />
+                {playing ? (
+                  <Pause className="inline-block align-middle text-xl" />
+                ) : (
+                  <PlayOne
+                    theme="filled"
+                    className="inline-block align-middle text-xl"
+                  />
+                )}
+                {!isTouch && (
+                  <Key handleKeyDown>{playing ? "Esc" : "Space"}</Key>
+                )}
+              </button>
+              <span className="flex-1" />
+              <button
+                className={clsx("fn-icon-button", isTouch ? "fn-with-bg" : "")}
+                onClick={seekPrevEvent}
+              >
+                <ButtonHighlight />
+                {isTouch ? "←" : <Key handleKeyDown>←</Key>}
+              </button>
+              <button
+                className={clsx("fn-icon-button", isTouch ? "fn-with-bg" : "")}
+                onClick={seekNextEvent}
+              >
+                <ButtonHighlight />
+                {isTouch ? "→" : <Key handleKeyDown>→</Key>}
+              </button>
+              <span className="flex-1" />
+
+              {/* 音量調整 */}
+              <button
+                className={clsx("fn-icon-button", "fg-base")}
+                onClick={() => setVolumeCtrlOpen(!volumeCtrlOpen)}
+                onPointerDown={(e) => e.stopPropagation()}
+                onPointerUp={(e) => e.stopPropagation()}
+              >
+                <ButtonHighlight />
+                <VolumeNotice
+                  theme="filled"
+                  className="inline-block align-middle"
+                />
+              </button>
+              <VolumeControlArea
+                className={clsx("absolute z-1 right-0 top-full")}
+                isMobile={isMobile}
+                large={true}
+                isOpen={volumeCtrlOpen}
+                setOpen={setVolumeCtrlOpen}
+                pointerInVolumeCtrl={pointerInVolumeCtrl}
+                setPointerInVolumeCtrl={setPointerInVolumeCtrl}
+                ytVolume={0} // todo?
+                setYtVolume={() => undefined}
+                enableSE={enableHitSE}
+                setEnableSE={setEnableHitSE}
+                seVolume={hitVolume}
+                setSEVolume={setHitVolume}
+                enableBeatSE={enableBeatSE}
+                setEnableBeatSE={setEnableBeatSE}
+                beatVolume={beatVolume}
+                setBeatVolume={setBeatVolume}
+                ready={ready}
+                playing={playing}
+              />
+            </div>
           </div>
 
           {/* 音符・イベントの詳細情報表示 */}
@@ -812,11 +853,12 @@ function Inspect(props: InspectProps) {
                 </div>
               ))}
               {selectedNotes.map((note) => (
-                <div key={note.id} className="flex items-center justify-end flex-wrap">
+                <div
+                  key={note.id}
+                  className="flex items-center justify-end flex-wrap"
+                >
                   <span>#</span>
-                  <span className="ml-1 min-w-6">
-                    {note.id + 1}
-                  </span>
+                  <span className="ml-1 min-w-6">{note.id + 1}</span>
                   {note.big && (
                     <span className="text-sm ml-2">
                       (Big#
@@ -865,9 +907,9 @@ function Inspect(props: InspectProps) {
         </div>
 
         {/* 左ペイン: FallingWindow */}
-        <div className="flex-1 min-w-0 min-h-0 relative">
+        <div className="relative flex-1 min-w-0 min-h-0">
           <InspectFallingWindow
-            className="absolute inset-0"
+            className="absolute inset-0 isolate"
             chartSeq={chartSeq}
             allEvents={allEvents}
             getCurrentTimeSec={getCurrentTimeSec}
@@ -879,9 +921,9 @@ function Inspect(props: InspectProps) {
 
       {/* 下部: 草と TimeBar */}
       <div className="relative w-full flex-none flex items-center">
-        <IrasutoyaLikeGrass height={10 * rem + 1 * rem} />
+        <IrasutoyaLikeGrass height={8 * rem} />
         <TimeBar
-          className="z-10"
+          className="z-10 scale-80 origin-bottom-left w-5/4!"
           chartSeq={chartSeq}
           currentTimeSec={currentTimeSec}
           setAndSeekCurrentTimeWithoutOffset={
@@ -892,7 +934,7 @@ function Inspect(props: InspectProps) {
         />
         <div className="absolute left-3 bottom-3 z-15 flex items-baseline">
           <span className="whitespace-nowrap">{t("level")}:</span>
-          <Select
+          <SmallSelect
             className=""
             options={levelOptions}
             value={selectedLvIndex}
@@ -905,18 +947,16 @@ function Inspect(props: InspectProps) {
         </div>
         <div className="absolute right-3 bottom-3 z-15 flex items-baseline">
           <span className="">{t("zoom")}</span>
-          <div>
-            <Button
-              small
-              text="-"
-              onClick={() => setZoom((z) => Math.max(-2, z - 1))}
-            />
-            <Button
-              small
-              text="+"
-              onClick={() => setZoom((z) => Math.min(3, z + 1))}
-            />
-          </div>
+          <Button
+            small
+            text="-"
+            onClick={() => setZoom((z) => Math.max(-2, z - 1))}
+          />
+          <Button
+            small
+            text="+"
+            onClick={() => setZoom((z) => Math.min(3, z + 1))}
+          />
         </div>
       </div>
     </main>
