@@ -139,7 +139,7 @@ export async function sendRecord(
     );
   }
   return sendRecord2(cid, await recordSigned(), resultSessionToken).catch(
-    (e: unknown) => captureAndWrap(e, { cid })
+    (e: unknown) => captureAndWrap(e, { cid, record })
   );
 }
 async function sendRecord2(
@@ -177,7 +177,7 @@ export async function sendResultSerialized(
   )
     .then((sign) => setSign(sign))
     .catch((e) => {
-      onError(captureAndWrap(e));
+      onError(captureAndWrap(e, { result: resultSerialized }));
     });
 }
 async function sendResultSerialized2(
