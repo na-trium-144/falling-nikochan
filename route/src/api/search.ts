@@ -377,10 +377,7 @@ export function aggeratePopularCounts(
     if (l) {
       count += rc.count; // RawPopularCount.countにはすでにPlayRecordEntryのfactorが考慮に入れられている
       // 曲の長さに応じて重み付けの上限を制限。 2min => 1, 1min => 0.7, 30s => 0.5, 10s => 0.3
-      const lengthFactor = Math.max(
-        0.3,
-        Math.min(1, Math.sqrt(l.length / 120))
-      );
+      const lengthFactor = Math.max(0.3, Math.sqrt(l.length / 120));
       weightedCount += rc.count * lengthFactor;
     }
   }
