@@ -43,7 +43,17 @@ const SearchResultSchema = () =>
       v.pipe(
         v.number(),
         v.description(
-          "Popularity score, only present when sorted by popularity"
+          "The total number of play record weighted by each record's `factor`. " +
+            "only present when sorted by popularity"
+        )
+      )
+    ),
+    weightedCount: v.optional(
+      v.pipe(
+        v.number(),
+        v.description(
+          "The final popularity score, the total number of play record weighted based on each record's `factor` and the chart's duration. " +
+            "only present when sorted by popularity"
         )
       )
     ),
@@ -277,12 +287,19 @@ const searchApp = new Hono<{
             .map((r) => ({
               cid: r.cid,
               updatedAt: r.updatedAt,
-              count: aggeratePopularCounts(rawPopularCounts, r),
+              ...aggeratePopularCounts(rawPopularCounts, r),
             }))
             .filter((r) => r.count > 0 || q) // If q is empty, only return those with at least one records
-            .sort((a, b) => b.count - a.count || b.updatedAt - a.updatedAt);
+            .sort(
+              (a, b) =>
+                b.weightedCount - a.weightedCount || b.updatedAt - a.updatedAt
+            );
 
-          sortedResults = mapped.map((r) => ({ cid: r.cid, count: r.count }));
+          sortedResults = mapped.map((r) => ({
+            cid: r.cid,
+            count: r.count,
+            weightedCount: r.weightedCount,
+          }));
           break;
         }
         case "latest":
@@ -351,21 +368,23 @@ export async function getRawPopularCounts(db: Db): Promise<RawPopularCount[]> {
 export function aggeratePopularCounts(
   raw: RawPopularCount[],
   r: { cid: string; levelBrief: ChartLevelBrief[] }
-) {
+): { count: number; weightedCount: number } {
   const rcs = raw.filter((rc) => rc.cid === r.cid);
-  let score = 0;
+  let count = 0;
+  let weightedCount = 0;
   for (const rc of rcs) {
     const l = r.levelBrief.find((l) => l.hash === rc.lvHash);
     if (l) {
+      count += rc.count; // RawPopularCount.countにはすでにPlayRecordEntryのfactorが考慮に入れられている
       // 曲の長さに応じて重み付けの上限を制限。 2min => 1, 1min => 0.7, 30s => 0.5, 10s => 0.3
       const lengthFactor = Math.max(
         0.3,
         Math.min(1, Math.sqrt(l.length / 120))
       );
-      score += rc.count * lengthFactor;
+      weightedCount += rc.count * lengthFactor;
     }
   }
-  return score;
+  return { count, weightedCount };
 }
 
 export default searchApp;
