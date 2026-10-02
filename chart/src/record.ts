@@ -6,9 +6,18 @@ import { bigScoreRate, chainScoreRate } from "./gameConstant.js";
 export const RecordGetSummarySchema = () =>
   v.object({
     lvHash: HashSchema(),
-    countAuto: v.number(),
-    // excluding auto play:
-    count: v.number(),
+    countAuto: v.pipe(
+      v.number(),
+      v.description(
+        "The total number of autoplay record weighted by each record's `factor`"
+      )
+    ),
+    count: v.pipe(
+      v.number(),
+      v.description(
+        "The total number of non-autoplay record weighted by each record's `factor`"
+      )
+    ),
     countFC: v.number(),
     countFB: v.number(),
     histogram: v.array(v.number()), // number[13]
