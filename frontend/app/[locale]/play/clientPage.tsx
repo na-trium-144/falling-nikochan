@@ -112,14 +112,18 @@ export function InitPlay({ locale }: { locale: string }) {
     setEditing(session.editing);
 
     if (session.editing) {
-      setChartSeq(
-        loadLevel(
-          session.level.freeze,
-          session.level.meta,
-          session.level.offset,
-          session.level.ver
-        )
-      );
+      if ("notes" in session.level) {
+        setChartSeq(session.level);
+      } else {
+        setChartSeq(
+          loadLevel(
+            session.level.freeze,
+            session.level.meta,
+            session.level.offset,
+            session.level.ver
+          )
+        );
+      }
       setErrorMsg(undefined);
     } else {
       /*

@@ -12,12 +12,15 @@ const SessionDataSchema = () =>
       cid: v.optional(v.string()),
       lvIndex: v.number(),
       brief: ChartBriefSchema(),
-      level: v.object({
-        freeze: LevelFreezeSchema15(),
-        meta: LevelMetaSchema15(),
-        offset: v.number(),
-        ver: v.union([v.literal(18)]),
-      }),
+      level: v.union([
+        ChartSeqDataSchema(), // 後方互換性のために残している、いつか適当なタイミングで消す
+        v.object({
+          freeze: LevelFreezeSchema15(),
+          meta: LevelMetaSchema15(),
+          offset: v.number(),
+          ver: v.union([v.literal(18)]),
+        }),
+      ]),
       editing: v.literal(true),
     }),
     v.object({
