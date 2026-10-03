@@ -25,6 +25,7 @@ import {
   RecordGetSummarySchema,
   serializeResultParams,
   createRecordPost,
+  loadLevel,
 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
@@ -111,7 +112,14 @@ export function InitPlay({ locale }: { locale: string }) {
     setEditing(session.editing);
 
     if (session.editing) {
-      setChartSeq(session.level);
+      setChartSeq(
+        loadLevel(
+          session.level.freeze,
+          session.level.meta,
+          session.level.offset,
+          session.level.ver
+        )
+      );
       setErrorMsg(undefined);
     } else {
       /*

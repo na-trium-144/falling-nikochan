@@ -5,6 +5,7 @@ import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
 import {
+  currentChartVer,
   getSignatureState,
   getStep,
   getTimeSec,
@@ -110,22 +111,27 @@ export default function Edit(props: {
   });
 
   const [sessionId, setSessionId] = useState<number>();
-  const [sessionData, setSessionData] = useState<SessionData>();
+  const sessionDataRef = useRef<SessionData | null>(null);
 
   useEffect(() => {
     if (sessionId === undefined) {
       setSessionId(initSession(null));
     } else {
       const updateSession = async () => {
-        if (chart) {
+        if (chart && currentLevel) {
           const data = {
             cid: chart.cid,
             lvIndex: chart.currentLevelIndex || 0,
             brief: await createBrief(chart.toObject(), new Date().getTime()),
-            level: loadChart(chart.toObject(), chart.currentLevelIndex || 0),
+            level: {
+              freeze: currentLevel.freeze,
+              meta: currentLevel.meta,
+              offset: chart.offset,
+              ver: currentChartVer,
+            } as const,
             editing: true as const,
           };
-          setSessionData(data);
+          sessionDataRef.current = data;
           try {
             // 譜面の編集時に毎回sessionに書き込む (テストプレイタブのリロードだけで読めるように)
             // 念の為metaTabでテストプレイボタンが押された時にも書き込んでいる
@@ -986,7 +992,7 @@ export default function Edit(props: {
                 <MetaTab
                   saveEditSession={saveEditSession}
                   sessionId={sessionId}
-                  sessionData={sessionData}
+                  sessionDataRef={sessionDataRef}
                   chart={chart}
                   locale={locale}
                   savePasswd={!!savePasswd}

@@ -1,5 +1,10 @@
 import * as v from "valibot";
-import { ChartBriefSchema, ChartSeqDataSchema } from "@falling-nikochan/chart";
+import {
+  ChartBriefSchema,
+  ChartSeqDataSchema,
+  LevelFreezeSchema15,
+  LevelMetaSchema15,
+} from "@falling-nikochan/chart";
 
 const SessionDataSchema = () =>
   v.variant("editing", [
@@ -7,7 +12,12 @@ const SessionDataSchema = () =>
       cid: v.optional(v.string()),
       lvIndex: v.number(),
       brief: ChartBriefSchema(),
-      level: ChartSeqDataSchema(),
+      level: v.object({
+        freeze: LevelFreezeSchema15(),
+        meta: LevelMetaSchema15(),
+        offset: v.number(),
+        ver: v.union([v.literal(18)]),
+      }),
       editing: v.literal(true),
     }),
     v.object({

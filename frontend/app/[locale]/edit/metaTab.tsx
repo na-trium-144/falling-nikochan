@@ -1,7 +1,7 @@
 import Button, { ButtonStyledLabel } from "@/common/button.js";
 import Input from "@/common/input.js";
 import { checkYouTubeId, getYouTubeId } from "@/common/ytId.js";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, RefObject, useState } from "react";
 import { ChartEditing, lastIncompatibleVer } from "@falling-nikochan/chart";
 import {
   initSession,
@@ -112,7 +112,7 @@ export function MetaEdit(props: Props) {
 interface Props2 {
   saveEditSession: () => void;
   sessionId?: number;
-  sessionData?: SessionData;
+  sessionDataRef: RefObject<SessionData | null>;
   chart?: ChartEditing;
   locale: string;
   savePasswd: boolean;
@@ -160,9 +160,9 @@ export function MetaTab(props: Props2) {
         <ExternalLink
           onClick={() => {
             setSessionError(undefined);
-            if (props.sessionData) {
+            if (props.sessionDataRef.current) {
               try {
-                initSession(props.sessionData, props.sessionId);
+                initSession(props.sessionDataRef.current, props.sessionId);
                 if (isStandalone() || isInsideFrame()) {
                   props.saveEditSession();
                   router.push(`/${props.locale}/play?sid=${props.sessionId}`);
