@@ -1,9 +1,13 @@
 import Button, { ButtonStyledLabel } from "@/common/button.js";
 import Input from "@/common/input.js";
 import { checkYouTubeId, getYouTubeId } from "@/common/ytId.js";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, RefObject, useState } from "react";
 import { ChartEditing, lastIncompatibleVer } from "@falling-nikochan/chart";
-import { initSession, SessionData } from "@/play/session.js";
+import {
+  initSession,
+  isQuotaExceededError,
+  SessionData,
+} from "@/play/session.js";
 import { ExternalLink } from "@/common/extLink.js";
 import ProgressBar from "@/common/progressBar.js";
 import CheckBox from "@/common/checkBox.js";
@@ -15,7 +19,7 @@ import { useShareLink } from "@/common/shareLinkAndImage";
 import { isInsideFrame, isStandalone } from "@/common/pwaInstall";
 import { useRouter } from "next/navigation";
 import { LocalLoadError, LocalLoadState, SaveState } from "./chartState";
-import { formatError } from "@/common/fetch";
+import { captureAndWrap, formatError } from "@/common/fetch";
 import { useDisplayMode } from "@/scale";
 
 interface Props {
@@ -108,7 +112,7 @@ export function MetaEdit(props: Props) {
 interface Props2 {
   saveEditSession: () => void;
   sessionId?: number;
-  sessionData?: SessionData;
+  sessionDataRef: RefObject<SessionData | null>;
   chart?: ChartEditing;
   locale: string;
   savePasswd: boolean;
@@ -138,6 +142,7 @@ export function MetaTab(props: Props2) {
       (l) => l.freeze.notes.length > 0 && !l.meta.unlisted
     );
   const { isTouch } = useDisplayMode();
+  const [sessionError, setSessionError] = useState<Error>();
 
   return (
     <>
@@ -154,18 +159,27 @@ export function MetaTab(props: Props2) {
       <div className="mb-1">
         <ExternalLink
           onClick={() => {
-            if (props.sessionData) {
-              initSession(props.sessionData, props.sessionId);
-              if (isStandalone() || isInsideFrame()) {
-                props.saveEditSession();
-                router.push(`/${props.locale}/play?sid=${props.sessionId}`);
-              } else {
-                window
-                  .open(
-                    `/${props.locale}/play?sid=${props.sessionId}`,
-                    "_blank"
-                  )
-                  ?.focus();
+            setSessionError(undefined);
+            if (props.sessionDataRef.current) {
+              try {
+                initSession(props.sessionDataRef.current, props.sessionId);
+                if (isStandalone() || isInsideFrame()) {
+                  props.saveEditSession();
+                  router.push(`/${props.locale}/play?sid=${props.sessionId}`);
+                } else {
+                  window
+                    .open(
+                      `/${props.locale}/play?sid=${props.sessionId}`,
+                      "_blank"
+                    )
+                    ?.focus();
+                }
+              } catch (e) {
+                if (isQuotaExceededError(e)) {
+                  setSessionError(e);
+                } else {
+                  setSessionError(captureAndWrap(e));
+                }
               }
             }
           }}
@@ -173,6 +187,11 @@ export function MetaTab(props: Props2) {
           {t("testPlay")}
         </ExternalLink>
         <HelpIcon>{t.rich("testPlayHelp", { br: () => <br /> })}</HelpIcon>
+        <span className="inline-block ml-1">
+          {isQuotaExceededError(sessionError)
+            ? te("quotaExceeded")
+            : sessionError?.message}
+        </span>
       </div>
       <div className="">
         <span className="inline-block">

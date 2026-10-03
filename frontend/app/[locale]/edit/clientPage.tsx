@@ -5,6 +5,7 @@ import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
 import {
+  currentChartVer,
   getSignatureState,
   getStep,
   getTimeSec,
@@ -18,7 +19,6 @@ import { Box } from "@/common/box.js";
 import { MetaTab } from "./metaTab.js";
 import { addRecent } from "@/common/recent.js";
 import {
-  loadChart,
   createBrief,
   Step,
   stepAdd,
@@ -29,7 +29,11 @@ import { MobileHeader } from "@/common/header.js";
 import { LuaTabPlaceholder, LuaTabProvider, useLuaExecutor } from "./luaTab.js";
 import Select from "@/common/select.js";
 import LevelTab from "./levelTab.js";
-import { initSession, SessionData } from "@/play/session.js";
+import {
+  initSession,
+  isQuotaExceededError,
+  SessionData,
+} from "@/play/session.js";
 import Forbid from "@icon-park/react/lib/icons/Forbid";
 import Move from "@icon-park/react/lib/icons/Move";
 import { GuideMain } from "./guideMain.js";
@@ -51,6 +55,7 @@ import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft.js";
 import { useDisplayMode } from "@/scale.js";
 import { useResizeDetector } from "react-resize-detector";
 import Close from "@icon-park/react/lib/icons/Close.js";
+import { captureAndWrap } from "@/common/fetch.js";
 
 export default function Edit(props: {
   locale: string;
@@ -105,25 +110,38 @@ export default function Edit(props: {
   });
 
   const [sessionId, setSessionId] = useState<number>();
-  const [sessionData, setSessionData] = useState<SessionData>();
+  const sessionDataRef = useRef<SessionData | null>(null);
 
   useEffect(() => {
     if (sessionId === undefined) {
       setSessionId(initSession(null));
     } else {
       const updateSession = async () => {
-        if (chart) {
+        if (chart && chart.currentLevel) {
           const data = {
             cid: chart.cid,
             lvIndex: chart.currentLevelIndex || 0,
             brief: await createBrief(chart.toObject(), new Date().getTime()),
-            level: loadChart(chart.toObject(), chart.currentLevelIndex || 0),
+            level: {
+              freeze: chart.currentLevel.freeze,
+              meta: chart.currentLevel.meta,
+              offset: chart.offset,
+              ver: currentChartVer,
+            } as const,
             editing: true as const,
           };
-          setSessionData(data);
-          initSession(data, sessionId);
-          // 譜面の編集時に毎回sessionに書き込む (テストプレイタブのリロードだけで読めるように)
-          // 念の為metaTabでテストプレイボタンが押された時にも書き込んでいる
+          sessionDataRef.current = data;
+          try {
+            // 譜面の編集時に毎回sessionに書き込む (テストプレイタブのリロードだけで読めるように)
+            // 念の為metaTabでテストプレイボタンが押された時にも書き込んでいる
+            initSession(data, sessionId);
+          } catch (e) {
+            if (isQuotaExceededError(e)) {
+              // ignore
+            } else {
+              captureAndWrap(e);
+            }
+          }
         }
       };
       updateSession();
@@ -973,7 +991,7 @@ export default function Edit(props: {
                 <MetaTab
                   saveEditSession={saveEditSession}
                   sessionId={sessionId}
-                  sessionData={sessionData}
+                  sessionDataRef={sessionDataRef}
                   chart={chart}
                   locale={locale}
                   savePasswd={!!savePasswd}
