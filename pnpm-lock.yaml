@@ -57,8 +57,8 @@ catalogs:
       specifier: 7.5.0
       version: 7.5.0
     next-intl:
-      specifier: 4.14.5
-      version: 4.14.5
+      specifier: 4.14.9
+      version: 4.14.9
     postcss:
       specifier: 8.5.26
       version: 8.5.26
@@ -348,7 +348,7 @@ importers:
         version: 16.1.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.3.0)(react@19.3.0)(sass@1.104.1)
       next-intl:
         specifier: 'catalog:'
-        version: 4.14.5(next@16.1.7)(react@19.3.0)
+        version: 4.14.9(@types/react@19.3.0)(next@16.1.7)(react@19.3.0)
       next-license-list:
         specifier: 1.0.1
         version: 1.0.1(webpack@5.111.0)
@@ -436,7 +436,7 @@ importers:
     dependencies:
       next-intl:
         specifier: 'catalog:'
-        version: 4.14.5(next@16.1.7)(react@19.3.0)
+        version: 4.14.9(@types/react@19.3.0)(next@16.1.7)(react@19.3.0)
 
   route:
     dependencies:
@@ -1122,14 +1122,14 @@ packages:
     resolution: {integrity: sha512-Xc3VhU02wqZ1HvHRJUwL09HkZSTvidqY5Ya0NXBSYOxAp+Ln9dcJr9fySI+CkONzP3PekQo9WdzCv0PGER/mOA==}
     engines: {node: '>=14.17.0'}
 
-  '@eloqnt/config@0.1.0':
-    resolution: {integrity: sha512-SLR6ZSHxu6XdZtmOz3xRmC3gsY/sCzqtLMD1gxbW2I3XXPBbupwL5RZbkLU/NcZm74AKZrIUPfz3CtEJfxUKqQ==}
+  '@eloqnt/config@0.1.1':
+    resolution: {integrity: sha512-YRDigSaiJEzKDfzTth5kG+L/PKfB3mo8h7yNzpXExPfvQmcD05WoZT57PdhJE0jI+Vva6eb0OCU8hnHHgdME3g==}
 
   '@eloqnt/format-json@0.1.0':
     resolution: {integrity: sha512-4Pkb+HyzgWNJXoU48aJhUyNZSjZvMGooPCNG1ZFmBm55xTiNNPQCNXH66Ob6sXS6RvbWZrRpCf+Uo/Jz9K9g+A==}
 
-  '@eloqnt/format-po@0.1.0':
-    resolution: {integrity: sha512-odgtuICWs67GdkNqY51/d2vaIukuOdlGalKASUGkI5c4cyWOmv/WIVyk5gZyn3xr614RzwWp57s9WB40lRLlBw==}
+  '@eloqnt/format-po@0.1.1':
+    resolution: {integrity: sha512-aLtmIoqXGEaeTT0RcsLN8sZ3aIrsT/c/dVs28zrLhDjO3+vA3KNP+r98N0xq8w/k36+/GIUt4uZNbqcA71GVWw==}
 
   '@emnapi/core@1.9.2':
     resolution: {integrity: sha512-UC+ZhH3XtczQYfOlu3lNEkdW/p4dsJ1r/bP7H8+rhao3TTTMO1ATq/4DdIi23XuGoFY+Cz0JmCbdVl0hz9jZcA==}
@@ -3806,8 +3806,8 @@ packages:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
     engines: {node: '>=0.10.0'}
 
-  icu-minify@4.14.5:
-    resolution: {integrity: sha512-5RQ5fP5inR+VZRTR4KwYBzy217ua4E9lxBT+zFHZcJv0dTOtRs9xXECSIWMQHAfmd0Hq2RXSSP2Gmyw/oQQY6A==}
+  icu-minify@4.14.9:
+    resolution: {integrity: sha512-PmO+fNnC3K3mfPKTnm3RrPERrhQZnjm1AlpyZQ0ShbXi8Y/kYZ3YOde8TEjCLz9k3P2DmzkBn8lykGrCAi1Ajw==}
 
   ignore@5.3.2:
     resolution: {integrity: sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==}
@@ -4488,14 +4488,18 @@ packages:
     resolution: {integrity: sha512-8Ofs/AUQh8MaEcrlq5xOX0CQ9ypTF5dl78mjlMNfOK08fzpgTHQRQPBxcPlEtIw0yRpws+Zo/3r+5WRby7u3Gg==}
     engines: {node: '>= 0.6'}
 
-  next-intl-swc-plugin-extractor@4.14.5:
-    resolution: {integrity: sha512-dbpsjHmwbqn795z7eDI7HHL+jxyvZ5CNF40sbGx+nkjM4pCs7HdTzGQnQ84mjF/WWZa/w9pJ6M74prh+3vnbGQ==}
+  next-intl-swc-plugin-extractor@4.14.9:
+    resolution: {integrity: sha512-8jAkmDwQJo6RDavBHm9QRl1YTn2WXf+rI4SVhMaZxZcxopnwZic6fKTXOoNIo3kzC+a6vJySkOkXmHTVFLAYtg==}
 
-  next-intl@4.14.5:
-    resolution: {integrity: sha512-9sPJh5ITJbP28HZ5obuFAMC4RwW/mhEvHiGVHXPWL0uRbF2RrjHWz8PcUmLaH2oca79ak2ayQz+uRSALZN9xSw==}
+  next-intl@4.14.9:
+    resolution: {integrity: sha512-uauRtUC+TrYNA1OL/QcwL9irndLrI9jK3Wdaa9W0B5AeKh9cqVdNeT0IWgLnhBqBRrVwppVdI0M+C1+JdGPQ3w==}
     peerDependencies:
+      '@types/react': ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       next: ^12.0.0 || ^13.0.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || >=19.0.0-rc <19.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
 
   next-license-list@1.0.1:
     resolution: {integrity: sha512-Hmhk2iICM44FNRxnVG+gqz8ta+5lHbMUfKHkAwg05KtFTFzARe3CjjdImE5E/xmHxdfBM+ILj0WhJnddtEiNYw==}
@@ -5325,10 +5329,14 @@ packages:
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
 
-  use-intl@4.14.5:
-    resolution: {integrity: sha512-NNGSInks18BAasPgnMrnahNkEZSkWpbWE70IcEDWPUZwS39tVuDB/Vo6J3FaDnYwwKioR33JfWFOzEFnhuJcJw==}
+  use-intl@4.14.9:
+    resolution: {integrity: sha512-37ktvdCCz+6JY2VFPl/GV69Ds4ahiUT2c2xEZZRZYxdgGLxFsUbdxzjQVRm3YMIOUU0VPs6zvlifb4Yjk4IxIg==}
     peerDependencies:
+      '@types/react': ^17.0.0 || ^18.0.0 || ^19.0.0
       react: ^17.0.0 || ^18.0.0 || >=19.0.0-rc <19.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
 
   valibot@1.4.2:
     resolution: {integrity: sha512-gjdCvJ6d3RyHAneqxMYMW9QMCwYMb3jpOO0IyHZV1bnRHFBHrX3VkIILt5XYR0WhwHiH7Mty8ovuPZ/O3gamrg==}
@@ -6264,15 +6272,15 @@ snapshots:
 
   '@discoveryjs/json-ext@1.1.0': {}
 
-  '@eloqnt/config@0.1.0': {}
+  '@eloqnt/config@0.1.1': {}
 
   '@eloqnt/format-json@0.1.0':
     dependencies:
-      '@eloqnt/config': 0.1.0
+      '@eloqnt/config': 0.1.1
 
-  '@eloqnt/format-po@0.1.0':
+  '@eloqnt/format-po@0.1.1':
     dependencies:
-      '@eloqnt/config': 0.1.0
+      '@eloqnt/config': 0.1.1
       po-parser: 2.2.0
 
   '@emnapi/core@1.9.2':
@@ -8848,7 +8856,7 @@ snapshots:
     dependencies:
       safer-buffer: 2.1.2
 
-  icu-minify@4.14.5:
+  icu-minify@4.14.9:
     dependencies:
       '@formatjs/icu-messageformat-parser': 3.5.8
 
@@ -9604,22 +9612,24 @@ snapshots:
 
   negotiator@1.0.0: {}
 
-  next-intl-swc-plugin-extractor@4.14.5: {}
+  next-intl-swc-plugin-extractor@4.14.9: {}
 
-  next-intl@4.14.5(next@16.1.7)(react@19.3.0):
+  next-intl@4.14.9(@types/react@19.3.0)(next@16.1.7)(react@19.3.0):
     dependencies:
-      '@eloqnt/config': 0.1.0
+      '@eloqnt/config': 0.1.1
       '@eloqnt/format-json': 0.1.0
-      '@eloqnt/format-po': 0.1.0
+      '@eloqnt/format-po': 0.1.1
       '@formatjs/intl-localematcher': 0.8.7
       '@parcel/watcher': 2.6.0
       '@swc/core': 1.16.2
-      icu-minify: 4.14.5
+      icu-minify: 4.14.9
       negotiator: 1.0.0
       next: 16.1.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.3.0)(react@19.3.0)(sass@1.104.1)
-      next-intl-swc-plugin-extractor: 4.14.5
+      next-intl-swc-plugin-extractor: 4.14.9
       react: 19.3.0
-      use-intl: 4.14.5(react@19.3.0)
+      use-intl: 4.14.9(@types/react@19.3.0)(react@19.3.0)
+    optionalDependencies:
+      '@types/react': 19.3.0
     transitivePeerDependencies:
       - '@swc/helpers'
 
@@ -10648,13 +10658,15 @@ snapshots:
     dependencies:
       punycode: 2.3.1
 
-  use-intl@4.14.5(react@19.3.0):
+  use-intl@4.14.9(@types/react@19.3.0)(react@19.3.0):
     dependencies:
       '@formatjs/fast-memoize': 3.1.5
       '@schummar/icu-type-parser': 1.21.5
-      icu-minify: 4.14.5
+      icu-minify: 4.14.9
       intl-messageformat: 11.2.5
       react: 19.3.0
+    optionalDependencies:
+      '@types/react': 19.3.0
 
   valibot@1.4.2(typescript@5.9.3):
     optionalDependencies:
