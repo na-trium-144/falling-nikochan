@@ -4,7 +4,6 @@ import clsx from "clsx/lite";
 import {
   ChartSeqData,
   displayNote,
-  DisplayNote,
   NoteInGame,
   stepCmp,
   targetY,
@@ -55,7 +54,7 @@ export default function InspectFallingWindow(props: Props) {
   // devicePixelRatioを無視するどころか、あえて小さくすることで、ぼかす
   const tailsCanvasDPR = Math.min(1, 6.5 / noteSize);
   const effectsCanvasDPR = 0.5;
-  const nikochanCanvasDPR = dpr * (false ? 0.17 : 1);
+  const nikochanCanvasDPR = dpr; /** (false ? 0.17 : 1)*/
 
   const { rem, playUIScale } = useDisplayMode();
   const { isDark } = useTheme();
@@ -273,7 +272,7 @@ export default function InspectFallingWindow(props: Props) {
       {/* 判定線 */}
       {boxSize && marginY !== undefined && (
         <TargetLine
-          className={clsx("z-fw-target-line", false && "blur-2xs")}
+          className={clsx("z-fw-target-line" /*false && "blur-2xs"*/)}
           barFlash={undefined}
           left={canvasRect.left}
           width={canvasRect.width}

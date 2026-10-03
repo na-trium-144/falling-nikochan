@@ -1,11 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ReactNode } from "react";
-import DropDown from "./dropdown";
-import clsx from "clsx/lite";
 import Translate from "@icon-park/react/lib/icons/Translate";
-import DownOne from "@icon-park/react/lib/icons/DownOne";
 import { SmallSelect } from "./select";
 
 export const langNames: { [key: string]: string } = {

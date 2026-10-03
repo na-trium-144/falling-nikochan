@@ -11,7 +11,6 @@ import {
   getStep,
   getTimeSec,
   Signature,
-  SignatureWithBarNum,
   Step,
   stepAdd,
   stepCmp,

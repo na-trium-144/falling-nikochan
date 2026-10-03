@@ -21,8 +21,6 @@ import { useOSDetector } from "@/common/pwaInstall";
 import { useDisplayMode } from "@/scale";
 import { useDelayedDisplayState } from "@/common/delayedDisplayState";
 import Range from "@/common/range";
-import DropDown from "@/common/dropdown";
-import DownOne from "@icon-park/react/lib/icons/DownOne";
 import { Scrollable } from "@/common/scrollable";
 import { HelpIcon } from "@/common/caption";
 import { APIError, shouldHideStatus } from "@/common/apiError";

@@ -28,14 +28,11 @@ import { useResizeDetector } from "react-resize-detector";
 import { useDisplayMode } from "@/scale.js";
 import { useColorThief } from "@/common/colorThief.js";
 import Button, { ButtonHighlight } from "@/common/button.js";
-import Select, { SmallSelect } from "@/common/select.js";
-import CheckBox from "@/common/checkBox.js";
-import Range from "@/common/range.js";
+import { SmallSelect } from "@/common/select.js";
 import { Box, CenterBox } from "@/common/box.js";
 import { SlimeSVG } from "@/common/slime.js";
 import { useSE } from "@/common/se.js";
 import VolumeNotice from "@icon-park/react/lib/icons/VolumeNotice";
-import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
 import { IrasutoyaLikeGrass } from "@/common/irasutoyaLike.jsx";
 import InspectFallingWindow from "./fallingWindow.js";
@@ -54,7 +51,7 @@ import Pause from "@icon-park/react/lib/icons/Pause.js";
 import PlayOne from "@icon-park/react/lib/icons/PlayOne.js";
 import { Key } from "@/common/key.js";
 
-interface ChartEvent {
+export interface ChartEvent {
   step: Step;
   timeSec: number;
   type: "note" | "bpm" | "speed" | "signature";
@@ -274,12 +271,7 @@ interface InspectProps {
 function Inspect(props: InspectProps) {
   const { errorMsg, cid, chartBrief, seqMap, initialLvIndex = 0 } = props;
   const t = useTranslations("inspect");
-  const {
-    isTouch,
-    isMobileGame: isMobile,
-    rem,
-    screenHeight,
-  } = useDisplayMode();
+  const { isTouch, isMobileGame: isMobile, rem } = useDisplayMode();
   const standalone = useStandaloneDetector();
   const insideFrame = useInsideFrameDetector();
 
