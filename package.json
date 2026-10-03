@@ -48,7 +48,7 @@
     "@eslint/js": "catalog:eslint",
     "@tsconfig/node23": "^23.0.4",
     "@types/node": "^22.19.7",
-    "core-js": "3.49.0",
+    "core-js": "3.50.0",
     "eslint": "catalog:eslint",
     "eslint-config-next": "catalog:next",
     "eslint-config-prettier": "10.1.8",
