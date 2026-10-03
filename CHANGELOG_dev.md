@@ -1,3 +1,8 @@
+## ver. 18.4 - 2026/10/04 [#1426](https://github.com/na-trium-144/falling-nikochan/pull/1426)
+
+* metaタブでテストプレイ起動時にエラーになった場合はメッセージを表示する
+* sessionのレベルデータをseq変換前のデータ形式に戻す
+
 ## ver. 18.0 - 2026/09/27
 
 * /api/playFile を廃止し、 /api/seqFile に統合 [#1376](https://github.com/na-trium-144/falling-nikochan/pull/1376)
