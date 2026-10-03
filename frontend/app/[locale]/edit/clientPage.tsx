@@ -19,7 +19,6 @@ import { Box } from "@/common/box.js";
 import { MetaTab } from "./metaTab.js";
 import { addRecent } from "@/common/recent.js";
 import {
-  loadChart,
   createBrief,
   Step,
   stepAdd,
@@ -118,14 +117,14 @@ export default function Edit(props: {
       setSessionId(initSession(null));
     } else {
       const updateSession = async () => {
-        if (chart && currentLevel) {
+        if (chart && chart.currentLevel) {
           const data = {
             cid: chart.cid,
             lvIndex: chart.currentLevelIndex || 0,
             brief: await createBrief(chart.toObject(), new Date().getTime()),
             level: {
-              freeze: currentLevel.freeze,
-              meta: currentLevel.meta,
+              freeze: chart.currentLevel.freeze,
+              meta: chart.currentLevel.meta,
               offset: chart.offset,
               ver: currentChartVer,
             } as const,
