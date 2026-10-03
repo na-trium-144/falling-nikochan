@@ -61,6 +61,7 @@ export default {
     seqEmpty: "The chart data is empty",
     resultSessionExpired:
       "The session has timed out. Please close this screen and try again.",
+    quotaExceeded: "The chart data is too large to open the test play.",
     errorPage: {
       title: "An error has occurred 😢",
       goHome: "Return to top page",
