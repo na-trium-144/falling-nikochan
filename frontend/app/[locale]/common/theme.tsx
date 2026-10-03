@@ -1,6 +1,5 @@
 "use client";
 
-import clsx from "clsx/lite";
 import {
   createContext,
   ReactNode,
@@ -10,13 +9,12 @@ import {
   useState,
 } from "react";
 import { useTranslations } from "next-intl";
-import DropDown from "./dropdown";
 import { IrasutoyaLikeBg } from "./irasutoyaLike.jsx";
 import Moon from "@icon-park/react/lib/icons/Moon";
 import Sun from "@icon-park/react/lib/icons/Sun";
-import DownOne from "@icon-park/react/lib/icons/DownOne";
 import themeInitScript from "./themeInit.js?raw";
 import { usePathname } from "next/navigation";
+import { SmallSelect } from "./select";
 
 declare global {
   var fnGetCurrentTheme: () => "dark" | "light" | null;
@@ -97,38 +95,11 @@ export function ThemeProvider(props: { children: ReactNode }) {
   );
 }
 
-export function ThemeSwitcher(props: {
-  children: ReactNode;
-  className?: string;
-}) {
-  const { theme, setTheme } = useTheme();
-  const t = useTranslations("footer");
-
-  return (
-    <DropDown
-      className={clsx("fn-link-1", props.className)}
-      value={theme}
-      options={[
-        { value: "dark" as const, label: t("dark") },
-        { value: "light" as const, label: t("light") },
-        { value: null, label: t("default") },
-      ]}
-      onSelect={(value) => {
-        if (value === "dark" || value === "light") {
-          setTheme(value);
-        } else {
-          setTheme(null);
-        }
-      }}
-    >
-      {props.children}
-    </DropDown>
-  );
-}
-
 export function MenuThemeSwitcher() {
   const t = useTranslations("main.links");
   const themeState = useTheme();
+  const { theme, setTheme } = useTheme();
+  const tf = useTranslations("footer");
   return (
     <p>
       {themeState.isDark ? (
@@ -137,12 +108,21 @@ export function MenuThemeSwitcher() {
         <Sun className="inline-block align-middle " />
       )}
       <span className="ml-1 ">{t("theme")}:</span>
-      <ThemeSwitcher
-        className={clsx(
-          "relative inline-block align-top pr-6 text-center",
-          "fn-link-1",
-          "fn-input"
-        )}
+      <SmallSelect
+        classNameInner="flex-col"
+        value={theme}
+        options={[
+          { value: "dark" as const, label: tf("dark") },
+          { value: "light" as const, label: tf("light") },
+          { value: null, label: tf("default") },
+        ]}
+        onSelect={(value) => {
+          if (value === "dark" || value === "light") {
+            setTheme(value);
+          } else {
+            setTheme(null);
+          }
+        }}
       >
         <div>
           {themeState.theme === "dark"
@@ -151,14 +131,10 @@ export function MenuThemeSwitcher() {
               ? t("light")
               : t("default")}
         </div>
-        <DownOne
-          className="absolute right-1 inset-y-0 h-max m-auto"
-          theme="filled"
-        />
         <span className="block h-0 overflow-hidden">{t("dark")}</span>
         <span className="block h-0 overflow-hidden">{t("light")}</span>
         <span className="block h-0 overflow-hidden">{t("default")}</span>
-      </ThemeSwitcher>
+      </SmallSelect>
     </p>
   );
 }

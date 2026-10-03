@@ -1,4 +1,5 @@
 import "@fontsource/merriweather/400.css";
+import "@fontsource/merriweather/400-italic.css";
 import "@fontsource/kaisei-opti/japanese-400.css";
 import "@fontsource-variable/noto-sans";
 import "@fontsource-variable/noto-sans-jp";

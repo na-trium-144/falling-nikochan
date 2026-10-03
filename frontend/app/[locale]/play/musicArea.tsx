@@ -3,7 +3,7 @@ import { ChartBrief } from "@falling-nikochan/chart";
 import ProgressBar from "@/common/progressBar.js";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { useDisplayMode } from "@/scale.js";
-import { RefObject, useEffect, useRef, useState } from "react";
+import { RefObject, useCallback, useEffect, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
 import VolumeNotice from "@icon-park/react/lib/icons/VolumeNotice";
@@ -14,6 +14,7 @@ import { useColorThief } from "@/common/colorThief";
 import { ButtonHighlight } from "@/common/button";
 import { YouTubeLogo } from "@/common/youtubeLogo";
 import { useTheme } from "@/common/theme";
+import CheckBox from "@/common/checkBox";
 
 interface Props {
   ready: boolean;
@@ -55,33 +56,15 @@ export function MusicArea(props: Props) {
 
   const t = useTranslations("play.message");
 
-  const [volumeCtrlOpen, setVolumeCtrlOpen] = useState(false);
-  const [ytVolumeCtrlAvailable, setYtVolumeCtrlAvailable] = useState(true);
-  useEffect(() => {
-    if (detectOS() === "ios") {
-      // https://stackoverflow.com/questions/31147753/youtube-iframe-embed-cant-control-audio-on-ipad
-      setYtVolumeCtrlAvailable(false);
+  const [volumeCtrlOpen, setVolumeCtrlOpen_] = useState(false);
+  const [initialVolumeCtrlOpen, setInitialVolumeCtrlOpen] = useState(false);
+  const [pointerInVolumeCtrl, setPointerInVolumeCtrl] = useState(false);
+  const setVolumeCtrlOpen = useCallback((open: boolean) => {
+    setVolumeCtrlOpen_(open);
+    if (open) {
+      setInitialVolumeCtrlOpen(true);
     }
   }, []);
-  const [pointerInVolumeCtrl, setPointerInVolumeCtrl] = useState(false);
-  const initialVolumeCtrlOpenDone = useRef(false);
-  useEffect(() => {
-    if (props.ready && !initialVolumeCtrlOpenDone.current) {
-      const t = setTimeout(() => {
-        setVolumeCtrlOpen(true);
-        initialVolumeCtrlOpenDone.current = true;
-      }, 500);
-      return () => clearTimeout(t);
-    }
-  }, [props.ready]);
-  useEffect(() => {
-    if (props.playing && volumeCtrlOpen && !pointerInVolumeCtrl) {
-      const t = setTimeout(() => {
-        setVolumeCtrlOpen(false);
-      }, 2000);
-      return () => clearTimeout(t);
-    }
-  }, [props.playing, volumeCtrlOpen, pointerInVolumeCtrl]);
 
   const [currentSec, setCurrentSec] = useState<number>(0);
   const levelLength =
@@ -403,7 +386,7 @@ export function MusicArea(props: Props) {
               )
             : "bottom-0 right-1 mr-sai",
           props.isMobile &&
-            (initialVolumeCtrlOpenDone.current
+            (initialVolumeCtrlOpen
               ? "transition-all ease-out duration-300 opacity-100 "
               : "opacity-0")
         )}
@@ -414,50 +397,127 @@ export function MusicArea(props: Props) {
         <ButtonHighlight />
         <VolumeNotice theme="filled" className="inline-block align-middle" />
       </button>
-      <div
+      <VolumeControlArea
         className={clsx(
-          "fg-base",
           "absolute z-10",
-          "flex flex-col",
           props.isMobile
-            ? clsx(
-                "bottom-0 inset-x-0 mx-auto w-80 max-w-full",
-                largeTitle
-                  ? "rounded-sq-box p-4 gap-3"
-                  : "rounded-sq-xl px-3 py-2 gap-1"
-              )
-            : clsx(
-                "top-full left-3 ml-auto max-w-100 right-[max(var(--sai-r),0.25rem)] mt-1",
-                largeTitle
-                  ? "rounded-sq-box p-3 gap-3"
-                  : "rounded-sq-xl px-2 py-1 gap-1"
-              ),
-          "fn-plain",
-          "transition-all duration-200",
-          volumeCtrlOpen
-            ? "ease-out scale-100 opacity-100"
-            : "ease-in scale-0 opacity-0"
+            ? "bottom-0 inset-x-0 mx-auto w-80 max-w-full"
+            : "top-full left-3 ml-auto max-w-100 right-[max(var(--sai-r),0.25rem)] mt-1"
         )}
-        style={{
-          transformOrigin: props.isMobile
-            ? "center calc(100% + 0.5rem)"
-            : "calc(100% - 0.75rem) -0.5rem",
-          backdropFilter: "blur(2px)",
-        }}
-        onPointerEnter={(e) => {
-          setPointerInVolumeCtrl(true);
-          e.stopPropagation();
-        }}
-        onPointerLeave={(e) => {
-          setPointerInVolumeCtrl(false);
-          e.stopPropagation();
-        }}
-        onPointerDown={(e) => e.stopPropagation()}
-        onPointerUp={(e) => e.stopPropagation()}
-      >
-        <span className="fn-glass-1" />
-        <span className="fn-glass-2" />
-        {/*{!props.isMobile && (
+        isMobile={props.isMobile}
+        large={!!largeTitle}
+        isOpen={volumeCtrlOpen}
+        setOpen={setVolumeCtrlOpen}
+        pointerInVolumeCtrl={pointerInVolumeCtrl}
+        setPointerInVolumeCtrl={setPointerInVolumeCtrl}
+        ytVolume={props.ytVolume}
+        setYtVolume={props.setYtVolume}
+        enableSE={props.enableSE}
+        seVolume={props.seVolume}
+        setSEVolume={props.setSEVolume}
+        ready={props.ready}
+        playing={props.playing}
+      />
+    </div>
+  );
+}
+
+interface VProps {
+  className: string;
+  isMobile: boolean;
+  large: boolean;
+  isOpen: boolean;
+  setOpen: (open: boolean) => void;
+  pointerInVolumeCtrl: boolean;
+  setPointerInVolumeCtrl: (e: boolean) => void;
+  ytVolume: number;
+  setYtVolume: (v: number) => void;
+  enableSE: boolean;
+  setEnableSE?: (enable: boolean) => void;
+  seVolume: number;
+  setSEVolume: (v: number) => void;
+  enableBeatSE?: boolean;
+  setEnableBeatSE?: (enable: boolean) => void;
+  beatVolume?: number;
+  setBeatVolume?: (v: number) => void;
+  ready: boolean;
+  playing: boolean;
+}
+export function VolumeControlArea(props: VProps) {
+  const t = useTranslations("play.message");
+  const {
+    ready,
+    playing,
+    setOpen,
+    isOpen,
+    pointerInVolumeCtrl,
+    setPointerInVolumeCtrl,
+  } = props;
+  const [ytVolumeCtrlAvailable, setYtVolumeCtrlAvailable] = useState(true);
+  useEffect(() => {
+    if (detectOS() === "ios") {
+      // https://stackoverflow.com/questions/31147753/youtube-iframe-embed-cant-control-audio-on-ipad
+      setYtVolumeCtrlAvailable(false);
+    }
+  }, []);
+  const initialVolumeCtrlOpenDone = useRef(false);
+  useEffect(() => {
+    if (ready && !initialVolumeCtrlOpenDone.current) {
+      const t = setTimeout(() => {
+        setOpen(true);
+        initialVolumeCtrlOpenDone.current = true;
+      }, 500);
+      return () => clearTimeout(t);
+    }
+  }, [ready, setOpen]);
+  useEffect(() => {
+    if (playing && isOpen && !pointerInVolumeCtrl) {
+      const t = setTimeout(() => {
+        setOpen(false);
+      }, 2000);
+      return () => clearTimeout(t);
+    }
+  }, [playing, setOpen, isOpen, pointerInVolumeCtrl]);
+
+  return (
+    <div
+      className={clsx(
+        "fg-base",
+        "flex flex-col",
+        props.isMobile
+          ? props.large
+            ? "rounded-sq-box p-4 gap-3"
+            : "rounded-sq-xl px-3 py-2 gap-1"
+          : props.large
+            ? "rounded-sq-box p-3 gap-3"
+            : "rounded-sq-xl px-2 py-1 gap-1",
+        "fn-plain",
+        "transition-all duration-200",
+        props.isOpen
+          ? "ease-out scale-100 opacity-100"
+          : "ease-in scale-0 opacity-0",
+        props.className
+      )}
+      style={{
+        transformOrigin: props.isMobile
+          ? "center calc(100% + 0.5rem)"
+          : "calc(100% - 0.75rem) -0.5rem",
+        backdropFilter: "blur(2px)",
+      }}
+      onPointerEnter={(e) => {
+        setPointerInVolumeCtrl(true);
+        e.stopPropagation();
+      }}
+      onPointerLeave={(e) => {
+        setPointerInVolumeCtrl(false);
+        e.stopPropagation();
+      }}
+      onPointerDown={(e) => e.stopPropagation()}
+      onPointerUp={(e) => e.stopPropagation()}
+    >
+      <span className="fn-glass-1" />
+      <span className="fn-glass-2" />
+      {/*{!props.isMobile && (
           <span
             className={clsx(
               "absolute inline-block right-2 top-0 w-4 h-4 -translate-y-1/2",
@@ -468,51 +528,94 @@ export function MusicArea(props: Props) {
             )}
           />
         )}*/}
-        <div className="flex flex-row items-center">
-          <YouTubeLogo className={clsx(largeTitle ? "text-xl" : "text-sm")} />
-          <span
-            className={clsx(
-              largeTitle ? "text-sm w-8" : "text-xs w-6",
-              "text-center"
-            )}
+      <div className="flex flex-row items-center">
+        <YouTubeLogo className={clsx(props.large ? "text-xl" : "text-sm")} />
+        <span
+          className={clsx(
+            props.large ? "text-sm w-8" : "text-xs w-6",
+            "text-center"
+          )}
+        >
+          {props.ytVolume}
+        </span>
+        <Range
+          className="flex-1 mx-1"
+          min={0}
+          max={100}
+          disabled={!ytVolumeCtrlAvailable}
+          value={ytVolumeCtrlAvailable ? props.ytVolume : 100}
+          onChange={props.setYtVolume}
+        />
+      </div>
+      <div className="flex flex-row items-center">
+        {props.setEnableSE ? (
+          <CheckBox
+            id="enableSE"
+            value={props.enableSE}
+            onChange={props.setEnableSE}
           >
-            {props.ytVolume}
-          </span>
-          <Range
-            className="flex-1 mx-1"
-            min={0}
-            max={100}
-            disabled={!ytVolumeCtrlAvailable}
-            value={ytVolumeCtrlAvailable ? props.ytVolume : 100}
-            onChange={props.setYtVolume}
-          />
-        </div>
-        <div className="flex flex-row items-center">
+            <SmilingFace
+              className={clsx(props.large ? "text-xl" : "text-sm")}
+            />
+          </CheckBox>
+        ) : (
           <SmilingFace
             className={clsx(
-              largeTitle ? "text-xl" : "text-sm",
+              props.large ? "text-xl" : "text-sm",
               props.enableSE || "text-dim"
             )}
           />
+        )}
+        <span
+          className={clsx(
+            props.large ? "text-sm w-8" : "text-xs w-6",
+            "text-center",
+            props.enableSE || "text-dim"
+          )}
+        >
+          {props.enableSE ? props.seVolume : t("off")}
+        </span>
+        <Range
+          className="flex-1 mx-1"
+          min={0}
+          max={100}
+          disabled={!props.enableSE}
+          value={props.enableSE ? props.seVolume : 0}
+          onChange={props.setSEVolume}
+        />
+      </div>
+      {props.beatVolume !== undefined && props.setBeatVolume && (
+        <div className="flex flex-row items-center">
+          {props.setEnableBeatSE ? (
+            <CheckBox
+              id="enableBeatSE"
+              value={!!props.enableBeatSE}
+              onChange={props.setEnableBeatSE}
+            >
+              beat
+            </CheckBox>
+          ) : (
+            <span>beat</span>
+          )}
           <span
             className={clsx(
-              largeTitle ? "text-sm w-8" : "text-xs w-6",
+              props.large ? "text-sm w-8" : "text-xs w-6",
               "text-center",
-              props.enableSE || "text-dim"
+              props.enableBeatSE || "text-dim"
             )}
           >
-            {props.enableSE ? props.seVolume : t("off")}
+            {props.enableBeatSE ? props.beatVolume : t("off")}
           </span>
           <Range
             className="flex-1 mx-1"
             min={0}
             max={100}
-            disabled={!props.enableSE}
-            value={props.enableSE ? props.seVolume : 0}
-            onChange={props.setSEVolume}
+            disabled={!props.enableBeatSE}
+            value={props.enableBeatSE ? props.beatVolume : 0}
+            onChange={props.setBeatVolume}
           />
         </div>
-      </div>
+      )}
     </div>
   );
 }

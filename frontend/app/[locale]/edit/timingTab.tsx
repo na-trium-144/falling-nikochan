@@ -29,6 +29,7 @@ import Range from "@/common/range";
 import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
 import { ButtonHighlight } from "@/common/button";
 import MathInput from "@/common/mathInput";
+import { CurrentStepText } from "./noteTab";
 
 interface Props {
   chart?: ChartEditing;
@@ -219,25 +220,7 @@ export default function TimingTab(props: Props) {
       <div>
         <span>{t("step")}</span>
         <HelpIcon>{t.rich("stepHelp", { br: () => <br /> })}</HelpIcon>
-        <span className="inline-block text-right w-6">
-          {(cur?.signatureState.barNum || 0) + 1}
-        </span>
-        <span className="ml-1 ">;</span>
-        <span className="inline-block text-right w-6">
-          {(cur?.signatureState.count.fourth || 0) + 1}
-        </span>
-        <div className="w-20 inline-block">
-          {cur && cur?.signatureState.count.numerator > 0 && (
-            <>
-              <span className="ml-2 ">+</span>
-              <span className="inline-block text-right w-6">
-                {cur.signatureState.count.numerator}
-              </span>
-              <span className="ml-1 mr-1">/</span>
-              <span>{cur.signatureState.count.denominator * 4}</span>
-            </>
-          )}
-        </div>
+        <CurrentStepText ss={cur?.signatureState} />
       </div>
       <div className="ml-2">
         <span>{t("bpm")}</span>

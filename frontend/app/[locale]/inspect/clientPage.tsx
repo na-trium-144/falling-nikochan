@@ -1,0 +1,956 @@
+"use client";
+
+import clsx from "clsx/lite";
+import {
+  ChartBrief,
+  ChartSeqData,
+  getBarLength,
+  getSignatureState,
+  getStep,
+  getTimeSec,
+  Signature,
+  Step,
+  stepCmp,
+  stepImproper,
+  stepZero,
+  updateBarNum,
+} from "@falling-nikochan/chart";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
+import * as msgpack from "@msgpack/msgpack";
+import { getSession } from "@/play/session.js";
+import { captureAndWrap, fetchBackend } from "@/common/fetch.js";
+import { markAsExpected } from "@/common/apiError.js";
+import { refreshBrief } from "@/common/briefCache.js";
+import { getQueryOptions } from "@/play/queryOption.js";
+import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
+import { useResizeDetector } from "react-resize-detector";
+import { useDisplayMode } from "@/scale.js";
+import { useColorThief } from "@/common/colorThief.js";
+import Button, { ButtonHighlight } from "@/common/button.js";
+import { SmallSelect } from "@/common/select.js";
+import { Box, CenterBox } from "@/common/box.js";
+import { SlimeSVG } from "@/common/slime.js";
+import { useSE } from "@/common/se.js";
+import VolumeNotice from "@icon-park/react/lib/icons/VolumeNotice";
+import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
+import { IrasutoyaLikeGrass } from "@/common/irasutoyaLike.jsx";
+import InspectFallingWindow from "./fallingWindow.js";
+import TimeBar from "@/edit/timeBar.js";
+import { useSETimer } from "@/edit/seTimer.js";
+import {
+  historyBackWithReview,
+  useInsideFrameDetector,
+  useStandaloneDetector,
+} from "@/common/pwaInstall.jsx";
+import { titleWithSiteName } from "@/common/title.js";
+import { InitErrorMessage } from "@/play/messageBox.js";
+import { VolumeControlArea } from "@/play/musicArea.js";
+import { CurrentStepText } from "@/edit/noteTab.js";
+import Pause from "@icon-park/react/lib/icons/Pause.js";
+import PlayOne from "@icon-park/react/lib/icons/PlayOne.js";
+import { Key } from "@/common/key.js";
+
+export interface ChartEvent {
+  step: Step;
+  timeSec: number;
+  type: "note" | "bpm" | "speed" | "signature";
+}
+
+function getAllEvents(chartSeq: ChartSeqData): ChartEvent[] {
+  const events: ChartEvent[] = [];
+  for (const n of chartSeq.notes) {
+    events.push({
+      step: n.step,
+      timeSec: n.hitTimeSec,
+      type: "note",
+    });
+  }
+  for (const b of chartSeq.bpmChanges) {
+    events.push({
+      step: b.step,
+      timeSec: b.timeSec,
+      type: "bpm",
+    });
+  }
+  for (const s of chartSeq.speedChanges) {
+    events.push({
+      step: s.step,
+      timeSec: s.timeSec,
+      type: "speed",
+    });
+  }
+  for (const sig of chartSeq.signature) {
+    events.push({
+      step: sig.step,
+      timeSec: getTimeSec(chartSeq.bpmChanges, sig.step),
+      type: "signature",
+    });
+  }
+  events.sort((a, b) => {
+    const cmp = stepCmp(a.step, b.step);
+    if (cmp !== 0) return cmp;
+    return a.timeSec - b.timeSec;
+  });
+  return events;
+}
+
+function getUniqueEventTimes(
+  events: readonly ChartEvent[]
+): { step: Step; timeSec: number }[] {
+  const result: { step: Step; timeSec: number }[] = [];
+  for (const ev of events) {
+    if (
+      result.length === 0 ||
+      stepCmp(result[result.length - 1].step, ev.step) !== 0
+    ) {
+      result.push({ step: ev.step, timeSec: ev.timeSec });
+    }
+  }
+  return result;
+}
+
+function findClosestEvent(
+  events: readonly ChartEvent[],
+  currentTimeSec: number
+): ChartEvent | null {
+  if (events.length === 0) return null;
+  let low = 0;
+  let high = events.length - 1;
+  while (low <= high) {
+    const mid = (low + high) >> 1;
+    if (events[mid].timeSec < currentTimeSec) {
+      low = mid + 1;
+    } else {
+      high = mid - 1;
+    }
+  }
+  let best = events[Math.min(Math.max(0, low), events.length - 1)];
+  let minDiff = Math.abs(best.timeSec - currentTimeSec);
+
+  if (low - 1 >= 0) {
+    const prev = events[low - 1];
+    const diff = Math.abs(prev.timeSec - currentTimeSec);
+    if (diff < minDiff) {
+      minDiff = diff;
+      best = prev;
+    }
+  }
+  if (low + 1 < events.length) {
+    const next = events[low + 1];
+    const diff = Math.abs(next.timeSec - currentTimeSec);
+    if (diff < minDiff) {
+      minDiff = diff;
+      best = next;
+    }
+  }
+  return best;
+}
+
+export function getInspectCurrentStep(
+  chartSeq: ChartSeqData,
+  events: readonly ChartEvent[],
+  currentTimeSec: number
+): Step {
+  const stepSnap4th = getStep(chartSeq.bpmChanges, currentTimeSec, 1);
+  const closestEvent = findClosestEvent(events, currentTimeSec);
+  if (!closestEvent) {
+    return stepSnap4th;
+  }
+  const timeSnap4th = getTimeSec(chartSeq.bpmChanges, stepSnap4th);
+  const diffSnap4th = Math.abs(timeSnap4th - currentTimeSec);
+  const diffEvent = Math.abs(closestEvent.timeSec - currentTimeSec);
+
+  if (diffEvent <= diffSnap4th) {
+    return closestEvent.step;
+  }
+  return stepSnap4th;
+}
+
+function formatSignature(sig: Signature): string {
+  const barLengths = getBarLength(sig);
+  return barLengths
+    .map((len) => `${stepImproper(len)}/${len.denominator * 4}`)
+    .join(" + ");
+}
+
+export function InitInspect() {
+  const te = useTranslations("error");
+
+  const [cid, setCid] = useState<string>();
+  const [chartBrief, setChartBrief] = useState<ChartBrief>();
+  const [seqMap, setSeqMap] = useState<Record<number, ChartSeqData>>();
+  const [initialLvIndex, setInitialLvIndex] = useState<number>(0);
+  const [errorMsg, setErrorMsg] = useState<string | Error>();
+
+  useEffect(() => {
+    const q = getQueryOptions();
+    const session = getSession(q.sid);
+    if (session === null) {
+      setErrorMsg(te("noSession"));
+      return;
+    }
+
+    setCid(session.cid);
+    setChartBrief(session.brief);
+
+    if (session.editing) {
+      setSeqMap({ [session.lvIndex]: session.level });
+      setInitialLvIndex(session.lvIndex);
+      setErrorMsg(undefined);
+    } else {
+      const listedLevels = session.brief.levels
+        .map((level, index) => ({ level, index }))
+        .filter(({ level }) => !level.unlisted);
+
+      if (listedLevels.length === 0) {
+        setErrorMsg(te("seqEmpty"));
+        return;
+      }
+
+      setInitialLvIndex(listedLevels[0].index);
+
+      Promise.all(
+        listedLevels.map(({ index }) =>
+          fetchBackend()
+            .url(`/api/seqFile/${session.cid}/${index}`)
+            .headers({ "X-If-Match": `"${session.brief.etag}"` })
+            .get()
+            .notFound(markAsExpected)
+            .error(412, (e) => {
+              refreshBrief(session.cid);
+              markAsExpected(e);
+            })
+            .arrayBuffer((buf) => {
+              const seq = msgpack.decode(buf) as ChartSeqData;
+              return { index, seq, error: undefined };
+            })
+            .catch((e: unknown) => ({
+              index,
+              seq: undefined,
+              error: captureAndWrap(e),
+            }))
+        )
+      ).then((results) => {
+        const errorResult = results.find((r) => r.error);
+        if (errorResult) {
+          setErrorMsg(errorResult.error);
+          return;
+        }
+        const map: Record<number, ChartSeqData> = {};
+        for (const r of results) {
+          if (r.seq) {
+            map[r.index] = r.seq;
+          }
+        }
+        setSeqMap(map);
+        setErrorMsg(undefined);
+      });
+    }
+  }, [te]);
+
+  return (
+    <Inspect
+      errorMsg={errorMsg}
+      cid={cid}
+      chartBrief={chartBrief}
+      seqMap={seqMap}
+      initialLvIndex={initialLvIndex}
+    />
+  );
+}
+
+interface InspectProps {
+  errorMsg?: string | Error;
+  cid?: string;
+  chartBrief?: ChartBrief;
+  seqMap?: Record<number, ChartSeqData>;
+  initialLvIndex?: number;
+}
+
+function Inspect(props: InspectProps) {
+  const { errorMsg, cid, chartBrief, seqMap, initialLvIndex = 0 } = props;
+  const t = useTranslations("inspect");
+  const { isTouch, isMobileGame: isMobile, rem } = useDisplayMode();
+  const standalone = useStandaloneDetector();
+  const insideFrame = useInsideFrameDetector();
+
+  const listedLevels = useMemo(() => {
+    if (!chartBrief) return [];
+    return chartBrief.levels
+      .map((level, index) => ({ level, index }))
+      .filter(
+        ({ level, index }) => !level.unlisted || (seqMap && index in seqMap)
+      );
+  }, [chartBrief, seqMap]);
+
+  const [selectedLvIndex, setSelectedLvIndex] =
+    useState<number>(initialLvIndex);
+
+  useEffect(() => {
+    if (
+      listedLevels.length > 0 &&
+      !listedLevels.some((l) => l.index === selectedLvIndex)
+    ) {
+      setSelectedLvIndex(listedLevels[0].index);
+    }
+  }, [listedLevels, selectedLvIndex]);
+
+  const chartSeq = seqMap ? seqMap[selectedLvIndex] : undefined;
+
+  const levelOptions = useMemo(
+    () =>
+      listedLevels.map(({ level, index }) => ({
+        value: index,
+        label: (
+          <span className="flex items-center gap-1.5 truncate">
+            {level.name && (
+              <span className="font-title truncate">{level.name}</span>
+            )}
+            <span className={clsx("fn-level-type", level.type)}>
+              <span>{level.type}-</span>
+              <span>{level.difficulty}</span>
+            </span>
+          </span>
+        ),
+      })),
+    [listedLevels]
+  );
+
+  const ref = useRef<HTMLDivElement | null>(null);
+  const ytPlayer = useRef<YouTubePlayer | undefined>(undefined);
+
+  const [playbackRate, setPlaybackRate] = useState<number>(1);
+  const [playing, setPlaying] = useState<boolean>(false);
+  const [ready, setReady] = useState<boolean>(false);
+  const [currentTimeSec, setCurrentTimeSec] = useState<number>(0);
+  const currentTimeSecRef = useRef<number>(0);
+  currentTimeSecRef.current = currentTimeSec;
+  const [zoom, setZoom] = useState<number>(0);
+
+  const colorThief = useColorThief();
+  const youtubeSpace = useResizeDetector();
+  const youtubeFitToWidth =
+    isMobile || (youtubeSpace.width ?? 0) / (youtubeSpace.height ?? 0) < 16 / 9;
+
+  useEffect(() => {
+    document.title = titleWithSiteName(
+      t("title", {
+        title: chartBrief?.title || "",
+        cid: cid || "",
+      })
+    );
+  });
+
+  const onReady = useCallback(() => {
+    setReady(true);
+    if (chartSeq) {
+      setCurrentTimeSec(-chartSeq.offset);
+    }
+  }, [chartSeq]);
+  const onStart = useCallback(() => {
+    setPlaying(true);
+  }, []);
+  const onStop = useCallback(() => {
+    setPlaying(false);
+  }, []);
+
+  const changePlaybackRate = useCallback((rate: number) => {
+    setPlaybackRate(rate);
+    ytPlayer.current?.setPlaybackRate?.(rate);
+  }, []);
+
+  const start = useCallback(() => {
+    if (chartSeq) {
+      ytPlayer.current?.seekTo?.(currentTimeSec + chartSeq.offset, true);
+    }
+    ytPlayer.current?.playVideo?.();
+    ref.current?.focus();
+  }, [chartSeq, currentTimeSec]);
+
+  const stop = useCallback(() => {
+    ytPlayer.current?.pauseVideo?.();
+    ref.current?.focus();
+  }, []);
+
+  const setAndSeekCurrentTimeWithoutOffset = useCallback(
+    (timeSec: number, focus = true, allowSeekAhead = true) => {
+      if (!playing) {
+        const clampedTime = timeSec - (chartSeq?.offset || 0);
+        setCurrentTimeSec(clampedTime);
+        if (ytPlayer.current && ytPlayer.current.getPlayerState?.() !== 5) {
+          ytPlayer.current.seekTo?.(timeSec, allowSeekAhead);
+        }
+      }
+      if (focus) {
+        ref.current?.focus();
+      }
+    },
+    [playing, chartSeq]
+  );
+
+  // 再生中に時刻を更新
+  useEffect(() => {
+    if (playing) {
+      const i = setInterval(() => {
+        if (ytPlayer.current?.getCurrentTime && chartSeq) {
+          const ytTime = ytPlayer.current.getCurrentTime();
+          setCurrentTimeSec(ytTime - chartSeq.offset);
+        }
+      }, 50);
+      return () => clearInterval(i);
+    }
+  }, [playing, chartSeq]);
+
+  const getCurrentTimeSec = useCallback(() => {
+    if (playing && ytPlayer.current?.getCurrentTime && chartSeq) {
+      return ytPlayer.current.getCurrentTime() - chartSeq.offset;
+    }
+    return currentTimeSecRef.current;
+  }, [playing, chartSeq]);
+
+  // SE設定
+  const {
+    playSE,
+    audioLatency,
+    enableHitSE,
+    setEnableHitSE,
+    hitVolume,
+    setHitVolume,
+    enableBeatSE,
+    setEnableBeatSE,
+    beatVolume,
+    setBeatVolume,
+  } = useSE(cid, 0, true, {
+    hitVolume: "seVolume",
+    hitVolumeCid: cid ? `seVolume-${cid}` : undefined,
+    enableHitSE: "enableSEInspect",
+    beatVolume: "beatVolume",
+    beatVolumeCid: cid ? `beatVolume-${cid}` : undefined,
+    enableBeatSE: "enableBeatInspect",
+  });
+  const [volumeCtrlOpen, setVolumeCtrlOpen] = useState(false);
+  const [pointerInVolumeCtrl, setPointerInVolumeCtrl] = useState(false);
+
+  useSETimer({
+    playing,
+    ytPlayer,
+    playSE,
+    audioLatency,
+    chartSeq,
+  });
+
+  const signatureWithBarNum = useMemo(
+    () => (chartSeq ? updateBarNum(chartSeq.signature) : []),
+    [chartSeq]
+  );
+
+  const allEvents = useMemo(
+    () => (chartSeq ? getAllEvents(chartSeq) : []),
+    [chartSeq]
+  );
+  const uniqueEvents = useMemo(
+    () => getUniqueEventTimes(allEvents),
+    [allEvents]
+  );
+
+  const currentStep = useMemo(() => {
+    if (!chartSeq) return stepZero();
+    return getInspectCurrentStep(chartSeq, allEvents, currentTimeSec);
+  }, [chartSeq, allEvents, currentTimeSec]);
+
+  const isNoteSelected = useCallback(
+    (n: { step: Step }) => stepCmp(n.step, currentStep) === 0,
+    [currentStep]
+  );
+
+  // カーソル移動 (前/次のイベント)
+  const seekPrevEvent = useCallback(() => {
+    if (!chartSeq) return;
+    const target = uniqueEvents
+      .filter((ev) => stepCmp(ev.step, currentStep) < 0)
+      .pop();
+    if (!target) {
+      setAndSeekCurrentTimeWithoutOffset(0);
+    } else {
+      setAndSeekCurrentTimeWithoutOffset(target.timeSec + chartSeq.offset);
+    }
+  }, [chartSeq, uniqueEvents, currentStep, setAndSeekCurrentTimeWithoutOffset]);
+
+  const seekNextEvent = useCallback(() => {
+    if (!chartSeq) return;
+    const target = uniqueEvents.find((ev) => stepCmp(ev.step, currentStep) > 0);
+    if (target) {
+      setAndSeekCurrentTimeWithoutOffset(target.timeSec + chartSeq.offset);
+    }
+  }, [chartSeq, uniqueEvents, currentStep, setAndSeekCurrentTimeWithoutOffset]);
+
+  // キーボードショートカット
+  useEffect(() => {
+    const keydown = (e: KeyboardEvent) => {
+      if (!chartSeq) return;
+      if (e.key === " " && !playing) {
+        start();
+        e.preventDefault();
+      } else if (
+        (e.key === "Escape" || e.key === "Esc" || e.key === " ") &&
+        playing
+      ) {
+        stop();
+        e.preventDefault();
+      } else if (e.key === "Left" || e.key === "ArrowLeft") {
+        seekPrevEvent();
+        e.preventDefault();
+      } else if (e.key === "Right" || e.key === "ArrowRight") {
+        seekNextEvent();
+        e.preventDefault();
+      }
+    };
+    window.addEventListener("keydown", keydown);
+    return () => window.removeEventListener("keydown", keydown);
+  }, [chartSeq, playing, start, stop, seekPrevEvent, seekNextEvent]);
+
+  const currentSignatureState = chartSeq
+    ? getSignatureState(signatureWithBarNum, currentStep)
+    : null;
+
+  const notesBigId: (number | null)[] = useMemo(() => {
+    const notesBigId: (number | null)[] = [];
+    let id = 0;
+    for (const n of chartSeq?.notes ?? []) {
+      if (n.big) {
+        notesBigId[n.id] = id;
+        id++;
+      }
+    }
+    return notesBigId;
+  }, [chartSeq]);
+  const bigCount = useMemo(
+    () => chartSeq?.notes.filter((n) => n.big).length,
+    [chartSeq]
+  );
+
+  // 選択中の音符（現在カーソル位置と一致する音符）
+  const selectedNotes = useMemo(
+    () => chartSeq?.notes.filter((n) => isNoteSelected(n)) || [],
+    [chartSeq, isNoteSelected]
+  );
+
+  const selectedBpmChanges = useMemo(() => {
+    if (!chartSeq) return [];
+    return chartSeq.bpmChanges.filter(
+      (b) => stepCmp(b.step, currentStep) === 0
+    );
+  }, [chartSeq, currentStep]);
+
+  const selectedSpeedChanges = useMemo(() => {
+    if (!chartSeq) return [];
+    const results: (
+      | { type: "direct"; bpm: number }
+      | { type: "interp"; prevBpm: number; bpm: number }
+    )[] = [];
+    for (let i = 0; i < chartSeq.speedChanges.length; i++) {
+      const s = chartSeq.speedChanges[i];
+      if (s.interp && i > 0) {
+        const prev = chartSeq.speedChanges[i - 1];
+        if (
+          stepCmp(currentStep, prev.step) > 0 &&
+          stepCmp(currentStep, s.step) <= 0
+        ) {
+          results.push({
+            type: "interp",
+            prevBpm: prev.bpm,
+            bpm: s.bpm,
+          });
+        }
+      } else {
+        if (stepCmp(s.step, currentStep) === 0) {
+          results.push({
+            type: "direct",
+            bpm: s.bpm,
+          });
+        }
+      }
+    }
+    return results;
+  }, [chartSeq, currentStep]);
+
+  const selectedSignatureChanges = useMemo(() => {
+    if (!chartSeq) return [];
+    return chartSeq.signature.filter(
+      (sig) => stepCmp(sig.step, currentStep) === 0
+    );
+  }, [chartSeq, currentStep]);
+
+  const ytId = chartBrief?.ytId;
+
+  if (errorMsg) {
+    return (
+      <InitErrorMessage
+        className="isolate z-play-error"
+        msg={errorMsg}
+        isTouch={isTouch}
+        exit={() => {
+          if (standalone || insideFrame) {
+            historyBackWithReview();
+          } else {
+            window.close();
+          }
+        }}
+      />
+    );
+  }
+
+  if (!chartSeq) {
+    return (
+      <CenterBox classNameOuter="isolate z-play-loading">
+        <p>
+          <SlimeSVG />
+          Loading...
+        </p>
+      </CenterBox>
+    );
+  }
+
+  return (
+    <main
+      className="w-full h-dvh overflow-hidden select-none flex flex-col"
+      tabIndex={0}
+      ref={ref}
+    >
+      <div
+        className={clsx(
+          "flex-1 min-h-0 w-full flex items-stretch",
+          isMobile ? "flex-col overflow-y-auto" : "flex-row-reverse"
+        )}
+      >
+        {/* 右ペイン (PC) / 上部 (Mobile) */}
+        <div
+          className={clsx(
+            isMobile
+              ? "w-full flex-none p-3"
+              : "w-1/3 min-w-80 max-w-sm h-full p-3 overflow-y-auto",
+            "flex flex-col items-stretch gap-2 shrink-0"
+          )}
+        >
+          {/* ヘッダー */}
+          {/*<div className="flex flex-row items-center justify-between">
+            <span className="font-title truncate text-sm flex-1">
+              {chartBrief?.title}
+            </span>
+            <span className="text-xs text-dim ml-2 whitespace-nowrap">
+              ID: {cid}
+            </span>
+          </div>*/}
+
+          {/* YouTube 埋め込み */}
+          <div
+            className={clsx(
+              isMobile
+                ? "flex flex-row-reverse gap-3"
+                : "flex flex-col items-stretch gap-2 shrink-0",
+              "mb-3"
+            )}
+          >
+            <div
+              ref={youtubeSpace.ref}
+              className={clsx(
+                isMobile ? "w-1/2" : "w-full",
+                "aspect-video flex-none"
+              )}
+            >
+              <div
+                className={clsx(
+                  "w-full h-full relative p-2 rounded-sq-xl",
+                  colorThief.boxStyle
+                )}
+                style={{ color: colorThief.currentColor }}
+              >
+                <span className="fn-glass-1" />
+                <span className="fn-glass-2" />
+                <FlexYouTube
+                  fixedSide={youtubeFitToWidth ? "width" : "height"}
+                  className={youtubeFitToWidth ? "w-full" : "h-full"}
+                  control={true}
+                  id={ytId}
+                  ytPlayer={ytPlayer}
+                  onReady={onReady}
+                  onStart={onStart}
+                  onStop={onStop}
+                  onPlaybackRateChange={setPlaybackRate}
+                />
+                {ytId && (
+                  <img
+                    ref={colorThief.imgRef}
+                    className="hidden"
+                    src={`https://i.ytimg.com/vi/${ytId}/mqdefault.jpg`}
+                    crossOrigin="anonymous"
+                    alt=""
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* 操作ボタン */}
+            <div className="relative flex flex-wrap items-center justify-end gap-1">
+              {(standalone || insideFrame) && (
+                <button
+                  className="fn-link-1 text-sm mr-2 flex items-center"
+                  onClick={() => historyBackWithReview()}
+                >
+                  <ArrowLeft className="mr-1" />
+                  {t("back")}
+                </button>
+              )}
+              <SmallSelect
+                options={["0.5", "0.75", "1", "1.25", "1.5", "1.75", "2"].map(
+                  (s) => ({
+                    label: (
+                      <>
+                        ×
+                        <span className="inline-block text-left ml-1 w-9">
+                          {s}
+                        </span>
+                      </>
+                    ),
+                    value: s,
+                  })
+                )}
+                value={playbackRate.toString()}
+                onSelect={(s: string) => changePlaybackRate(Number(s))}
+                showValue
+              />
+              <button
+                className={clsx("fn-icon-button", isTouch ? "fn-with-bg" : "")}
+                onClick={() => {
+                  if (ready) {
+                    if (!playing) {
+                      start();
+                    } else {
+                      stop();
+                    }
+                  }
+                }}
+              >
+                <ButtonHighlight />
+                {playing ? (
+                  <Pause className="inline-block align-middle text-xl" />
+                ) : (
+                  <PlayOne
+                    theme="filled"
+                    className="inline-block align-middle text-xl"
+                  />
+                )}
+                {!isTouch && (
+                  <Key handleKeyDown>{playing ? "Esc" : "Space"}</Key>
+                )}
+              </button>
+              <span className="flex-1" />
+              <button
+                className={clsx("fn-icon-button", isTouch ? "fn-with-bg" : "")}
+                onClick={seekPrevEvent}
+              >
+                <ButtonHighlight />
+                {isTouch ? "←" : <Key handleKeyDown>←</Key>}
+              </button>
+              <button
+                className={clsx("fn-icon-button", isTouch ? "fn-with-bg" : "")}
+                onClick={seekNextEvent}
+              >
+                <ButtonHighlight />
+                {isTouch ? "→" : <Key handleKeyDown>→</Key>}
+              </button>
+              <span className="flex-1" />
+
+              {/* 音量調整 */}
+              <button
+                className={clsx("fn-icon-button", "fg-base")}
+                onClick={() => setVolumeCtrlOpen(!volumeCtrlOpen)}
+                onPointerDown={(e) => e.stopPropagation()}
+                onPointerUp={(e) => e.stopPropagation()}
+              >
+                <ButtonHighlight />
+                <VolumeNotice
+                  theme="filled"
+                  className="inline-block align-middle"
+                />
+              </button>
+              <VolumeControlArea
+                className={clsx("absolute z-1 right-0 top-full")}
+                isMobile={isMobile}
+                large={true}
+                isOpen={volumeCtrlOpen}
+                setOpen={setVolumeCtrlOpen}
+                pointerInVolumeCtrl={pointerInVolumeCtrl}
+                setPointerInVolumeCtrl={setPointerInVolumeCtrl}
+                ytVolume={0} // todo?
+                setYtVolume={() => undefined}
+                enableSE={enableHitSE}
+                setEnableSE={setEnableHitSE}
+                seVolume={hitVolume}
+                setSEVolume={setHitVolume}
+                enableBeatSE={enableBeatSE}
+                setEnableBeatSE={setEnableBeatSE}
+                beatVolume={beatVolume}
+                setBeatVolume={setBeatVolume}
+                ready={ready}
+                playing={playing}
+              />
+            </div>
+          </div>
+
+          {/* 音符・イベントの詳細情報表示 */}
+          <div className="flex items-center justify-center">
+            <span className="min-w-20 text-right">{t("step")}</span>
+            <CurrentStepText ss={currentSignatureState} />
+          </div>
+          <Box
+            classNameOuter="w-full mt-1"
+            classNameInner="p-4 flex flex-col gap-1"
+          >
+            <div className="flex flex-col gap-1">
+              {selectedNotes.length === 0 &&
+                selectedBpmChanges.length === 0 &&
+                selectedSpeedChanges.length === 0 &&
+                selectedSignatureChanges.length === 0 && (
+                  <span className="text-dim">{t("noSelection")}</span>
+                )}
+              {selectedBpmChanges.map((b, i) => (
+                <div
+                  key={`bpm-${i}`}
+                  className="flex items-center justify-between"
+                >
+                  <span className="text-sm mr-2">{t("bpmChange")}:</span>
+                  <span>{b.bpm}</span>
+                </div>
+              ))}
+              {selectedSpeedChanges.map((s, i) => (
+                <div
+                  key={`speed-${i}`}
+                  className="flex items-center justify-between"
+                >
+                  <span className="text-sm mr-2">{t("speedChange")}:</span>
+                  <span>
+                    {s.type === "interp" ? `${s.prevBpm} → ${s.bpm}` : s.bpm}
+                  </span>
+                </div>
+              ))}
+              {selectedSignatureChanges.map((sig, i) => (
+                <div
+                  key={`sig-${i}`}
+                  className="flex items-center justify-between"
+                >
+                  <span className="text-sm mr-2">{t("signatureChange")}:</span>
+                  <span>{formatSignature(sig)}</span>
+                </div>
+              ))}
+              {selectedNotes.map((note) => (
+                <div
+                  key={note.id}
+                  className="flex items-center justify-end flex-wrap"
+                >
+                  <span>#</span>
+                  <span className="ml-1 min-w-6">{note.id + 1}</span>
+                  {note.big && (
+                    <span className="text-sm ml-2">
+                      (Big#
+                      <span className="ml-1">{notesBigId[note.id]! + 1}</span>)
+                    </span>
+                  )}
+                  <span className="flex-1" />
+                  <span className="ml-2">
+                    <span className="text-sm text-dim mr-1">
+                      <var className="italic">x</var>:
+                    </span>
+                    <span className="inline-block min-w-6 text-center">
+                      {note.hitX}
+                    </span>
+                  </span>
+                  <span className="ml-2">
+                    <span className="text-sm text-dim mr-1">
+                      <var className="italic">vx</var>:
+                    </span>
+                    <span className="inline-block min-w-6 text-center">
+                      {note.hitVX}
+                    </span>
+                  </span>
+                  <span className="ml-2">
+                    <span className="text-sm text-dim mr-1">
+                      <var className="italic">vy</var>:
+                    </span>
+                    <span className="inline-block min-w-6 text-center">
+                      {note.hitVY}
+                    </span>
+                  </span>
+                </div>
+              ))}
+              <hr className="fn-hr my-1" />
+              <div className="flex items-center">
+                <span className="ml-2">/</span>
+                <span className="ml-1 min-w-8 text-center">
+                  {chartSeq?.notes.length}
+                </span>
+                <span className="text-sm ml-2">
+                  (Big<span className="text-sm ml-1">{bigCount}</span>)
+                </span>
+              </div>
+            </div>
+          </Box>
+        </div>
+
+        {/* 左ペイン: FallingWindow */}
+        <div className="relative flex-1 min-w-0 min-h-0">
+          <InspectFallingWindow
+            className="absolute inset-0 isolate"
+            chartSeq={chartSeq}
+            allEvents={allEvents}
+            getCurrentTimeSec={getCurrentTimeSec}
+            playing={playing}
+            playbackRate={playbackRate}
+          />
+        </div>
+      </div>
+
+      {/* 下部: 草と TimeBar */}
+      <div className="relative w-full flex-none flex items-center">
+        <IrasutoyaLikeGrass height={8 * rem} />
+        <TimeBar
+          className="z-10 scale-80 origin-bottom-left w-5/4!"
+          chartSeq={chartSeq}
+          currentTimeSec={currentTimeSec}
+          setAndSeekCurrentTimeWithoutOffset={
+            setAndSeekCurrentTimeWithoutOffset
+          }
+          zoom={zoom}
+          isNoteSelected={isNoteSelected}
+        />
+        <div className="absolute left-3 bottom-3 z-15 flex items-baseline">
+          <span className="whitespace-nowrap">{t("level")}:</span>
+          <SmallSelect
+            className=""
+            options={levelOptions}
+            value={selectedLvIndex}
+            onSelect={(idx: number) => {
+              setSelectedLvIndex(idx);
+            }}
+            disabled={levelOptions.length <= 1}
+            showValue
+          />
+        </div>
+        <div className="absolute right-3 bottom-3 z-15 flex items-baseline">
+          <span className="">{t("zoom")}</span>
+          <Button
+            small
+            text="-"
+            onClick={() => setZoom((z) => Math.max(-2, z - 1))}
+          />
+          <Button
+            small
+            text="+"
+            onClick={() => setZoom((z) => Math.min(3, z + 1))}
+          />
+        </div>
+      </div>
+    </main>
+  );
+}
