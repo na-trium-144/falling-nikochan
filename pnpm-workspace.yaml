@@ -26,7 +26,7 @@ catalog:
   "@vercel/og": 0.11.1
   chai: 6.2.2
   colorthief: 3.4.0
-  dotenv: ^16.6.1
+  dotenv: ^18.0.5
   fn-commands: 1.1.0
   hono: 4.13.8
   hono-openapi: 1.3.1
