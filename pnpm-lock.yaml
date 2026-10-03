@@ -60,8 +60,8 @@ catalogs:
       specifier: 4.14.5
       version: 4.14.5
     postcss:
-      specifier: 8.5.26
-      version: 8.5.26
+      specifier: 8.5.28
+      version: 8.5.28
     valibot:
       specifier: 1.4.2
       version: 1.4.2
@@ -418,7 +418,7 @@ importers:
         version: 1.1.8
       postcss:
         specifier: 'catalog:'
-        version: 8.5.26
+        version: 8.5.28
       sass:
         specifier: 1.104.1
         version: 1.104.1
@@ -4701,8 +4701,8 @@ packages:
     resolution: {integrity: sha512-PS08Iboia9mts/2ygV3eLpY5ghnUcfLV/EXTOW1E2qYxJKGGBUtNjN76FYHnMs36RmARn41bC0AZmn+rR0OVpQ==}
     engines: {node: ^10 || ^12 || >=14}
 
-  postcss@8.5.26:
-    resolution: {integrity: sha512-u82N74LFzG8ca+dD8puPnplTXoGH4fTPpVGuIbt36G3qvNlkvfD0lEAZSxaly3KX8TS/L1A1gsCEmvKmBcVbkQ==}
+  postcss@8.5.28:
+    resolution: {integrity: sha512-RRuzqDtt5Y9h3quz5hWhK+TPnsmVs6WwSU6LkJMeY4HstUEDuYTG8UJSdawMRzmzAtV+KEoG8N3Qg2qLy5vM/A==}
     engines: {node: ^10 || ^12 || >=14}
 
   prelude-ls@1.2.1:
@@ -6600,7 +6600,7 @@ snapshots:
       '@mdx-js/mdx': 3.1.1
       source-map: 0.7.6
     optionalDependencies:
-      webpack: 5.111.0(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2)
+      webpack: 5.111.0(postcss@8.5.28)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2)
     transitivePeerDependencies:
       - supports-color
 
@@ -7180,7 +7180,7 @@ snapshots:
   '@sentry/webpack-plugin@5.3.0(webpack@5.111.0)':
     dependencies:
       '@sentry/bundler-plugin-core': 5.3.0
-      webpack: 5.111.0(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2)
+      webpack: 5.111.0(postcss@8.5.28)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2)
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -7341,7 +7341,7 @@ snapshots:
       '@alloc/quick-lru': 5.2.0
       '@tailwindcss/node': 4.3.3
       '@tailwindcss/oxide': 4.3.3
-      postcss: 8.5.26
+      postcss: 8.5.28
       tailwindcss: 4.3.3
 
   '@tsconfig/node23@23.0.4': {}
@@ -9546,15 +9546,15 @@ snapshots:
 
   minimist@1.2.8: {}
 
-  minimizer-webpack-plugin@5.10.1(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack@5.111.0):
+  minimizer-webpack-plugin@5.10.1(postcss@8.5.28)(sharp@0.34.5)(svgo@4.0.2)(webpack@5.111.0):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
       schema-utils: 4.5.0
       terser: 5.51.2
-      webpack: 5.111.0(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2)
+      webpack: 5.111.0(postcss@8.5.28)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2)
     optionalDependencies:
-      postcss: 8.5.26
+      postcss: 8.5.28
       sharp: 0.34.5
       svgo: 4.0.2
 
@@ -9843,7 +9843,7 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  postcss@8.5.26:
+  postcss@8.5.28:
     dependencies:
       nanoid: 3.3.18
       picocolors: 1.1.1
@@ -10734,7 +10734,7 @@ snapshots:
 
   webpack-sources@3.5.1: {}
 
-  webpack@5.111.0(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2):
+  webpack@5.111.0(postcss@8.5.28)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2):
     dependencies:
       '@types/estree': 1.0.9
       '@types/json-schema': 7.0.15
@@ -10748,7 +10748,7 @@ snapshots:
       events: 3.3.0
       graceful-fs: 4.2.11
       mime-db: 1.54.0
-      minimizer-webpack-plugin: 5.10.1(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack@5.111.0)
+      minimizer-webpack-plugin: 5.10.1(postcss@8.5.28)(sharp@0.34.5)(svgo@4.0.2)(webpack@5.111.0)
       schema-utils: 4.5.0
       tapable: 2.3.3
       watchpack: 2.5.2
