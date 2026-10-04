@@ -81,6 +81,14 @@ import {
   ChartUntil17Min,
   convertTo17,
 } from "./legacy/chart17.js";
+import {
+  Chart19,
+  ChartSchema19,
+  ChartUntil19,
+  ChartUntil19Min,
+  convertTo19,
+  Level19Freeze,
+} from "./legacy/chart19.js";
 
 export const YoutubeIdSchema = () =>
   v.pipe(
@@ -183,19 +191,19 @@ export function emptyBrief(): ChartBrief {
     levels: [],
   };
 }
-export const currentChartVer = 18;
+export const currentChartVer = 19;
 // これ以前の譜面データがサーバーにアップロードされている場合に警告を出す。
 // ローカルファイル読み込みの場合、14以前のyml,mpkファイルはチェックされるが、15以降のluaファイルのバージョンはチェックしていない。
 export const lastIncompatibleVer = 16;
-export type ChartEdit = Chart17;
-export const ChartSchema = ChartSchema17;
+export type ChartEdit = Chart19;
+export const ChartSchema = ((...args) =>
+  ChartSchema19(...args)) as typeof ChartSchema19;
 export type LevelMin = Level15Meta;
-export type LevelFreeze = Level15Freeze;
+export type LevelFreeze = Level19Freeze;
 export const convertToMin = convertToMin14;
 
-export async function convertToLatest(chart: ChartUntil17): Promise<ChartEdit> {
-  if (chart.ver !== 17 && chart.ver !== 18)
-    chart = await convertTo17(chart as ChartUntil15);
+export async function convertToLatest(chart: ChartUntil19): Promise<ChartEdit> {
+  if (chart.ver !== 19) chart = await convertTo19(chart as ChartUntil17);
   return chart;
 }
 /*
@@ -204,22 +212,25 @@ jsonシリアライズ可能ではないinfinityなどが含まれると保存�
 それを防ぐためjsonシリアライズを通してからバリデーションする。
 (TODO)そもそも保存時にjson化すべきでない。
 */
-export async function validateChart(chart: ChartUntil17): Promise<ChartEdit> {
+export async function validateChart(chart: ChartUntil19): Promise<ChartEdit> {
   chart = JSON.parse(JSON.stringify(chart));
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   chart = await convertToLatest(chart);
-  chart satisfies Chart17;
+  chart satisfies Chart19;
   chart = v.parse(ChartSchema(), chart);
   return { ...chart, ver: currentChartVer };
 }
-export function validateChartWithoutConvert(chart: ChartUntil17): ChartUntil17 {
+export function validateChartWithoutConvert(chart: ChartUntil19): ChartUntil19 {
   chart = JSON.parse(JSON.stringify(chart));
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   switch (chart.ver) {
+    case 19:
+      chart satisfies Chart19;
+      return v.parse(ChartSchema19(), chart);
     case 18:
     case 17:
       chart satisfies Chart17;
-      return v.parse(ChartSchema(), chart);
+      return v.parse(ChartSchema17(), chart);
     case 16:
     case 15:
       chart satisfies Chart15;
@@ -235,14 +246,13 @@ export function validateChartWithoutConvert(chart: ChartUntil17): ChartUntil17 {
   }
 }
 export async function validateChartMin(
-  chart: ChartUntil17Min
-): Promise<Chart14Min | Chart17> {
+  chart: ChartUntil19Min
+): Promise<Chart14Min | Chart19> {
   chart = JSON.parse(JSON.stringify(chart));
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart.ver >= 15) {
-    if (chart.ver !== 17 && chart.ver !== 18)
-      chart = await convertTo17(chart as ChartUntil15);
-    chart satisfies Chart17;
+    if (chart.ver !== 19) chart = await convertTo19(chart as ChartUntil17);
+    chart satisfies Chart19;
     chart = v.parse(ChartSchema(), chart);
     return { ...chart, ver: currentChartVer };
   } else {
@@ -273,6 +283,7 @@ export async function hash(text: string) {
  */
 export async function hashLevel(
   level:
+    | Level19Freeze
     | Level15Freeze
     | Level13Freeze
     | Level11Freeze
@@ -293,6 +304,7 @@ export async function hashLevel(
         hitVX: note.hitVX,
         hitVY: note.hitVY,
         fall: "fall" in note ? note.fall : false,
+        longFrom: "longFrom" in note ? note.longFrom : [],
       }) satisfies NoteCommand
   );
 
@@ -335,7 +347,9 @@ export async function hashLevel(
   );
 }
 
-export function numEvents(chart: Chart14Edit | Chart15 | Chart17): number {
+export function numEvents(
+  chart: Chart14Edit | Chart15 | Chart17 | Chart19
+): number {
   return chart.levelsFreeze
     .map(
       (l) =>
@@ -437,7 +451,7 @@ export function emptyLevel(
 export async function createBrief(
   // API用に過去2バージョンサポート
   // seedでChart5を使う
-  chart: Chart5 | Chart14Edit | Chart15 | Chart17,
+  chart: Chart5 | Chart14Edit | Chart15 | Chart17 | Chart19,
   updatedAt: number
 ): Promise<ChartBrief> {
   let levelHashes: string[] = [];
