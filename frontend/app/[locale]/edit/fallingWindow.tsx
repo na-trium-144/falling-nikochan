@@ -104,6 +104,15 @@ export default function FallingWindow(props: Props) {
             : "oklch(87.2% 0.01 258.338)" // gray-300
         )
       );
+      displayNikochan.forEach((d) => {
+        d.dn.longFrom.forEach((longFrom) => {
+          d.drawLong(
+            ctx,
+            dpr,
+            displayNikochan.find((dp) => dp.id === d.id + longFrom)
+          );
+        });
+      });
       displayNikochan.forEach((d) => d.drawNikochan(ctx, dpr));
       displayNikochan
         .find((d) => d.dn.id === cur.noteIndex)

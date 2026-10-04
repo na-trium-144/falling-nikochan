@@ -105,6 +105,27 @@ export class DisplayNikochan {
     }
   }
 
+  drawLong(
+    ctx: CanvasRenderingContext2D,
+    dpr: number,
+    dnPrevNote: DisplayNikochan | undefined | null
+  ) {
+    if (!dnPrevNote) {
+      return;
+    }
+    // 仮の直線
+    ctx.save();
+    ctx.scale(dpr, dpr);
+    ctx.translate(this.left, this.top);
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(dnPrevNote.left - this.left, dnPrevNote.top - this.top);
+    ctx.strokeStyle = "rgba(250, 205, 0, 1)";
+    ctx.lineWidth = 4;
+    ctx.stroke();
+    ctx.restore();
+  }
+
   drawNikochan(nctx: CanvasRenderingContext2D, dpr: number) {
     let dx = 0;
     let dy = 0;
