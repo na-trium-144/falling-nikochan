@@ -8,6 +8,7 @@ import {
   SignatureWithLua15,
   SpeedChangeWithLua15,
 } from "../legacy/chart15.js";
+import { NoteCommandWithLua19 } from "../legacy/chart19.js";
 import {
   BPMChangeWithLua3,
   NoteCommandWithLua3,
@@ -45,7 +46,7 @@ export interface LevelForLuaEditLatest {
   lua: string[];
 }
 export interface LevelForLuaEdit {
-  notes: NoteCommandWithLua15[] | NoteCommand9[] | NoteCommandWithLua3[];
+  notes: NoteCommandWithLua19[] | NoteCommandWithLua15[] | NoteCommand9[] | NoteCommandWithLua3[];
   rest: RestWithLua15[] | Rest9[] | RestStep3[];
   bpmChanges: BPMChangeWithLua15[] | BPMChange9[] | BPMChangeWithLua3[];
   speedChanges:

@@ -28,8 +28,8 @@ import {
 } from "./legacy/chart15.js";
 import { docRefs, Schema } from "./docSchema.js";
 import { resolver } from "hono-openapi";
-import { Chart17 } from "./legacy/chart17.js";
 import { BPMChangeWithLua3, NoteCommandWithLua3 } from "./legacy/chart3.js";
+import { Chart19, Level19Freeze } from "./legacy/chart19.js";
 
 export const DisplayParamSchema = () =>
   v.object({
@@ -112,10 +112,16 @@ export const NoteSeqSchema = () =>
           "Whether the note falls from the top of the screen, or thrown up from the bottom"
         )
       ),
+      longFrom: v.pipe(
+        v.array(v.pipe(v.number(), v.integer(), v.ltValue(0))),
+        v.description(
+          "Empty array represents a single tap note. [-n] represents a long note connected to the n-th previous note."
+        )
+      ),
     }),
     v.description(
       "Note data used for judgement and display during play.\n" +
-        "The `step`, `big`, `hitX`, `hitVX`, `hitVY`, and `fall` parameters are original values defined in the chart data, identical to those in `NoteCommand15`.\n" +
+        "The `step`, `big`, `hitX`, `hitVX`, `hitVY`, `fall` and `longFrom` parameters are original values defined in the chart data, identical to those in `NoteCommand15`.\n" +
         "The remaining parameters are calculated based on these values along with BPM and speed changes, " +
         "via the internal `loadChart` function and the `/api/seqFile` and `/api/seqPreview` APIs, " +
         "and are used for rendering during gameplay."
@@ -254,8 +260,7 @@ export const ChartSeqDataSchema = () =>
         v.literal(15),
         v.literal(16),
         // 現行バージョン:
-        v.literal(17),
-        v.literal(18),
+        v.literal(19),
       ]),
       v.description("Chart version")
     ),
@@ -305,6 +310,7 @@ export interface DisplayNote {
   bigBonus?: number;
   chain?: number;
   visible: boolean;
+  longFrom: number[];
 }
 
 /**
@@ -336,6 +342,7 @@ function solveQuadEquation(
 
 export function loadLevel(
   freeze:
+    | Level19Freeze
     | Level15Freeze
     | {
         notes: NoteCommandWithLua3[];
@@ -562,6 +569,7 @@ export function loadLevel(
       hitVX: c.hitVX,
       hitVY: c.hitVY,
       fall: "fall" in c ? !!c.fall : false,
+      longFrom: "longFrom" in c ? c.longFrom : [],
     });
   }
   return {
@@ -600,7 +608,7 @@ export function loadLevel(
  * chartを読み込む
  */
 export function loadChart(
-  chart: Chart17 | Chart15 | Chart6,
+  chart: Chart19 | Chart15 | Chart6,
   levelIndex: number
 ): ChartSeqData {
   if (chart.ver === 6) {
@@ -671,6 +679,7 @@ export function displayNote(
       baseScore: note.baseScore,
       chainBonus: note.chainBonus,
       bigBonus: note.bigBonus,
+      longFrom: note.longFrom,
     };
   } else if (timeSec < note.appearTimeSec) {
     return null;
@@ -704,6 +713,7 @@ export function displayNote(
       baseScore: note.baseScore,
       chainBonus: note.chainBonus,
       bigBonus: note.bigBonus,
+      longFrom: note.longFrom,
     };
   }
 }

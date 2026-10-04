@@ -335,6 +335,38 @@ function NoteEdit(props: Props) {
           </CheckBox>
           <Key handleKeyDown>B</Key>
         </div>
+        <div>
+          <CheckBox
+            id="note-long"
+            className="ml-2 mr-1"
+            value={n.longFrom.length > 0}
+            onChange={(v) =>
+              currentLevel?.updateNote({ ...n, longFrom: v ? [-1] : [] })
+            }
+            disabled={!currentLevel?.currentNoteEditable}
+          >
+            <span>{t("long")}</span>
+          </CheckBox>
+          <MathInput
+            className="w-20"
+            actualValue={n.longFrom.join(",")}
+            updateValue={(v) =>
+              currentLevel?.updateNote({
+                ...n,
+                longFrom: [Number(v)],
+              })
+            }
+            isValid={(v) =>
+              v !== "" &&
+              !isNaN(Number(v)) &&
+              Math.floor(Number(v)) === Number(v) &&
+              Number(v) < 0
+            }
+            disabled={
+              !currentLevel?.currentNoteEditable || n.longFrom.length !== 1
+            }
+          />
+        </div>
         <div className="mt-2 ml-2">
           <span>{t("fallMode")}</span>
           <HelpIcon>{t.rich("fallModeHelp", { br: () => <br /> })}</HelpIcon>

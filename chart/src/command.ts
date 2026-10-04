@@ -1,14 +1,13 @@
 import {
   CopyBuffer,
-  NoteCommand15,
-  NoteCommandWithLua15,
   Rest15,
   RestWithLua15,
 } from "./legacy/chart15.js";
+import { NoteCommand19, NoteCommandWithLua19 } from "./legacy/chart19.js";
 import { Step, stepZero } from "./step.js";
 
-export type NoteCommand = NoteCommand15;
-export type NoteCommandWithLua = NoteCommandWithLua15;
+export type NoteCommand = NoteCommand19;
+export type NoteCommandWithLua = NoteCommandWithLua19;
 
 export function defaultNoteCommand(
   currentStep: Step = stepZero()
@@ -21,6 +20,7 @@ export function defaultNoteCommand(
     hitVY: +3,
     fall: true,
     luaLine: null,
+    longFrom: [],
   };
 }
 

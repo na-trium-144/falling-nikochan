@@ -371,6 +371,13 @@ export default function FallingWindow(props: Props) {
           const dns = displayNikochan.current[dn.id]!;
           dns.update(dn, c);
           shouldHideBPMSign ||= dns.shouldHideBPMSign;
+          dn.longFrom.forEach((longFrom) => {
+            dns.drawLong(
+              nctx,
+              nikochanCanvasDPR,
+              displayNikochan.current[dn.id + longFrom]
+            );
+          });
           dns.drawNikochan(nctx, nikochanCanvasDPR);
           dns.drawTail(ctx, tailsCanvasDPR);
           dns.drawRipple(ectx, effectsCanvasDPR);
