@@ -46,10 +46,10 @@ export async function reportPopularCharts(env: Bindings) {
       const sortedResults = results
         .map((r) => ({
           cid: r.cid,
-          count: aggeratePopularCounts(rawPopularCounts, r),
+          ...aggeratePopularCounts(rawPopularCounts, r),
         }))
         .filter((r) => r.count > 0)
-        .sort((a, b) => b.count - a.count)
+        .sort((a, b) => b.weightedCount - a.weightedCount)
         .slice(0, 6);
 
       popularBriefs = await Promise.all(

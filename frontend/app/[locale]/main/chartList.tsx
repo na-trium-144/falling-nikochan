@@ -1,5 +1,9 @@
 "use client";
-import { ChartBrief, levelTypes } from "@falling-nikochan/chart";
+import {
+  ChartBrief,
+  levelTypes,
+  RecordGetSummarySchema,
+} from "@falling-nikochan/chart";
 import clsx from "clsx/lite";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useTranslations } from "next-intl";
@@ -30,6 +34,7 @@ import { Scrollable } from "@/common/scrollable.js";
 import { captureAndWrap, fetchBackend, formatError } from "@/common/fetch.js";
 import * as v from "valibot";
 import { useDisplayMode } from "@/scale.js";
+import PlayOne from "@icon-park/react/lib/icons/PlayOne.js";
 
 interface PProps {
   locale: string;
@@ -85,6 +90,8 @@ export type ChartListType = "recent" | "recentEdit" | "popular" | "latest";
 
 export interface ChartLineBrief {
   cid: string;
+  count?: number;
+  countTotal?: number;
   updatedAt?: number; // searchAPIのレスポンスにこれがある場合はbrief.updatedAtよりも優先する
   fetching?: boolean;
   fetched: boolean;
@@ -102,6 +109,7 @@ interface Props {
   creator?: boolean;
   showLoading?: boolean; // briefsがundefinedか、briefsにfetched:falseが含まれる場合にloadingを表示する
   dateDiff?: boolean;
+  showCount?: boolean;
   search?: boolean;
   href: (cid: string) => string;
   onClick?: (cid: string) => void;
@@ -197,8 +205,22 @@ export function ChartList(props: Props) {
           .get()
           .json((latest) =>
             v
-              .parse(v.array(v.object({ cid: v.string() })), latest)
-              .map(({ cid }) => ({ cid, fetched: false }))
+              .parse(
+                v.array(
+                  v.object({
+                    cid: v.string(),
+                    count: v.optional(v.number()),
+                    updatedAt: v.optional(v.number()),
+                  })
+                ),
+                latest
+              )
+              .map(({ cid, count, updatedAt }) => ({
+                cid,
+                count,
+                updatedAt,
+                fetched: false,
+              }))
           )
           .catch((e: unknown) => captureAndWrap(e, { type: props.type }))
           .then((latest) => mergeAndSetBriefs(latest));
@@ -268,17 +290,32 @@ export function ChartList(props: Props) {
           changed = true;
           fetchBrief(b.cid, {
             onResult: (brief) =>
-              setBriefs((briefs) => {
-                if (Array.isArray(briefs)) {
-                  briefs = briefs.slice();
-                  const i = briefs.findIndex((b2) => b2?.cid === b.cid);
-                  if (i >= 0) {
-                    briefs[i]!.fetched = true;
-                    briefs[i]!.brief = brief;
-                  }
-                }
-                return briefs;
-              }),
+              fetchBackend()
+                .get(`/api/record/${b.cid}`)
+                .json((record) =>
+                  v
+                    .parse(v.array(RecordGetSummarySchema()), record)
+                    .reduce(
+                      (countTotal, lvRecord) =>
+                        countTotal + lvRecord.count + lvRecord.countAuto,
+                      0
+                    )
+                )
+                .catch(() => undefined)
+                .then((countTotal) =>
+                  setBriefs((briefs) => {
+                    if (Array.isArray(briefs)) {
+                      briefs = briefs.slice();
+                      const i = briefs.findIndex((b2) => b2?.cid === b.cid);
+                      if (i >= 0) {
+                        briefs[i]!.fetched = true;
+                        briefs[i]!.brief = brief;
+                        briefs[i]!.countTotal = countTotal;
+                      }
+                    }
+                    return briefs;
+                  })
+                ),
             onNotFound: () =>
               setBriefs((briefs) => {
                 if (Array.isArray(briefs)) {
@@ -309,7 +346,7 @@ export function ChartList(props: Props) {
         setBriefs(briefs.slice());
       }
     }
-  }, [briefs, props.type, maxRow, fetchAll]);
+  }, [briefs, props.type, maxRow, fetchAll, props.showCount]);
   useEffect(() => {
     if (Array.isArray(briefs)) {
       if (props.type === "recent") {
@@ -441,6 +478,9 @@ export function ChartList(props: Props) {
                 original={filteredBriefs.at(i)!.original}
                 newTab={props.newTab}
                 dateDiff={props.dateDiff}
+                showCount={props.showCount}
+                count={filteredBriefs.at(i)!.count}
+                countTotal={filteredBriefs.at(i)!.countTotal}
                 badge={props.badge}
                 small={props.small}
                 big={props.big}
@@ -550,6 +590,8 @@ interface CProps {
   className?: string;
   style?: object;
   cid: string;
+  count?: number;
+  countTotal?: number;
   updatedAt?: number;
   brief?: ChartBrief;
   href: string;
@@ -559,6 +601,7 @@ interface CProps {
   original?: boolean;
   newTab?: boolean;
   dateDiff?: boolean;
+  showCount?: boolean;
   badge?: boolean;
   small?: boolean;
   big?: "h" | "v";
@@ -672,7 +715,7 @@ function ChartListItemChildren(props: CProps) {
       <div className="fn-cl-content">
         {props.big ? (
           <>
-            <div className="h-4 **:leading-4">
+            <div className="relative h-4 **:leading-4">
               <span className="text-xs text-dim">{props.cid}</span>
               {props.dateDiff && (
                 <DateDiff
@@ -680,6 +723,23 @@ function ChartListItemChildren(props: CProps) {
                   date={props.updatedAt ?? props.brief?.updatedAt ?? 0}
                 />
               )}
+              {props.showCount &&
+                props.count !== undefined &&
+                props.count > 0 && (
+                  <span className="absolute top-0 right-0 text-sm">
+                    <PlayOne
+                      theme="filled"
+                      className="inline-block align-middle mr-0.5"
+                    />
+                    {Math.ceil(props.count)}
+                    {props.countTotal && (
+                      <>
+                        <span className="mx-0.5">/</span>
+                        {Math.ceil(props.countTotal)}
+                      </>
+                    )}
+                  </span>
+                )}
               {props.original && (
                 <span className="ml-2 text-xs">(オリジナル曲)</span>
               )}
@@ -748,10 +808,29 @@ function ChartListItemChildren(props: CProps) {
               <span className="ml-1 text-sm/3">{props.cid}</span>
               {props.dateDiff && (
                 <DateDiff
-                  className="ml-2 text-xs/3 text-dim"
+                  className="ml-2 text-xs/3"
                   date={props.updatedAt ?? props.brief?.updatedAt ?? 0}
                 />
               )}
+              {props.showCount &&
+                props.count !== undefined &&
+                props.count > 0 && (
+                  <span className="ml-2 text-xs/3">
+                    (
+                    <PlayOne
+                      theme="filled"
+                      className="inline-block align-middle mr-0.5"
+                    />
+                    {Math.ceil(props.count)}
+                    {props.countTotal && (
+                      <>
+                        <span className="mx-0.5">/</span>
+                        {Math.ceil(props.countTotal)}
+                      </>
+                    )}
+                    )
+                  </span>
+                )}
               {props.original && (
                 <span className="ml-2 text-xs/3">(オリジナル曲)</span>
               )}
@@ -790,6 +869,25 @@ function ChartListItemChildren(props: CProps) {
                   date={props.updatedAt ?? props.brief?.updatedAt ?? 0}
                 />
               )}
+              {props.showCount &&
+                props.count !== undefined &&
+                props.count > 0 && (
+                  <span className="ml-2 text-xs">
+                    (
+                    <PlayOne
+                      theme="filled"
+                      className="inline-block align-middle mr-0.5"
+                    />
+                    {Math.ceil(props.count)}
+                    {props.countTotal && (
+                      <>
+                        <span className="mx-0.5">/</span>
+                        {Math.ceil(props.countTotal)}
+                      </>
+                    )}
+                    )
+                  </span>
+                )}
               {props.original && (
                 <span className="ml-2 text-xs">(オリジナル曲)</span>
               )}
