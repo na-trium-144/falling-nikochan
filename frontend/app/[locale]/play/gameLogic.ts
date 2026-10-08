@@ -29,36 +29,33 @@ export default function useGameLogic(
   playSE: (s: SEType) => void,
   flash: (x: { targetX: number }) => void
 ) {
-  const [notesAll, setNotesAll] = useState<NoteInGame[]>([]);
   const [notesDone, setNotesDone] = useState<NoteDone[][]>([]);
 
-  const judgeInstance = useRef<Judge>(new Judge({ playbackRate }));
+  // リセットのたびに新しいインスタンスにする
+  const [judge, setJudge] = useState<Judge>(new Judge([]));
+  judge.playbackRate = playbackRate;
+  judge.onPlaySE = playSE;
+  judge.onFlash = flash;
 
   // good, ok, bad, missの個数
   const [judgeCount, setJudgeCount] = useState<
     [number, number, number, number, number]
   >([0, 0, 0, 0, 0]);
-  const notesTotal = notesAll.length;
   const judgeScore = judgeCount[0] * 1 + judgeCount[1] * okBaseScore;
   const [bonus, setBonus] = useState<number>(0); // 1 + 2 + ... + 100 + 100 + ...
-  const bonusTotal =
-    notesTotal < bonusMax
-      ? (notesTotal * (notesTotal + 1)) / 2
-      : (bonusMax * (bonusMax + 1)) / 2 + bonusMax * (notesTotal - bonusMax);
   const [bigCount, setBigCount] = useState<number>(0);
-  const [bigTotal, setBigTotal] = useState<number>(0);
-  const baseScore = (judgeScore / (notesTotal || 1)) * baseScoreRate;
-  const chainScore = (bonus / (bonusTotal || 1)) * chainScoreRate;
-  const bigScore = (bigCount / (bigTotal || 1)) * bigScoreRate;
+  const baseScore = (judgeScore / (judge.notesTotal || 1)) * baseScoreRate;
+  const chainScore = (bonus / (judge.bonusTotal || 1)) * chainScoreRate;
+  const bigScore = (bigCount / (judge.bigTotal || 1)) * bigScoreRate;
   const score = baseScore + chainScore + bigScore;
   const hitCountByType = useRef<Record<number, number>>({});
   const [hitType, setHitType] = useState<number | null>(null);
 
-  const chartEnd = judgeCount.reduce((sum, j) => sum + j, 0) == notesTotal;
+  const chartEnd =
+    judgeCount.reduce((sum, j) => sum + j, 0) == judge.notesTotal;
 
   const [chain, setChain] = useState<number>(0);
   const [maxChain, setMaxChain] = useState<number>(0);
-  const chainRef = useRef<number>(0);
 
   const lateTimes = useRef<number[]>([]);
   const timeOfsEstimator = useRef<OffsetEstimator | null>(null);
@@ -76,9 +73,9 @@ export default function useGameLogic(
   const autoAdjustOffset = useCallback(
     (ofs: number, now: number, noteIndex: number) => {
       if (!auto && autoOffset) {
-        const late = now - notesAll[noteIndex].hitTimeSec;
+        const late = now - judge.notesAll[noteIndex].hitTimeSec;
         for (let i = noteIndex - 1; i >= 0; i--) {
-          const latePrev = now - notesAll[i].hitTimeSec;
+          const latePrev = now - judge.notesAll[i].hitTimeSec;
           if (latePrev === late) {
             continue;
           } else if (Math.abs(latePrev) < Math.abs(late)) {
@@ -88,8 +85,8 @@ export default function useGameLogic(
             break;
           }
         }
-        for (let i = noteIndex + 1; i < notesAll.length; i++) {
-          const lateNext = now - notesAll[i].hitTimeSec;
+        for (let i = noteIndex + 1; i < judge.notesAll.length; i++) {
+          const lateNext = now - judge.notesAll[i].hitTimeSec;
           if (lateNext === late) {
             continue;
           } else if (Math.abs(lateNext) < Math.abs(late)) {
@@ -101,7 +98,7 @@ export default function useGameLogic(
         }
 
         // doneを0にすることで判定後であってもvelを計算させる
-        const n = { ...notesAll[noteIndex], done: 0 };
+        const n = { ...judge.notesAll[noteIndex], done: 0 };
         const dn = displayNote(n, now);
         if (timeOfsEstimator.current && dn) {
           const nPosOfs = dn ? -dn.pos.y : 0;
@@ -125,42 +122,21 @@ export default function useGameLogic(
         }
       }
     },
-    [auto, autoOffset, setUserOffset, notesAll]
+    [auto, autoOffset, setUserOffset, judge]
   );
 
-  // Noteに判定を保存し、scoreとchainを更新
-  const judge = useCallback(
-    (c: HitCandidate, now: number) => {
+  // scoreとchainを更新
+  const onJudge = useCallback(
+    (c: HitCandidate, now: number, thisChain: number) => {
       if (c.note.big && c.note.done > 0) {
-        c.note.bigDone = true;
         if (c.judge <= 2) {
           setBigCount((big) => big + 1);
-          c.note.bigBonus = (1 / (bigTotal || 1)) * bigScoreRate;
-          //  / ((1 / notesTotal) * baseScoreRate)
         }
       } else {
         // c.judge = 1 ~ 4
-        if (c.judge <= 3) {
-          c.note.hitPos = displayNote(c.note, c.note.hitTimeSec + c.late)?.pos; // 位置を固定
-        }
-        c.note.done = c.judge;
-        let thisChain: number;
         if (c.judge <= 2) {
-          thisChain = chainRef.current + 1;
-          c.note.chain = thisChain;
-          c.note.chainBonus =
-            (Math.min(thisChain, bonusMax) / bonusTotal) * chainScoreRate;
-          //  / ((1 / notesTotal) * baseScoreRate)
           setBonus((bonus) => bonus + Math.min(thisChain, bonusMax));
-          if (c.judge === 1) {
-            c.note.baseScore = (1 / notesTotal) * baseScoreRate;
-          } else {
-            c.note.baseScore = (okBaseScore / notesTotal) * baseScoreRate;
-          }
-        } else {
-          thisChain = 0;
         }
-        chainRef.current = thisChain;
         setChain(thisChain);
         setMaxChain((max) => Math.max(max, thisChain));
         setJudgeCount((judgeCount) => {
@@ -221,30 +197,23 @@ export default function useGameLogic(
         });
       }
     },
-    [bonusTotal, notesTotal, bigTotal, playbackRate]
+    [playbackRate]
   );
-
-  judgeInstance.current.playbackRate = playbackRate;
-  judgeInstance.current.onJudge = judge;
-  judgeInstance.current.onPlaySE = playSE;
+  judge.onJudge = onJudge;
 
   const resetNotesAll = useCallback(
     (notes: NoteInGame[], now: number) => {
       // note.done などを書き換えるため、元データを壊さないようdeepcopy
-      const notesCopy = notes.map((n) => ({ ...n })).slice();
-      setNotesAll(notesCopy.slice());
       setNotesDone([]);
       setJudgeCount([0, 0, 0, 0, 0]);
       setChain(0);
       setMaxChain(0);
-      chainRef.current = 0;
       setBonus(0);
       setBigCount(0);
-      setBigTotal(notesCopy.filter((n) => n.big).length);
       hitCountByType.current = {};
       setHitType(null);
       initTimeOfsEstimator();
-      judgeInstance.current.reset(notesCopy, now);
+      setJudge(new Judge(notes, now));
     },
     [initTimeOfsEstimator]
   );
@@ -252,16 +221,17 @@ export default function useGameLogic(
   const iosRelease = useCallback(() => {
     const now = getCurrentTimeSec();
     if (now !== undefined) {
-      judgeInstance.current.iosRelease(now);
+      judge.iosRelease(now);
     }
   }, [getCurrentTimeSec]);
 
   // キーを押したときの判定
   const hit = useCallback<(type: number) => HitCandidate | null>(
-    (type: number) => {
+    (hitType: number) => {
       const now = getCurrentTimeSec();
       if (now !== undefined) {
-        hitCountByType.current[type] = (hitCountByType.current[type] || 0) + 1;
+        hitCountByType.current[hitType] =
+          (hitCountByType.current[hitType] || 0) + 1;
         setHitType(
           Number(
             Object.keys(hitCountByType.current).reduce((a, b) =>
@@ -274,15 +244,12 @@ export default function useGameLogic(
         );
       }
       if (now === undefined) return null;
-      const candidate = judgeInstance.current.hit(now);
+      const { candidate, type } = judge.hit(now);
       if (candidate) {
         lateTimes.current.push(
           candidate.late / playbackRate + userOffset /* + audioLatency */
         );
-        if (
-          !candidate.note.bigDone &&
-          judgeInstance.current.iosThruNote !== candidate.note
-        ) {
+        if (type === "normal") {
           autoAdjustOffset(
             candidate.late / playbackRate + userOffset /* + audioLatency */,
             now,
@@ -292,7 +259,7 @@ export default function useGameLogic(
       }
       return candidate;
     },
-    [getCurrentTimeSec, playbackRate, userOffset, autoAdjustOffset]
+    [getCurrentTimeSec, playbackRate, userOffset, autoAdjustOffset, judge]
   );
 
   // badLateSec以上過ぎたものをmiss判定にする
@@ -303,11 +270,11 @@ export default function useGameLogic(
       timer = null;
       const now = getCurrentTimeSec();
       if (now !== undefined) {
-        const nextMissTime = judgeInstance.current.checkMiss(now);
-        if (nextMissTime.length > 0) {
+        const nextMissTime = judge.checkMiss(now);
+        if (nextMissTime !== null) {
           timer = setTimeout(
             removeOneNote,
-            (Math.min(...nextMissTime) * 1000) / playbackRate
+            (nextMissTime * 1000) / playbackRate
           );
         }
       }
@@ -318,7 +285,7 @@ export default function useGameLogic(
         clearTimeout(timer);
       }
     };
-  }, [auto, getCurrentTimeSec, playbackRate]);
+  }, [auto, getCurrentTimeSec, playbackRate, judge]);
 
   useEffect(() => {
     if (auto) {
@@ -326,53 +293,14 @@ export default function useGameLogic(
       const removeOneNote = () => {
         timer = null;
         const now = getCurrentTimeSec();
-        const nextHitTime: number[] = [];
-        const notesYetDone = judgeInstance.current.notesYetDone;
-        const notesBigYetDone = judgeInstance.current.notesBigYetDone;
-        while (now !== undefined && notesYetDone.length >= 1) {
-          const n = notesYetDone[0];
-          const late = now - n.hitTimeSec;
-          if (late >= 0) {
-            if (judgeForAuto) {
-              hit(0);
-            } else {
-              playSE("hit");
-              judge({ note: n, judge: 1, late: 0 }, now);
-              notesYetDone.shift();
-              if (n.big) {
-                notesBigYetDone.push(n);
-              }
-            }
-            flash({ targetX: n.targetX });
-            continue;
-          } else {
-            nextHitTime.push(-late);
-            break;
+        if (now !== undefined) {
+          const nextHitTime = judge.checkAuto(now, judgeForAuto);
+          if (nextHitTime !== null) {
+            timer = setTimeout(
+              removeOneNote,
+              (nextHitTime * 1000) / playbackRate
+            );
           }
-        }
-        while (now !== undefined && notesBigYetDone.length >= 1) {
-          const n = notesBigYetDone[0];
-          const late = now - n.hitTimeSec;
-          if (late >= 0) {
-            if (judgeForAuto) {
-              hit(0);
-            } else {
-              playSE("hitBig");
-              judge({ note: n, judge: 1, late: 0 }, now);
-              notesBigYetDone.shift();
-            }
-            flash({ targetX: n.targetX });
-            continue;
-          } else {
-            nextHitTime.push(-late);
-            break;
-          }
-        }
-        if (nextHitTime.length > 0) {
-          timer = setTimeout(
-            removeOneNote,
-            (Math.min(...nextHitTime) * 1000) / playbackRate
-          );
         }
       };
       removeOneNote();
@@ -391,11 +319,12 @@ export default function useGameLogic(
     playSE,
     flash,
     judgeForAuto,
+    judge,
   ]);
 
   // ビルド後のjsから見つけづらくするためにオブジェクトではなくarrayにしている
   return [
-    notesAll,
+    judge.notesAll,
     resetNotesAll,
     baseScore,
     chainScore,
@@ -407,14 +336,12 @@ export default function useGameLogic(
     hit,
     iosRelease,
     judgeCount,
-    bigTotal === 0 ? null : bigCount,
-    bigTotal,
+    judge.bigTotal === 0 ? null : bigCount,
+    judge.bigTotal,
     chartEnd,
     lateTimes,
     hitType,
     posOfs,
     timeOfsEstimator,
-    judge,
-    { current: judgeInstance.current.notesYetDone },
   ] as const;
 }

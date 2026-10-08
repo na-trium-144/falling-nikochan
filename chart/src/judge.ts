@@ -5,6 +5,11 @@ import {
   badLateSec,
   goodSecThru,
   okSecThru,
+  bigScoreRate,
+  bonusMax,
+  chainScoreRate,
+  baseScoreRate,
+  okBaseScore,
 } from "./gameConstant.js";
 import { displayNote, NoteInGame } from "./seq.js";
 
@@ -22,45 +27,47 @@ export interface JudgeOptions {
 }
 
 export class Judge {
+  notesAll: NoteInGame[];
+  notesTotal: number;
+  bonusTotal: number;
+  bigTotal: number;
+  currentChain: number = 0;
+  /**
+   * まだ判定していないNote
+   */
   notesYetDone: NoteInGame[] = [];
+  /**
+   * 通常判定が終わってBig判定がまだのNote
+   */
   notesBigYetDone: NoteInGame[] = [];
+  /**
+   * iosThru判定が発生した場合の音符
+   * (判定終了済みではあり、notesYetDoneには含まれない)
+   */
   iosThruNote: NoteInGame | null = null;
   iosPrevRelease: number | null = null;
+
   playbackRate: number = 1;
-  onJudge?: (candidate: HitCandidate, now: number) => void;
+  onJudge?: (candidate: HitCandidate, now: number, thisChain: number) => void;
   onPlaySE?: (se: "hit" | "hitBig") => void;
+  onFlash?: (x: { targetX: number }) => void;
 
-  constructor(
-    notesOrOptions?: NoteInGame[] | JudgeOptions,
-    options?: JudgeOptions
-  ) {
-    if (Array.isArray(notesOrOptions)) {
-      this.reset(notesOrOptions);
-      if (options) {
-        if (options.playbackRate !== undefined) {
-          this.playbackRate = options.playbackRate;
-        }
-        this.onJudge = options.onJudge;
-        this.onPlaySE = options.onPlaySE;
-      }
-    } else if (notesOrOptions) {
-      if (notesOrOptions.playbackRate !== undefined) {
-        this.playbackRate = notesOrOptions.playbackRate;
-      }
-      this.onJudge = notesOrOptions.onJudge;
-      this.onPlaySE = notesOrOptions.onPlaySE;
-      if (notesOrOptions.notes) {
-        this.reset(notesOrOptions.notes);
-      }
-    }
-  }
-
-  reset(notes: NoteInGame[], now?: number): void {
+  constructor(notes: NoteInGame[], now?: number) {
     // note.done などを書き換えるため、元データを壊さないようdeepcopy
-    this.notesYetDone = notes.map((n) => ({ ...n }));
+    this.notesAll = structuredClone(notes);
+    this.notesYetDone = this.notesAll.slice();
     this.notesBigYetDone = [];
     this.iosThruNote = null;
     this.iosPrevRelease = null;
+
+    this.notesTotal = notes.length;
+    this.bigTotal = notes.filter((n) => n.big).length;
+    this.bonusTotal =
+      this.notesTotal < bonusMax
+        ? (this.notesTotal * (this.notesTotal + 1)) / 2
+        : (bonusMax * (bonusMax + 1)) / 2 +
+          bonusMax * (this.notesTotal - bonusMax);
+    this.currentChain = 0;
 
     // 開始時よりも前の音符を判定済みにする
     if (now !== undefined) {
@@ -78,19 +85,45 @@ export class Judge {
     this.iosPrevRelease = now;
   }
 
+  /**
+   * Noteに判定を保存し、onJudgeコールバックを呼び出す
+   */
   judge(c: HitCandidate, now: number): void {
+    let thisChain: number = 0;
     if (c.note.big && c.note.done > 0) {
       c.note.bigDone = true;
+      if (c.judge <= 2) {
+        c.note.bigBonus = (1 / (this.bigTotal || 1)) * bigScoreRate; //  / ((1 / notesTotal) * baseScoreRate)
+      }
     } else {
-      if (c.judge <= 3 && c.note.display?.length) {
+      // c.judge = 1 ~ 4
+      if (c.judge <= 3) {
+        // 位置を固定
         c.note.hitPos = displayNote(c.note, c.note.hitTimeSec + c.late)?.pos;
       }
       c.note.done = c.judge;
+      if (c.judge <= 2) {
+        thisChain = this.currentChain + 1;
+        c.note.chain = thisChain;
+        c.note.chainBonus =
+          (Math.min(thisChain, bonusMax) / this.bonusTotal) * chainScoreRate; //  / ((1 / notesTotal) * baseScoreRate)
+        if (c.judge === 1) {
+          c.note.baseScore = (1 / this.notesTotal) * baseScoreRate;
+        } else {
+          c.note.baseScore = (okBaseScore / this.notesTotal) * baseScoreRate;
+        }
+      } else {
+        thisChain = 0;
+      }
+      this.currentChain = thisChain;
     }
-    this.onJudge?.(c, now);
+    this.onJudge?.(c, now, thisChain);
   }
 
-  hit(now: number): HitCandidate | null {
+  hit(now: number): {
+    candidate: HitCandidate | null;
+    type: "thru" | "prevThru" | "normal" | "big" | null;
+  } {
     let candidate: HitCandidate | null = null;
     while (this.notesYetDone.length >= 1) {
       const n = this.notesYetDone[0];
@@ -108,6 +141,7 @@ export class Judge {
         candidate = { note: n, judge: 3, late };
         break;
       } else if (late > badLateSec * this.playbackRate) {
+        console.log("miss in hit()");
         this.judge({ note: n, judge: 4, late }, now);
         this.notesYetDone.shift();
         continue;
@@ -182,6 +216,7 @@ export class Judge {
         // big判定にbadは無い
         // miss
         if (i === 0) {
+          console.log("Big miss in hit()");
           this.judge({ note: n, judge: 4, late }, now);
           this.notesBigYetDone.shift();
         } else {
@@ -219,6 +254,13 @@ export class Judge {
           Math.abs(candidateThru1.judge) < Math.abs(candidateBig.judge)))
     ) {
       this.onPlaySE?.("hit");
+      console.log(
+        "hit thru",
+        candidateThru0.judge,
+        candidateThru1.judge,
+        candidate?.judge,
+        candidateBig?.judge
+      );
       this.judge(candidateThru0, now);
       this.notesYetDone.shift();
       if (candidateThru0.note.big) {
@@ -230,7 +272,7 @@ export class Judge {
       if (candidateThru1.note.big) {
         this.notesBigYetDone.push(candidateThru1.note);
       }
-      return candidateThru1;
+      return { candidate: candidateThru1, type: "thru" };
     } else if (
       candidatePrevThru &&
       (!candidate ||
@@ -239,33 +281,36 @@ export class Judge {
         Math.abs(candidatePrevThru.judge) < Math.abs(candidateBig.judge))
     ) {
       this.onPlaySE?.("hit");
-      return null;
+      console.log("prev thru");
+      return { candidate: null, type: "prevThru" };
     } else if (
       candidate &&
       (!candidateBig ||
         Math.abs(candidate.judge) <= Math.abs(candidateBig.judge)) // ここは等号の場合bigでない通常判定を優先
     ) {
       this.onPlaySE?.("hit");
+      console.log("hit", candidate.judge, candidateBig?.judge);
       this.judge(candidate, now);
       this.notesYetDone.shift();
       if (candidate.note.big) {
         this.notesBigYetDone.push(candidate.note);
       }
-      return candidate;
+      return { candidate: candidate, type: "normal" };
     } else if (candidateBig) {
       this.onPlaySE?.("hitBig");
+      console.log("hitBig", candidateBig.judge);
       this.judge(candidateBig, now);
       this.notesBigYetDone = this.notesBigYetDone.filter(
         (n) => n !== candidateBig!.note
       );
-      return candidateBig;
+      return { candidate: candidateBig, type: "big" };
     } else {
       this.onPlaySE?.("hit");
-      return null;
+      return { candidate: null, type: null };
     }
   }
 
-  checkMiss(now: number): number[] {
+  checkMiss(now: number): number | null {
     const nextMissTime: number[] = [];
     while (this.notesYetDone.length >= 1) {
       const n = this.notesYetDone[0];
@@ -279,13 +324,16 @@ export class Judge {
           lateThru !== null &&
           Math.abs(lateThru) <= goodSecThru * this.playbackRate
         ) {
+          console.log("hit thru in interval", 1);
           this.judge({ note: n, judge: 1, late: lateThru }, now);
         } else if (
           lateThru !== null &&
           Math.abs(lateThru) <= okSecThru * this.playbackRate
         ) {
+          console.log("hit thru in interval", 2);
           this.judge({ note: n, judge: 2, late: lateThru }, now);
         } else {
+          console.log("miss in interval");
           this.judge({ note: n, judge: 4, late }, now);
         }
         this.notesYetDone.shift();
@@ -301,6 +349,7 @@ export class Judge {
       const late = now - n.hitTimeSec;
       if (late > okSec * this.playbackRate) {
         // big判定にbadは無い
+        console.log("Big miss in interval");
         this.judge({ note: n, judge: 4, late }, now);
         this.notesBigYetDone.shift();
         continue;
@@ -309,6 +358,50 @@ export class Judge {
         break;
       }
     }
-    return nextMissTime;
+    return nextMissTime.length > 0 ? Math.min(...nextMissTime) : null;
+  }
+
+  checkAuto(now: number, judgeForAuto: boolean): number | null {
+    const nextHitTime: number[] = [];
+    while (this.notesYetDone.length >= 1) {
+      const n = this.notesYetDone[0];
+      const late = now - n.hitTimeSec;
+      if (late >= 0) {
+        if (judgeForAuto) {
+          this.hit(0);
+        } else {
+          this.onPlaySE?.("hit");
+          this.judge({ note: n, judge: 1, late: 0 }, now);
+          this.notesYetDone.shift();
+          if (n.big) {
+            this.notesBigYetDone.push(n);
+          }
+        }
+        this.onFlash?.({ targetX: n.targetX });
+        continue;
+      } else {
+        nextHitTime.push(-late);
+        break;
+      }
+    }
+    while (this.notesBigYetDone.length >= 1) {
+      const n = this.notesBigYetDone[0];
+      const late = now - n.hitTimeSec;
+      if (late >= 0) {
+        if (judgeForAuto) {
+          this.hit(0);
+        } else {
+          this.onPlaySE?.("hitBig");
+          this.judge({ note: n, judge: 1, late: 0 }, now);
+          this.notesBigYetDone.shift();
+        }
+        this.onFlash?.({ targetX: n.targetX });
+        continue;
+      } else {
+        nextHitTime.push(-late);
+        break;
+      }
+    }
+    return nextHitTime.length > 0 ? Math.min(...nextHitTime) : null;
   }
 }

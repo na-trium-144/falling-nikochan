@@ -556,8 +556,6 @@ function Play(props: Props) {
     hitType,
     posOfs,
     timeOfsEstimator,
-    // judge,
-    // notesYetDone,
   ] = useGameLogic(
     getCurrentTimeSec,
     auto,
