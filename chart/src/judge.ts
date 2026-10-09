@@ -374,7 +374,7 @@ export class Judge {
       const late = now - n.hitTimeSec;
       if (late >= 0) {
         if (judgeForAuto) {
-          this.hit(0);
+          this.hit(now);
         } else {
           this.onPlaySE?.("hit");
           this.judge({ note: n, judge: 1, late: 0 }, now);
@@ -395,7 +395,7 @@ export class Judge {
       const late = now - n.hitTimeSec;
       if (late >= 0) {
         if (judgeForAuto) {
-          this.hit(0);
+          this.hit(now);
         } else {
           this.onPlaySE?.("hitBig");
           this.judge({ note: n, judge: 1, late: 0 }, now);
