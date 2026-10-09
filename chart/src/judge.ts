@@ -48,7 +48,12 @@ export class Judge {
   iosPrevRelease: number | null = null;
 
   playbackRate: number = 1;
-  onJudge?: (candidate: HitCandidate, now: number, thisChain: number) => void;
+  onJudge?: (
+    candidate: HitCandidate,
+    now: number,
+    bigHit: boolean,
+    thisChain: number
+  ) => void;
   onPlaySE?: (se: "hit" | "hitBig") => void;
   onFlash?: (x: { targetX: number }) => void;
 
@@ -95,6 +100,7 @@ export class Judge {
       if (c.judge <= 2) {
         c.note.bigBonus = (1 / (this.bigTotal || 1)) * bigScoreRate; //  / ((1 / notesTotal) * baseScoreRate)
       }
+      this.onJudge?.(c, now, true, thisChain);
     } else {
       // c.judge = 1 ~ 4
       if (c.judge <= 3) {
@@ -116,8 +122,8 @@ export class Judge {
         thisChain = 0;
       }
       this.currentChain = thisChain;
+      this.onJudge?.(c, now, false, thisChain);
     }
-    this.onJudge?.(c, now, thisChain);
   }
 
   hit(now: number): {

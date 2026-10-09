@@ -130,8 +130,8 @@ export default function useGameLogic(
 
   // scoreとchainを更新
   const onJudge = useCallback(
-    (c: HitCandidate, now: number, thisChain: number) => {
-      if (c.note.big && c.note.done > 0) {
+    (c: HitCandidate, now: number, bigHit: boolean, thisChain: number) => {
+      if (bigHit) {
         if (c.judge <= 2) {
           setBigCount((big) => big + 1);
         }
