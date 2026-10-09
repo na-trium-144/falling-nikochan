@@ -33,8 +33,11 @@ export default function useGameLogic(
 
   // リセットのたびに新しいインスタンスにする
   const [judge, setJudge] = useState<Judge>(new Judge([]));
+  // eslint-disable-next-line react-hooks/immutability
   judge.playbackRate = playbackRate;
+  // eslint-disable-next-line react-hooks/immutability
   judge.onPlaySE = playSE;
+  // eslint-disable-next-line react-hooks/immutability
   judge.onFlash = flash;
 
   // good, ok, bad, missの個数
@@ -199,6 +202,7 @@ export default function useGameLogic(
     },
     [playbackRate]
   );
+  // eslint-disable-next-line react-hooks/immutability
   judge.onJudge = onJudge;
 
   const resetNotesAll = useCallback(
@@ -223,7 +227,7 @@ export default function useGameLogic(
     if (now !== undefined) {
       judge.iosRelease(now);
     }
-  }, [getCurrentTimeSec]);
+  }, [getCurrentTimeSec, judge]);
 
   // キーを押したときの判定
   const hit = useCallback<(type: number) => HitCandidate | null>(
@@ -319,7 +323,6 @@ export default function useGameLogic(
     playSE,
     flash,
     judgeForAuto,
-    judge,
   ]);
 
   // ビルド後のjsから見つけづらくするためにオブジェクトではなくarrayにしている
