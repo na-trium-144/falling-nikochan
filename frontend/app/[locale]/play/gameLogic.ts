@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   okBaseScore,
   bonusMax,
@@ -11,6 +11,7 @@ import {
   NoteInGame,
   Judge,
   HitCandidate,
+  JudgeOptions,
 } from "@falling-nikochan/chart";
 import { SEType } from "@/common/se";
 import { OffsetEstimator } from "./offsetEstimator";
@@ -33,12 +34,6 @@ export default function useGameLogic(
 
   // リセットのたびに新しいインスタンスにする
   const [judge, setJudge] = useState<Judge>(new Judge([]));
-  // eslint-disable-next-line react-hooks/immutability
-  judge.playbackRate = playbackRate;
-  // eslint-disable-next-line react-hooks/immutability
-  judge.onPlaySE = playSE;
-  // eslint-disable-next-line react-hooks/immutability
-  judge.onFlash = flash;
 
   // good, ok, bad, missの個数
   const [judgeCount, setJudgeCount] = useState<
@@ -202,25 +197,6 @@ export default function useGameLogic(
     },
     [playbackRate]
   );
-  // eslint-disable-next-line react-hooks/immutability
-  judge.onJudge = onJudge;
-
-  const resetNotesAll = useCallback(
-    (notes: NoteInGame[], now: number) => {
-      // note.done などを書き換えるため、元データを壊さないようdeepcopy
-      setNotesDone([]);
-      setJudgeCount([0, 0, 0, 0, 0]);
-      setChain(0);
-      setMaxChain(0);
-      setBonus(0);
-      setBigCount(0);
-      hitCountByType.current = {};
-      setHitType(null);
-      initTimeOfsEstimator();
-      setJudge(new Judge(notes, now));
-    },
-    [initTimeOfsEstimator]
-  );
 
   const iosRelease = useCallback(() => {
     const now = getCurrentTimeSec();
@@ -298,7 +274,7 @@ export default function useGameLogic(
         timer = null;
         const now = getCurrentTimeSec();
         if (now !== undefined) {
-          const nextHitTime = judge.checkAuto(now, judgeForAuto);
+          const nextHitTime = judge.checkAuto(now);
           if (nextHitTime !== null) {
             timer = setTimeout(
               removeOneNote,
@@ -324,6 +300,36 @@ export default function useGameLogic(
     flash,
     judgeForAuto,
   ]);
+
+  const judgeOpts = useMemo<JudgeOptions>(
+    () => ({
+      judgeForAuto,
+      playbackRate,
+      onJudge,
+      onPlaySE: playSE,
+      onFlash: flash,
+    }),
+    [judgeForAuto, playbackRate, onJudge, playSE, flash]
+  );
+  // eslint-disable-next-line react-hooks/immutability
+  judge.opts = judgeOpts;
+
+  const resetNotesAll = useCallback(
+    (notes: NoteInGame[], now: number) => {
+      // note.done などを書き換えるため、元データを壊さないようdeepcopy
+      setNotesDone([]);
+      setJudgeCount([0, 0, 0, 0, 0]);
+      setChain(0);
+      setMaxChain(0);
+      setBonus(0);
+      setBigCount(0);
+      hitCountByType.current = {};
+      setHitType(null);
+      initTimeOfsEstimator();
+      setJudge(new Judge(notes, judgeOpts, now));
+    },
+    [initTimeOfsEstimator, judgeOpts]
+  );
 
   // ビルド後のjsから見つけづらくするためにオブジェクトではなくarrayにしている
   return [
