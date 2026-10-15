@@ -1,3 +1,7 @@
+## ver. 18.5 - 2026/10/15 [#1427](https://github.com/na-trium-144/falling-nikochan/pull/1427)
+
+* gameLogic.ts の判定ロジックをクラス Judge として抽出し、テストを作成
+
 ## ver. 18.4 - 2026/10/04 [#1426](https://github.com/na-trium-144/falling-nikochan/pull/1426)
 
 * metaタブでテストプレイ起動時にエラーになった場合はメッセージを表示する
