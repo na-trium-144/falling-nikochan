@@ -62,6 +62,7 @@ export default {
     seqEmpty: "譜面データが空です",
     resultSessionExpired:
       "セッションがタイムアウトしました。この画面を閉じてもう一度やり直してください",
+    quotaExceeded: "譜面データが大きすぎるためテストプレイを開けません",
     errorPage: {
       title: "エラーが発生しました 😢",
       goHome: "トップへ戻る",

@@ -17,17 +17,15 @@ import clsx from "clsx/lite";
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
 import {
-  bigScoreRate,
-  chainScoreRate,
   levelTypes,
   RecordGetSummary,
   inputTypes,
   emptyBrief,
   ChartSeqData,
   RecordGetSummarySchema,
-  ResultSerialized,
-  serializeCid,
-  serializeDate4,
+  serializeResultParams,
+  createRecordPost,
+  loadLevel,
 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
@@ -75,7 +73,6 @@ import {
   sendRecord,
   sendResultSerialized,
 } from "./resultSigningAuth.js";
-import { encodeBase64Url } from "hono/utils/encode";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -115,7 +112,18 @@ export function InitPlay({ locale }: { locale: string }) {
     setEditing(session.editing);
 
     if (session.editing) {
-      setChartSeq(session.level);
+      if ("notes" in session.level) {
+        setChartSeq(session.level);
+      } else {
+        setChartSeq(
+          loadLevel(
+            session.level.freeze,
+            session.level.meta,
+            session.level.offset,
+            session.level.ver
+          )
+        );
+      }
       setErrorMsg(undefined);
     } else {
       /*
@@ -234,12 +242,10 @@ function Play(props: Props) {
     setAutoOffset_(v);
     localStorage.setItem("autoOffset", v ? "1" : "0");
   }, []);
-  const [resultSessionPrivateKey, setResultSessionPrivateKey] =
-    useState<Uint8Array | null>(null);
+  const [resultSessionPrivateKey, setResultSessionPrivateKey] = useState<
+    Uint8Array | Error | "ignore" | null
+  >(null);
   const [resultSessionToken, setResultSessionToken] = useState<string | null>(
-    null
-  );
-  const [resultSessionError, setResultSessionError] = useState<Error | null>(
     null
   );
   const [resultSessionExp, setResultSessionExp] = useState<number | null>(null);
@@ -267,17 +273,34 @@ function Play(props: Props) {
         },
         (e) => {
           if (!canceled) {
-            setResultSessionError(e);
-            console.warn(
-              "Failed to initialize ResultSigning session. " +
-                "If you want to ignore and continue, add `nosigning=1` query parameter."
-            );
+            if (
+              process.env.BACKEND_PREFIX &&
+              process.env.BACKEND_PREFIX !== window.location.origin
+            ) {
+              // 開発環境など、別のバックエンドに接続している場合は、BuildKeyが異なるため認証できない。その場合は認証を必須にしない。
+              setResultSessionPrivateKey("ignore");
+              console.warn(
+                "Failed to initialize ResultSigning session, " +
+                  "but ignored because BACKEND_PREFIX is set and different from location.origin. ",
+                "Record will not be sent and ResultParam will not be signed. ",
+                e
+              );
+            } else {
+              setResultSessionPrivateKey(e);
+              console.warn(
+                "Failed to initialize ResultSigning session. " +
+                  "If you want to ignore and continue, add `nosigning=1` query parameter.",
+                e
+              );
+            }
           }
         }
       );
       return () => {
         canceled = true;
       };
+    } else {
+      setResultSessionPrivateKey("ignore");
     }
   }, [cid, queryOptions.nosigning]);
 
@@ -533,8 +556,6 @@ function Play(props: Props) {
     hitType,
     posOfs,
     timeOfsEstimator,
-    // judge,
-    // notesYetDone,
   ] = useGameLogic(
     getCurrentTimeSec,
     auto,
@@ -652,7 +673,11 @@ function Play(props: Props) {
   const [giveUpWaitingFps, setGiveUpWaitingFps] = useState<boolean>(false);
   const giveUpFpsTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isReadyAll =
-    ytReady && !!chartSeq && (realFpsStable || giveUpWaitingFps);
+    ytReady &&
+    !!chartSeq &&
+    (realFpsStable || giveUpWaitingFps) &&
+    resultSessionPrivateKey !== null &&
+    !(resultSessionPrivateKey instanceof Error);
   useEffect(() => {
     if (errorMsg) {
       if (showLoadingTimeout.current !== null) {
@@ -713,8 +738,8 @@ function Play(props: Props) {
     if (!errorMsg) {
       if (apiErrorMsg) {
         setErrorMsg(apiErrorMsg);
-      } else if (resultSessionError) {
-        setErrorMsg(resultSessionError);
+      } else if (resultSessionPrivateKey instanceof Error) {
+        setErrorMsg(resultSessionPrivateKey);
       } else if (ytError !== null) {
         setErrorMsg(te("ytError", { code: ytError }));
       } else if (chartBrief && !chartBrief.ytId) {
@@ -725,7 +750,7 @@ function Play(props: Props) {
     }
   }, [
     apiErrorMsg,
-    resultSessionError,
+    resultSessionPrivateKey,
     ytError,
     chartBrief,
     chartSeq,
@@ -787,96 +812,114 @@ function Play(props: Props) {
             )
           );
           stop();
-          if (
-            cid &&
-            resultSessionPrivateKey &&
-            resultSessionToken &&
-            chartBrief?.levels.at(lvIndex) &&
-            !queryOptions.result
-          ) {
+          if (cid && chartBrief?.levels.at(lvIndex) && !queryOptions.result) {
             if (oldUserBegin === null && minActualPlaybackRate === 1) {
               // こっちはautoは含む
+              let factor: number | null = null;
               try {
-                const factor = updateRecordFactor(
+                factor = updateRecordFactor(
                   cid,
                   chartBrief.levels[lvIndex].hash,
                   auto
                 );
+              } catch (e) {
+                console.error(e);
+                // ignore errors from updateRecordFactor
+              }
+              if (
+                factor !== null &&
+                resultSessionPrivateKey instanceof Uint8Array &&
+                resultSessionToken
+              ) {
+                const record = createRecordPost(
+                  newResultDate,
+                  chartBrief.levels.at(lvIndex)!,
+                  baseScore,
+                  chainScore,
+                  bigScore,
+                  score,
+                  // judgeCount.slice(0, 4) as [number, number, number, number],
+                  // bigCount,
+                  // hitType,
+                  // minActualPlaybackRate,
+                  // cid,
+                  auto,
+                  editing,
+                  factor
+                );
                 sendRecord(
                   cid,
-                  {
-                    lvHash: chartBrief.levels[lvIndex].hash,
-                    auto,
-                    score,
-                    baseScore,
-                    chainScore,
-                    bigScore,
-                    fc: chainScore === chainScoreRate,
-                    fb: bigScore === bigScoreRate,
-                    editing,
-                    factor,
-                    date: newResultDate.getTime(),
-                  },
+                  record,
                   resultSessionPrivateKey,
                   resultSessionToken
                 );
-              } catch {
-                // ignore errors from updateRecordFactor
               }
             }
             if (!wasAutoPlay && oldUserBegin === null) {
               // こっちはplaybackRate変更を含む
-              // serializeResultParams() と同一の処理をわざわざ再度書いている (結果の情報をオブジェクトに入れたくないため)
-              const serialized = msgpack.encode([
-                4,
-                serializeDate4(newResultDate),
-                chartBrief.levels.at(lvIndex)!.name,
-                levelTypes.indexOf(chartBrief.levels.at(lvIndex)!.type),
-                chartBrief.levels.at(lvIndex)!.difficulty,
-                Math.floor(baseScore * 100),
-                Math.floor(chainScore * 100),
-                Math.floor(bigScore * 100),
-                Math.floor(score * 100),
+              const resultSerialized = serializeResultParams(
+                newResultDate,
+                chartBrief.levels.at(lvIndex)!,
+                baseScore,
+                chainScore,
+                bigScore,
+                score,
                 judgeCount.slice(0, 4) as [number, number, number, number],
                 bigCount,
                 hitType,
-                minActualPlaybackRate * 4,
-                serializeCid(cid),
-              ] satisfies ResultSerialized);
-              const resultSerialized = encodeBase64Url(
-                serialized.buffer.slice(
-                  serialized.byteOffset,
-                  serialized.byteOffset + serialized.byteLength
-                )
-              ).replaceAll("=", "");
-              sendResultSerialized(
-                resultSerialized,
-                resultSessionPrivateKey,
-                resultSessionToken,
-                (sign) => {
-                  setResultSerialized(resultSerialized);
-                  setResultSign(sign);
-                  if (
-                    score > bestScoreState &&
-                    // cid &&
-                    // !auto &&
-                    // userBegin === null &&
-                    // chartBrief?.levels.at(lvIndex) &&
-                    minActualPlaybackRate === 1
-                  ) {
-                    setBestScore(
-                      cid,
-                      chartBrief.levels[lvIndex].hash,
-                      resultSerialized,
-                      sign
-                    );
-                    reloadBestScore();
-                  }
-                },
-                (e) => {
-                  setResultSign(e);
-                }
+                minActualPlaybackRate,
+                cid
               );
+              // sessionTokenがない場合でもbestScoreだけ先に保存する
+              if (
+                score > bestScoreState &&
+                // cid &&
+                // !auto &&
+                // userBegin === null &&
+                // chartBrief?.levels.at(lvIndex) &&
+                minActualPlaybackRate === 1
+              ) {
+                setBestScore(
+                  cid,
+                  chartBrief.levels[lvIndex].hash,
+                  resultSerialized,
+                  undefined
+                );
+                reloadBestScore();
+              }
+              if (
+                resultSessionPrivateKey instanceof Uint8Array &&
+                resultSessionToken
+              ) {
+                sendResultSerialized(
+                  resultSerialized,
+                  resultSessionPrivateKey,
+                  resultSessionToken,
+                  (sign) => {
+                    setResultSerialized(resultSerialized);
+                    setResultSign(sign);
+                    if (
+                      score > bestScoreState &&
+                      // cid &&
+                      // !auto &&
+                      // userBegin === null &&
+                      // chartBrief?.levels.at(lvIndex) &&
+                      minActualPlaybackRate === 1
+                    ) {
+                      setBestScore(
+                        cid,
+                        chartBrief.levels[lvIndex].hash,
+                        resultSerialized,
+                        sign
+                      );
+                      // reloadBestScore();
+                    }
+                  },
+                  (e) => {
+                    setResultSign(e);
+                  }
+                );
+              }
             }
           }
         }, 1000);

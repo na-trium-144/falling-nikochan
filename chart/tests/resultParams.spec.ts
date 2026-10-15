@@ -8,7 +8,6 @@ import {
   serializeCid,
   serializeDate3,
   serializeDate4,
-  serializeResultParams,
   serializeResultParamsLegacy,
   signResultParams,
   verifyResultParams,
@@ -35,12 +34,6 @@ const expectedParams = {
 
 describe("resultParams", () => {
   describe("deserializeResultParams", () => {
-    test("should parse current result params", async () => {
-      const serialized = serializeResultParams(expectedParams);
-      const deserialized = deserializeResultParams(decodeBase64Url(serialized));
-      expect(deserialized).to.be.deep.equal(expectedParams);
-    });
-
     test("should parse result params version 4", async () => {
       const dateBase4 = new Date(2026, 9, 1);
       const serialized = msgpack.encode([

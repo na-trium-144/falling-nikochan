@@ -33,13 +33,13 @@ import {
   languageDetector,
   fetchStatic,
   getBrief,
+  etag,
 } from "@falling-nikochan/route";
 import { inspect } from "node:util";
 import { createMiddleware } from "hono/factory";
 import { Db } from "mongodb";
 import { before, after } from "node:test";
 import { structuredLogger } from "@hono/structured-logger";
-import { etag } from "hono/etag";
 inspect.defaultOptions.depth = null;
 
 if (typeof process.env.MONGODB_URI !== "string") {

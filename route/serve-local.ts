@@ -15,6 +15,7 @@ import {
   cronTestApp,
   getBrief,
   methodNotAllowed,
+  etag,
 } from "./src/index.js";
 import { Hono } from "hono";
 import { ImageResponse } from "@vercel/og";
@@ -23,7 +24,6 @@ import { Db, MongoClient } from "mongodb";
 import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 import { structuredLogger } from "@hono/structured-logger";
-import { etag } from "hono/etag";
 
 const port = 8787;
 

@@ -1,5 +1,10 @@
 import * as v from "valibot";
-import { ChartBriefSchema, ChartSeqDataSchema } from "@falling-nikochan/chart";
+import {
+  ChartBriefSchema,
+  ChartSeqDataSchema,
+  LevelFreezeSchema15,
+  LevelMetaSchema15,
+} from "@falling-nikochan/chart";
 
 const SessionDataSchema = () =>
   v.variant("editing", [
@@ -7,7 +12,15 @@ const SessionDataSchema = () =>
       cid: v.optional(v.string()),
       lvIndex: v.number(),
       brief: ChartBriefSchema(),
-      level: ChartSeqDataSchema(),
+      level: v.union([
+        ChartSeqDataSchema(), // 後方互換性のために残している、いつか適当なタイミングで消す
+        v.object({
+          freeze: LevelFreezeSchema15(),
+          meta: LevelMetaSchema15(),
+          offset: v.number(),
+          ver: v.union([v.literal(18)]),
+        }),
+      ]),
       editing: v.literal(true),
     }),
     v.object({
@@ -21,6 +34,22 @@ const SessionDataSchema = () =>
     }),
   ]);
 export type SessionData = v.InferOutput<ReturnType<typeof SessionDataSchema>>;
+
+export function isQuotaExceededError(e: unknown): e is DOMException {
+  // https://developer.mozilla.org/ja/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API#localstorage_%E3%81%AE%E6%A9%9F%E8%83%BD%E6%A4%9C%E5%87%BA
+  return (
+    e instanceof DOMException &&
+    // everything except Firefox
+    (e.code === 22 ||
+      // Firefox
+      e.code === 1014 ||
+      // test name field too, because code might not be present
+      // everything except Firefox
+      e.name === "QuotaExceededError" ||
+      // Firefox
+      e.name === "NS_ERROR_DOM_QUOTA_REACHED")
+  );
+}
 
 // プレイボタンを押した時にlocalStorageに保存し、sessionIdを返す
 // share->play では押すたびにidを発行、edit->playでは使い回し

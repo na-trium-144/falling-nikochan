@@ -13,6 +13,7 @@ import {
   getBrief,
   sentryBeforeSend,
   methodNotAllowed,
+  etag,
 } from "@falling-nikochan/route";
 import { Hono } from "hono";
 import { env } from "hono/adapter";
@@ -23,7 +24,6 @@ import { MongoClient } from "mongodb";
 import { createMiddleware } from "hono/factory";
 import { compress } from "hono/compress";
 import { structuredLogger } from "@hono/structured-logger";
-import { etag } from "hono/etag";
 
 const fetchStatic = (e, url) => e.ASSETS.fetch(url);
 const sentryConfig = (env) => ({
