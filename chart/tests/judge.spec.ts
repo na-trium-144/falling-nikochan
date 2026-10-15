@@ -11,9 +11,16 @@ import {
   okSecThru,
   NoteInGame,
   stepZero,
-  defaultJudgeOpts,
+  JudgeOptions,
 } from "@falling-nikochan/chart";
 
+const defaultJudgeOpts: JudgeOptions = {
+  judgeForAuto: false,
+  playbackRate: 1,
+  onJudge: () => undefined,
+  onPlaySE: () => undefined,
+  onFlash: () => undefined,
+}
 function createDummyNote(options: {
   id: number;
   hitTimeSec: number;
@@ -399,7 +406,7 @@ describe("Judge", () => {
       const { candidate, type } = judge.hit(1.13); // within +0.04
       expect(candidate?.note.id).to.equal(2);
       expect(candidate?.judge).to.equal(1);
-      expect(type, "thru");
+      expect(type).to.equal("thru");
       expect(judged).to.have.lengthOf(2);
       expect(judged[0].note.id).to.equal(1);
       expect(judged[0].judge).to.equal(1);
@@ -429,7 +436,7 @@ describe("Judge", () => {
       const { candidate, type } = judge.hit(1.13); // within +0.04
       expect(candidate?.note.id).to.equal(2);
       expect(candidate?.judge).to.equal(1);
-      expect(type, "thru");
+      expect(type).to.equal("thru");
       expect(judged).to.have.lengthOf(2);
       expect(judged[0].note.id).to.equal(1);
       expect(judged[0].judge).to.equal(2);
@@ -459,7 +466,7 @@ describe("Judge", () => {
       const { candidate, type } = judge.hit(1.2);
       expect(candidate?.note.id).to.equal(2);
       expect(candidate?.judge).to.equal(1);
-      expect(type, "normal");
+      expect(type).to.equal("normal");
       expect(judged).to.have.lengthOf(2);
       expect(judged[0].note.id).to.equal(1);
       expect(judged[0].judge).to.equal(4);
@@ -487,7 +494,7 @@ describe("Judge", () => {
       const { candidate, type } = judge.hit(1.1); // in badLateSec for note1, in goodSec for note2
       expect(candidate?.note.id).to.equal(1);
       expect(candidate?.judge).to.equal(3);
-      expect(type, "normal");
+      expect(type).to.equal("normal");
       expect(judged).to.have.lengthOf(1);
       expect(judged[0].note.id).to.equal(1);
       expect(sePlayed).to.deep.equal(["hit"]);
