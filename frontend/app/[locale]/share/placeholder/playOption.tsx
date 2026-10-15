@@ -349,9 +349,37 @@ function SelectedLevelInfo(props: {
       <p className="mt-2 min-w-65 ">
         {/* histogramの幅 w-5 x13 */}
         {t("otherPlayers")}
-        {selectedRecord !== undefined && !(selectedRecord instanceof Error) && (
-          <span className="ml-2 text-sm">({selectedRecord.count || 0})</span>
-        )}
+        {props.record !== null /* recordを読み込み中の場合 */ &&
+          !(selectedRecord instanceof Error) && (
+            <span className="ml-2 text-sm">
+              (
+              {/*
+              count > 0 && auto > 0 => (count + auto)
+              count > 0 && auto == 0 => (count)
+              count == 0 && auto > 0 => (auto)
+              count == 0 && auto == 0 => (0)
+              */}
+              {selectedRecord === undefined ? (
+                <span>0</span>
+              ) : (
+                <>
+                  {(selectedRecord.count > 0 ||
+                    selectedRecord.countAuto === 0) && (
+                    <span>{selectedRecord.count}</span>
+                  )}
+                  {selectedRecord.count > 0 && selectedRecord.countAuto > 0 && (
+                    <span className="text-dim text-xs mx-0.5">+</span>
+                  )}
+                  {selectedRecord.countAuto > 0 && (
+                    <span className="text-dim text-xs">
+                      auto: {selectedRecord.countAuto}
+                    </span>
+                  )}
+                </>
+              )}
+              )
+            </span>
+          )}
       </p>
       <span className={clsx(props.record === null ? "block" : "hidden")}>
         <SlimeSVG />

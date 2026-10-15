@@ -1,3 +1,9 @@
+## ver. 18.6 - 2026/10/15 [#1366](https://github.com/na-trium-144/falling-nikochan/pull/1366)
+
+* stats APIを追加、トップページに譜面数と再生数の統計の表示を追加
+* トップページのChartListに再生数表示を追加
+* autoの再生数の表示を追加
+
 ## ver. 18.5 - 2026/10/15 [#1427](https://github.com/na-trium-144/falling-nikochan/pull/1427)
 
 * gameLogic.ts の判定ロジックをクラス Judge として抽出し、テストを作成

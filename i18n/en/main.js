@@ -15,6 +15,13 @@ export default {
     // "← Back" button
     back: "Back",
     popular: "Popular Songs",
+    stats: {
+      chartCount: "Total Songs",
+      playCount: "Total Plays",
+    },
+    playCount: "Play Count",
+    playCount3Days: "{popularDays} days",
+    playCountTotal: "Total",
     howToPlay: {
       title: "What is Falling Nikochan?",
       content1:

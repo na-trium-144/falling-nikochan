@@ -170,6 +170,7 @@ export interface ChartEntryCompressed {
   pRandomSalt: string | null;
   updatedAt: number;
   notifiedAt?: number; // 最後にcronで通知した時刻
+  playCount?: number; // v8以前の古いカラム
   ip: string[];
   locale: string;
   copyBuffer?: (NoteCommand9 | null)[];
@@ -360,6 +361,7 @@ export async function zipEntry(
     zoom: entry.zoom, // ver14〜
     levelBrief: entry.levelBrief,
     levelsCompressed: new Binary(levelsCompressed),
+    ...(entry.playCount !== undefined && { playCount: entry.playCount }),
   };
 }
 
