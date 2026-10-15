@@ -20,7 +20,7 @@ const defaultJudgeOpts: JudgeOptions = {
   onJudge: () => undefined,
   onPlaySE: () => undefined,
   onFlash: () => undefined,
-}
+};
 function createDummyNote(options: {
   id: number;
   hitTimeSec: number;
