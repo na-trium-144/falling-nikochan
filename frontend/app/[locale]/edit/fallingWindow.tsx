@@ -17,12 +17,19 @@ import { useCanvasProps } from "@/play/fallingWindow.js";
 import { DisplayNikochan } from "@/play/displayNikochan.js";
 import { useTheme } from "@/common/theme.js";
 
+export type DragStyle = "free" | "center" | "spread";
+
+function cleanNumber(num: number): number {
+  return Math.round(num * 1e6) / 1e6;
+}
+
 interface Props {
   className?: string;
   style?: object;
   chart?: ChartEditing;
   dragMode: null | "p" | "v" | "a";
   setDragMode: (mode: null | "p" | "v" | "a") => void;
+  dragStyle: DragStyle;
   inCodeTab: boolean;
 }
 
@@ -49,6 +56,15 @@ export default function FallingWindow(props: Props) {
 
   // const [displayNotes, setDisplayNotes] = useState<DisplayNote[]>([]);
   const displayNotesRef = useRef<DisplayNote[]>([]);
+
+  const lastValidRatioRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const note = currentLevel?.currentNote;
+    if (note && note.hitX !== 0) {
+      lastValidRatioRef.current = note.hitVX / note.hitX;
+    }
+  }, [currentLevel?.currentNote]);
 
   const [pendingNoteUpdate, setPendingNoteUpdate] =
     useState<NoteCommandWithLua | null>(null);
@@ -228,15 +244,58 @@ export default function FallingWindow(props: Props) {
                   <DragHandle
                     className="absolute inset-0"
                     onMove={(_x, _y, cx /*, cy*/) => {
+                      if (!ref.current || !currentLevel?.currentNote) return;
+                      const baseNote = currentLevel.currentNote;
                       const winLeft = ref.current.getBoundingClientRect().left;
-                      // const winBottom = ref.current.getBoundingClientRect().bottom;
-                      // cx-winLeft, winBottom-cy が divのabsolute基準からマウスカーソル位置までの相対位置になる
-                      setPendingNoteUpdate({
-                        ...currentNote,
-                        hitX: Math.round(
-                          ((cx - winLeft - marginX) * 10) / boxSize - 5
-                        ),
-                      });
+                      // cx-winLeft が divのabsolute基準からマウスカーソル位置までの相対位置になる
+                      const newHitX = Math.round(
+                        ((cx - winLeft - marginX) * 10) / boxSize - 5
+                      );
+
+                      if (props.dragStyle === "free") {
+                        setPendingNoteUpdate({
+                          ...baseNote,
+                          hitX: newHitX,
+                        });
+                      } else if (props.dragStyle === "center") {
+                        if (baseNote.hitX === 0 && baseNote.hitVX !== 0) {
+                          // CenterStyleでx=0,vx!=0の場合はCenterStyleは意味をなさないのでドラッグしてもxは編集できない
+                          return;
+                        }
+                        let ratio: number;
+                        if (baseNote.hitX !== 0) {
+                          ratio = baseNote.hitVX / baseNote.hitX;
+                          lastValidRatioRef.current = ratio;
+                        } else {
+                          // baseNote.hitX === 0 && baseNote.hitVX === 0
+                          ratio = lastValidRatioRef.current ?? 0;
+                        }
+                        const newHitVX = cleanNumber(newHitX * ratio);
+                        setPendingNoteUpdate({
+                          ...baseNote,
+                          hitX: newHitX,
+                          hitVX: newHitVX,
+                        });
+                      } else if (props.dragStyle === "spread") {
+                        if (baseNote.hitVY === 0) {
+                          setPendingNoteUpdate({
+                            ...baseNote,
+                            hitX: newHitX,
+                          });
+                        } else {
+                          const apexX =
+                            baseNote.hitX +
+                            baseNote.hitVX * (baseNote.hitVY / 1) * 2.5;
+                          const newHitVX = cleanNumber(
+                            (apexX - newHitX) / (baseNote.hitVY * 2.5)
+                          );
+                          setPendingNoteUpdate({
+                            ...baseNote,
+                            hitX: newHitX,
+                            hitVX: newHitVX,
+                          });
+                        }
+                      }
                     }}
                     onMoveEnd={() => {
                       if (pendingNoteUpdate) {
