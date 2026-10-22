@@ -334,7 +334,7 @@ export async function OGResult(
                 justifyContent: "center",
               }}
             >
-              <span style={{ position: "relative", width: "max-content" }}>
+              <span style={{ position: "relative" }}>
                 {params.judgeCount[ji] % 10}
                 <span
                   style={{ position: "absolute", insetBlock: 0, right: "100%" }}
@@ -362,12 +362,13 @@ export async function OGResult(
                 justifyContent: "center",
               }}
             >
-              <span style={{ position: "relative", width: "max-content" }}>
+              <span style={{ position: "relative" }}>
                 {(params.bigCount || 0) % 10}
                 <span
                   style={{ position: "absolute", insetBlock: 0, right: "100%" }}
                 >
-                  {params.bigCount &&
+                  {params.bigCount != null &&
+                    params.bigCount !== 0 &&
                     params.bigCount >= 10 &&
                     Math.floor(params.bigCount / 10)}
                 </span>
