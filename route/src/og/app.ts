@@ -284,6 +284,7 @@ const ogApp = (config: {
           case inputTypes.gamepad:
             imagePath = "/og-icons/game-three.svg";
             break;
+          case 0:
           case null:
             imagePath = null;
             break;
