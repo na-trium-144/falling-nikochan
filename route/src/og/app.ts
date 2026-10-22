@@ -172,6 +172,7 @@ const ogApp = (config: {
           throw new HTTPException(400, { message: "invalidResultParam" });
         }
         if (
+          !env(c).API_NO_RESULT_VERIFY &&
           isVerificationRequired(resultParams) &&
           !(await verifyResultParams(
             { result, sign },
