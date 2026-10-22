@@ -42,6 +42,7 @@ export default function useGameLogic(
   const judgeScore = judgeCount[0] * 1 + judgeCount[1] * okBaseScore;
   const [bonus, setBonus] = useState<number>(0); // 1 + 2 + ... + 100 + 100 + ...
   const [bigCount, setBigCount] = useState<number>(0);
+  const [bigMiss, setBigMiss] = useState<number>(0);
   const baseScore = (judgeScore / (judge.notesTotal || 1)) * baseScoreRate;
   const chainScore = (bonus / (judge.bonusTotal || 1)) * chainScoreRate;
   const bigScore = (bigCount / (judge.bigTotal || 1)) * bigScoreRate;
@@ -50,7 +51,8 @@ export default function useGameLogic(
   const [hitType, setHitType] = useState<number | null>(null);
 
   const chartEnd =
-    judgeCount.reduce((sum, j) => sum + j, 0) == judge.notesTotal;
+    judgeCount.reduce((sum, j) => sum + j, 0) == judge.notesTotal &&
+    bigCount + bigMiss == judge.bigTotal;
 
   const [chain, setChain] = useState<number>(0);
   const [maxChain, setMaxChain] = useState<number>(0);
@@ -129,6 +131,8 @@ export default function useGameLogic(
       if (bigHit) {
         if (c.judge <= 2) {
           setBigCount((big) => big + 1);
+        } else {
+          setBigMiss((big) => big + 1);
         }
       } else {
         // c.judge = 1 ~ 4
@@ -323,6 +327,7 @@ export default function useGameLogic(
       setMaxChain(0);
       setBonus(0);
       setBigCount(0);
+      setBigMiss(0);
       hitCountByType.current = {};
       setHitType(null);
       initTimeOfsEstimator();

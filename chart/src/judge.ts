@@ -93,6 +93,9 @@ export class Judge {
       ) {
         const n = this.#notesYetDone.shift()!;
         this.#judge({ note: n, judge: 5, late: 0 }, now);
+        if (n.big) {
+          this.#judge({ note: n, judge: 5, late: 0 }, now);
+        }
       }
     }
   }
@@ -352,6 +355,10 @@ export class Judge {
         } else {
           console.log("miss in interval");
           this.#judge({ note: n, judge: 4, late }, now);
+          if (n.big) {
+            // also big miss
+            this.#judge({ note: n, judge: 4, late }, now);
+          }
         }
         this.#notesYetDone.shift();
         this.#iosPrevRelease = null;

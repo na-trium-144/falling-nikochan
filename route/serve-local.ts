@@ -11,11 +11,11 @@ import {
   languageDetector,
   onError,
   notFound,
-  fetchStatic,
   cronTestApp,
   getBrief,
   methodNotAllowed,
   etag,
+  ResponseOK,
 } from "./src/index.js";
 import { Hono } from "hono";
 import { ImageResponse } from "@vercel/og";
@@ -24,6 +24,7 @@ import { Db, MongoClient } from "mongodb";
 import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 import { structuredLogger } from "@hono/structured-logger";
+import { readFile } from "node:fs/promises";
 
 const port = 8787;
 
@@ -51,6 +52,12 @@ const dbMiddleware = createMiddleware(async (c, next) => {
   await next();
 });
 const fetchBrief = (_e: Bindings, cid: string) => getBrief(db!, cid);
+
+async function fetchStatic(e: Bindings, url: URL): Promise<ResponseOK> {
+  return new Response(
+    await readFile(`../frontend/out/${url.pathname}`.replaceAll("//", "/"))
+  ) as ResponseOK;
+}
 
 console.log(`Server is running on http://localhost:${port}`);
 

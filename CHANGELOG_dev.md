@@ -1,3 +1,12 @@
+## ver. 18.7 - 2026/10/23 [#1433](https://github.com/na-trium-144/falling-nikochan/pull/1433)
+
+* 開発環境でプレイ記録の署名のチェックを省略できるようにする `API_NO_RESULT_VERIFY` 環境変数を追加
+* 開発環境のfetchStaticで500エラーにならないようfetchではなくreadFileに変更
+* ogResultでBig判定数が0のとき00と表示されるのを修正
+* Bigのミス数をカウントするようにし、すべてのBig判定が完了するまで譜面を終了しない
+* 譜面よりも先に動画が終了した場合は、譜面が終了したものとして扱う
+* resultParamで inputType: 0 を許可する
+
 ## ver. 18.6 - 2026/10/15 [#1366](https://github.com/na-trium-144/falling-nikochan/pull/1366)
 
 * stats APIを追加、トップページに譜面数と再生数の統計の表示を追加

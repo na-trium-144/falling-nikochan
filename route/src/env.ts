@@ -15,6 +15,7 @@ export interface Bindings {
   MONGODB_URI: string;
   API_ENV?: "development";
   API_NO_RATELIMIT?: "1";
+  API_NO_RESULT_VERIFY?: "1";
   SECRET_SALT?: string;
   RESULT_SECRET_KEY?: string;
   API_CACHE_EDGE?: "1";

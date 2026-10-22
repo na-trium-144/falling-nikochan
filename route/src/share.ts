@@ -67,6 +67,7 @@ const shareApp = (config: {
           sign = parsed.sign;
           resultParams = deserializeResultParams(result);
           if (
+            !env(c).API_NO_RESULT_VERIFY &&
             isVerificationRequired(resultParams) &&
             !(await verifyResultParams(
               { result, sign },
