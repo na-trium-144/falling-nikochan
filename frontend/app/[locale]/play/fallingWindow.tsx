@@ -12,7 +12,6 @@ import {
 import { useResizeDetector } from "react-resize-detector";
 import TargetLine from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
-import { useRealFPS } from "@/common/fpsCalculator";
 import { DisplayNikochan } from "./displayNikochan";
 import { OffsetEstimator } from "./offsetEstimator";
 import { fetchAsset } from "@/common/fetch";
@@ -130,6 +129,7 @@ type Props = {
   playbackRate: number;
   setShouldHideBPMSign: (hide: boolean) => void;
   shouldHideBPMSign: boolean;
+  ignoreRunDelta: boolean;
 } & (
   | {
       showTSOffset: boolean;
@@ -161,6 +161,7 @@ export default function FallingWindow(props: Props) {
     setRunFPS,
     noClear,
     playbackRate,
+    ignoreRunDelta,
   } = props;
   const tailsCanvasRef = useRef<HTMLCanvasElement>(null);
   const nikochanCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -208,6 +209,7 @@ export default function FallingWindow(props: Props) {
   useStableFrame({
     setRunFPS,
     setRenderFPS,
+    ignoreRunDelta,
     callback: () => {
       const now = getCurrentTimeSec();
       const ctx = tailsCanvasRef.current?.getContext("2d", {

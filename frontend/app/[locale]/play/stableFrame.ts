@@ -5,8 +5,14 @@ interface Props {
   callback: () => void;
   setRunFPS: (fps: number) => void;
   setRenderFPS: (fps: number) => void;
+  ignoreRunDelta: boolean;
 }
-export function useStableFrame({ callback, setRunFPS, setRenderFPS }: Props) {
+export function useStableFrame({
+  callback,
+  setRunFPS,
+  setRenderFPS,
+  ignoreRunDelta,
+}: Props) {
   const callbackRef = useRef<() => void>(null!);
   callbackRef.current = callback;
 
@@ -28,9 +34,7 @@ export function useStableFrame({ callback, setRunFPS, setRenderFPS }: Props) {
       animFrame = requestAnimationFrame(updateLoop);
       performance.mark("updateLoop");
 
-      if (
-        runTriggeredTimeStamp.current !== null
-      ) {
+      if (runTriggeredTimeStamp.current !== null) {
         // 別タブ・別ウィンドウに切り替えた時など、一時的に時間が飛んだ場合をスキップ
         if (performance.now() - runTriggeredTimeStamp.current < 100) {
           runDeltas.current.push(
@@ -60,8 +64,9 @@ export function useStableFrame({ callback, setRunFPS, setRenderFPS }: Props) {
       }
       const nowMs = performance.now() - prevRerender;
       if (
-        runTriggeredTimeStamp.current === null &&
-        Math.round(nowMs / realMs) >= runFrameCount
+        (runTriggeredTimeStamp.current === null &&
+          Math.round(nowMs / realMs) >= runFrameCount) ||
+        ignoreRunDelta
       ) {
         runTriggeredTimeStamp.current = performance.now();
         if (Math.round(nowMs / realMs) >= 3 * runFrameCount) {
@@ -73,14 +78,14 @@ export function useStableFrame({ callback, setRunFPS, setRenderFPS }: Props) {
         }
 
         callbackRef.current();
-      
+
         // performance.mark("nikochan-rerender");
         renderFpsCounter.current.push(performance.now());
       }
     };
     animFrame = requestAnimationFrame(updateLoop);
     return () => cancelAnimationFrame(animFrame);
-  }, [setRunFPS]);
+  }, [setRunFPS, ignoreRunDelta]);
 
   useEffect(() => {
     const i = setInterval(() => {
