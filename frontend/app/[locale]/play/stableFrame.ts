@@ -1,5 +1,5 @@
 import { useRealFPS } from "@/common/fpsCalculator";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 interface Props {
   callback: () => void;
@@ -10,7 +10,6 @@ export function useStableFrame({ callback, setRunFPS, setRenderFPS }: Props) {
   const callbackRef = useRef<() => void>(null!);
   callbackRef.current = callback;
 
-  const [rerenderIndex, setRerenderIndex] = useState<number>(0);
   const { realFps } = useRealFPS();
   const realFpsRef = useRef<number>(20);
   realFpsRef.current = realFps;
@@ -18,8 +17,6 @@ export function useStableFrame({ callback, setRunFPS, setRenderFPS }: Props) {
   // triggered: requestAnimationFrame() でセット
   // executedIndex: render関数が実行されたらセット
   const runTriggeredTimeStamp = useRef<DOMHighResTimeStamp | null>(null);
-  const runTriggeredIndex = useRef<number>(0);
-  const runExecutedIndex = useRef<number>(0);
   const runDeltas = useRef<DOMHighResTimeStamp[]>([]);
   const runFps = useRef<number>(60);
   // 最終的なFPS
@@ -32,7 +29,6 @@ export function useStableFrame({ callback, setRunFPS, setRenderFPS }: Props) {
       performance.mark("updateLoop");
 
       if (
-        runExecutedIndex.current >= runTriggeredIndex.current &&
         runTriggeredTimeStamp.current !== null
       ) {
         // 別タブ・別ウィンドウに切り替えた時など、一時的に時間が飛んだ場合をスキップ
@@ -67,10 +63,6 @@ export function useStableFrame({ callback, setRunFPS, setRenderFPS }: Props) {
         runTriggeredTimeStamp.current === null &&
         Math.round(nowMs / realMs) >= runFrameCount
       ) {
-        setRerenderIndex((r) => {
-          runTriggeredIndex.current = r + 1;
-          return r + 1;
-        });
         runTriggeredTimeStamp.current = performance.now();
         if (Math.round(nowMs / realMs) >= 3 * runFrameCount) {
           // 大幅に遅延している場合
@@ -79,20 +71,16 @@ export function useStableFrame({ callback, setRunFPS, setRenderFPS }: Props) {
         } else {
           prevRerender += realMs * runFrameCount;
         }
+
+        callbackRef.current();
+      
+        // performance.mark("nikochan-rerender");
+        renderFpsCounter.current.push(performance.now());
       }
     };
     animFrame = requestAnimationFrame(updateLoop);
     return () => cancelAnimationFrame(animFrame);
   }, [setRunFPS]);
-  useLayoutEffect(() => {
-    if (runExecutedIndex.current !== rerenderIndex) {
-      callbackRef.current();
-      
-      // performance.mark("nikochan-rerender");
-      runExecutedIndex.current = rerenderIndex;
-      renderFpsCounter.current.push(performance.now());
-    }
-  }, [rerenderIndex]);
 
   useEffect(() => {
     const i = setInterval(() => {
