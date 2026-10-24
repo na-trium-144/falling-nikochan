@@ -17,6 +17,7 @@ export interface QueryOptions {
   noClear?: boolean; // 停止時に音符を消さない
   tsOffset?: boolean; // リアルタイムにオフセットを表示
   seek?: boolean; // オートプレイ時に5秒送り/5秒戻しができるようになる(音符の挙動がバグっぽいので隠し機能にしている)
+  ignoreRunDelta?: boolean;
 }
 function toBoolean(value: string | null): boolean {
   return !(value === null || value === "0" || value === "");
@@ -38,5 +39,6 @@ export function getQueryOptions(): QueryOptions {
     noClear: toBoolean(q.get("noclear")),
     tsOffset: toBoolean(q.get("tsoffset")),
     seek: toBoolean(q.get("seek")),
+    ignoreRunDelta: toBoolean(q.get("ignoreRunDelta")),
   };
 }

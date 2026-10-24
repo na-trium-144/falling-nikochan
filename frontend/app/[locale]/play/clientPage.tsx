@@ -1246,6 +1246,7 @@ function Play(props: Props) {
               playbackRate={playbackRate}
               shouldHideBPMSign={shouldHideBPMSign}
               setShouldHideBPMSign={setShouldHideBPMSign}
+              ignoreRunDelta={!!queryOptions.ignoreRunDelta}
               showTSOffset={!!queryOptions.tsOffset}
               rawStartTimeStamp={rawStartTimeStamp}
               filteredStartTimeStamp={filteredStartTimeStamp}
