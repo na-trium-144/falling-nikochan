@@ -7,6 +7,20 @@ interface Props {
   setRenderFPS: (fps: number) => void;
   ignoreRunDelta: boolean;
 }
+/**
+ * requestAnimationFrameを使って一定周期でコールバックを呼ぶ。
+ *
+ * realFps: 負荷がないときに現在の環境でrequestAnimationFrameが呼ばれる周期。
+ *   fpsCalaulator.tsx で測定している
+ * runFps: 現在requestAnimationFrameが呼ばれている周期 (呼び出される間隔の平均の逆数)
+ *   nikochanの1フレームのキャンバス描画、その他Reactのレンダリングなどの処理にかかる時間を反映している。
+ * renderFps: nikochanがキャンバスを描画した周期。
+ *   nikochanは最終的な周期がrunFps程度になるようにコールバックを呼ぶ間隔を間引く。
+ *   環境によってはrequestAnimationFrameが例えば10ms→30ms→10ms→30ms のような間隔で呼ばれる場合があり、
+ *   不均一な間隔でキャンバスを更新しても不必要に負荷を上げるだけであるため。
+ *
+ * ignoreRunDelta=true (playページのクエリパラメータなど) を指定すると、runFpsを無視して毎フレーム描画する。
+ */
 export function useStableFrame({
   callback,
   setRunFPS,
@@ -19,13 +33,9 @@ export function useStableFrame({
   const { realFps } = useRealFPS();
   const realFpsRef = useRef<number>(20);
   realFpsRef.current = realFps;
-  // レンダリング等nikochanの1フレームの処理にかかる時間の測定
-  // triggered: requestAnimationFrame() でセット
-  // executedIndex: render関数が実行されたらセット
   const runTriggeredTimeStamp = useRef<DOMHighResTimeStamp | null>(null);
   const runDeltas = useRef<DOMHighResTimeStamp[]>([]);
   const runFps = useRef<number>(60);
-  // 最終的なFPS
   const renderFpsCounter = useRef<DOMHighResTimeStamp[]>([]);
   useEffect(() => {
     let animFrame: ReturnType<typeof requestAnimationFrame>;
@@ -34,22 +44,24 @@ export function useStableFrame({
       animFrame = requestAnimationFrame(updateLoop);
       performance.mark("updateLoop");
 
-      if (runTriggeredTimeStamp.current !== null) {
-        // 別タブ・別ウィンドウに切り替えた時など、一時的に時間が飛んだ場合をスキップ
-        if (performance.now() - runTriggeredTimeStamp.current < 100) {
-          runDeltas.current.push(
-            performance.now() - runTriggeredTimeStamp.current
-          );
+      if (!ignoreRunDelta) {
+        if (runTriggeredTimeStamp.current !== null) {
+          // 別タブ・別ウィンドウに切り替えた時など、一時的に時間が飛んだ場合をスキップ
+          if (performance.now() - runTriggeredTimeStamp.current < 100) {
+            runDeltas.current.push(
+              performance.now() - runTriggeredTimeStamp.current
+            );
+          }
+          runTriggeredTimeStamp.current = null;
         }
-        runTriggeredTimeStamp.current = null;
-      }
 
-      if (runDeltas.current.length > Math.max(runFps.current, 20)) {
-        const runDeltaSum = runDeltas.current.reduce((a, b) => a + b, 0);
-        const avgRunDelta = runDeltaSum / runDeltas.current.length;
-        runFps.current = Math.round(1000 / avgRunDelta);
-        setRunFPS(runFps.current);
-        runDeltas.current = [];
+        if (runDeltas.current.length > Math.max(runFps.current, 20)) {
+          const runDeltaSum = runDeltas.current.reduce((a, b) => a + b, 0);
+          const avgRunDelta = runDeltaSum / runDeltas.current.length;
+          runFps.current = Math.round(1000 / avgRunDelta);
+          setRunFPS(runFps.current);
+          runDeltas.current = [];
+        }
       }
 
       // フレームレートがrunFps程度になるように抑えつつ一定の間隔でrerenderを呼び出すようにする
