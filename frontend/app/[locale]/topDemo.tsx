@@ -40,10 +40,14 @@ export function TopDemo(
   const [runFps, setRunFps] = useState<number>(0);
   const [renderFps, setRenderFps] = useState<number>(0);
   const [showFps, setShowFps] = useState<boolean>(false);
+  const [ignoreRunDelta, setIgnoreRunDelta] = useState<boolean>(false);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.has("fps")) {
       setShowFps(true);
+    }
+    if (params.has("ignoreRunDelta")) {
+      setIgnoreRunDelta(true);
     }
   }, []);
 
@@ -112,6 +116,7 @@ export function TopDemo(
         shouldHideBPMSign={false}
         setShouldHideBPMSign={() => undefined}
         showTSOffset={false}
+        ignoreRunDelta={ignoreRunDelta}
       />
       {showFps && (
         <span className="fixed left-3 bottom-3 isolate z-play-version">
