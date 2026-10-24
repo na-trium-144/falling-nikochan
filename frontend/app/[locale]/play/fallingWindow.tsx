@@ -122,8 +122,8 @@ type Props = {
   notes: NoteInGame[];
   getCurrentTimeSec: () => number | undefined;
   playing: boolean;
-  setRunFPS: (fps: number) => void;
-  setRenderFPS: (fps: number) => void;
+  setRunFPS: null | ((fps: number) => void);
+  setRenderFPS: null | ((fps: number) => void);
   barFlash: FlashPos;
   noClear: boolean;
   playbackRate: number;

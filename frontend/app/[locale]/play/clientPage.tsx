@@ -1239,8 +1239,8 @@ function Play(props: Props) {
               notes={notesAll}
               getCurrentTimeSec={getCurrentTimeSec}
               playing={chartPlaying}
-              setRunFPS={setRunFps}
-              setRenderFPS={setRenderFps}
+              setRunFPS={queryOptions.fps ? setRunFps : null}
+              setRenderFPS={queryOptions.fps ? setRenderFps : null}
               barFlash={barFlash}
               noClear={!!queryOptions.noClear}
               playbackRate={playbackRate}

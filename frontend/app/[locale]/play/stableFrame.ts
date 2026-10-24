@@ -3,8 +3,8 @@ import { useEffect, useRef } from "react";
 
 interface Props {
   callback: () => void;
-  setRunFPS: (fps: number) => void;
-  setRenderFPS: (fps: number) => void;
+  setRunFPS: null | ((fps: number) => void);
+  setRenderFPS: null | ((fps: number) => void);
   ignoreRunDelta: boolean;
 }
 /**
@@ -59,7 +59,7 @@ export function useStableFrame({
           const runDeltaSum = runDeltas.current.reduce((a, b) => a + b, 0);
           const avgRunDelta = runDeltaSum / runDeltas.current.length;
           runFps.current = Math.round(1000 / avgRunDelta);
-          setRunFPS(runFps.current);
+          setRunFPS?.(runFps.current);
           runDeltas.current = [];
         }
       }
@@ -108,7 +108,7 @@ export function useStableFrame({
       ) {
         renderFpsCounter.current.shift();
       }
-      setRenderFPS(renderFpsCounter.current.length);
+      setRenderFPS?.(renderFpsCounter.current.length);
     }, 100);
     return () => clearInterval(i);
   }, [setRenderFPS]);
