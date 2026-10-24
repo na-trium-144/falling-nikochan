@@ -39,6 +39,6 @@ export function getQueryOptions(): QueryOptions {
     noClear: toBoolean(q.get("noclear")),
     tsOffset: toBoolean(q.get("tsoffset")),
     seek: toBoolean(q.get("seek")),
-    ignoreRunDelta: toBoolean(q.get("ignoreRunDelta")),
+    ignoreRunDelta: toBoolean(q.get("ignorerundelta")),
   };
 }
