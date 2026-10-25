@@ -113,6 +113,7 @@
 @import "./styles/range.css";
 @import "./styles/scrollable.css";
 @import "./styles/irasutoya-like.css";
+@import "./styles/target-line.css";
 
 /* other components */
 @import "./styles/main.css";

@@ -61,7 +61,6 @@ import { useRealFPS } from "@/common/fpsCalculator.jsx";
 import { IrasutoyaLikeGrass } from "@/common/irasutoyaLike.jsx";
 import { getQueryOptions, QueryOptions } from "./queryOption.js";
 import { ButtonHighlight } from "@/common/button.jsx";
-import { useFlash } from "./useFlash.js";
 import { captureAndWrap, fetchBackend } from "@/common/fetch.js";
 import * as v from "valibot";
 import { markAsExpected } from "@/common/apiError.js";
@@ -73,6 +72,7 @@ import {
   sendRecord,
   sendResultSerialized,
 } from "./resultSigningAuth.js";
+import { useFlash } from "@/common/targetLine.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -546,7 +546,7 @@ function Play(props: Props) {
     ytPlayerFinished,
   ]);
 
-  const { barFlash, flash } = useFlash();
+  const { flashRef, flash } = useFlash();
 
   const [
     notesAll,
@@ -1239,13 +1239,14 @@ function Play(props: Props) {
               notes={notesAll}
               getCurrentTimeSec={getCurrentTimeSec}
               playing={chartPlaying}
-              setRunFPS={setRunFps}
-              setRenderFPS={setRenderFps}
-              barFlash={barFlash}
+              setRunFPS={queryOptions.fps ? setRunFps : null}
+              setRenderFPS={queryOptions.fps ? setRenderFps : null}
+              flashRef={flashRef}
               noClear={!!queryOptions.noClear}
               playbackRate={playbackRate}
               shouldHideBPMSign={shouldHideBPMSign}
               setShouldHideBPMSign={setShouldHideBPMSign}
+              ignoreRunDelta={!!queryOptions.ignoreRunDelta}
               showTSOffset={!!queryOptions.tsOffset}
               rawStartTimeStamp={rawStartTimeStamp}
               filteredStartTimeStamp={filteredStartTimeStamp}
