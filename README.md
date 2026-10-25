@@ -22,7 +22,7 @@ For more information, play, and chart creation, please visit the Falling Nikocha
 >
 > 遊び方などの説明、プレイ、譜面作成 は、Falling Nikochan トップページからどうぞ: https://nikochan.utcode.net
 
-<img src="https://github.com/na-trium-144/falling-nikochan/blob/main/.github/screenshot_15.jpg?raw=true" width=960 />
+<img src="https://github.com/na-trium-144/falling-nikochan/blob/main/.github/screenshot_18.jpg?raw=true" width=960 />
 
 ## Development and Contributing
 

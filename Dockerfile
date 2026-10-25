@@ -57,5 +57,7 @@ COPY --from=builder /app/route/dist ./route/dist
 COPY --from=builder /app/chart/dist ./chart/dist
 COPY .vercel/output/static ./frontend/out
 
+ENV NODE_ENV=production
+
 # The server will be started by docker-compose, but we can define a default command.
 CMD ["bun", "./route/serve-bun-prod.ts"]
