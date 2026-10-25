@@ -1,3 +1,13 @@
+## ver. 18.8 - 2026/10/25 [#1436](https://github.com/na-trium-144/falling-nikochan/pull/1436)
+
+* フレームレート関連の処理をhookに切り出す
+* 毎フレームreactの再レンダリングをトリガーするのをやめ、requestAnimationFrameの中で直接canvasのレンダリングをするようにする
+* 比較検証用に `ignoreRunDelta=1` でフレームレート調整機能を無効化できるようにする
+* playページで、処理が重くメモ化できるコンポーネントは雑にメモ化した
+* 不要なstate更新を避ける
+    * fps表示がオフの場合はfpsの状態を更新しない
+    * targetlineのアニメーションにstateを使わず直接refを更新する
+
 ## ver. 18.7 - 2026/10/23 [#1433](https://github.com/na-trium-144/falling-nikochan/pull/1433)
 
 * 開発環境でプレイ記録の署名のチェックを省略できるようにする `API_NO_RESULT_VERIFY` 環境変数を追加
