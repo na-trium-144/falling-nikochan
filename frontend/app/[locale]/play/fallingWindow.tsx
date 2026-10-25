@@ -1,7 +1,14 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { RefObject, useCallback, useEffect, useRef, useState } from "react";
+import {
+  Ref,
+  RefObject,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   targetY,
   bigScale,
@@ -10,7 +17,7 @@ import {
   NoteInGame,
 } from "@falling-nikochan/chart";
 import { useResizeDetector } from "react-resize-detector";
-import TargetLine from "@/common/targetLine.js";
+import TargetLine, { TargetLineHandler } from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
 import { DisplayNikochan } from "./displayNikochan";
 import { OffsetEstimator } from "./offsetEstimator";
@@ -124,7 +131,7 @@ type Props = {
   playing: boolean;
   setRunFPS: null | ((fps: number) => void);
   setRenderFPS: null | ((fps: number) => void);
-  barFlash: FlashPos;
+  flashRef?: Ref<TargetLineHandler>;
   noClear: boolean;
   playbackRate: number;
   setShouldHideBPMSign: (hide: boolean) => void;
@@ -151,7 +158,6 @@ type Props = {
       timeOfsEstimator?: undefined;
     }
 );
-export type FlashPos = { targetX: number } | { clientX: number } | undefined;
 export default function FallingWindow(props: Props) {
   const {
     notes,
@@ -405,12 +411,13 @@ export default function FallingWindow(props: Props) {
       {boxSize && marginY !== undefined && (
         <TargetLine
           className={clsx("z-fw-target-line", props.blur && "blur-2xs")}
-          barFlash={
-            props.barFlash === undefined || canvasMarginX === undefined
+          ref={props.flashRef}
+          flashPosToPixel={(pos) =>
+            pos === undefined || canvasMarginX === undefined
               ? undefined
-              : "targetX" in props.barFlash
-                ? props.barFlash.targetX * boxSize + canvasMarginX
-                : props.barFlash.clientX
+              : "targetX" in pos
+                ? pos.targetX * boxSize + canvasMarginX
+                : pos.clientX
           }
           left={canvasRect.left}
           width={canvasRect.width}

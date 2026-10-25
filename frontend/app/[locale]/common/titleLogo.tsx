@@ -19,6 +19,7 @@ export default function Title(props: Props) {
   const [nikochanPhase, setNikochanPhase] = useState<number>(
     props.anim ? 0 : 2
   );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [nikochanPhaseNext, setNikochanPhaseNext] = useState<number>(
     props.anim ? 0 : 2
   );
@@ -28,10 +29,10 @@ export default function Title(props: Props) {
       cancelAnimationFrame(i);
     };
   }, [nikochanPhaseNext]);
-  const [barFlash, setBarFlash] = useState<boolean>(props.anim ? false : true);
   useEffect(() => {
     if (nikochanPhase === 0) {
-      setNikochanPhaseNext(1);
+      throw new Error("not implemented");
+      /*setNikochanPhaseNext(1);
       setTimeout(
         () =>
           requestAnimationFrame(() => {
@@ -40,14 +41,15 @@ export default function Title(props: Props) {
             setBarFlash(true);
           }),
         300
-      );
+      );*/
     }
   }, [nikochanPhase]);
 
   return (
     <div className={clsx("fn-title", props.className)} style={props.style}>
       <TargetLine
-        barFlash={barFlash ? "100% - 1.75rem" : undefined}
+        // barFlash={barFlash ? "100% - 1.75rem" : undefined}
+        flashPosToPixel={() => undefined}
         left={0}
         right={0}
         bottom="2.2rem"
