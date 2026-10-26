@@ -33,10 +33,7 @@ export default function OGTemplate() {
         fixedSeed
         className="absolute"
       />
-      <Title
-        className="absolute top-0 left-0 h-22 scale-190 origin-top-left "
-        anim={false}
-      />
+      <Title className="absolute top-0 left-0 h-22 scale-190 origin-top-left " />
       <div
         className={clsx(
           "absolute top-0 right-0 w-124 pl-4 pb-4 pt-0 pr-0 rounded-bl-xl",
