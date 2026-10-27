@@ -1,5 +1,5 @@
 import { serve } from "@hono/node-server";
-import { serveStatic } from "@hono/node-server/serve-static";
+import { serveStatic as honoServeStatic } from "@hono/node-server/serve-static";
 import {
   apiApp,
   ogApp,
@@ -24,7 +24,6 @@ import { Db, MongoClient } from "mongodb";
 import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 import { structuredLogger } from "@hono/structured-logger";
-import { readFile } from "node:fs/promises";
 
 const port = 8787;
 
@@ -53,10 +52,29 @@ const dbMiddleware = createMiddleware(async (c, next) => {
 });
 const fetchBrief = (_e: Bindings, cid: string) => getBrief(db!, cid);
 
+const serveStatic = honoServeStatic({
+  root: "../frontend/out",
+  rewriteRequestPath: (path) => {
+    if (path.match(/\/[^/]+\.[^/]+$/)) {
+      // path with extension
+      return path;
+    } else if (path.endsWith("/")) {
+      return path.slice(0, -1) + ".html";
+    } else if (path.endsWith("LICENSE")) {
+      return path;
+    } else {
+      // access to html file without extension
+      return path + ".html";
+    }
+  },
+});
 async function fetchStatic(e: Bindings, url: URL): Promise<ResponseOK> {
-  return new Response(
-    await readFile(`../frontend/out/${url.pathname}`.replaceAll("//", "/"))
-  ) as ResponseOK;
+  const res = await new Hono({ strict: false }).use(serveStatic).request(url);
+  if (res.ok) {
+    return res as ResponseOK;
+  } else {
+    throw new Error(`File ${url.pathname} not found`);
+  }
 }
 
 console.log(`Server is running on http://localhost:${port}`);
@@ -78,25 +96,7 @@ app
   .route("/rss.xml", await rssApp({ dbMiddleware }))
   .route("/share", shareApp({ fetchBrief, fetchStatic }))
   .route("/", redirectApp({ fetchStatic }))
-  .use(
-    "/*",
-    serveStatic({
-      root: "../frontend/out",
-      rewriteRequestPath: (path) => {
-        if (path.match(/\/[^/]+\.[^/]+$/)) {
-          // path with extension
-          return path;
-        } else if (path.endsWith("/")) {
-          return path.slice(0, -1) + ".html";
-        } else if (path.endsWith("LICENSE")) {
-          return path;
-        } else {
-          // access to html file without extension
-          return path + ".html";
-        }
-      },
-    })
-  )
+  .use("/*", serveStatic)
   .use(languageDetector())
   .onError(
     onError({ fetchStatic, captureException: null, setTransactionName: null })
