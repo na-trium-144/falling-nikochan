@@ -25,6 +25,7 @@ import {
   RecordGetSummarySchema,
   serializeResultParams,
   createRecordPost,
+  loadLevel,
 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
@@ -60,7 +61,6 @@ import { useRealFPS } from "@/common/fpsCalculator.jsx";
 import { IrasutoyaLikeGrass } from "@/common/irasutoyaLike.jsx";
 import { getQueryOptions, QueryOptions } from "./queryOption.js";
 import { ButtonHighlight } from "@/common/button.jsx";
-import { useFlash } from "./useFlash.js";
 import { captureAndWrap, fetchBackend } from "@/common/fetch.js";
 import * as v from "valibot";
 import { markAsExpected } from "@/common/apiError.js";
@@ -72,6 +72,7 @@ import {
   sendRecord,
   sendResultSerialized,
 } from "./resultSigningAuth.js";
+import { useFlash } from "@/common/targetLine.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -111,7 +112,18 @@ export function InitPlay({ locale }: { locale: string }) {
     setEditing(session.editing);
 
     if (session.editing) {
-      setChartSeq(session.level);
+      if ("notes" in session.level) {
+        setChartSeq(session.level);
+      } else {
+        setChartSeq(
+          loadLevel(
+            session.level.freeze,
+            session.level.meta,
+            session.level.offset,
+            session.level.ver
+          )
+        );
+      }
       setErrorMsg(undefined);
     } else {
       /*
@@ -364,6 +376,7 @@ function Play(props: Props) {
   useEffect(reloadBestScore, [reloadBestScore]);
 
   const [chartPlaying, setChartPlaying] = useState<boolean>(false);
+  const [ytPlayerFinished, setYtPlayerFinished] = useState<boolean>(false);
   const [wasAutoPlay, setWasAutoPlay] = useState<boolean>(false); // start時点でautoだったかどうか
   // const [oldPlaybackRate, setOldPlaybackRate] = useState<number>(1);  use minActualPlaybackRate instead
   const [oldUserBegin, setOldUserBegin] = useState<number | null>(null);
@@ -460,7 +473,12 @@ function Play(props: Props) {
     []
   );
   const getCurrentTimeSec = useCallback(() => {
-    if (ytPlayer.current?.getCurrentTime && chartSeq && chartPlaying) {
+    if (
+      ytPlayer.current?.getCurrentTime &&
+      chartSeq &&
+      chartPlaying &&
+      !ytPlayerFinished
+    ) {
       const ytCurrentTime = ytPlayer.current.getCurrentTime();
       const perfNow = performance.now();
       const ytNow =
@@ -520,9 +538,15 @@ function Play(props: Props) {
       timeStampLastAdjusted.current = perfNow;
       return now;
     }
-  }, [chartSeq, chartPlaying, offsetPlusLatency, playbackRate]);
+  }, [
+    chartSeq,
+    chartPlaying,
+    offsetPlusLatency,
+    playbackRate,
+    ytPlayerFinished,
+  ]);
 
-  const { barFlash, flash } = useFlash();
+  const { flashRef, flash } = useFlash();
 
   const [
     notesAll,
@@ -544,8 +568,6 @@ function Play(props: Props) {
     hitType,
     posOfs,
     timeOfsEstimator,
-    // judge,
-    // notesYetDone,
   ] = useGameLogic(
     getCurrentTimeSec,
     auto,
@@ -636,21 +658,21 @@ function Play(props: Props) {
     }
   }, []);
   const seekBack = useCallback(() => {
-    if (chartPlaying && auto && queryOptions.seek) {
+    if (chartPlaying && !ytPlayerFinished && auto && queryOptions.seek) {
       ytPlayer.current?.seekTo?.(
         (ytPlayer.current?.getCurrentTime?.() ?? 0) - 5,
         true
       );
     }
-  }, [chartPlaying, auto, queryOptions]);
+  }, [chartPlaying, auto, queryOptions, ytPlayerFinished]);
   const seekForward = useCallback(() => {
-    if (chartPlaying && auto && queryOptions.seek) {
+    if (chartPlaying && !ytPlayerFinished && auto && queryOptions.seek) {
       ytPlayer.current?.seekTo?.(
         (ytPlayer.current?.getCurrentTime?.() ?? 0) + 5,
         true
       );
     }
-  }, [chartPlaying, auto, queryOptions]);
+  }, [chartPlaying, auto, queryOptions, ytPlayerFinished]);
 
   // youtube側のreadyイベント & chartSeqが読み込まれる の両方を満たしたら
   // resetを1回呼び、loadingを閉じ、初期化完了となる
@@ -752,17 +774,14 @@ function Play(props: Props) {
   useEffect(() => {
     if (chartPlaying && chartSeq) {
       const checkEnd = () => {
-        const ended =
-          ytPlayer.current?.getPlayerState?.() === 0 ||
-          (ytPlayer.current?.getCurrentTime?.() ?? 0) >= chartSeq.ytEndSec;
-        if (ended !== endSecPassed) {
-          setEndSecPassed(ended);
+        if ((ytPlayer.current?.getCurrentTime?.() ?? 0) >= chartSeq.ytEndSec) {
+          setEndSecPassed(true);
         }
       };
       const t = setInterval(checkEnd, 100);
       return () => clearInterval(t);
     }
-  }, [chartPlaying, chartSeq, endSecPassed, getCurrentTimeSec]);
+  }, [chartPlaying, chartSeq, getCurrentTimeSec]);
 
   const [resultSerialized, setResultSerialized] = useState<string | undefined>(
     undefined
@@ -771,7 +790,7 @@ function Play(props: Props) {
     undefined
   );
   useEffect(() => {
-    if (chartPlaying && chartEnd && endSecPassed) {
+    if (chartPlaying && ((chartEnd && endSecPassed) || ytPlayerFinished)) {
       if (!showResult) {
         const newResultDate = new Date();
         if (
@@ -920,7 +939,7 @@ function Play(props: Props) {
     }
     // 値の変化にあわせて正確に再実行することよりも二重送信を防ぐことのほうが大事
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chartPlaying, showResult, chartEnd, endSecPassed]);
+  }, [chartPlaying, showResult, chartEnd, endSecPassed, ytPlayerFinished]);
 
   const onReady = useCallback(() => {
     console.log("ready ->", ytPlayer.current?.getPlayerState?.());
@@ -940,6 +959,8 @@ function Play(props: Props) {
       }
       setLoadingAfterReady(false);
       setNeedManualStart(false);
+      setYtPlayerFinished(false);
+      setEndSecPassed(false);
       setChartPlaying(true);
       setWasAutoPlay(auto);
       // setOldPlaybackRate(playbackRate);
@@ -983,7 +1004,7 @@ function Play(props: Props) {
     switch (ytPlayer.current?.getPlayerState?.()) {
       case 0:
         if (chartPlaying) {
-          setEndSecPassed(true);
+          setYtPlayerFinished(true);
         }
         break;
       case 2:
@@ -1218,13 +1239,14 @@ function Play(props: Props) {
               notes={notesAll}
               getCurrentTimeSec={getCurrentTimeSec}
               playing={chartPlaying}
-              setRunFPS={setRunFps}
-              setRenderFPS={setRenderFps}
-              barFlash={barFlash}
+              setRunFPS={queryOptions.fps ? setRunFps : null}
+              setRenderFPS={queryOptions.fps ? setRenderFps : null}
+              flashRef={flashRef}
               noClear={!!queryOptions.noClear}
               playbackRate={playbackRate}
               shouldHideBPMSign={shouldHideBPMSign}
               setShouldHideBPMSign={setShouldHideBPMSign}
+              ignoreRunDelta={!!queryOptions.ignoreRunDelta}
               showTSOffset={!!queryOptions.tsOffset}
               rawStartTimeStamp={rawStartTimeStamp}
               filteredStartTimeStamp={filteredStartTimeStamp}

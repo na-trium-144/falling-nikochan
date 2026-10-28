@@ -4,7 +4,7 @@ import clsx from "clsx/lite";
 import { useTheme } from "@/common/theme";
 import { useDisplayMode } from "@/scale.js";
 import { useTranslations } from "next-intl";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { memo, ReactNode, useEffect, useRef, useState } from "react";
 
 interface CProps {
   className?: string;
@@ -72,6 +72,9 @@ export interface NoteDone {
   chain: number;
 }
 export function ScoreDisp(props: Props) {
+  return <ScoreDispInner {...props} />;
+}
+const ScoreDispInner = memo(function ScoreDispInner(props: Props) {
   const t = useTranslations("play.score");
   const { score, best } = props;
   const lch = useColorWithLerp(props.pc ? props.baseScore / 80 : 0);
@@ -112,7 +115,7 @@ export function ScoreDisp(props: Props) {
       )}
     </Cloud>
   );
-}
+});
 function ScoreDiffAnim({ nd }: { nd: NoteDone }) {
   const ref = useRef<HTMLDivElement>(null!);
   useEffect(() => {
@@ -193,6 +196,9 @@ interface ChainProps {
 // slate-800: oklch(0.279 0.041 260.031); -> orange-500: oklch(0.705 0.213 47.604);
 // stone-300: oklch(0.869 0.005 56.366); -> yellow-400: oklch(0.852 0.199 91.936);
 export function ChainDisp(props: ChainProps) {
+  return <ChainDispInner {...props} />;
+}
+const ChainDispInner = memo(function ChainDispInner(props: ChainProps) {
   const t = useTranslations("play.score");
   const lch = useColorWithLerp(props.fc ? props.chain / 100 : 0);
   return (
@@ -243,7 +249,8 @@ export function ChainDisp(props: ChainProps) {
       />
     </Cloud>
   );
-}
+});
+
 function ChainBigAnim(props: { className: string; chain: number }) {
   const [animChain, setAnimChain] = useState<number>(0);
   const ref = useRef<HTMLSpanElement | null>(null);

@@ -247,6 +247,7 @@ The service worker ([`worker/entry.ts`](worker/entry.ts), bundled into `/sw.js`)
 | `MONGODB_URI` | | | required | `mongodb://...` |
 | `API_ENV` |  |  | DO NOT SET | if set to `development`, development-specific behaviors such as password bypass will be enabled |
 | `API_NO_RATELIMIT` |  |  | DO NOT SET | |
+| `API_NO_RESULT_VERIFY` |  |  | DO NOT SET | |
 | `SECRET_SALT` |  |  | required | any string |
 | `RESULT_SECRET_KEY` |  |  | required | HMAC SHA-256 key in base64url format. Generate with `pnpm exec tsx ./route/generateSecretKey.ts` |
 | `VERCEL_PROTECTION_BYPASS_SECRET` |  |  | optional | needed only when deploy to vercel as preview |

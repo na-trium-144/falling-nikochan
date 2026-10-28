@@ -8,7 +8,7 @@ import DistraughtFace from "@icon-park/react/lib/icons/DistraughtFace";
 import GrinningFaceWithTightlyClosedEyesOpenMouth from "@icon-park/react/lib/icons/GrinningFaceWithTightlyClosedEyesOpenMouth";
 import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
 import { useTranslations } from "next-intl";
-import { ReactNode } from "react";
+import { memo, ReactNode } from "react";
 
 interface Props {
   className?: string;
@@ -27,6 +27,9 @@ interface Props {
   showResultDiff: boolean;
 }
 export default function StatusBox(props: Props) {
+  return <StatusBoxInner {...props} />;
+}
+const StatusBoxInner = memo(function StatusBoxInner(props: Props) {
   const t = useTranslations("play.status");
   const { screenWidth, screenHeight, rem, statusScale } = useDisplayMode();
   const isMobile = screenWidth < screenHeight;
@@ -210,7 +213,7 @@ export default function StatusBox(props: Props) {
       )}
     </Box>
   );
-}
+});
 
 function StatusItem(props: {
   wide?: boolean;
