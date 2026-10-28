@@ -196,8 +196,8 @@ importers:
         specifier: ^22.19.7
         version: 22.19.7
       core-js:
-        specifier: 3.49.0
-        version: 3.49.0
+        specifier: 3.50.0
+        version: 3.50.0
       eslint:
         specifier: catalog:eslint
         version: 9.39.5(jiti@2.7.0)
@@ -3169,8 +3169,8 @@ packages:
     resolution: {integrity: sha512-Kb2wC0fvsWfQrgk8HU5lW6U/Lcs8+9aaYcy4ZFc6DDlo4nZ7n70dEgE5rtR0oG6ufKDUnrwfWL1mXR5ljDatrQ==}
     deprecated: core-js@<3.23.3 is no longer maintained and not recommended for usage due to the number of issues. Because of the V8 engine whims, feature detection in old core-js versions could cause a slowdown up to 100x even if nothing is polyfilled. Some versions have web compatibility issues. Please, upgrade your dependencies to the actual version of core-js.
 
-  core-js@3.49.0:
-    resolution: {integrity: sha512-es1U2+YTtzpwkxVLwAFdSpaIMyQaq0PBgm3YD1W3Qpsn1NAmO3KSgZfu+oGSWVu6NvLHoHCV/aYcsE5wiB7ALg==}
+  core-js@3.50.0:
+    resolution: {integrity: sha512-BRWgOLKkFeCgRudR6zrs8p9XJZcE14grzKMMssoYrk6krtuEZ7MTKPIY5RzOnqsEKIR9kst7wNzphttraT+Yqw==}
 
   countup.js@2.10.1:
     resolution: {integrity: sha512-UHW/BsPDgVZfN919D4iu2HPv+jJxZUuaR3EhT0ScFZaD446GiQtkMTgOnOyJXdA2AewdlyUk9UvERlTHTbVpcw==}
@@ -8011,7 +8011,7 @@ snapshots:
 
   core-js@2.6.12: {}
 
-  core-js@3.49.0: {}
+  core-js@3.50.0: {}
 
   countup.js@2.10.1: {}
 
