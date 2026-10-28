@@ -634,7 +634,7 @@ export function APIDocsLink({ small }: { small?: boolean }) {
   return (
     <>
       <Code className="inline-block align-middle mr-1" />
-      <a className="fn-link-1" href={process.env.BACKEND_PREFIX + "/api"}>
+      <ExternalLink href={process.env.BACKEND_PREFIX + "/api"}>
         {small ? (
           <span>{t("links.apiReferenceShort")}</span>
         ) : (
@@ -643,7 +643,7 @@ export function APIDocsLink({ small }: { small?: boolean }) {
             <span className="no-pc">{t("links.apiReferenceShort")}</span>
           </>
         )}
-      </a>
+      </ExternalLink>
     </>
   );
 }

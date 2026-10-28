@@ -211,19 +211,17 @@ export function PCMenuPopup(props: PopupProps) {
                 <GitHubLink small />
               </li>
             </ul>
-            {showDev && (
-              <>
-                <hr className="fn-hr my-4" />
-                <ul className="list-disc ml-4.5 space-y-1 text-left">
-                  <li>
-                    <APIDocsLink small />
-                  </li>
-                  <li>
-                    <DevPageLink locale={props.locale} />
-                  </li>
-                </ul>
-              </>
-            )}
+            <hr className="fn-hr my-4" />
+            <ul className="list-disc ml-4.5 space-y-1 text-left">
+              <li>
+                <APIDocsLink small />
+              </li>
+              {showDev && (
+                <li>
+                  <DevPageLink locale={props.locale} />
+                </li>
+              )}
+            </ul>
           </Box>
         </div>
       </>
