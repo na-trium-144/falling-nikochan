@@ -10,7 +10,6 @@ import {
   useEffect,
   useRef,
   useState,
-  useCallback,
 } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
@@ -459,7 +458,7 @@ const MusicAreaInner = memo(function MusicAreaInner(props: Props) {
       />
     </div>
   );
-}
+})
 
 interface VProps {
   className: string;
@@ -483,6 +482,11 @@ interface VProps {
   playing: boolean;
 }
 export function VolumeControlArea(props: VProps) {
+  // TODO: コールバックがレンダーごとに作られる場合メモ化できていない
+  // 現状メモ化が必要な呼び出し元は inspect/clientPage だけであり、そこではすべてuseCallbackしているので、現時点では問題はないはず
+  return <VolumeControlAreaInner {...props}/>
+}
+const VolumeControlAreaInner = memo(function VolumeControlAreaInner(props: VProps) {
   const t = useTranslations("play.message");
   const {
     ready,

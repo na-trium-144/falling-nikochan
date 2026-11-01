@@ -8,13 +8,14 @@ import {
   stepCmp,
   targetY,
 } from "@falling-nikochan/chart";
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useCanvasProps } from "@/play/fallingWindow.js";
 import { DisplayNikochan } from "@/play/displayNikochan.js";
 import { useDisplayMode } from "@/scale.js";
 import { useTheme } from "@/common/theme.js";
 import { ChartEvent, getInspectCurrentStep } from "./clientPage.js";
 import TargetLine from "@/common/targetLine.js";
+import { useStableFrame } from "@/play/stableFrame.js";
 
 interface Props {
   className?: string;
@@ -24,6 +25,9 @@ interface Props {
   getCurrentTimeSec: () => number;
   playing: boolean;
   playbackRate?: number;
+  setRunFPS: null | ((fps: number) => void);
+  setRenderFPS: null | ((fps: number) => void);
+  ignoreRunDelta: boolean;
 }
 
 export default function InspectFallingWindow(props: Props) {
@@ -33,6 +37,9 @@ export default function InspectFallingWindow(props: Props) {
     getCurrentTimeSec,
     playing,
     playbackRate = 1,
+    setRunFPS,
+    setRenderFPS,
+    ignoreRunDelta,
   } = props;
 
   const effectsCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -76,8 +83,12 @@ export default function InspectFallingWindow(props: Props) {
     }
   }, [chartSeq, playing]);
 
-  const renderCanvas = useCallback(
-    (currentTimeSec: number) => {
+  useStableFrame({
+    setRunFPS,
+    setRenderFPS,
+    ignoreRunDelta,
+    callback: () => {
+      const currentTimeSec = getCurrentTimeSec();
       const ectx = effectsCanvasRef.current?.getContext("2d", {
         alpha: true,
         desynchronized: true,
@@ -205,37 +216,7 @@ export default function InspectFallingWindow(props: Props) {
         lastNow.current = currentTimeSec;
       }
     },
-    [
-      chartSeq,
-      allEvents,
-      canvasRect,
-      boxSize,
-      canvasMarginX,
-      canvasMarginY,
-      isDark,
-      marginY,
-      noteSize,
-      playUIScale,
-      rem,
-      playing,
-      playbackRate,
-      effectsCanvasDPR,
-      tailsCanvasDPR,
-      nikochanCanvasDPR,
-    ]
-  );
-
-  // 60fpsアニメーションループ
-  useEffect(() => {
-    let animFrame: ReturnType<typeof requestAnimationFrame>;
-    const loop = () => {
-      const time = getCurrentTimeSec();
-      renderCanvas(time);
-      animFrame = requestAnimationFrame(loop);
-    };
-    animFrame = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(animFrame);
-  }, [getCurrentTimeSec, renderCanvas]);
+  });
 
   return (
     <div className={props.className} style={props.style} ref={ref}>
@@ -273,7 +254,7 @@ export default function InspectFallingWindow(props: Props) {
       {boxSize && marginY !== undefined && (
         <TargetLine
           className={clsx("z-fw-target-line" /*false && "blur-2xs"*/)}
-          barFlash={undefined}
+          flashPosToPixel={() => undefined}
           left={canvasRect.left}
           width={canvasRect.width}
           bottom={targetY * boxSize + marginY}

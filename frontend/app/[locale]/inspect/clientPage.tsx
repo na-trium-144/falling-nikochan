@@ -4,16 +4,14 @@ import clsx from "clsx/lite";
 import {
   ChartBrief,
   ChartSeqData,
-  getBarLength,
   getSignatureState,
   getStep,
   getTimeSec,
-  Signature,
   Step,
   stepCmp,
-  stepImproper,
   stepZero,
   updateBarNum,
+  loadLevel,
 } from "@falling-nikochan/chart";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
@@ -22,7 +20,7 @@ import { getSession } from "@/play/session.js";
 import { captureAndWrap, fetchBackend } from "@/common/fetch.js";
 import { markAsExpected } from "@/common/apiError.js";
 import { refreshBrief } from "@/common/briefCache.js";
-import { getQueryOptions } from "@/play/queryOption.js";
+import { getQueryOptions, QueryOptions } from "@/play/queryOption.js";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { useResizeDetector } from "react-resize-detector";
 import { useDisplayMode } from "@/scale.js";
@@ -50,6 +48,7 @@ import { CurrentStepText } from "@/edit/noteTab.js";
 import Pause from "@icon-park/react/lib/icons/Pause.js";
 import PlayOne from "@icon-park/react/lib/icons/PlayOne.js";
 import { Key } from "@/common/key.js";
+import { EventDetails } from "./eventDetails.js";
 
 export interface ChartEvent {
   step: Step;
@@ -167,13 +166,6 @@ export function getInspectCurrentStep(
   return stepSnap4th;
 }
 
-function formatSignature(sig: Signature): string {
-  const barLengths = getBarLength(sig);
-  return barLengths
-    .map((len) => `${stepImproper(len)}/${len.denominator * 4}`)
-    .join(" + ");
-}
-
 export function InitInspect() {
   const te = useTranslations("error");
 
@@ -182,9 +174,11 @@ export function InitInspect() {
   const [seqMap, setSeqMap] = useState<Record<number, ChartSeqData>>();
   const [initialLvIndex, setInitialLvIndex] = useState<number>(0);
   const [errorMsg, setErrorMsg] = useState<string | Error>();
+  const [queryOptions, setQueryOptions] = useState<QueryOptions>({});
 
   useEffect(() => {
     const q = getQueryOptions();
+    setQueryOptions(q);
     const session = getSession(q.sid);
     if (session === null) {
       setErrorMsg(te("noSession"));
@@ -195,7 +189,18 @@ export function InitInspect() {
     setChartBrief(session.brief);
 
     if (session.editing) {
-      setSeqMap({ [session.lvIndex]: session.level });
+      if ("notes" in session.level) {
+        setSeqMap({ [session.lvIndex]: session.level });
+      } else {
+        setSeqMap({
+          [session.lvIndex]: loadLevel(
+            session.level.freeze,
+            session.level.meta,
+            session.level.offset,
+            session.level.ver
+          ),
+        });
+      }
       setInitialLvIndex(session.lvIndex);
       setErrorMsg(undefined);
     } else {
@@ -256,6 +261,7 @@ export function InitInspect() {
       chartBrief={chartBrief}
       seqMap={seqMap}
       initialLvIndex={initialLvIndex}
+      queryOptions={queryOptions}
     />
   );
 }
@@ -266,10 +272,18 @@ interface InspectProps {
   chartBrief?: ChartBrief;
   seqMap?: Record<number, ChartSeqData>;
   initialLvIndex?: number;
+  queryOptions: QueryOptions;
 }
 
 function Inspect(props: InspectProps) {
-  const { errorMsg, cid, chartBrief, seqMap, initialLvIndex = 0 } = props;
+  const {
+    errorMsg,
+    cid,
+    chartBrief,
+    seqMap,
+    initialLvIndex = 0,
+    queryOptions,
+  } = props;
   const t = useTranslations("inspect");
   const { isTouch, isMobileGame: isMobile, rem } = useDisplayMode();
   const standalone = useStandaloneDetector();
@@ -319,6 +333,28 @@ function Inspect(props: InspectProps) {
 
   const ref = useRef<HTMLDivElement | null>(null);
   const ytPlayer = useRef<YouTubePlayer | undefined>(undefined);
+
+  const [ytVolume, setYtVolume_] = useState<number>(100);
+  const setYtVolume = useCallback(
+    (v: number) => {
+      setYtVolume_(v);
+      localStorage.setItem("ytVolume", v.toString());
+      if (cid) {
+        localStorage.setItem(`ytVolume-${cid}`, v.toString());
+      }
+      ytPlayer.current?.setVolume?.(v);
+    },
+    [cid]
+  );
+  useEffect(() => {
+    const vol = Number(
+      localStorage.getItem(`ytVolume-${cid}`) ||
+        localStorage.getItem("ytVolume") ||
+        100
+    );
+    setYtVolume_(vol);
+    ytPlayer.current?.setVolume?.(vol);
+  }, [cid]);
 
   const [playbackRate, setPlaybackRate] = useState<number>(1);
   const [playing, setPlaying] = useState<boolean>(false);
@@ -513,74 +549,6 @@ function Inspect(props: InspectProps) {
   const currentSignatureState = chartSeq
     ? getSignatureState(signatureWithBarNum, currentStep)
     : null;
-
-  const notesBigId: (number | null)[] = useMemo(() => {
-    const notesBigId: (number | null)[] = [];
-    let id = 0;
-    for (const n of chartSeq?.notes ?? []) {
-      if (n.big) {
-        notesBigId[n.id] = id;
-        id++;
-      }
-    }
-    return notesBigId;
-  }, [chartSeq]);
-  const bigCount = useMemo(
-    () => chartSeq?.notes.filter((n) => n.big).length,
-    [chartSeq]
-  );
-
-  // 選択中の音符（現在カーソル位置と一致する音符）
-  const selectedNotes = useMemo(
-    () => chartSeq?.notes.filter((n) => isNoteSelected(n)) || [],
-    [chartSeq, isNoteSelected]
-  );
-
-  const selectedBpmChanges = useMemo(() => {
-    if (!chartSeq) return [];
-    return chartSeq.bpmChanges.filter(
-      (b) => stepCmp(b.step, currentStep) === 0
-    );
-  }, [chartSeq, currentStep]);
-
-  const selectedSpeedChanges = useMemo(() => {
-    if (!chartSeq) return [];
-    const results: (
-      | { type: "direct"; bpm: number }
-      | { type: "interp"; prevBpm: number; bpm: number }
-    )[] = [];
-    for (let i = 0; i < chartSeq.speedChanges.length; i++) {
-      const s = chartSeq.speedChanges[i];
-      if (s.interp && i > 0) {
-        const prev = chartSeq.speedChanges[i - 1];
-        if (
-          stepCmp(currentStep, prev.step) > 0 &&
-          stepCmp(currentStep, s.step) <= 0
-        ) {
-          results.push({
-            type: "interp",
-            prevBpm: prev.bpm,
-            bpm: s.bpm,
-          });
-        }
-      } else {
-        if (stepCmp(s.step, currentStep) === 0) {
-          results.push({
-            type: "direct",
-            bpm: s.bpm,
-          });
-        }
-      }
-    }
-    return results;
-  }, [chartSeq, currentStep]);
-
-  const selectedSignatureChanges = useMemo(() => {
-    if (!chartSeq) return [];
-    return chartSeq.signature.filter(
-      (sig) => stepCmp(sig.step, currentStep) === 0
-    );
-  }, [chartSeq, currentStep]);
 
   const ytId = chartBrief?.ytId;
 
@@ -783,8 +751,8 @@ function Inspect(props: InspectProps) {
                 setOpen={setVolumeCtrlOpen}
                 pointerInVolumeCtrl={pointerInVolumeCtrl}
                 setPointerInVolumeCtrl={setPointerInVolumeCtrl}
-                ytVolume={0} // todo?
-                setYtVolume={() => undefined}
+                ytVolume={ytVolume}
+                setYtVolume={setYtVolume}
                 enableSE={enableHitSE}
                 setEnableSE={setEnableHitSE}
                 seVolume={hitVolume}
@@ -808,93 +776,11 @@ function Inspect(props: InspectProps) {
             classNameOuter="w-full mt-1"
             classNameInner="p-4 flex flex-col gap-1"
           >
-            <div className="flex flex-col gap-1">
-              {selectedNotes.length === 0 &&
-                selectedBpmChanges.length === 0 &&
-                selectedSpeedChanges.length === 0 &&
-                selectedSignatureChanges.length === 0 && (
-                  <span className="text-dim">{t("noSelection")}</span>
-                )}
-              {selectedBpmChanges.map((b, i) => (
-                <div
-                  key={`bpm-${i}`}
-                  className="flex items-center justify-between"
-                >
-                  <span className="text-sm mr-2">{t("bpmChange")}:</span>
-                  <span>{b.bpm}</span>
-                </div>
-              ))}
-              {selectedSpeedChanges.map((s, i) => (
-                <div
-                  key={`speed-${i}`}
-                  className="flex items-center justify-between"
-                >
-                  <span className="text-sm mr-2">{t("speedChange")}:</span>
-                  <span>
-                    {s.type === "interp" ? `${s.prevBpm} → ${s.bpm}` : s.bpm}
-                  </span>
-                </div>
-              ))}
-              {selectedSignatureChanges.map((sig, i) => (
-                <div
-                  key={`sig-${i}`}
-                  className="flex items-center justify-between"
-                >
-                  <span className="text-sm mr-2">{t("signatureChange")}:</span>
-                  <span>{formatSignature(sig)}</span>
-                </div>
-              ))}
-              {selectedNotes.map((note) => (
-                <div
-                  key={note.id}
-                  className="flex items-center justify-end flex-wrap"
-                >
-                  <span>#</span>
-                  <span className="ml-1 min-w-6">{note.id + 1}</span>
-                  {note.big && (
-                    <span className="text-sm ml-2">
-                      (Big#
-                      <span className="ml-1">{notesBigId[note.id]! + 1}</span>)
-                    </span>
-                  )}
-                  <span className="flex-1" />
-                  <span className="ml-2">
-                    <span className="text-sm text-dim mr-1">
-                      <var className="italic">x</var>:
-                    </span>
-                    <span className="inline-block min-w-6 text-center">
-                      {note.hitX}
-                    </span>
-                  </span>
-                  <span className="ml-2">
-                    <span className="text-sm text-dim mr-1">
-                      <var className="italic">vx</var>:
-                    </span>
-                    <span className="inline-block min-w-6 text-center">
-                      {note.hitVX}
-                    </span>
-                  </span>
-                  <span className="ml-2">
-                    <span className="text-sm text-dim mr-1">
-                      <var className="italic">vy</var>:
-                    </span>
-                    <span className="inline-block min-w-6 text-center">
-                      {note.hitVY}
-                    </span>
-                  </span>
-                </div>
-              ))}
-              <hr className="fn-hr my-1" />
-              <div className="flex items-center">
-                <span className="ml-2">/</span>
-                <span className="ml-1 min-w-8 text-center">
-                  {chartSeq?.notes.length}
-                </span>
-                <span className="text-sm ml-2">
-                  (Big<span className="text-sm ml-1">{bigCount}</span>)
-                </span>
-              </div>
-            </div>
+            <EventDetails
+              chartSeq={chartSeq}
+              isNoteSelected={isNoteSelected}
+              currentStep={currentStep}
+            />
           </Box>
         </div>
 
@@ -907,6 +793,10 @@ function Inspect(props: InspectProps) {
             getCurrentTimeSec={getCurrentTimeSec}
             playing={playing}
             playbackRate={playbackRate}
+            ignoreRunDelta={!!queryOptions.ignoreRunDelta}
+            // TODO: FPS表示機能
+            setRunFPS={null}
+            setRenderFPS={null}
           />
         </div>
       </div>
