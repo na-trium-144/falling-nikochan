@@ -436,7 +436,7 @@ const MusicAreaInner = memo(function MusicAreaInner(props: Props) {
           "fg-base",
           props.isMobile
             ? clsx(
-                "-bottom-9 inset-x-0 mx-auto w-max text-xl",
+                "-bottom-9 left-(--sai-l) right-(--sai-r) mx-auto w-max text-xl",
                 props.isTouch ? "fn-with-bg" : ""
               )
             : "bottom-0 right-1 mr-sai",
@@ -459,7 +459,7 @@ const MusicAreaInner = memo(function MusicAreaInner(props: Props) {
           "flex flex-col",
           props.isMobile
             ? clsx(
-                "bottom-0 inset-x-0 mx-auto w-80 max-w-full",
+                "bottom-0 left-(--sai-l) right-(--sai-r) mx-auto w-80 max-w-full",
                 largeTitle
                   ? "rounded-sq-box p-4 gap-3"
                   : "rounded-sq-xl px-3 py-2 gap-1"
