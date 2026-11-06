@@ -176,7 +176,7 @@ const MusicAreaInner = memo(function MusicAreaInner(props: Props) {
         "grow-0 shrink-0 flex",
         // levelBgColors.at(levelTypes.indexOf(props.lvType)) || levelBgColors[1],
         props.isMobile
-          ? "rounded-b-sq-xl pb-1"
+          ? "rounded-b-sq-xl pb-1 -mx-1 px-1 inset-shadow-none"
           : "rounded-bl-sq-box pl-3 pb-1.5",
         "relative flex-col",
         props.className,
@@ -216,8 +216,12 @@ const MusicAreaInner = memo(function MusicAreaInner(props: Props) {
             )}
             style={{
               width: props.isMobile
-                ? 50 * mobilePlayUIHeightScale + "%"
+                ? `${50 * mobilePlayUIHeightScale}%`
                 : "100%",
+              // 動画を小さくする必要がありその結果無駄なスペースが空く場合に限り右側safe-areaを使う
+              marginRight: props.isMobile
+                ? `min(var(--sai-r), ${50 - 50 * mobilePlayUIHeightScale}%)`
+                : undefined,
             }}
             scale={ytHalf ? 0.5 : 1}
             id={props.chartBrief?.ytId}
