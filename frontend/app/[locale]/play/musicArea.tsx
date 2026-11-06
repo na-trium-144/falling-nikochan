@@ -94,6 +94,7 @@ const MusicAreaInner = memo(function MusicAreaInner(props: Props) {
   const t = useTranslations("play.message");
 
   const [volumeCtrlOpen, setVolumeCtrlOpen] = useState(false);
+  const [rerenderVolume, setRerenderVolume] = useState(0);
   const [ytVolumeCtrlAvailable, setYtVolumeCtrlAvailable] = useState(true);
   useEffect(() => {
     if (detectOS() === "ios") {
@@ -108,6 +109,11 @@ const MusicAreaInner = memo(function MusicAreaInner(props: Props) {
       const t = setTimeout(() => {
         setVolumeCtrlOpen(true);
         initialVolumeCtrlOpenDone.current = true;
+        for (let delay = 0; delay <= 250; delay += 50) {
+          setTimeout(() => {
+            setRerenderVolume((prev) => prev + 1);
+          }, delay);
+        }
       }, 500);
       return () => clearTimeout(t);
     }
@@ -523,6 +529,7 @@ const MusicAreaInner = memo(function MusicAreaInner(props: Props) {
             disabled={!ytVolumeCtrlAvailable}
             value={ytVolumeCtrlAvailable ? props.ytVolume : 100}
             onChange={props.setYtVolume}
+            rerenderKey={rerenderVolume}
           />
         </div>
         <div className="flex flex-row items-center">
@@ -548,6 +555,7 @@ const MusicAreaInner = memo(function MusicAreaInner(props: Props) {
             disabled={!props.enableSE}
             value={props.enableSE ? props.seVolume : 0}
             onChange={props.setSEVolume}
+            rerenderKey={rerenderVolume}
           />
         </div>
       </div>
