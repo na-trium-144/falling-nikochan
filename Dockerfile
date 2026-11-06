@@ -4,7 +4,7 @@ WORKDIR /app
 ENV CI=true
 
 # Install pnpm
-RUN npm install -g pnpm@11
+RUN npm install -g pnpm@12
 
 # Copy package files
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
@@ -27,7 +27,7 @@ WORKDIR /app
 ENV CI=true
 
 # Install pnpm
-RUN npm install -g pnpm@11
+RUN npm install -g pnpm@12
 
 # Copy package files
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
