@@ -11,7 +11,7 @@
     @apply fg-bright;
 
     &.fn-small {
-      @apply h-8 py-0;
+      @apply min-h-[unset] h-8 py-0;
     }
 
     &.fn-cta {
