@@ -23,6 +23,8 @@ function cleanNumber(num: number): number {
   return Math.round(num * 1e6) / 1e6;
 }
 
+const DRAG_UNIT = 0.5;
+
 interface Props {
   className?: string;
   style?: object;
@@ -248,9 +250,11 @@ export default function FallingWindow(props: Props) {
                       const baseNote = currentLevel.currentNote;
                       const winLeft = ref.current.getBoundingClientRect().left;
                       // cx-winLeft が divのabsolute基準からマウスカーソル位置までの相対位置になる
-                      const newHitX = Math.round(
-                        ((cx - winLeft - marginX) * 10) / boxSize - 5
-                      );
+                      const newHitX =
+                        Math.round(
+                          (((cx - winLeft - marginX) * 10) / boxSize - 5) /
+                            DRAG_UNIT
+                        ) * DRAG_UNIT;
 
                       if (props.dragStyle === "free") {
                         setPendingNoteUpdate({
@@ -355,8 +359,10 @@ export default function FallingWindow(props: Props) {
                       // );
                       setPendingNoteUpdate({
                         ...currentNote,
-                        hitVX: Math.round(mouseVX * 4),
-                        hitVY: Math.round(mouseVY * 4),
+                        hitVX:
+                          Math.round((mouseVX * 4) / DRAG_UNIT) * DRAG_UNIT,
+                        hitVY:
+                          Math.round((mouseVY * 4) / DRAG_UNIT) * DRAG_UNIT,
                       });
                     }}
                     onMoveEnd={() => {
