@@ -1047,7 +1047,7 @@ export default function Edit(props: {
               ) : tab === 2 ? (
                 <LevelTab chart={chart} />
               ) : tab === 3 ? (
-                <NoteTab chart={chart} aceSessionRef={aceSessionRef} />
+                <NoteTab chart={chart} aceSessionRef={aceSessionRef} playing={playing} />
               ) : null}
               <LuaTabPlaceholder parentContainer={ref.current} />
             </Box>
