@@ -13,8 +13,9 @@ interface CProps {
 }
 function Cloud(props: CProps) {
   const themeState = useTheme();
-  const { playUIScale } = useDisplayMode();
+  const { isMobileGame, playUIScale } = useDisplayMode();
 
+  const xMargin = 0.75 * playUIScale + "rem";
   return (
     <div
       className={clsx(
@@ -24,8 +25,15 @@ function Cloud(props: CProps) {
       style={{
         width: 225,
         height: 115,
-        left: props.left ? 0.75 * playUIScale + "rem" : undefined,
-        right: props.left ? undefined : 0.75 * playUIScale + "rem",
+        left: props.left
+          ? `max(0px, calc(${xMargin} - var(--sai-l)))`
+          : undefined,
+        // mobileでない場合右側にはMusicAreaがあるのでsafe-areaは無関係
+        right: props.left
+          ? undefined
+          : isMobileGame
+            ? `max(0px, calc(${xMargin} - var(--sai-r)))`
+            : xMargin,
         transform: `scale(${playUIScale * 0.8})`,
       }}
     >

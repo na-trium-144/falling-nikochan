@@ -386,7 +386,9 @@ export default function TopPage(props: Props) {
 
       <Features locale={locale} />
       <SocialLinks />
-      <hr className="fn-hr" />
+      <div className="w-full px-sai">
+        <hr className="fn-hr" />
+      </div>
       <PoliciesAndLinks locale={locale} />
 
       <div className="flex-none basis-mobile-footer no-pc" />
@@ -732,7 +734,7 @@ export function PoliciesAndLinks({
           </ul>
         </div>
       </section>
-      <div className="mb-6 main-wide:mb-12 flex flex-col gap-1 main-wide:flex-row items-center justify-center">
+      <div className="px-sai mb-6 main-wide:mb-12 flex flex-col gap-1 main-wide:flex-row items-center justify-center">
         <span>&copy; 2024-2026 na-trium-144</span>
         <span className="no-mobile mx-1">/</span>
         <span>

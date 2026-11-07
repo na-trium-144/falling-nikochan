@@ -1,3 +1,18 @@
+## ver. 18.12 - 2026/11/7 [#1442](https://github.com/na-trium-144/falling-nikochan/pull/1442)
+
+* topDemoがデモデータの取得失敗時に無限ループするのを修正
+* 左右のsafe-areaが揃っていない場合のトップページとプレイ画面の中央揃えを修正
+* プレイ画面の音量のRangeの見た目が初期状態で0になるのを修正
+* モバイル表示の時のみMusicAreaのshadow削除、各丸をはみ出させる、余裕があればsafearea考慮
+* editのtimerをフックに切り出す
+* 譜面編集側のx,vx,vyもinspectにあわせて斜体に変更
+* 小さいselectのコンポーネントをSmallSelectとして抽出・リファクタ
+* fn-smallが小さくないのを修正
+
+## ver. 18.11 - 2026/11/7 [#1441](https://github.com/na-trium-144/falling-nikochan/pull/1441)
+
+* pnpm12
+
 ## ver. 18.8 - 2026/10/25 [#1436](https://github.com/na-trium-144/falling-nikochan/pull/1436)
 
 * フレームレート関連の処理をhookに切り出す
