@@ -15,11 +15,7 @@ export default {
     confirmUnsaved: "未保存の変更があります",
     touchMode:
       "タッチ操作モード: {mode, select, p {x 移動} v {vx, vy 移動} other {オフ}}",
-    dragStyles: {
-      free: "Free Style",
-      center: "Center Style",
-      spread: "Spread Style",
-    },
+    dragStyleSymmetry: "左右対称モード",
     playerControl: "動画の操作",
     playerControls: {
       play: "再生",

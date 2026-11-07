@@ -281,6 +281,7 @@ export default function FallingWindow(props: Props) {
                           hitVX: newHitVX,
                         });
                       } else if (props.dragStyle === "spread") {
+                        // Currently not used
                         if (baseNote.hitVY === 0) {
                           setPendingNoteUpdate({
                             ...baseNote,

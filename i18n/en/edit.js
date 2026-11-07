@@ -15,11 +15,7 @@ export default {
     confirmUnsaved: "There are unsaved changes.",
     touchMode:
       "Touch mode: {mode, select, p {Move x} v {Move vx, vy} other {Off}}",
-    dragStyles: {
-      free: "Free Style",
-      center: "Center Style",
-      spread: "Spread Style",
-    },
+    dragStyleSymmetry: "Symmetric",
     playerControl: "Player controls",
     playerControls: {
       play: "Play",

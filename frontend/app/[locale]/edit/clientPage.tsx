@@ -57,6 +57,7 @@ import { useResizeDetector } from "react-resize-detector";
 import Close from "@icon-park/react/lib/icons/Close.js";
 import { captureAndWrap } from "@/common/fetch.js";
 import Range from "@/common/range.js";
+import CheckBox from "@/common/checkBox.js";
 
 const stepUnitRangeValues = [4, 8, 12, 16, 24, 32, 48] as const;
 
@@ -774,16 +775,12 @@ export default function Edit(props: {
             </div>
             {chart && (
               <div className="self-start flex flex-row items-center gap-2 py-3">
-                <Select
-                  options={[
-                    { label: t("dragStyles.free"), value: "free" },
-                    { label: t("dragStyles.center"), value: "center" },
-                    { label: t("dragStyles.spread"), value: "spread" },
-                  ]}
-                  value={dragStyle}
-                  onSelect={(s: DragStyle) => setDragStyle(s)}
-                  showValue
-                />
+                <CheckBox
+                  id="dragStyleSymmetry"
+                  value={dragStyle === "center"}
+                  onChange={(v) => setDragStyle(v ? "center" : "free")}>
+                  {t("dragStyleSymmetry")}
+                </CheckBox>
                 {isTouch && (
                   <button
                     className={clsx("flex flex-row items-center", "fn-link-1")}
