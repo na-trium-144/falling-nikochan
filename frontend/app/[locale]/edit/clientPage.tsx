@@ -924,6 +924,7 @@ export default function Edit(props: {
               </span>
             </div>
             <TimeBar
+              playing={playing}
               chart={chart}
               setAndSeekCurrentTimeWithoutOffset={
                 setAndSeekCurrentTimeWithoutOffset
