@@ -57,7 +57,7 @@ jobs:
         with:
           ref: staging # 更新されたstagingブランチを取得
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v4
         with:
           node-version: 24.x
@@ -100,7 +100,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: staging
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v4
         with:
           node-version: 24.x
