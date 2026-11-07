@@ -1,0 +1,21 @@
+@layer components {
+  .fn-target-line {
+    @apply absolute h-0.5 transition-all overflow-x-clip;
+    @apply bg-black/35 dark:bg-white/35 duration-500;
+    &.fn-flash {
+      @apply bg-amber-400/70 dark:bg-amber-400/70 duration-0;
+    }
+
+    > .fn-target-line-shadow {
+      @apply absolute inset-y-0 rounded-[50%];
+      @apply shadow-[0_0_1rem_0.05rem] shadow-yellow-400;
+      @apply origin-center transition ease-linear;
+      width: 200%;
+
+      @apply scale-x-0 opacity-100 duration-0;
+      &.fn-flash {
+        @apply scale-x-100 opacity-0 duration-400;
+      }
+    }
+  }
+}

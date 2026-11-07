@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRealFPS } from "./common/fpsCalculator";
 import FallingWindow from "./play/fallingWindow";
-import { useFlash } from "./play/useFlash";
 import useGameLogic from "./play/gameLogic";
 import { ChartBrief, ChartSeqData } from "@falling-nikochan/chart";
 import * as msgpack from "@msgpack/msgpack";
@@ -10,6 +9,7 @@ import clsx from "clsx/lite";
 import { ChartListItem } from "./main/chartList";
 import { fetchBackend } from "./common/fetch";
 import { fetchBrief } from "./common/briefCache";
+import { useFlash } from "./common/targetLine";
 
 export interface DemoChart {
   cid: string;
@@ -40,14 +40,18 @@ export function TopDemo(
   const [runFps, setRunFps] = useState<number>(0);
   const [renderFps, setRenderFps] = useState<number>(0);
   const [showFps, setShowFps] = useState<boolean>(false);
+  const [ignoreRunDelta, setIgnoreRunDelta] = useState<boolean>(false);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.has("fps")) {
       setShowFps(true);
     }
+    if (params.has("ignoreRunDelta")) {
+      setIgnoreRunDelta(true);
+    }
   }, []);
 
-  const { barFlash, flash } = useFlash();
+  const { flashRef, flash } = useFlash();
   const currentTimeSec = useRef<number>(0);
   const prevTimeStamp = useRef<DOMHighResTimeStamp | null>(null);
   const getCurrentTimeSec = useCallback(() => {
@@ -106,12 +110,13 @@ export function TopDemo(
         playing={true}
         setRunFPS={setRunFps}
         setRenderFPS={setRenderFps}
-        barFlash={barFlash}
         noClear={false}
         playbackRate={1}
         shouldHideBPMSign={false}
         setShouldHideBPMSign={() => undefined}
         showTSOffset={false}
+        ignoreRunDelta={ignoreRunDelta}
+        flashRef={flashRef}
       />
       {showFps && (
         <span className="fixed left-3 bottom-3 isolate z-play-version">

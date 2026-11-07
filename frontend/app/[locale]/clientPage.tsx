@@ -29,10 +29,12 @@ import { LazyImg } from "./common/lazyImage.js";
 import Search from "@icon-park/react/lib/icons/Search.js";
 import { useRouter } from "next/navigation.js";
 import * as v from "valibot";
-import { CidSchema } from "@falling-nikochan/chart";
+import { CidSchema, popularDays } from "@falling-nikochan/chart";
 import { fetchBackend } from "./common/fetch.js";
 import { SocialLinks } from "./common/social.js";
 import { YouTubeLogo } from "./common/youtubeLogo.js";
+import { StatsDisplay } from "./common/stats.js";
+import PlayOne from "@icon-park/react/lib/icons/PlayOne.js";
 
 interface Props {
   locale: string;
@@ -320,6 +322,8 @@ export default function TopPage(props: Props) {
         </div>
       </div>
 
+      <StatsDisplay />
+
       <div
         id="popular"
         className="w-full max-w-main px-sai-3 mb-8 main-wide:px-sai-6 main-wide:mb-12"
@@ -329,7 +333,19 @@ export default function TopPage(props: Props) {
           classNameInner="flex flex-col items-center"
           padding={6}
         >
-          <h2 className="fn-heading-sect text-3xl mb-4">{t("popular")}</h2>
+          <h2 className="relative mb-4 w-full pb-6 main-wide:pb-0">
+            <span className="fn-heading-sect text-3xl">{t("popular")}</span>
+            <span className="absolute bottom-0 right-4 text-sm main-wide:text-base">
+              (
+              <PlayOne
+                theme="filled"
+                className="inline-block align-middle mr-0.5"
+              />
+              {t("playCount")}: {t("playCount3Days", { popularDays })}
+              <span className="mx-0.5">/</span>
+              {t("playCountTotal")})
+            </span>
+          </h2>
           <ChartList
             classNameOuter="no-mobile"
             type="popular"
@@ -340,6 +356,7 @@ export default function TopPage(props: Props) {
             showLoading
             badge
             fixedRows={6}
+            showCount
             big="v"
           />
           <ChartList
@@ -352,6 +369,7 @@ export default function TopPage(props: Props) {
             showLoading
             badge
             fixedRows={6}
+            showCount
           />
           <Link
             href={`/${locale}/main/play?sort=popular`}
@@ -616,7 +634,7 @@ export function APIDocsLink({ small }: { small?: boolean }) {
   return (
     <>
       <Code className="inline-block align-middle mr-1" />
-      <a className="fn-link-1" href={process.env.BACKEND_PREFIX + "/api"}>
+      <ExternalLink href={process.env.BACKEND_PREFIX + "/api"}>
         {small ? (
           <span>{t("links.apiReferenceShort")}</span>
         ) : (
@@ -625,7 +643,7 @@ export function APIDocsLink({ small }: { small?: boolean }) {
             <span className="no-pc">{t("links.apiReferenceShort")}</span>
           </>
         )}
-      </a>
+      </ExternalLink>
     </>
   );
 }
@@ -654,7 +672,7 @@ export function PoliciesAndLinks({
   const t = useTranslations("main");
   return (
     <>
-      <section className="fn-policies-and-links mb-3 main-wide:mb-24">
+      <section className="fn-policies-and-links mb-8">
         <div>
           <h2 className="fn-heading-sect text-2xl mb-3">
             {t("policies.title")}
@@ -714,6 +732,14 @@ export function PoliciesAndLinks({
           </ul>
         </div>
       </section>
+      <div className="mb-6 main-wide:mb-12 flex flex-col gap-1 main-wide:flex-row items-center justify-center">
+        <span>&copy; 2024-2026 na-trium-144</span>
+        <span className="no-mobile mx-1">/</span>
+        <span>
+          Powered by{" "}
+          <ExternalLink href="https://utcode.net">ut.code();</ExternalLink>
+        </span>
+      </div>
     </>
   );
 }

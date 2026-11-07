@@ -1,12 +1,9 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { useEffect, useState } from "react";
-import TargetLine from "./targetLine.js";
 import Link from "next/link.js";
 
 interface Props {
-  anim?: boolean;
   className?: string;
   style?: object;
 }
@@ -16,9 +13,11 @@ interface Props {
  * 仕様を変えると既存のレイアウトが崩れそうで触りたくない。
  */
 export default function Title(props: Props) {
+  /*
   const [nikochanPhase, setNikochanPhase] = useState<number>(
     props.anim ? 0 : 2
   );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [nikochanPhaseNext, setNikochanPhaseNext] = useState<number>(
     props.anim ? 0 : 2
   );
@@ -28,7 +27,6 @@ export default function Title(props: Props) {
       cancelAnimationFrame(i);
     };
   }, [nikochanPhaseNext]);
-  const [barFlash, setBarFlash] = useState<boolean>(props.anim ? false : true);
   useEffect(() => {
     if (nikochanPhase === 0) {
       setNikochanPhaseNext(1);
@@ -43,25 +41,33 @@ export default function Title(props: Props) {
       );
     }
   }, [nikochanPhase]);
+  */
 
   return (
     <div className={clsx("fn-title", props.className)} style={props.style}>
-      <TargetLine
-        barFlash={barFlash ? "100% - 1.75rem" : undefined}
+      {/*<TargetLine
+        // barFlash={barFlash ? "100% - 1.75rem" : undefined}
+        flashPosToPixel={() => undefined}
         left={0}
         right={0}
         bottom="2.2rem"
+      />*/}
+      <div
+        className="fn-target-line fn-flash"
+        style={{ left: 0, right: 0, bottom: "2.2rem" }}
       />
       <h1>Falling Nikochan</h1>
       <img
         className={clsx(
-          nikochanPhase === 0 && "phase-0",
-          nikochanPhase === 1 && "phase-1",
-          nikochanPhase === 2 && "phase-2"
+          "phase-2"
+          // nikochanPhase === 0 && "phase-0",
+          // nikochanPhase === 1 && "phase-1",
+          // nikochanPhase === 2 && "phase-2"
         )}
         src={
           process.env.ASSET_PREFIX +
-          `/assets/nikochan${[0, 0, 1][nikochanPhase]}.svg` +
+          `/assets/nikochan1.svg` +
+          // `/assets/nikochan${[0, 0, 1][nikochanPhase]}.svg` +
           process.env.ASSET_QUERY_NIKOCHAN
         }
       />
@@ -77,7 +83,7 @@ export function TitleAsLink(props: { className: string; locale: string }) {
       className={clsx("fn-title-main fn-link-1", props.className)}
       prefetch={process.env.PREFETCH as "auto"}
     >
-      <Title anim />
+      <Title />
     </Link>
   );
 }

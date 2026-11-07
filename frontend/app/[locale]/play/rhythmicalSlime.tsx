@@ -8,7 +8,6 @@ import {
   Signature5,
   SignatureState,
   stepCmp,
-  stepZero,
   updateBarNum,
   updateBpmTimeSec,
 } from "@falling-nikochan/chart";
@@ -82,8 +81,11 @@ export default function RhythmicalSlime(props: Props) {
           if (!step.current) {
             // play開始直後にstepを初期化 (zeroとは限らない)
             step.current = getStep(bpmChangesWithTimeSec, now, 32);
-            if (stepCmp(step.current, stepZero()) < 0) {
-              step.current = stepZero();
+            if (signatureWithBar.length === 0) {
+              throw new Error("signature.length=0");
+            }
+            if (stepCmp(step.current, signatureWithBar[0].step) < 0) {
+              step.current = signatureWithBar[0].step;
             } else {
               const ss = getSignatureState(signatureWithBar, step.current);
               step.current = ss.stepAligned;

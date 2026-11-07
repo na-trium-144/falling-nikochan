@@ -1,3 +1,37 @@
+## ver. 18.8 - 2026/10/25 [#1436](https://github.com/na-trium-144/falling-nikochan/pull/1436)
+
+* フレームレート関連の処理をhookに切り出す
+* 毎フレームreactの再レンダリングをトリガーするのをやめ、requestAnimationFrameの中で直接canvasのレンダリングをするようにする
+* 比較検証用に `ignoreRunDelta=1` でフレームレート調整機能を無効化できるようにする
+* playページで、処理が重くメモ化できるコンポーネントは雑にメモ化した
+* 不要なstate更新を避ける
+    * fps表示がオフの場合はfpsの状態を更新しない
+    * targetlineのアニメーションにstateを使わず直接refを更新する
+
+## ver. 18.7 - 2026/10/23 [#1433](https://github.com/na-trium-144/falling-nikochan/pull/1433)
+
+* 開発環境でプレイ記録の署名のチェックを省略できるようにする `API_NO_RESULT_VERIFY` 環境変数を追加
+* 開発環境のfetchStaticで500エラーにならないようfetchではなくreadFileに変更
+* ogResultでBig判定数が0のとき00と表示されるのを修正
+* Bigのミス数をカウントするようにし、すべてのBig判定が完了するまで譜面を終了しない
+* 譜面よりも先に動画が終了した場合は、譜面が終了したものとして扱う
+* resultParamで inputType: 0 を許可する
+
+## ver. 18.6 - 2026/10/15 [#1366](https://github.com/na-trium-144/falling-nikochan/pull/1366)
+
+* stats APIを追加、トップページに譜面数と再生数の統計の表示を追加
+* トップページのChartListに再生数表示を追加
+* autoの再生数の表示を追加
+
+## ver. 18.5 - 2026/10/15 [#1427](https://github.com/na-trium-144/falling-nikochan/pull/1427)
+
+* gameLogic.ts の判定ロジックをクラス Judge として抽出し、テストを作成
+
+## ver. 18.4 - 2026/10/04 [#1426](https://github.com/na-trium-144/falling-nikochan/pull/1426)
+
+* metaタブでテストプレイ起動時にエラーになった場合はメッセージを表示する
+* sessionのレベルデータをseq変換前のデータ形式に戻す
+
 ## ver. 18.0 - 2026/09/27
 
 * /api/playFile を廃止し、 /api/seqFile に統合 [#1376](https://github.com/na-trium-144/falling-nikochan/pull/1376)

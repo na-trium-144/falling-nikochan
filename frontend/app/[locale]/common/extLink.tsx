@@ -21,6 +21,9 @@ function LinkChildren(props: Props) {
     </>
   );
 }
+function isExternalLink(href: string) {
+  return !href.startsWith("/") || href.startsWith("/api");
+}
 export function ExternalLink(props: Props) {
   const isStandalone = useStandaloneDetector();
   const isInsideFrame = useInsideFrameDetector();
@@ -33,7 +36,11 @@ export function ExternalLink(props: Props) {
         <LinkChildren {...props} />
       </button>
     );
-  } else if (props.href?.startsWith("/") && (isStandalone || isInsideFrame)) {
+  } else if (
+    props.href &&
+    !isExternalLink(props.href) &&
+    (isStandalone || isInsideFrame)
+  ) {
     return (
       <Link
         className={clsx("fn-link-1", props.className)}
@@ -44,10 +51,11 @@ export function ExternalLink(props: Props) {
       </Link>
     );
   } else {
+    // 実際にhrefもonClickも渡されないExternalLinkは存在し(トップページのメールアドレス)、それはExternalとして扱う
     return (
       <a
         className={clsx(
-          props.href?.startsWith("/") && !props.forceColor
+          props.href && !isExternalLink(props.href) && !props.forceColor
             ? "fn-link-1"
             : props.noColor
               ? "fn-link-2"

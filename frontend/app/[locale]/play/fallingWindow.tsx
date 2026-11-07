@@ -1,7 +1,14 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { RefObject, useCallback, useEffect, useRef, useState } from "react";
+import {
+  Ref,
+  RefObject,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   targetY,
   bigScale,
@@ -10,13 +17,13 @@ import {
   NoteInGame,
 } from "@falling-nikochan/chart";
 import { useResizeDetector } from "react-resize-detector";
-import TargetLine from "@/common/targetLine.js";
+import TargetLine, { TargetLineHandler } from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
-import { useRealFPS } from "@/common/fpsCalculator";
 import { DisplayNikochan } from "./displayNikochan";
 import { OffsetEstimator } from "./offsetEstimator";
 import { fetchAsset } from "@/common/fetch";
 import { useTheme } from "@/common/theme";
+import { useStableFrame } from "./stableFrame";
 
 export function useCanvasProps() {
   const { width, height, ref } = useResizeDetector();
@@ -122,13 +129,14 @@ type Props = {
   notes: NoteInGame[];
   getCurrentTimeSec: () => number | undefined;
   playing: boolean;
-  setRunFPS: (fps: number) => void;
-  setRenderFPS: (fps: number) => void;
-  barFlash: FlashPos;
+  setRunFPS: null | ((fps: number) => void);
+  setRenderFPS: null | ((fps: number) => void);
+  flashRef?: Ref<TargetLineHandler>;
   noClear: boolean;
   playbackRate: number;
   setShouldHideBPMSign: (hide: boolean) => void;
   shouldHideBPMSign: boolean;
+  ignoreRunDelta: boolean;
 } & (
   | {
       showTSOffset: boolean;
@@ -150,7 +158,6 @@ type Props = {
       timeOfsEstimator?: undefined;
     }
 );
-export type FlashPos = { targetX: number } | { clientX: number } | undefined;
 export default function FallingWindow(props: Props) {
   const {
     notes,
@@ -160,6 +167,7 @@ export default function FallingWindow(props: Props) {
     setRunFPS,
     noClear,
     playbackRate,
+    ignoreRunDelta,
   } = props;
   const tailsCanvasRef = useRef<HTMLCanvasElement>(null);
   const nikochanCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -186,107 +194,6 @@ export default function FallingWindow(props: Props) {
   const effectsCanvasDPR = 0.5;
   const nikochanCanvasDPR = dpr * (props.blur ? 0.17 : 1);
 
-  const [rerenderIndex, setRerenderIndex] = useState<number>(0);
-  const { realFps } = useRealFPS();
-  const realFpsRef = useRef<number>(20);
-  realFpsRef.current = realFps;
-  // レンダリング等nikochanの1フレームの処理にかかる時間の測定
-  // triggered: requestAnimationFrame() でセット
-  // executedIndex: render関数が実行されたらセット
-  const runTriggeredTimeStamp = useRef<DOMHighResTimeStamp | null>(null);
-  const runTriggeredIndex = useRef<number>(0);
-  const runExecutedIndex = useRef<number>(0);
-  const runDeltas = useRef<DOMHighResTimeStamp[]>([]);
-  const runFps = useRef<number>(60);
-  // 最終的なFPS
-  const renderFpsCounter = useRef<DOMHighResTimeStamp[]>([]);
-  useEffect(() => {
-    let animFrame: ReturnType<typeof requestAnimationFrame>;
-    let prevRerender = performance.now();
-    const updateLoop = () => {
-      animFrame = requestAnimationFrame(updateLoop);
-      performance.mark("updateLoop");
-
-      if (
-        runExecutedIndex.current >= runTriggeredIndex.current &&
-        runTriggeredTimeStamp.current !== null
-      ) {
-        // 別タブ・別ウィンドウに切り替えた時など、一時的に時間が飛んだ場合をスキップ
-        if (performance.now() - runTriggeredTimeStamp.current < 100) {
-          runDeltas.current.push(
-            performance.now() - runTriggeredTimeStamp.current
-          );
-        }
-        runTriggeredTimeStamp.current = null;
-      }
-
-      if (runDeltas.current.length > Math.max(runFps.current, 20)) {
-        const runDeltaSum = runDeltas.current.reduce((a, b) => a + b, 0);
-        const avgRunDelta = runDeltaSum / runDeltas.current.length;
-        runFps.current = Math.round(1000 / avgRunDelta);
-        setRunFPS(runFps.current);
-        runDeltas.current = [];
-      }
-
-      // フレームレートがrunFps程度になるように抑えつつ一定の間隔でrerenderを呼び出すようにする
-      const realMs = 1000 / realFpsRef.current;
-      let runFrameCount = 1;
-      while (
-        // 例: realFps=120の場合、90fps以上->120, 51.5fps以上->60, 36.0fps以上->40...
-        realFpsRef.current / (runFrameCount + 0.33) >
-        Math.max(runFps.current, 20)
-      ) {
-        runFrameCount++;
-      }
-      const nowMs = performance.now() - prevRerender;
-      if (
-        runTriggeredTimeStamp.current === null &&
-        Math.round(nowMs / realMs) >= runFrameCount
-      ) {
-        setRerenderIndex((r) => {
-          runTriggeredIndex.current = r + 1;
-          return r + 1;
-        });
-        runTriggeredTimeStamp.current = performance.now();
-        if (Math.round(nowMs / realMs) >= 3 * runFrameCount) {
-          // 大幅に遅延している場合
-          // console.log("large delay:", nowMs);
-          prevRerender = performance.now();
-        } else {
-          prevRerender += realMs * runFrameCount;
-        }
-      }
-    };
-    animFrame = requestAnimationFrame(updateLoop);
-    return () => cancelAnimationFrame(animFrame);
-  }, [setRunFPS]);
-  useEffect(() => {
-    const i = setInterval(() => {
-      while (
-        renderFpsCounter.current.at(0) &&
-        renderFpsCounter.current.at(-1)! - renderFpsCounter.current.at(0)! >
-          1000
-      ) {
-        renderFpsCounter.current.shift();
-      }
-      setRenderFPS(renderFpsCounter.current.length);
-    }, 100);
-    return () => clearInterval(i);
-  }, [setRenderFPS]);
-
-  const ctx = tailsCanvasRef.current?.getContext("2d", {
-    alpha: true,
-    desynchronized: true,
-  });
-  const nctx = nikochanCanvasRef.current?.getContext("2d", {
-    alpha: true,
-    desynchronized: true,
-  });
-  const ectx = effectsCanvasRef.current?.getContext("2d", {
-    alpha: true,
-    desynchronized: true,
-  });
-
   const nikochanBitmap = useRef<ImageBitmap[][] | null>(null); // nikochanBitmap.current[0-3][big:0|1]
   useEffect(() => {
     fetchNikochanBitmap(nikochanCanvasDPR).then((bitmaps) => {
@@ -304,118 +211,133 @@ export default function FallingWindow(props: Props) {
     }
   }, [notes]);
   const lastNow = useRef<number>(0);
-  if (runExecutedIndex.current !== rerenderIndex) {
-    // performance.mark("nikochan-rerender");
-    runExecutedIndex.current = rerenderIndex;
-    renderFpsCounter.current.push(performance.now());
-    const now = getCurrentTimeSec();
-    if (
-      playing &&
-      marginX !== undefined &&
-      marginY !== undefined &&
-      canvasMarginX !== undefined &&
-      canvasMarginY !== undefined &&
-      boxSize &&
-      now !== undefined &&
-      nikochanBitmap.current
-    ) {
-      let shouldHideBPMSign = false;
 
-      const c = {
-        noteSize,
-        boxSize,
-        playUIScale,
-        canvasMarginX,
-        canvasMarginY,
-        marginY,
-        playbackRate,
-        rem,
-        now,
-        nikochanBitmap: nikochanBitmap.current,
-        lastNow: lastNow.current,
-        dark: isDark,
-      };
+  useStableFrame({
+    setRunFPS,
+    setRenderFPS,
+    ignoreRunDelta,
+    callback: () => {
+      const now = getCurrentTimeSec();
+      const ctx = tailsCanvasRef.current?.getContext("2d", {
+        alpha: true,
+        desynchronized: true,
+      });
+      const nctx = nikochanCanvasRef.current?.getContext("2d", {
+        alpha: true,
+        desynchronized: true,
+      });
+      const ectx = effectsCanvasRef.current?.getContext("2d", {
+        alpha: true,
+        desynchronized: true,
+      });
+      if (
+        playing &&
+        marginX !== undefined &&
+        marginY !== undefined &&
+        canvasMarginX !== undefined &&
+        canvasMarginY !== undefined &&
+        boxSize &&
+        now !== undefined &&
+        nikochanBitmap.current
+      ) {
+        let shouldHideBPMSign = false;
 
-      displayNotes.current = notes
-        .map((n) => displayNote(n, now))
-        .filter((n) => n !== null);
-      displayNotes.current.reverse(); // 奥に表示されるものが最初
+        const c = {
+          noteSize,
+          boxSize,
+          playUIScale,
+          canvasMarginX,
+          canvasMarginY,
+          marginY,
+          playbackRate,
+          rem,
+          now,
+          nikochanBitmap: nikochanBitmap.current,
+          lastNow: lastNow.current,
+          dark: isDark,
+        };
 
-      if (ectx && nctx && ctx) {
-        ectx.clearRect(
-          0,
-          0,
-          canvasRect.width * effectsCanvasDPR,
-          canvasRect.height * effectsCanvasDPR
-        );
-        nctx.clearRect(
-          0,
-          0,
-          canvasRect.width * nikochanCanvasDPR,
-          canvasRect.height * nikochanCanvasDPR
-        );
-        ctx.clearRect(
-          0,
-          0,
-          canvasRect.width * tailsCanvasDPR,
-          canvasRect.height * tailsCanvasDPR
-        );
-        for (const dn of displayNotes.current) {
-          if (!displayNikochan.current[dn.id]) {
-            displayNikochan.current[dn.id] = new DisplayNikochan(
-              notes[dn.id],
-              dn,
-              c
-            );
-          }
-          const dns = displayNikochan.current[dn.id]!;
-          dns.update(dn, c);
-          shouldHideBPMSign ||= dns.shouldHideBPMSign;
-          dns.drawNikochan(nctx, nikochanCanvasDPR);
-          dns.drawTail(ctx, tailsCanvasDPR);
-          dns.drawRipple(ectx, effectsCanvasDPR);
-          dns.drawParticle(ectx, effectsCanvasDPR);
-        }
-        lastNow.current = now;
+        displayNotes.current = notes
+          .map((n) => displayNote(n, now))
+          .filter((n) => n !== null);
+        displayNotes.current.reverse(); // 奥に表示されるものが最初
 
-        if (props.shouldHideBPMSign !== shouldHideBPMSign) {
-          setTimeout(() => props.setShouldHideBPMSign(shouldHideBPMSign));
-        }
-      }
-    } else {
-      if (!noClear) {
-        displayNotes.current = [];
-        if (ctx) {
-          ctx.clearRect(
-            0,
-            0,
-            canvasRect.width * tailsCanvasDPR,
-            canvasRect.height * tailsCanvasDPR
-          );
-        }
-        if (nctx) {
-          nctx.clearRect(
-            0,
-            0,
-            canvasRect.width * nikochanCanvasDPR,
-            canvasRect.height * nikochanCanvasDPR
-          );
-        }
-        if (ectx) {
+        if (ectx && nctx && ctx) {
           ectx.clearRect(
             0,
             0,
             canvasRect.width * effectsCanvasDPR,
             canvasRect.height * effectsCanvasDPR
           );
+          nctx.clearRect(
+            0,
+            0,
+            canvasRect.width * nikochanCanvasDPR,
+            canvasRect.height * nikochanCanvasDPR
+          );
+          ctx.clearRect(
+            0,
+            0,
+            canvasRect.width * tailsCanvasDPR,
+            canvasRect.height * tailsCanvasDPR
+          );
+          for (const dn of displayNotes.current) {
+            if (!displayNikochan.current[dn.id]) {
+              displayNikochan.current[dn.id] = new DisplayNikochan(
+                notes[dn.id],
+                dn,
+                c
+              );
+            }
+            const dns = displayNikochan.current[dn.id]!;
+            dns.update(dn, c);
+            shouldHideBPMSign ||= dns.shouldHideBPMSign;
+            dns.drawNikochan(nctx, nikochanCanvasDPR);
+            dns.drawTail(ctx, tailsCanvasDPR);
+            dns.drawRipple(ectx, effectsCanvasDPR);
+            dns.drawParticle(ectx, effectsCanvasDPR);
+          }
+          lastNow.current = now;
+
+          if (props.shouldHideBPMSign !== shouldHideBPMSign) {
+            setTimeout(() => props.setShouldHideBPMSign(shouldHideBPMSign));
+          }
+        }
+      } else {
+        if (!noClear) {
+          displayNotes.current = [];
+          if (ctx) {
+            ctx.clearRect(
+              0,
+              0,
+              canvasRect.width * tailsCanvasDPR,
+              canvasRect.height * tailsCanvasDPR
+            );
+          }
+          if (nctx) {
+            nctx.clearRect(
+              0,
+              0,
+              canvasRect.width * nikochanCanvasDPR,
+              canvasRect.height * nikochanCanvasDPR
+            );
+          }
+          if (ectx) {
+            ectx.clearRect(
+              0,
+              0,
+              canvasRect.width * effectsCanvasDPR,
+              canvasRect.height * effectsCanvasDPR
+            );
+          }
+        }
+        displayNikochan.current = [];
+        if (props.shouldHideBPMSign !== false) {
+          setTimeout(() => props.setShouldHideBPMSign(false));
         }
       }
-      displayNikochan.current = [];
-      if (props.shouldHideBPMSign !== false) {
-        setTimeout(() => props.setShouldHideBPMSign(false));
-      }
-    }
-  }
+    },
+  });
 
   const filteredStartTimeStampSample = useRef<number | null>(null);
   const rawStartTimeStampSample = useRef<number | null>(null);
@@ -489,12 +411,13 @@ export default function FallingWindow(props: Props) {
       {boxSize && marginY !== undefined && (
         <TargetLine
           className={clsx("z-fw-target-line", props.blur && "blur-2xs")}
-          barFlash={
-            props.barFlash === undefined || canvasMarginX === undefined
+          ref={props.flashRef}
+          flashPosToPixel={(pos) =>
+            pos === undefined || canvasMarginX === undefined
               ? undefined
-              : "targetX" in props.barFlash
-                ? props.barFlash.targetX * boxSize + canvasMarginX
-                : props.barFlash.clientX
+              : "targetX" in pos
+                ? pos.targetX * boxSize + canvasMarginX
+                : pos.clientX
           }
           left={canvasRect.left}
           width={canvasRect.width}

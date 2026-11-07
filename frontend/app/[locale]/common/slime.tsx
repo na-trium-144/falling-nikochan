@@ -72,14 +72,14 @@ const SlimeSVGInner = memo(function SlimeSVGInner(props: Props) {
   } as const;
   const smilAnimationValues = (params: string[]) =>
     [2, 0, 1, 3, 4, 3, 2, 2].map((i) => params[i]).join(";");
-  const lgy1AnimRef = useRef<SVGAnimateElement>(null!);
-  const lgy2AnimRef = useRef<SVGAnimateElement>(null!);
-  const p1AnimRef = useRef<SVGAnimateElement>(null!);
-  const p2AnimRef = useRef<SVGAnimateElement>(null!);
-  const p3AnimRef = useRef<SVGAnimateElement>(null!);
-  const p5AnimRef = useRef<SVGAnimateElement>(null!);
-  const p6AnimRef = useRef<SVGAnimateElement>(null!);
-  const p9AnimRef = useRef<SVGAnimateElement>(null!);
+  const lgy1AnimRef = useRef<SVGAnimateElement>(null);
+  const lgy2AnimRef = useRef<SVGAnimateElement>(null);
+  const p1AnimRef = useRef<SVGAnimateElement>(null);
+  const p2AnimRef = useRef<SVGAnimateElement>(null);
+  const p3AnimRef = useRef<SVGAnimateElement>(null);
+  const p5AnimRef = useRef<SVGAnimateElement>(null);
+  const p6AnimRef = useRef<SVGAnimateElement>(null);
+  const p9AnimRef = useRef<SVGAnimateElement>(null);
   const doAnim = useCallback((jumpStart: number, duration?: number) => {
     const animRefs = [
       lgy1AnimRef,
@@ -97,9 +97,9 @@ const SlimeSVGInner = memo(function SlimeSVGInner(props: Props) {
     for (const ref of animRefs) {
       if (duration !== undefined) {
         // reactの再レンダリングを待たずに即座にdurを更新し、今のアニメーションに反映させる
-        ref.current.setAttribute("dur", duration + "s");
+        ref.current?.setAttribute("dur", duration + "s");
       }
-      ref.current.beginElementAt(jumpStart);
+      ref.current?.beginElementAt(jumpStart);
     }
   }, []);
   useEffect(() => {

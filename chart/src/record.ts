@@ -1,13 +1,23 @@
 import * as v from "valibot";
-import { HashSchema } from "./chart.js";
+import { ChartBrief, HashSchema } from "./chart.js";
+import { bigScoreRate, chainScoreRate } from "./gameConstant.js";
 
 // GET /api/record -> RecordGetSummary[]
 export const RecordGetSummarySchema = () =>
   v.object({
     lvHash: HashSchema(),
-    countAuto: v.number(),
-    // excluding auto play:
-    count: v.number(),
+    countAuto: v.pipe(
+      v.number(),
+      v.description(
+        "The total number of autoplay record weighted by each record's `factor`"
+      )
+    ),
+    count: v.pipe(
+      v.number(),
+      v.description(
+        "The total number of non-autoplay record weighted by each record's `factor`"
+      )
+    ),
     countFC: v.number(),
     countFB: v.number(),
     histogram: v.array(v.number()), // number[13]
@@ -67,3 +77,34 @@ export const RecordPostSchema = () =>
     }, "score !== base + chain + big")
   );
 export type RecordPost = v.InferOutput<ReturnType<typeof RecordPostSchema>>;
+
+export function createRecordPost(
+  date: Date,
+  level: ChartBrief["levels"][number],
+  baseScore: number,
+  chainScore: number,
+  bigScore: number,
+  score: number,
+  // judgeCount: [number, number, number, number],
+  // bigCount: number | null,
+  // hitType: number | null,
+  // playbackRate: number,
+  // cid: string,
+  auto: boolean,
+  editing: boolean,
+  factor: number
+) {
+  return {
+    lvHash: level.hash,
+    auto,
+    score,
+    baseScore,
+    chainScore,
+    bigScore,
+    fc: chainScore === chainScoreRate,
+    fb: bigScore === bigScoreRate,
+    editing,
+    factor,
+    date: date.getTime(),
+  } satisfies RecordPost;
+}

@@ -26,6 +26,7 @@ import { env } from "hono/adapter";
 import { Db } from "mongodb";
 import socialApp from "./social.js";
 import briefMultiApp from "./briefs.js";
+import statsApp from "./stats.js";
 import { ResponseOK } from "../env.js";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
@@ -147,6 +148,7 @@ const apiApp = async (config: {
     .route("/ip", forwardCheckApp({ getConnInfo: config.getConnInfo }))
     .route("/oembed", oembedApp)
     .route("/social", socialApp)
+    .route("/stats", statsApp)
     .get("/debug-sentry", () => {
       throw new Error("My first sentry error!");
     });
@@ -188,6 +190,21 @@ const apiApp = async (config: {
       theme: "default",
       url: "/api/openapi.json",
       pageTitle: "Falling Nikochan API Reference",
+      documentDownloadType: "direct",
+      metaData: {
+        title: "Falling Nikochan API Reference",
+        description:
+          "API Reference for Falling Nikochan, " +
+          "a simple and cute rhythm game " +
+          "where anyone can create and share charts.",
+        ogTitle: "Falling Nikochan API Reference",
+        ogDescription:
+          "API Reference for Falling Nikochan, " +
+          "a simple and cute rhythm game " +
+          "where anyone can create and share charts.",
+        ogUrl: "https://nikochan.utcode.net/api",
+        ogType: "website",
+      },
       customCss: `
 body {
   position: relative;

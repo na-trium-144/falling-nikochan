@@ -3,7 +3,14 @@ import { ChartBrief } from "@falling-nikochan/chart";
 import ProgressBar from "@/common/progressBar.js";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { useDisplayMode } from "@/scale.js";
-import { RefObject, useEffect, useRef, useState } from "react";
+import {
+  memo,
+  RefObject,
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 import { useResizeDetector } from "react-resize-detector";
 import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
 import VolumeNotice from "@icon-park/react/lib/icons/VolumeNotice";
@@ -41,6 +48,37 @@ interface Props {
   setSEVolume: (vol: number) => void;
 }
 export function MusicArea(props: Props) {
+  const ytCalllbacksRef = useRef<{
+    onReady: () => void;
+    onStart: () => void;
+    onStop: () => void;
+    onPlaybackRateChange: (rate: number) => void;
+    onError: (ec: number) => void;
+  }>(undefined!);
+  ytCalllbacksRef.current = { ...props };
+  const onReady = useCallback(() => ytCalllbacksRef.current.onReady(), []);
+  const onStart = useCallback(() => ytCalllbacksRef.current.onStart(), []);
+  const onStop = useCallback(() => ytCalllbacksRef.current.onStop(), []);
+  const onError = useCallback(
+    (ec: number) => ytCalllbacksRef.current.onError(ec),
+    []
+  );
+  const onPlaybackRateChange = useCallback(
+    (rate: number) => ytCalllbacksRef.current.onPlaybackRateChange(rate),
+    []
+  );
+  return (
+    <MusicAreaInner
+      {...props}
+      onReady={onReady}
+      onStart={onStart}
+      onStop={onStop}
+      onError={onError}
+      onPlaybackRateChange={onPlaybackRateChange}
+    />
+  );
+}
+const MusicAreaInner = memo(function MusicAreaInner(props: Props) {
   const { width, height, ref } = useResizeDetector();
   const { rem, screenHeight, mobilePlayUIHeightScale } = useDisplayMode();
   const ytHalf = width && width / 2 < 200;
@@ -103,7 +141,7 @@ export function MusicArea(props: Props) {
           )
         );
       }
-    }, 50);
+    }, 250);
     return () => clearInterval(id);
   }, [props.ytPlayer, props.ytBeginSec, levelLength]);
 
@@ -515,4 +553,4 @@ export function MusicArea(props: Props) {
       </div>
     </div>
   );
-}
+});

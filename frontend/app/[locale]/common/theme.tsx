@@ -43,10 +43,15 @@ export function ThemeProvider(props: { children: ReactNode }) {
   const [isDark, setIsDark] = useState<boolean>(false);
   const pathname = usePathname();
   const updateTheme = useCallback(() => {
-    setTheme(window.fnGetCurrentTheme());
-    const isDark = window.fnCurrentThemeIsDark();
-    setIsDark(isDark);
-    window.fnApplyTheme();
+    try {
+      setTheme(window.fnGetCurrentTheme());
+      const isDark = window.fnCurrentThemeIsDark();
+      setIsDark(isDark);
+      window.fnApplyTheme();
+    } catch (e) {
+      console.error(e);
+      // Sentryに報告せず無視
+    }
   }, []);
   useLayoutEffect(() => {
     updateTheme();
