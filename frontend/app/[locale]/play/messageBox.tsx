@@ -29,6 +29,7 @@ import { APIError, shouldHideStatus } from "@/common/apiError";
 import { LinksOnError } from "@/common/errorPageComponent";
 import { formatErrorMsg, isExpectedError } from "@/common/fetch";
 import * as Sentry from "@sentry/nextjs";
+import { SmallSelect } from "@/common/select";
 
 interface MessageProps {
   className?: string;
@@ -269,7 +270,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
         </li>*/}
           <li>
             <span className="mr-1">{t("playbackRate")}:</span>
-            <DropDown
+            <SmallSelect
               options={["0.5", "0.75", "1", "1.25", "1.5", "1.75", "2"].map(
                 (s) => ({
                   label: (
@@ -285,11 +286,6 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
               )}
               value={props.playbackRate.toString()}
               onSelect={(s: string) => props.setPlaybackRate(Number(s))}
-              className={clsx(
-                "relative inline-block pr-6 text-center",
-                "fn-link-1",
-                "fn-input"
-              )}
             >
               <div>
                 ×
@@ -297,11 +293,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
                   {props.playbackRate}
                 </span>
               </div>
-              <DownOne
-                className="absolute right-1 inset-y-0 h-max m-auto"
-                theme="filled"
-              />
-            </DropDown>
+            </SmallSelect>
           </li>
           <li>
             <CheckBox
