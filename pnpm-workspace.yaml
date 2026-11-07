@@ -58,10 +58,10 @@ catalogs:
     "@icon-park/react": ^1.4.2
     "@icon-park/svg": ^1.4.2
   next:
-    "@next/bundle-analyzer": 16.1.7
-    "@next/mdx": 16.1.7
-    eslint-config-next: 16.1.7
-    next: 16.1.7
+    "@next/bundle-analyzer": 16.3.8
+    "@next/mdx": 16.3.8
+    eslint-config-next: 16.3.8
+    next: 16.3.8
   react:
     "@types/react": ^19.3.0
     "@types/react-dom": ^19.3.0
