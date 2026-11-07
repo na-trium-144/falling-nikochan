@@ -157,7 +157,8 @@ export default function TimeBar(props: Props) {
       ? stepAdd(
           getStep(
             currentLevel.freeze.bpmChanges,
-            cur.timeSec - timeBarWidth / 2 / zoomPxPerSec(),
+            // cur.timeSec - timeBarWidth / 2 / zoomPxPerSec(),
+            (Math.round(cur.timeSec * zoomPxPerSec() / timeBarWidth - 1) * timeBarWidth) / zoomPxPerSec(),
             currentLevel.meta.snapDivider
           ),
           {
@@ -183,8 +184,9 @@ export default function TimeBar(props: Props) {
       });
       const t = getTimeSec(currentLevel.freeze.bpmChanges, s) + chart.offset;
       if (
-        t - (cur.timeSec + chart.offset) <
-        timeBarWidth / 2 / zoomPxPerSec()
+        /*t - (cur.timeSec + chart.offset) <
+        timeBarWidth / 2 / zoomPxPerSec()*/
+        t < (Math.round(cur.timeSec * zoomPxPerSec() / timeBarWidth + 1) * timeBarWidth) / zoomPxPerSec()
       ) {
         timeBarSteps.push({ step: s, timeSec: t });
       } else {

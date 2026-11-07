@@ -6,7 +6,7 @@ import Input from "./input";
 // import { evaluate } from "mathjs";
 // lazy load mathjs because it's heavy
 
-interface MathInputProps {
+export interface MathInputProps {
   className?: string;
   actualValue: string;
   updateValue: (v: string) => void;
