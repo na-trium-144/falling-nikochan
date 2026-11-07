@@ -3,7 +3,7 @@
 import clsx from "clsx/lite";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
-import FallingWindow from "./fallingWindow.js";
+import FallingWindow, { DragStyle } from "./fallingWindow.js";
 import Button, { ButtonHighlight } from "@/common/button.js";
 import TimeBar from "./timeBar.js";
 import Input from "@/common/input.js";
@@ -53,6 +53,10 @@ import { useDisplayMode } from "@/scale.js";
 import { useResizeDetector } from "react-resize-detector";
 import Close from "@icon-park/react/lib/icons/Close.js";
 import { captureAndWrap } from "@/common/fetch.js";
+import Range from "@/common/range.js";
+import CheckBox from "@/common/checkBox.js";
+
+const stepUnitRangeValues = [4, 8, 12, 16, 24, 32, 48] as const;
 
 export default function Edit(props: {
   locale: string;
@@ -328,6 +332,7 @@ export default function Edit(props: {
   const openGuide = () => setGuidePage([2, 4, 5, 6, 7][tab]);
 
   const [dragMode, setDragMode] = useState<null | "p" | "v" | "a">(null);
+  const [dragStyle, setDragStyle] = useState<DragStyle>("free");
   useEffect(() => {
     if (dragMode === null && !isTouch && chart) {
       setDragMode("p");
@@ -405,12 +410,14 @@ export default function Edit(props: {
               ? aceSessionRef.current[chart.currentLevelIndex]
               : undefined;
           session?.getUndoManager().undo(session);
+          e.preventDefault(); // chromeはどこにもフォーカスがなくてもctrl+zでテキストを戻そうとする場合がある
         } else if (e.key === "y") {
           const session =
             chart?.currentLevelIndex !== undefined
               ? aceSessionRef.current[chart.currentLevelIndex]
               : undefined;
           session?.getUndoManager().redo(session);
+          e.preventDefault();
         } else {
           //
         }
@@ -444,12 +451,7 @@ export default function Edit(props: {
       tabIndex={0}
       ref={ref}
       onKeyUp={(e) => {
-        if (
-          chart &&
-          ready &&
-          !isCodeTab &&
-          (e.key === "Shift" || e.key === "Control")
-        ) {
+        if (chart && !isCodeTab && (e.key === "Shift" || e.key === "Control")) {
           setDragMode("p");
         }
       }}
@@ -642,6 +644,7 @@ export default function Edit(props: {
                   chart={chart}
                   dragMode={dragMode}
                   setDragMode={setDragMode}
+                  dragStyle={dragStyle}
                 />
                 <div
                   className={clsx(
@@ -669,41 +672,48 @@ export default function Edit(props: {
                 />
               </div>
             </div>
-            {chart && isTouch && (
-              <button
-                className={clsx(
-                  "self-start flex flex-row items-center",
-                  "fn-link-1"
+            {chart && (
+              <div className="self-start flex flex-row items-center gap-2 py-3">
+                <CheckBox
+                  id="dragStyleSymmetry"
+                  value={dragStyle === "center"}
+                  onChange={(v) => setDragStyle(v ? "center" : "free")}>
+                  {t("dragStyleSymmetry")}
+                </CheckBox>
+                {isTouch && (
+                  <button
+                    className={clsx("flex flex-row items-center", "fn-link-1")}
+                    onClick={() => {
+                      setDragMode(
+                        dragMode === "p" ? "v" : dragMode === "v" ? null : "p"
+                      );
+                    }}
+                  >
+                    <span className="relative inline-block w-8 h-8 ">
+                      {dragMode === null ? (
+                        <>
+                          <Move className="absolute text-xl inset-0 w-max h-max m-auto " />
+                          <Forbid className="absolute text-3xl inset-0 w-max h-max m-auto " />
+                        </>
+                      ) : (
+                        <>
+                          <Move
+                            className="absolute text-xl inset-0 w-max h-max m-auto "
+                            theme="two-tone"
+                            fill={["#333", "#fc5"]}
+                          />
+                        </>
+                      )}
+                    </span>
+                    <span className="whitespace-nowrap">
+                      {t.rich("touchMode", {
+                        mode: dragMode || "null",
+                        var: (c) => <var className="italic">{c}</var>,
+                      })}
+                    </span>
+                  </button>
                 )}
-                onClick={() => {
-                  setDragMode(
-                    dragMode === "p" ? "v" : dragMode === "v" ? null : "p"
-                  );
-                }}
-              >
-                <span className="relative inline-block w-8 h-8 ">
-                  {dragMode === null ? (
-                    <>
-                      <Move className="absolute text-xl inset-0 w-max h-max m-auto " />
-                      <Forbid className="absolute text-3xl inset-0 w-max h-max m-auto " />
-                    </>
-                  ) : (
-                    <>
-                      <Move
-                        className="absolute text-xl inset-0 w-max h-max m-auto "
-                        theme="two-tone"
-                        fill={["#333", "#fc5"]}
-                      />
-                    </>
-                  )}
-                </span>
-                <span className="">
-                  {t.rich("touchMode", {
-                    mode: dragMode || "null",
-                    var: (c) => <var className="italic">{c}</var>,
-                  })}
-                </span>
-              </button>
+              </div>
             )}
           </div>
           <div
@@ -813,12 +823,13 @@ export default function Edit(props: {
               </span>
             </div>
             <TimeBar
+              playing={playing}
               chart={chart}
               setAndSeekCurrentTimeWithoutOffset={
                 setAndSeekCurrentTimeWithoutOffset
               }
             />
-            <div className="flex flex-row items-baseline">
+            <div className="flex flex-row flex-wrap items-baseline">
               <span>{t("stepUnit")} =</span>
               <span className="ml-2">1</span>
               <span className="ml-1">/</span>
@@ -830,24 +841,39 @@ export default function Edit(props: {
                 }}
                 isValid={(v) =>
                   !isNaN(Number(v)) &&
+                  Number(v) > 0 &&
                   String(Math.floor(Number(v) / 4) * 4) === v
                 }
+              />
+              <Range
+                className="mx-2 self-center"
+                min={0}
+                max={stepUnitRangeValues.length - 1}
+                value={stepUnitRangeValues.findLastIndex(
+                  (u) => u <= (currentLevel?.meta.snapDivider ?? 1) * 4
+                )}
+                onChange={(v) => {
+                  currentLevel?.updateMeta({
+                    snapDivider: stepUnitRangeValues[v] / 4,
+                  });
+                }}
               />
               <HelpIcon className="self-center">
                 {t.rich("stepUnitHelp", { br: () => <br /> })}
               </HelpIcon>
-              <div className="flex-1" />
-              <span className="mr-1">{t("zoom")}</span>
-              <Button
-                small
-                text="-"
-                onClick={() => chart?.setZoom(chart.zoom - 1)}
-              />
-              <Button
-                small
-                text="+"
-                onClick={() => chart?.setZoom(chart.zoom + 1)}
-              />
+              <div className="flex-1 flex flex-row items-baseline justify-end">
+                <span className="mr-1">{t("zoom")}</span>
+                <Button
+                  small
+                  text="-"
+                  onClick={() => chart?.setZoom(chart.zoom - 1)}
+                />
+                <Button
+                  small
+                  text="+"
+                  onClick={() => chart?.setZoom(chart.zoom + 1)}
+                />
+              </div>
             </div>
             <div className="flex flex-row ml-6 mt-3">
               {tabNameKeys.map((key, i) =>
@@ -921,7 +947,7 @@ export default function Edit(props: {
               ) : tab === 2 ? (
                 <LevelTab chart={chart} />
               ) : tab === 3 ? (
-                <NoteTab chart={chart} aceSessionRef={aceSessionRef} />
+                <NoteTab chart={chart} aceSessionRef={aceSessionRef} playing={playing} />
               ) : null}
               <LuaTabPlaceholder parentContainer={ref.current} />
             </Box>

@@ -40,10 +40,11 @@ export function CurrentStepText({
 interface Props {
   chart?: ChartEditing;
   aceSessionRef: RefObject<(Ace.EditSession | null)[]>;
+  playing: boolean;
 }
 export default function NoteTab(props: Props) {
   const t = useTranslations("edit.note");
-  const { chart } = props;
+  const { chart, playing } = props;
   const currentLevel = chart?.currentLevel;
   const cur = currentLevel?.current;
   const ss = cur?.signatureState;
@@ -98,12 +99,16 @@ export default function NoteTab(props: Props) {
       </div>
       <NoteEdit {...props} />
       <span className="flex-1 mb-4 " />
-      <div className="flex flex-row items-baseline mb-2">
-        <UndoRedoButton {...props} />
-      </div>
-      <div className="flex flex-row ">
-        <CopyPasteButton {...props} />
-      </div>
+      {!playing && (
+        <>
+          <div className="flex flex-row items-baseline mb-2">
+            <UndoRedoButton {...props} />
+          </div>
+          <div className="flex flex-row ">
+            <CopyPasteButton {...props} />
+          </div>
+        </>
+      )}
     </div>
   );
 }
