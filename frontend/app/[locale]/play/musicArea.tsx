@@ -94,6 +94,7 @@ const MusicAreaInner = memo(function MusicAreaInner(props: Props) {
   const t = useTranslations("play.message");
 
   const [volumeCtrlOpen, setVolumeCtrlOpen] = useState(false);
+  const [rerenderVolume, setRerenderVolume] = useState(0);
   const [ytVolumeCtrlAvailable, setYtVolumeCtrlAvailable] = useState(true);
   useEffect(() => {
     if (detectOS() === "ios") {
@@ -108,6 +109,11 @@ const MusicAreaInner = memo(function MusicAreaInner(props: Props) {
       const t = setTimeout(() => {
         setVolumeCtrlOpen(true);
         initialVolumeCtrlOpenDone.current = true;
+        for (let delay = 0; delay <= 250; delay += 50) {
+          setTimeout(() => {
+            setRerenderVolume((prev) => prev + 1);
+          }, delay);
+        }
       }, 500);
       return () => clearTimeout(t);
     }
@@ -170,7 +176,7 @@ const MusicAreaInner = memo(function MusicAreaInner(props: Props) {
         "grow-0 shrink-0 flex",
         // levelBgColors.at(levelTypes.indexOf(props.lvType)) || levelBgColors[1],
         props.isMobile
-          ? "rounded-b-sq-xl pb-1"
+          ? "rounded-b-sq-xl pb-1 -mx-1 px-1 inset-shadow-none"
           : "rounded-bl-sq-box pl-3 pb-1.5",
         "relative flex-col",
         props.className,
@@ -210,8 +216,12 @@ const MusicAreaInner = memo(function MusicAreaInner(props: Props) {
             )}
             style={{
               width: props.isMobile
-                ? 50 * mobilePlayUIHeightScale + "%"
+                ? `${50 * mobilePlayUIHeightScale}%`
                 : "100%",
+              // 動画を小さくする必要がありその結果無駄なスペースが空く場合に限り右側safe-areaを使う
+              marginRight: props.isMobile
+                ? `min(var(--sai-r), ${50 - 50 * mobilePlayUIHeightScale}%)`
+                : undefined,
             }}
             scale={ytHalf ? 0.5 : 1}
             id={props.chartBrief?.ytId}
@@ -436,7 +446,7 @@ const MusicAreaInner = memo(function MusicAreaInner(props: Props) {
           "fg-base",
           props.isMobile
             ? clsx(
-                "-bottom-9 inset-x-0 mx-auto w-max text-xl",
+                "-bottom-9 left-(--sai-l) right-(--sai-r) mx-auto w-max text-xl",
                 props.isTouch ? "fn-with-bg" : ""
               )
             : "bottom-0 right-1 mr-sai",
@@ -459,7 +469,7 @@ const MusicAreaInner = memo(function MusicAreaInner(props: Props) {
           "flex flex-col",
           props.isMobile
             ? clsx(
-                "bottom-0 inset-x-0 mx-auto w-80 max-w-full",
+                "bottom-0 left-(--sai-l) right-(--sai-r) mx-auto w-80 max-w-full",
                 largeTitle
                   ? "rounded-sq-box p-4 gap-3"
                   : "rounded-sq-xl px-3 py-2 gap-1"
@@ -523,6 +533,7 @@ const MusicAreaInner = memo(function MusicAreaInner(props: Props) {
             disabled={!ytVolumeCtrlAvailable}
             value={ytVolumeCtrlAvailable ? props.ytVolume : 100}
             onChange={props.setYtVolume}
+            rerenderKey={rerenderVolume}
           />
         </div>
         <div className="flex flex-row items-center">
@@ -548,6 +559,7 @@ const MusicAreaInner = memo(function MusicAreaInner(props: Props) {
             disabled={!props.enableSE}
             value={props.enableSE ? props.seVolume : 0}
             onChange={props.setSEVolume}
+            rerenderKey={rerenderVolume}
           />
         </div>
       </div>

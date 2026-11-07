@@ -98,7 +98,7 @@ export class DisplayNikochan {
     this.#dn = dn;
     this.#c = c;
     this.#now = performance.now();
-    if (this.#n.done !== 0) {
+    if (this.#dn.done !== 0) {
       if (this.#fadeoutStart === null) {
         this.#fadeoutStart = this.#now;
       }
@@ -112,15 +112,15 @@ export class DisplayNikochan {
     if (!this.#dn.visible) {
       return;
     }
-    if (this.#n.done !== 0) {
+    if (this.#dn.done !== 0) {
       if (this.fadeoutFactor >= 1) {
         return;
       }
-      if (this.#n.done === 1) {
+      if (this.#dn.done === 1) {
         dy = -1 * this.#c.rem * this.fadeoutFactor;
         scale = 1 + 0.25 * this.fadeoutFactor;
       }
-      if (this.#n.done === 2) {
+      if (this.#dn.done === 2) {
         dy = -0.5 * this.#c.rem * this.fadeoutFactor;
       }
     }
@@ -128,7 +128,7 @@ export class DisplayNikochan {
     dx -= (this.size * (scale - 1)) / 2;
     dy -= (this.size * (scale - 1)) / 2;
     nctx.drawImage(
-      this.#c.nikochanBitmap[this.#n.done <= 3 ? this.#n.done : 0][
+      this.#c.nikochanBitmap[this.#dn.done <= 3 ? this.#dn.done : 0][
         this.#n.big ? 1 : 0
       ],
       (this.left - this.size / 2 + dx) * dpr,
@@ -195,7 +195,7 @@ export class DisplayNikochan {
     }
     const headSize = this.#c.noteSize * 1;
     const tailSize = this.#c.noteSize * 0.85;
-    if (this.#n.done !== 0) {
+    if (this.#dn.done !== 0) {
       if (this.fadeoutFactor >= 1) {
         return;
       }
@@ -262,7 +262,7 @@ export class DisplayNikochan {
     }
 
     if (
-      this.#n.done === 0 ||
+      this.#dn.done === 0 ||
       (tailLength > this.#c.noteSize / 2 && tailOpacity > 0.5)
     ) {
       ctx.save();
@@ -270,7 +270,7 @@ export class DisplayNikochan {
       ctx.translate(this.left, this.top);
 
       ctx.globalAlpha =
-        (this.#n.done === 0 ? 1 : tailOpacity) * this.globalAlpha;
+        (this.#dn.done === 0 ? 1 : tailOpacity) * this.globalAlpha;
       ctx.beginPath();
       const headRadius = (headSize * bigScale(this.#n.big)) / 2;
       ctx.arc(0, 0, headRadius, 0, Math.PI * 2);
@@ -285,7 +285,7 @@ export class DisplayNikochan {
   }
 
   drawRipple(ctx: CanvasRenderingContext2D, dpr: number) {
-    if (this.#n.done !== 1) {
+    if (this.#dn.done !== 1) {
       return;
     }
 
@@ -440,7 +440,7 @@ export class DisplayNikochan {
     return Math.min(1, (this.#now - this.#fadeoutStart!) / 300);
   }
   get globalAlpha() {
-    if (this.#n.done === 0) {
+    if (this.#dn.done === 0) {
       return this.fadeinFactor;
     } else {
       return 1 - this.fadeoutFactor;
