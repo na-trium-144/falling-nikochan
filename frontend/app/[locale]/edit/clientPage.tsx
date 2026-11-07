@@ -4,12 +4,6 @@ import clsx from "clsx/lite";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
-import {
-  currentChartVer,
-  getSignatureState,
-  getStep,
-  getTimeSec,
-} from "@falling-nikochan/chart";
 import Button, { ButtonHighlight } from "@/common/button.js";
 import TimeBar from "./timeBar.js";
 import Input from "@/common/input.js";
@@ -19,6 +13,7 @@ import { Box } from "@/common/box.js";
 import { MetaTab } from "./metaTab.js";
 import { addRecent } from "@/common/recent.js";
 import {
+  currentChartVer,
   createBrief,
   getTimeSec,
   Step,

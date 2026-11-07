@@ -1,6 +1,5 @@
 "use client";
 
-import clsx from "clsx/lite";
 import {
   createContext,
   ReactNode,
@@ -10,11 +9,9 @@ import {
   useState,
 } from "react";
 import { useTranslations } from "next-intl";
-import DropDown from "./dropdown";
 import { IrasutoyaLikeBg } from "./irasutoyaLike.jsx";
 import Moon from "@icon-park/react/lib/icons/Moon";
 import Sun from "@icon-park/react/lib/icons/Sun";
-import DownOne from "@icon-park/react/lib/icons/DownOne";
 import themeInitScript from "./themeInit.js?raw";
 import { usePathname } from "next/navigation";
 import { SmallSelect } from "./select";
