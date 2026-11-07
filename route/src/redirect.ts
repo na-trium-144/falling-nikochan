@@ -67,7 +67,7 @@ const redirectApp = (config: {
           return c.notFound();
       }
     })
-    .on("get", ["/", "/edit", "/main/*", "/play"], async (c) => {
+    .on("get", ["/", "/edit", "/main/*", "/play", "/inspect"], async (c) => {
       const search = new URL(c.req.url).search;
       const path = c.req.path === "/" ? "" : c.req.path;
       const lang = c.get("language");
