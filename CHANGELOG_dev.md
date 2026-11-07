@@ -1,3 +1,7 @@
+## ver. 18.11 - 2026/11/7 [#1441](https://github.com/na-trium-144/falling-nikochan/pull/1441)
+
+* pnpm12
+
 ## ver. 18.8 - 2026/10/25 [#1436](https://github.com/na-trium-144/falling-nikochan/pull/1436)
 
 * フレームレート関連の処理をhookに切り出す

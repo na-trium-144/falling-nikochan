@@ -81,7 +81,7 @@ cleanupUnusedCatalogs: true
 dedupePeers: true
 
 minimumReleaseAge: 1440
-# minimumReleaseAgeStrict: true  # added in v11.0
+minimumReleaseAgeStrict: true
 minimumReleaseAgeExclude:
   # these are authored by me (@na-trium-144)
   - fn-commands
