@@ -56,6 +56,9 @@ import { useDisplayMode } from "@/scale.js";
 import { useResizeDetector } from "react-resize-detector";
 import Close from "@icon-park/react/lib/icons/Close.js";
 import { captureAndWrap } from "@/common/fetch.js";
+import Range from "@/common/range.js";
+
+const stepUnitRangeValues = [4, 8, 12, 16, 24, 32, 48] as const;
 
 export default function Edit(props: {
   locale: string;
@@ -548,11 +551,7 @@ export default function Edit(props: {
       tabIndex={0}
       ref={ref}
       onKeyUp={(e) => {
-        if (
-          chart &&
-          !isCodeTab &&
-          (e.key === "Shift" || e.key === "Control")
-        ) {
+        if (chart && !isCodeTab && (e.key === "Shift" || e.key === "Control")) {
           setDragMode("p");
         }
       }}
@@ -787,10 +786,7 @@ export default function Edit(props: {
                 />
                 {isTouch && (
                   <button
-                    className={clsx(
-                      "flex flex-row items-center",
-                      "fn-link-1"
-                    )}
+                    className={clsx("flex flex-row items-center", "fn-link-1")}
                     onClick={() => {
                       setDragMode(
                         dragMode === "p" ? "v" : dragMode === "v" ? null : "p"
@@ -933,7 +929,7 @@ export default function Edit(props: {
                 setAndSeekCurrentTimeWithoutOffset
               }
             />
-            <div className="flex flex-row items-baseline">
+            <div className="flex flex-row flex-wrap items-baseline">
               <span>{t("stepUnit")} =</span>
               <span className="ml-2">1</span>
               <span className="ml-1">/</span>
@@ -948,21 +944,35 @@ export default function Edit(props: {
                   String(Math.floor(Number(v) / 4) * 4) === v
                 }
               />
+              <Range
+                className="mx-2 self-center"
+                min={0}
+                max={stepUnitRangeValues.length - 1}
+                value={stepUnitRangeValues.findLastIndex(
+                  (u) => u <= (currentLevel?.meta.snapDivider ?? 1) * 4
+                )}
+                onChange={(v) => {
+                  currentLevel?.updateMeta({
+                    snapDivider: stepUnitRangeValues[v] / 4,
+                  });
+                }}
+              />
               <HelpIcon className="self-center">
                 {t.rich("stepUnitHelp", { br: () => <br /> })}
               </HelpIcon>
-              <div className="flex-1" />
-              <span className="mr-1">{t("zoom")}</span>
-              <Button
-                small
-                text="-"
-                onClick={() => chart?.setZoom(chart.zoom - 1)}
-              />
-              <Button
-                small
-                text="+"
-                onClick={() => chart?.setZoom(chart.zoom + 1)}
-              />
+              <div className="flex-1 flex flex-row items-baseline justify-end">
+                <span className="mr-1">{t("zoom")}</span>
+                <Button
+                  small
+                  text="-"
+                  onClick={() => chart?.setZoom(chart.zoom - 1)}
+                />
+                <Button
+                  small
+                  text="+"
+                  onClick={() => chart?.setZoom(chart.zoom + 1)}
+                />
+              </div>
             </div>
             <div className="flex flex-row ml-6 mt-3">
               {tabNameKeys.map((key, i) =>
