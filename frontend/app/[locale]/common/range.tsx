@@ -14,7 +14,7 @@ interface Props {
   onChange: (value: number) => void;
   // ReactRangeはレンダー時にthumbの位置を計算するので、scaleアニメーションなどと相性が悪い
   // workaroundとして、memoを無視して再レンダーするためのpropを用意する
-  rerenderKey: number;
+  rerenderKey?: number;
 }
 export default function Range(rangeProps: Props) {
   const onChangeRef = useRef<(value: number) => void>(undefined!);
