@@ -939,6 +939,7 @@ export default function Edit(props: {
                 }}
                 isValid={(v) =>
                   !isNaN(Number(v)) &&
+                  Number(v) > 0 &&
                   String(Math.floor(Number(v) / 4) * 4) === v
                 }
               />
