@@ -14,7 +14,7 @@ jobs:
         node-version: [22.x, 24.x]
     steps:
     - uses: actions/checkout@v6
-    - uses: pnpm/action-setup@v4
+    - uses: pnpm/action-setup@v6
     - uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
@@ -35,7 +35,7 @@ jobs:
       # API_NO_RATELIMIT: "1"
     steps:
     - uses: actions/checkout@v6
-    - uses: pnpm/action-setup@v4
+    - uses: pnpm/action-setup@v6
     - uses: actions/setup-node@v4
       with:
         node-version: 24.x
@@ -54,7 +54,7 @@ jobs:
       # API_NO_RATELIMIT: "1"
     steps:
     - uses: actions/checkout@v6
-    - uses: pnpm/action-setup@v4
+    - uses: pnpm/action-setup@v6
     - uses: actions/setup-node@v4
       with:
         node-version: 24.x
@@ -72,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
-    - uses: pnpm/action-setup@v4
+    - uses: pnpm/action-setup@v6
     - uses: actions/setup-node@v4
       with:
         node-version: 24.x
@@ -89,12 +89,12 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
     - uses: actions/checkout@v6
-    - uses: pnpm/action-setup@v4
+    - uses: pnpm/action-setup@v6
     - uses: actions/setup-node@v4
       with:
         node-version: 24.x
         cache: 'pnpm'
-    - run: pnpm config set node-linker hoisted --local
+    - run: pnpm config set node-linker hoisted --location=project
     - name: Pull Vercel Environment Information
       run: pnpm dlx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
     - name: Build Project Artifacts
@@ -127,7 +127,7 @@ jobs:
       API_ENV: development
     steps:
     - uses: actions/checkout@v6
-    - uses: pnpm/action-setup@v4
+    - uses: pnpm/action-setup@v6
     - uses: actions/setup-node@v4
       with:
         node-version: 24.x
@@ -190,12 +190,12 @@ jobs:
     steps:
     # .vercel/output と、それとは別に node_modules も必要
     - uses: actions/checkout@v6
-    - uses: pnpm/action-setup@v4
+    - uses: pnpm/action-setup@v6
     - uses: actions/setup-node@v4
       with:
         node-version: 24.x
         cache: 'pnpm'
-    - run: pnpm config set node-linker hoisted --local
+    - run: pnpm config set node-linker hoisted --location=project
     - run: pnpm install --frozen-lockfile
     - run: pnpm run t
     - name: Pull Vercel Environment Information

@@ -70,9 +70,9 @@ export function TopDemo(
     false,
     0,
     false,
-    () => undefined,
+    null,
     1,
-    () => undefined,
+    null,
     flash
   );
   useEffect(() => {

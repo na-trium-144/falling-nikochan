@@ -25,10 +25,10 @@ export default function useGameLogic(
   // ここで指定するuserOffsetは判定には影響しない
   userOffset: number,
   autoOffset: boolean,
-  setUserOffset: (v: number) => void,
+  setUserOffset: null | ((v: number) => void),
   playbackRate: number,
-  playSE: (s: SEType) => void,
-  flash: (x: { targetX: number }) => void
+  playSE: null | ((s: SEType) => void),
+  flash: null | ((x: { targetX: number }) => void)
 ) {
   const [notesDone, setNotesDone] = useState<NoteDone[][]>([]);
 
@@ -118,7 +118,7 @@ export default function useGameLogic(
           const timeOfs = timeOfsEstimator.current.update(
             ofs - posOfs.current / dn.vel.y
           );
-          setUserOffset(timeOfs);
+          setUserOffset?.(timeOfs);
         }
       }
     },
@@ -294,24 +294,15 @@ export default function useGameLogic(
         }
       };
     }
-  }, [
-    auto,
-    getCurrentTimeSec,
-    hit,
-    playbackRate,
-    judge,
-    playSE,
-    flash,
-    judgeForAuto,
-  ]);
+  }, [auto, getCurrentTimeSec, hit, playbackRate, judge, judgeForAuto]);
 
   const judgeOpts = useMemo<JudgeOptions>(
     () => ({
       judgeForAuto,
       playbackRate,
       onJudge,
-      onPlaySE: playSE,
-      onFlash: flash,
+      onPlaySE: playSE ?? (() => undefined),
+      onFlash: flash ?? (() => undefined),
     }),
     [judgeForAuto, playbackRate, onJudge, playSE, flash]
   );

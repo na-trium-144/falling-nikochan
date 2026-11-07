@@ -32,7 +32,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full development setup guide, pro
 
 The code for the backend is in the [route/](route/) directory, NOT in the [api/](api/) directory.
 
-API Reference is here: https://nikochan.utcode.net/api
+API Reference (Scalar UI) is available at https://nikochan.utcode.net/api, and OpenAPI schema can be downloaded from https://nikochan.utcode.net/api/openapi.json
 
 The Lua script API used for chart editing is available in a separate repository ([na-trium-144/fn-commands](https://github.com/na-trium-144/fn-commands))
 
@@ -42,7 +42,7 @@ This project is licensed under the GNU Affero General Public License v3.0 or lat
 The full text of the AGPL-3.0 license can be found in the [LICENSE](LICENSE) file.
 
 The use of Falling Nikochan's API and embedding it in an iframe are exempt from AGPL-3.0-or-later and can be done freely.
-The OpenAPI Specification of the API ([/api/openapi.json](https://nikochan.utcode.net/api/openapi.json)) is licensed under the MIT License.
+The OpenAPI Specification of the API (/api/openapi.json) is licensed under the MIT License.
 
 The assets in `frontend/public/assets/` (including images, sounds, etc.) are licensed under the Creative Commons Attribution 4.0 International (CC-BY-4.0) license.
 The full text of the CC-BY-4.0 license for assets can be found in the [frontend/public/assets/LICENSE](frontend/public/assets/LICENSE) file.

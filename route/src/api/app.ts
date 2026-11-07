@@ -190,6 +190,21 @@ const apiApp = async (config: {
       theme: "default",
       url: "/api/openapi.json",
       pageTitle: "Falling Nikochan API Reference",
+      documentDownloadType: "direct",
+      metaData: {
+        title: "Falling Nikochan API Reference",
+        description:
+          "API Reference for Falling Nikochan, " +
+          "a simple and cute rhythm game " +
+          "where anyone can create and share charts.",
+        ogTitle: "Falling Nikochan API Reference",
+        ogDescription:
+          "API Reference for Falling Nikochan, " +
+          "a simple and cute rhythm game " +
+          "where anyone can create and share charts.",
+        ogUrl: "https://nikochan.utcode.net/api",
+        ogType: "website",
+      },
       customCss: `
 body {
   position: relative;
