@@ -139,13 +139,18 @@ export default function TimeBar(props: Props) {
         suppressNoteClickUntil.current = Date.now() + DRAG_CLICK_SUPPRESSION_MS;
       }
     };
+    const disableSelect = (e: Event) => {
+      e.preventDefault();
+    };
 
     timeBar.addEventListener("mousedown", onMouseDown);
+    timeBar.addEventListener("selectstart", disableSelect);
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
     window.addEventListener("blur", onMouseUp);
     return () => {
       timeBar.removeEventListener("mousedown", onMouseDown);
+      timeBar.removeEventListener("selectstart", disableSelect);
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
       window.removeEventListener("blur", onMouseUp);
@@ -236,7 +241,7 @@ export default function TimeBar(props: Props) {
         convertDeltaYToX
       >
         <div
-          className={clsx("relative overflow-visible")}
+          className={clsx("relative overflow-visible select-none")}
           style={{
             marginTop: barTop,
             height: barHeight,
