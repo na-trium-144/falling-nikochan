@@ -10,6 +10,7 @@ import {
 } from "../chart.js";
 import { CopyBuffer } from "../legacy/chart15.js";
 import { stepZero } from "../step.js";
+import { defaultCopyBufferObj, InitNoteStyle } from "../command.js";
 
 export interface CurrentPasswd {
   ph: string | null;
@@ -313,6 +314,10 @@ export class ChartEditing extends EventEmitter<EventType> {
       this.emit("rerender");
       // dataに変化があるが、changeは呼ばない
     }
+  }
+  resetInitNote(initNoteStyle: InitNoteStyle) {
+    this.#copyBuffer["0"] = defaultCopyBufferObj(initNoteStyle)["0"];
+    this.emit("rerender");
   }
   pasteNote(copyIndex: number, forceAdd: boolean = false) {
     if (this.#copyBuffer[String(copyIndex)] && this.currentLevel) {

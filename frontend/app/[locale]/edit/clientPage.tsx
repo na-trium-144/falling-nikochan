@@ -20,6 +20,7 @@ import {
   stepAdd,
   stepCmp,
   stepZero,
+  InitNoteStyle,
 } from "@falling-nikochan/chart";
 import { MobileHeader } from "@/common/header.js";
 import { LuaTabPlaceholder, LuaTabProvider, useLuaExecutor } from "./luaTab.js";
@@ -87,6 +88,8 @@ export default function Edit(props: {
     localLoadState,
     localLoad,
     aceSessionRef,
+    initNoteStyle,
+    setInitNoteStyle,
   } = useChartState({
     luaExecutor,
     onLoad: (cid) => {
@@ -339,6 +342,22 @@ export default function Edit(props: {
     }
   }, [dragMode, isTouch, chart]);
 
+  const setInitNoteAndDragStyle = useCallback(
+    (i: InitNoteStyle) => {
+      setInitNoteStyle(i);
+      switch (i) {
+        case "center":
+          setDragStyle("center");
+          break;
+        case "vertical":
+        default:
+          setDragStyle("free");
+          break;
+      }
+    },
+    [setInitNoteStyle]
+  );
+
   useEffect(() => {
     if (ytPlayer.current?.getDuration) {
       chart?.setYTDuration(ytPlayer.current.getDuration());
@@ -514,6 +533,8 @@ export default function Edit(props: {
           setIndex={setGuidePage}
           close={() => setGuidePage(null)}
           locale={locale}
+          initNoteStyle={initNoteStyle}
+          setInitNoteStyle={setInitNoteAndDragStyle}
         />
       ) : null}
 
@@ -677,7 +698,8 @@ export default function Edit(props: {
                 <CheckBox
                   id="dragStyleSymmetry"
                   value={dragStyle === "center"}
-                  onChange={(v) => setDragStyle(v ? "center" : "free")}>
+                  onChange={(v) => setDragStyle(v ? "center" : "free")}
+                >
                   {t("dragStyleSymmetry")}
                 </CheckBox>
                 {isTouch && (
@@ -947,7 +969,11 @@ export default function Edit(props: {
               ) : tab === 2 ? (
                 <LevelTab chart={chart} />
               ) : tab === 3 ? (
-                <NoteTab chart={chart} aceSessionRef={aceSessionRef} playing={playing} />
+                <NoteTab
+                  chart={chart}
+                  aceSessionRef={aceSessionRef}
+                  playing={playing}
+                />
               ) : null}
               <LuaTabPlaceholder parentContainer={ref.current} />
             </Box>

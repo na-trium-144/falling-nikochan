@@ -3,9 +3,10 @@
 import clsx from "clsx/lite";
 import { Box } from "@/common/box.js";
 import { Pager } from "@/common/pager.js";
-import Button from "@/common/button.js";
+import Button, { ButtonHighlight } from "@/common/button.js";
 import { useTranslations } from "next-intl";
 import { ReactNode } from "react";
+import { InitNoteStyle, initNoteStyles } from "@falling-nikochan/chart";
 
 const maxIndex = 7;
 
@@ -15,6 +16,9 @@ interface Props {
   setIndex: (i: number) => void;
   close: () => void;
   locale: string;
+
+  initNoteStyle: InitNoteStyle;
+  setInitNoteStyle: (i: InitNoteStyle) => void;
 }
 export function GuideMain(props: Props) {
   const t = useTranslations("edit.guide");
@@ -42,10 +46,35 @@ export function GuideMain(props: Props) {
         {/* scrollableのフェードを更新するため、意図的にkeyを追加しこのdivごと変化させる */}
         <div key={props.index} className="flex-1">
           {props.content}
+          {props.index === 1 && (
+            <>
+              <hr className="fn-hr" />
+              <h4 className="fn-heading-box">{t("initNoteStyle")}</h4>
+              <div className="flex justify-center">
+                {initNoteStyles.map((s) => (
+                  <button
+                    key={s}
+                    className={clsx(
+                      "fn-toggle",
+                      s === props.initNoteStyle
+                        ? "fn-flat-button fn-plain fn-selected"
+                        : "fn-flat-button fn-sky"
+                    )}
+                    onClick={() => props.setInitNoteStyle(s)}
+                  >
+                    <span className="fn-glass-1" />
+                    <span className="fn-glass-2" />
+                    <ButtonHighlight />
+                    {t(s)}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
         <p className="w-max m-auto">
           <Button
-            text={props.index === 1 ? t("agreeClose") : t("close")}
+            text={/*props.index === 1 ? t("agreeClose") : */ t("close")}
             onClick={props.close}
           />
         </p>
