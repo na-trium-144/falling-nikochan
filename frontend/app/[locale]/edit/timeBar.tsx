@@ -251,10 +251,7 @@ export default function TimeBar(props: Props) {
         >
           <TimeBarInner
             {...props}
-            draggingTimeBar={draggingTimeBar}
-            onUserScrolled={onUserScrolled}
             zoomPxPerSec={zoomPxPerSec}
-            timeBarRef={timeBarRef as RefObject<HTMLElement>}
             timeBarWidth={timeBarWidth}
             timeBarSteps={timeBarSteps}
             suppressNoteClickUntil={suppressNoteClickUntil}
@@ -385,6 +382,18 @@ const TimeBarInner = memo(function TimeBarInner(props: Props & InnerProps) {
   const { chart, setAndSeekCurrentTimeWithoutOffset } = props;
   const currentLevel = chart?.currentLevel;
   const cur = currentLevel?.current;
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_rerenderIndex, setRerenderIndex] = useState<number>(0);
+  const rerender = useCallback(() => setRerenderIndex((i) => i + 1), []);
+  useEffect(() => {
+    chart?.on("change", rerender);
+    chart?.on("levelIndex", rerender);
+    return () => {
+      chart?.off("change", rerender);
+      chart?.off("levelIndex", rerender);
+    };
+  }, [chart, rerender]);
 
   const {
     zoomPxPerSec,
