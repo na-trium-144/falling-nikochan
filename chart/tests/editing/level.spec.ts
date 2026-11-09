@@ -295,6 +295,45 @@ describe("LevelEditing", () => {
               "print('new line')\nprint('new line 2')"
             );
           });
+          test("should reuse result of previous execution", async () => {
+            let executedCode = "";
+            const level = new LevelEditing(
+              dummyChartData.levelsMeta[0],
+              dummyChartData.levelsFreeze[0],
+              dummyChartData.lua[0],
+              () => {},
+              () => dummyChartData.offset,
+              dummyLuaExecutor(async (code: string) => {
+                executedCode = code;
+                return dummyChartData.levelsFreeze[0];
+              })
+            );
+            await level.updateLua(
+              ["print('new line')", "print('new line 2')"],
+              fromLuaEditor
+            );
+            expect(executedCode).to.equal(
+              "print('new line')\nprint('new line 2')"
+            );
+            executedCode = "";
+            await level.updateLua(
+              [
+                "print('new line')",
+                "print('new line 2')",
+                "print('new line 3')",
+              ],
+              fromLuaEditor
+            );
+            expect(executedCode).to.equal(
+              "print('new line')\nprint('new line 2')\nprint('new line 3')"
+            );
+            executedCode = "";
+            await level.updateLua(
+              ["print('new line')", "print('new line 2')"],
+              fromLuaEditor
+            );
+            expect(executedCode).to.equal("");
+          });
           test("should update lua immediately", async () => {
             const level = new LevelEditing(
               dummyChartData.levelsMeta[0],

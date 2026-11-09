@@ -67,6 +67,12 @@ export class LevelEditing extends EventEmitter<EventType> {
   // chartState.tsでsessionからの復元時にセットし、luaEditorの初期化に使う
   luaEditorInitialUndoManager: object | null = null;
 
+  // updateLuaに渡された過去のluaコードをいくつか保持し、同一なら再実行しない
+  // undoManagerの大きさ(現在は20)よりちょっと大きくしておく
+  static readonly luaCacheLength = 25;
+  #luaCache: string[] = [];
+  #luaResultCache = new Map<string, LevelFreeze>();
+
   constructor(
     min: Readonly<LevelMin>,
     freeze: Readonly<LevelFreeze>,
@@ -176,16 +182,31 @@ export class LevelEditing extends EventEmitter<EventType> {
     this.emit("change");
   }
   async updateLua(lua: string[], fromLuaEditor: boolean = false) {
+    const luaCode = lua.join("\n");
     this.#lua = lua;
     if (!fromLuaEditor) {
-      this.#luaEditorValue = lua.join("\n");
+      this.#luaEditorValue = luaCode;
       this.emit("rerender");
     }
     this.#luaExecutorRef.current.abortExec();
-    const levelFreezed = await this.#luaExecutorRef.current.exec(
-      lua.join("\n"),
-      this.index
-    );
+    let levelFreezed: LevelFreeze | null = null;
+    if (luaCode.trim()) {  // なぜか空文字列が渡される瞬間があるっぽい?
+      if (this.#luaCache.includes(luaCode)) {
+        levelFreezed = this.#luaResultCache.get(luaCode)!;
+      } else {
+        levelFreezed = await this.#luaExecutorRef.current.exec(
+          luaCode,
+          this.index
+        );
+        if (levelFreezed) {
+          this.#luaResultCache.set(luaCode, levelFreezed);
+          this.#luaCache.push(luaCode);
+          if (this.#luaCache.length > LevelEditing.luaCacheLength) {
+            this.#luaResultCache.delete(this.#luaCache.shift()!);
+          }
+        }
+      }
+    }
     if (levelFreezed) {
       this.#lastValidLua = lua;
       this.updateFreeze(levelFreezed);
