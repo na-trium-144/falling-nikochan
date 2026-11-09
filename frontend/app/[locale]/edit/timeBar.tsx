@@ -6,6 +6,7 @@ import {
   getSignatureState,
   getStep,
   getTimeSec,
+  NoteInGame,
   Step,
   stepAdd,
   stepCmp,
@@ -262,6 +263,9 @@ export default function TimeBar(props: Props) {
             suppressNoteClickUntil={suppressNoteClickUntil}
             timeBarBeginSec={timeBarBeginSec}
             timeBarEndSec={timeBarEndSec}
+            currentSeqNote={
+              props.playing ? undefined : currentLevel?.currentSeqNote
+            }
           />
         </div>
       </Scrollable>
@@ -380,6 +384,7 @@ interface InnerProps {
   suppressNoteClickUntil: RefObject<number>;
   timeBarBeginSec: number;
   timeBarEndSec: number;
+  currentSeqNote: NoteInGame | undefined;
 }
 const TimeBarInner = memo(function TimeBarInner(props: Props & InnerProps) {
   const { rem } = useDisplayMode();
@@ -407,6 +412,7 @@ const TimeBarInner = memo(function TimeBarInner(props: Props & InnerProps) {
     suppressNoteClickUntil,
     timeBarBeginSec,
     timeBarEndSec,
+    currentSeqNote,
   } = props;
 
   // timebar上の位置を計算
@@ -600,8 +606,7 @@ const TimeBarInner = memo(function TimeBarInner(props: Props & InnerProps) {
                   "absolute rounded-full cursor-pointer",
                   "transition duration-100",
                   "hover:brightness-110 hover:scale-110 active:brightness-125",
-                  !props.playing &&
-                    n.hitTimeSec === currentLevel.currentSeqNote?.hitTimeSec
+                  n.hitTimeSec === currentSeqNote?.hitTimeSec
                     ? "bg-red-400"
                     : "bg-yellow-400"
                 )}
