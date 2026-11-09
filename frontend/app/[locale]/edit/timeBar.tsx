@@ -160,20 +160,12 @@ export default function TimeBar(props: Props) {
   }, [timeBarRef]);
 
   const timeBarBeginSec =
-    (Math.round(
-      ((cur && chart ? cur.timeSec + chart.offset : 0) * zoomPxPerSec()) /
-        timeBarWidth -
-        1
-    ) *
+    (Math.round(((cur ? cur.timeSec : 0) * zoomPxPerSec()) / timeBarWidth - 1) *
       timeBarWidth) /
     zoomPxPerSec();
   // cur.timeSec - timeBarWidth / 2 / zoomPxPerSec()
   const timeBarEndSec =
-    (Math.round(
-      ((cur && chart ? cur.timeSec + chart.offset : 0) * zoomPxPerSec()) /
-        timeBarWidth +
-        1
-    ) *
+    (Math.round(((cur ? cur.timeSec : 0) * zoomPxPerSec()) / timeBarWidth + 1) *
       timeBarWidth) /
     zoomPxPerSec();
   const timeBarBeginStep = useMemo(
@@ -213,7 +205,8 @@ export default function TimeBar(props: Props) {
         if (
           /*t - (cur.timeSec + chart.offset) <
         timeBarWidth / 2 / zoomPxPerSec()*/
-          t < timeBarEndSec
+          t <
+          timeBarEndSec + chart.offset
         ) {
           timeBarSteps.push({ step: s, timeSec: t });
         } else {
@@ -595,8 +588,8 @@ const TimeBarInner = memo(function TimeBarInner(props: Props & InnerProps) {
         cur &&
         currentLevel?.seqNotes.map(
           (n) =>
-            n.hitTimeSec + chart.offset > timeBarBeginSec &&
-            n.hitTimeSec + chart.offset < timeBarEndSec &&
+            n.hitTimeSec > timeBarBeginSec &&
+            n.hitTimeSec < timeBarEndSec &&
             // 同じ位置に2つ以上の音符を重ねない
             n.hitTimeSec !==
               currentLevel?.seqNotes.at(n.id + 1)?.hitTimeSec && (
