@@ -3,13 +3,24 @@
 import { useDisplayMode } from "@/scale";
 import clsx from "clsx/lite";
 import {
+  createContext,
   CSSProperties,
   ElementType,
   ReactNode,
   RefObject,
+  useContext,
   useEffect,
   useRef,
 } from "react";
+
+// DisableScrollableが有効の間は、Scrollableをスクロールした際に再描画を行わない
+const DisableScrollableContext = createContext<boolean>(false);
+
+export function DisableScrollable(props: {disabled: boolean; children: ReactNode}){
+  return <DisableScrollableContext.Provider value={props.disabled}>
+    {props.children}
+  </DisableScrollableContext.Provider>
+}
 
 interface Props<T extends ElementType> {
   as?: T;
@@ -26,6 +37,7 @@ interface Props<T extends ElementType> {
   onScroll?: () => void;
 }
 export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
+  const disableScrollable = useContext(DisableScrollableContext);
   const myRef = useRef<HTMLDivElement>(null);
   const ref = props.ref || myRef;
   const { onScroll: propsOnScroll } = props;
@@ -33,7 +45,7 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
   const { scrollableX, scrollableY, defaultFadeY, carouselX, padding } = props;
   useEffect(() => {
     const refCurrent = ref.current;
-    if (refCurrent) {
+    if (refCurrent && !disableScrollable) {
       let redrawing = false;
       const redraw = () => {
         // Safariでmask-image書き換え時に描画されなくなるバグがあるため、opacityを書き換えて強制的に再描画させる
@@ -173,7 +185,7 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
         }
       };
     }
-  }, [ref, padding, rem, scrollableX, scrollableY, propsOnScroll]);
+  }, [disableScrollable, ref, padding, rem, scrollableX, scrollableY, propsOnScroll]);
   const Component = props.as || "div";
   return (
     <Component
