@@ -23,7 +23,7 @@ interface Props {
 export function GuideMain(props: Props) {
   const t = useTranslations("edit.guide");
   return (
-    <div className={clsx("fn-modal-bg")}>
+    <div className={clsx("fn-modal-bg")} onClick={props.close}>
       <Box
         classNameOuter="shadow-modal"
         classNameInner="flex flex-col"
@@ -35,6 +35,7 @@ export function GuideMain(props: Props) {
           maxWidth: "40rem",
           maxHeight: "40rem",
         }}
+        onClick={(e) => e.stopPropagation()}
       >
         <Pager
           index={props.index}
@@ -52,7 +53,10 @@ export function GuideMain(props: Props) {
               <h4 className="fn-heading-box">{t("initNoteStyle")}</h4>
               <div className="flex justify-center items-center gap-2 mb-2">
                 {initNoteStyles.map((s) => (
-                  <div className="shrink-1 basis-32 min-w-0 flex flex-col items-center gap-2" key={s}>
+                  <div
+                    className="shrink-1 basis-32 min-w-0 flex flex-col items-center gap-2"
+                    key={s}
+                  >
                     <button
                       className={clsx(
                         "fn-toggle",
