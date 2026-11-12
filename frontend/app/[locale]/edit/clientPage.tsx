@@ -110,7 +110,7 @@ export default function Edit(props: {
   useEffect(() => {
     // Next.jsがtitleを勝手に書き換える場合があるので頻繁に上書きする必要があるが、
     // title変更がcss再計算をトリガーして重い場合があるため、更新頻度を減らし、さらに再生中を避ける
-    if(!playing){
+    if (!playing) {
       const i = setInterval(() => {
         document.title = titleWithSiteName(
           t("title", { title: chart?.meta.title || "", cid: chart?.cid || "" })

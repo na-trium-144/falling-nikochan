@@ -16,10 +16,15 @@ import {
 // DisableScrollableが有効の間は、Scrollableをスクロールした際に再描画を行わない
 const DisableScrollableContext = createContext<boolean>(false);
 
-export function DisableScrollable(props: {disabled: boolean; children: ReactNode}){
-  return <DisableScrollableContext.Provider value={props.disabled}>
-    {props.children}
-  </DisableScrollableContext.Provider>
+export function DisableScrollable(props: {
+  disabled: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <DisableScrollableContext.Provider value={props.disabled}>
+      {props.children}
+    </DisableScrollableContext.Provider>
+  );
 }
 
 interface Props<T extends ElementType> {
@@ -185,7 +190,15 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
         }
       };
     }
-  }, [disableScrollable, ref, padding, rem, scrollableX, scrollableY, propsOnScroll]);
+  }, [
+    disableScrollable,
+    ref,
+    padding,
+    rem,
+    scrollableX,
+    scrollableY,
+    propsOnScroll,
+  ]);
   const Component = props.as || "div";
   return (
     <Component

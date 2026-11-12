@@ -190,7 +190,8 @@ export class LevelEditing extends EventEmitter<EventType> {
     }
     this.#luaExecutorRef.current.abortExec();
     let levelFreezed: LevelFreeze | null = null;
-    if (luaCode.trim()) {  // なぜか空文字列が渡される瞬間があるっぽい?
+    if (luaCode.trim()) {
+      // なぜか空文字列が渡される瞬間があるっぽい?
       if (this.#luaCache.includes(luaCode)) {
         levelFreezed = this.#luaResultCache.get(luaCode)!;
       } else {

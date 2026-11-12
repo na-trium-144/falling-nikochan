@@ -35,8 +35,10 @@ export function defaultCopyBuffer() {
 }
 
 export const initNoteStyles = ["free", "vertical", "center"] as const;
-export type InitNoteStyle = typeof initNoteStyles[number];
-export function defaultCopyBufferObj(initNoteStyle?: InitNoteStyle): CopyBuffer {
+export type InitNoteStyle = (typeof initNoteStyles)[number];
+export function defaultCopyBufferObj(
+  initNoteStyle?: InitNoteStyle
+): CopyBuffer {
   switch (initNoteStyle) {
     case "vertical":
       return { "0": [0, 0, 3, false, true] };
