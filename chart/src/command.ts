@@ -1,6 +1,5 @@
 import {
   CopyBuffer,
-  CopyBufferEntry,
   NoteCommand15,
   NoteCommandWithLua15,
   Rest15,
