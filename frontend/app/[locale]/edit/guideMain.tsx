@@ -50,23 +50,44 @@ export function GuideMain(props: Props) {
             <>
               <hr className="fn-hr" />
               <h4 className="fn-heading-box">{t("initNoteStyle")}</h4>
-              <div className="flex justify-center">
+              <div className="flex justify-center gap-2">
                 {initNoteStyles.map((s) => (
-                  <button
-                    key={s}
-                    className={clsx(
-                      "fn-toggle",
-                      s === props.initNoteStyle
-                        ? "fn-flat-button fn-plain fn-selected"
-                        : "fn-flat-button fn-sky"
-                    )}
-                    onClick={() => props.setInitNoteStyle(s)}
-                  >
-                    <span className="fn-glass-1" />
-                    <span className="fn-glass-2" />
-                    <ButtonHighlight />
-                    {t(s)}
-                  </button>
+                  <div className="flex flex-col items-center gap-2" key={s}>
+                    <button
+                      className={clsx(
+                        "fn-toggle",
+                        s === props.initNoteStyle
+                          ? "fn-flat-button fn-plain fn-selected"
+                          : "fn-flat-button fn-sky"
+                      )}
+                      onClick={() => props.setInitNoteStyle(s)}
+                    >
+                      <span className="fn-glass-1" />
+                      <span className="fn-glass-2" />
+                      <ButtonHighlight />
+                      {t(s)}
+                    </button>
+                    <img
+                      src={
+                        process.env.ASSET_PREFIX +
+                        `/assets/initNoteStyle-${s}.png` +
+                        process.env.ASSET_NOTE_STYLE
+                      }
+                      className="w-32 dark:hidden"
+                      decoding="async"
+                      fetchPriority="low"
+                    />
+                    <img
+                      src={
+                        process.env.ASSET_PREFIX +
+                        `/assets/initNoteStyle-${s}-dark.png` +
+                        process.env.ASSET_NOTE_STYLE
+                      }
+                      className="w-32 hidden dark:block"
+                      decoding="async"
+                      fetchPriority="low"
+                    />
+                  </div>
                 ))}
               </div>
             </>
