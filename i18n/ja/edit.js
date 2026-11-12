@@ -15,6 +15,7 @@ export default {
     confirmUnsaved: "未保存の変更があります",
     touchMode:
       "タッチ操作モード: {mode, select, p {<var>x</var> 移動} v {<var>vx</var>, <var>vy</var> 移動} other {オフ}}",
+    dragStyleSymmetry: "左右対称モード",
     playerControl: "動画の操作",
     playerControls: {
       play: "再生",
@@ -276,6 +277,10 @@ export default {
       },
       agreeClose: "利用規約に同意して閉じる",
       close: "閉じる",
+      initNoteStyle: "デフォルトの譜面スタイル",
+      free: "フリー",
+      vertical: "垂直落下",
+      center: "左右対称",
     },
   },
 };

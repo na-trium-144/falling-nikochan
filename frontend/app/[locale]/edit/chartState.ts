@@ -23,6 +23,8 @@ import {
   updateBpmTimeSec,
   updateBarNum,
   ChartSchema,
+  InitNoteStyle,
+  initNoteStyles,
 } from "@falling-nikochan/chart";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as msgpack from "@msgpack/msgpack";
@@ -157,6 +159,18 @@ export function useChartState(props: Props) {
   luaExecutorRef.current = props.luaExecutor;
 
   const [savePasswd, setSavePasswd] = useState<boolean>(false);
+
+  const [initNoteStyle, setInitNoteStyle_] = useState<InitNoteStyle>("free");
+  const setInitNoteStyle = useCallback(
+    (i: InitNoteStyle) => {
+      if (chartState.state === "ok") {
+        chartState.chart.resetInitNote(i);
+      }
+      setInitNoteStyle_(i);
+      localStorage.setItem("initNoteStyle", i);
+    },
+    [chartState]
+  );
 
   const fetchChart = useCallback(
     async (cid: string, options: FetchChartOptions) => {
@@ -614,13 +628,25 @@ export function useChartState(props: Props) {
       setSavePasswd(savePasswd);
 
       if (cid === "new") {
+        let initNoteStyle = localStorage.getItem("initNoteStyle");
+        if (
+          !(initNoteStyles as readonly (string | null)[]).includes(
+            initNoteStyle
+          )
+        ) {
+          initNoteStyle = "free";
+        }
+        setInitNoteStyle_(initNoteStyle as InitNoteStyle);
         setChartState({
-          chart: new ChartEditing(emptyChart(locale), {
-            luaExecutorRef,
-            locale,
-            cid: undefined,
-            currentPasswd: undefined,
-          }),
+          chart: new ChartEditing(
+            emptyChart(locale, initNoteStyle as InitNoteStyle),
+            {
+              luaExecutorRef,
+              locale,
+              cid: undefined,
+              currentPasswd: undefined,
+            }
+          ),
           state: "ok",
         });
         onLoadRef.current("new");
@@ -682,5 +708,7 @@ export function useChartState(props: Props) {
     localLoadState,
     localLoad,
     aceSessionRef,
+    initNoteStyle,
+    setInitNoteStyle,
   };
 }

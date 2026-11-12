@@ -29,6 +29,7 @@ const archiveFiles = allFiles
   .filter((n) => !n.includes("assets/ogTemplate"))
   .filter((n) => !n.includes("assets/app-icon"))
   .filter((n) => !n.includes("assets/lp-"))
+  .filter((n) => !n.includes("assets/initNoteStyle-"))
   .filter((n) => !n.includes("assets/nikochan"))
   .filter((n) => !n.includes("assets/cloud"))
   .filter(

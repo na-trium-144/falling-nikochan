@@ -3,7 +3,7 @@
 import clsx from "clsx/lite";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
-import FallingWindow from "./fallingWindow.js";
+import FallingWindow, { DragStyle } from "./fallingWindow.js";
 import Button, { ButtonHighlight } from "@/common/button.js";
 import TimeBar from "./timeBar.js";
 import Input from "@/common/input.js";
@@ -20,6 +20,7 @@ import {
   stepAdd,
   stepCmp,
   stepZero,
+  InitNoteStyle,
 } from "@falling-nikochan/chart";
 import { MobileHeader } from "@/common/header.js";
 import { LuaTabPlaceholder, LuaTabProvider, useLuaExecutor } from "./luaTab.js";
@@ -53,6 +54,11 @@ import { useDisplayMode } from "@/scale.js";
 import { useResizeDetector } from "react-resize-detector";
 import Close from "@icon-park/react/lib/icons/Close.js";
 import { captureAndWrap } from "@/common/fetch.js";
+import Range from "@/common/range.js";
+import CheckBox from "@/common/checkBox.js";
+import { DisableScrollable } from "@/common/scrollable.js";
+
+const stepUnitRangeValues = [4, 8, 12, 16, 24, 32, 48] as const;
 
 export default function Edit(props: {
   locale: string;
@@ -83,6 +89,8 @@ export default function Edit(props: {
     localLoadState,
     localLoad,
     aceSessionRef,
+    initNoteStyle,
+    setInitNoteStyle,
   } = useChartState({
     luaExecutor,
     onLoad: (cid) => {
@@ -100,10 +108,16 @@ export default function Edit(props: {
   const cur = currentLevel?.current;
 
   useEffect(() => {
-    document.title = titleWithSiteName(
-      t("title", { title: chart?.meta.title || "", cid: chart?.cid || "" })
-    );
-    // dependencyなし: 常時実行
+    // Next.jsがtitleを勝手に書き換える場合があるので頻繁に上書きする必要があるが、
+    // title変更がcss再計算をトリガーして重い場合があるため、更新頻度を減らし、さらに再生中を避ける
+    if (!playing) {
+      const i = setInterval(() => {
+        document.title = titleWithSiteName(
+          t("title", { title: chart?.meta.title || "", cid: chart?.cid || "" })
+        );
+      }, 1000);
+      return () => clearInterval(i);
+    }
   });
 
   const [sessionId, setSessionId] = useState<number>();
@@ -328,11 +342,28 @@ export default function Edit(props: {
   const openGuide = () => setGuidePage([2, 4, 5, 6, 7][tab]);
 
   const [dragMode, setDragMode] = useState<null | "p" | "v" | "a">(null);
+  const [dragStyle, setDragStyle] = useState<DragStyle>("free");
   useEffect(() => {
     if (dragMode === null && !isTouch && chart) {
       setDragMode("p");
     }
   }, [dragMode, isTouch, chart]);
+
+  const setInitNoteAndDragStyle = useCallback(
+    (i: InitNoteStyle) => {
+      setInitNoteStyle(i);
+      switch (i) {
+        case "center":
+          setDragStyle("center");
+          break;
+        case "vertical":
+        default:
+          setDragStyle("free");
+          break;
+      }
+    },
+    [setInitNoteStyle]
+  );
 
   useEffect(() => {
     if (ytPlayer.current?.getDuration) {
@@ -405,12 +436,14 @@ export default function Edit(props: {
               ? aceSessionRef.current[chart.currentLevelIndex]
               : undefined;
           session?.getUndoManager().undo(session);
+          e.preventDefault(); // chromeはどこにもフォーカスがなくてもctrl+zでテキストを戻そうとする場合がある
         } else if (e.key === "y") {
           const session =
             chart?.currentLevelIndex !== undefined
               ? aceSessionRef.current[chart.currentLevelIndex]
               : undefined;
           session?.getUndoManager().redo(session);
+          e.preventDefault();
         } else {
           //
         }
@@ -435,564 +468,606 @@ export default function Edit(props: {
     aceSessionRef,
   ]);
   return (
-    <main
-      className={clsx(
-        "w-full h-dvh overflow-x-clip overflow-y-auto",
-        "edit-wide:overflow-y-clip",
-        dragMode !== null && "touch-none"
-      )}
-      tabIndex={0}
-      ref={ref}
-      onKeyUp={(e) => {
-        if (
-          chart &&
-          ready &&
-          !isCodeTab &&
-          (e.key === "Shift" || e.key === "Control")
-        ) {
-          setDragMode("p");
-        }
-      }}
-      onDragOver={(e) => {
-        if (chart !== undefined && tab !== 4) {
-          // エディタの読み込みが完了するまでは無効
-          e.preventDefault();
-          setDragOver(true);
-        }
-      }}
-    >
-      <div
+    <DisableScrollable disabled={playing}>
+      <main
         className={clsx(
-          "fixed z-edit-mobile-header top-0 inset-x-0",
-          "flex edit-wide:hidden flex-row items-center",
-          "fn-mh-blur"
+          "w-full h-dvh overflow-x-clip overflow-y-auto",
+          "edit-wide:overflow-y-clip",
+          dragMode !== null && "touch-none"
         )}
-      >
-        <MobileHeader
-          className="flex-1 edit-wide:hidden"
-          noBackButton={!standalone && !insideFrame}
-        >
-          {t("titleShort")} ID: {chart?.cid}
-        </MobileHeader>
-        <Button
-          className="mt-sai mr-sai"
-          text={t("help")}
-          onClick={openGuide}
-        />
-      </div>
-      <div className="w-0 h-mobile-header edit-wide:hidden" />
-      {chart === undefined ? (
-        <div
-          className={clsx("fn-modal-bg")}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="absolute inset-6 grid place-content-center">
-            <Box
-              classNameOuter={clsx(
-                "w-max h-max max-w-full max-h-full",
-                "shadow-modal"
-              )}
-              classNameInner="flex flex-col items-center text-center"
-              scrollableY
-              padding={6}
-            >
-              <PasswdPrompt
-                loadStatus={loadStatus}
-                fetchChart={fetchChart}
-                savePasswd={savePasswd}
-                setSavePasswd={setSavePasswd}
-              />
-            </Box>
-          </div>
-        </div>
-      ) : guidePage !== null ? (
-        <GuideMain
-          content={props.guideContents[guidePage]}
-          index={guidePage}
-          setIndex={setGuidePage}
-          close={() => setGuidePage(null)}
-          locale={locale}
-        />
-      ) : null}
-
-      {dragOver && (
-        <div
-          className="fn-modal-bg z-edit-dragover-bg"
-          onDragLeave={() => setDragOver(false)}
-          onDrop={(e) => {
+        tabIndex={0}
+        ref={ref}
+        onKeyUp={(e) => {
+          if (
+            chart &&
+            !isCodeTab &&
+            (e.key === "Shift" || e.key === "Control")
+          ) {
+            setDragMode("p");
+          }
+        }}
+        onDragOver={(e) => {
+          if (chart !== undefined && tab !== 4) {
+            // エディタの読み込みが完了するまでは無効
             e.preventDefault();
-            setDragOver(false);
-            const file = e.dataTransfer.files[0];
-            if (file) {
-              const reader = new FileReader();
-              reader.onload = async (event) => {
-                await localLoad(event.target!.result as ArrayBuffer);
-              };
-              reader.readAsArrayBuffer(file);
-            }
-          }}
-        >
-          <Box classNameOuter="w-max h-max p-6 shadow-modal">
-            <p>{t("dragOver")}</p>
-          </Box>
-        </div>
-      )}
-
-      <LuaTabProvider
-        visible={tab === 4}
-        chart={chart}
-        currentStepStr={cur?.currentStepStr || null}
-        seekStepAbs={seekStepAbs}
-        result={luaExecutor.running ? null : luaExecutor.result}
-        aceSessionRef={aceSessionRef}
+            setDragOver(true);
+          }
+        }}
       >
         <div
           className={clsx(
-            "w-full",
-            "edit-wide:h-full edit-wide:flex edit-wide:items-stretch edit-wide:justify-center edit-wide:flex-row",
-            "p-sai-3 gap-3",
-            "overflow-hidden"
+            "fixed z-edit-mobile-header top-0 inset-x-0",
+            "flex edit-wide:hidden flex-row items-center",
+            "fn-mh-blur"
           )}
+        >
+          <MobileHeader
+            className="flex-1 edit-wide:hidden"
+            noBackButton={!standalone && !insideFrame}
+          >
+            {t("titleShort")} ID: {chart?.cid}
+          </MobileHeader>
+          <Button
+            className="mt-sai mr-sai"
+            text={t("help")}
+            onClick={openGuide}
+          />
+        </div>
+        <div className="w-0 h-mobile-header edit-wide:hidden" />
+        {chart === undefined ? (
+          <div
+            className={clsx("fn-modal-bg")}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="absolute inset-6 grid place-content-center">
+              <Box
+                classNameOuter={clsx(
+                  "w-max h-max max-w-full max-h-full",
+                  "shadow-modal"
+                )}
+                classNameInner="flex flex-col items-center text-center"
+                scrollableY
+                padding={6}
+              >
+                <PasswdPrompt
+                  loadStatus={loadStatus}
+                  fetchChart={fetchChart}
+                  savePasswd={savePasswd}
+                  setSavePasswd={setSavePasswd}
+                />
+              </Box>
+            </div>
+          </div>
+        ) : guidePage !== null ? (
+          <GuideMain
+            content={props.guideContents[guidePage]}
+            index={guidePage}
+            setIndex={setGuidePage}
+            close={() => setGuidePage(null)}
+            locale={locale}
+            initNoteStyle={initNoteStyle}
+            setInitNoteStyle={setInitNoteAndDragStyle}
+          />
+        ) : null}
+
+        {dragOver && (
+          <div
+            className="fn-modal-bg z-edit-dragover-bg"
+            onDragLeave={() => setDragOver(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragOver(false);
+              const file = e.dataTransfer.files[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onload = async (event) => {
+                  await localLoad(event.target!.result as ArrayBuffer);
+                };
+                reader.readAsArrayBuffer(file);
+              }
+            }}
+          >
+            <Box classNameOuter="w-max h-max p-6 shadow-modal">
+              <p>{t("dragOver")}</p>
+            </Box>
+          </div>
+        )}
+
+        <LuaTabProvider
+          visible={tab === 4}
+          chart={chart}
+          currentStepStr={cur?.currentStepStr || null}
+          seekStepAbs={seekStepAbs}
+          result={luaExecutor.running ? null : luaExecutor.result}
+          aceSessionRef={aceSessionRef}
         >
           <div
             className={clsx(
-              "edit-wide:basis-4/12 edit-wide:h-full",
-              "min-w-0 grow-0 shrink-0 flex flex-col items-stretch"
+              "w-full",
+              "edit-wide:h-full edit-wide:flex edit-wide:items-stretch edit-wide:justify-center edit-wide:flex-row",
+              "p-sai-3 gap-3",
+              "overflow-hidden"
             )}
           >
-            <div className="hidden edit-wide:flex flex-row items-baseline mb-3 space-x-2">
-              {(standalone || insideFrame) && (
-                <button
-                  className={clsx("fn-link-1")}
-                  onClick={() => {
-                    historyBackWithReview();
+            <div
+              className={clsx(
+                "edit-wide:basis-4/12 edit-wide:h-full",
+                "min-w-0 grow-0 shrink-0 flex flex-col items-stretch"
+              )}
+            >
+              <div className="hidden edit-wide:flex flex-row items-baseline mb-3 space-x-2">
+                {(standalone || insideFrame) && (
+                  <button
+                    className={clsx("fn-link-1")}
+                    onClick={() => {
+                      historyBackWithReview();
+                    }}
+                  >
+                    <ArrowLeft className="inline-block align-middle mr-2 " />
+                    {t("back")}
+                  </button>
+                )}
+                <span className="min-w-0 overflow-clip grow-1 flex flex-row items-baseline space-x-2">
+                  <span className="whitespace-nowrap ">{t("titleShort")}</span>
+                  <span className="grow-1 whitespace-nowrap ">
+                    ID: {chart?.cid}
+                  </span>
+                  <span className="min-w-0 overflow-clip shrink-1 whitespace-nowrap text-dim">
+                    <span className="">ver.</span>
+                    <span className="ml-1">{process.env.buildVersion}</span>
+                  </span>
+                </span>
+                <Button text={t("help")} onClick={openGuide} />
+              </div>
+              <div
+                ref={youtubeSpace.ref}
+                className="grow-0 shrink-0 grid-centering edit-wide:h-9/25"
+              >
+                <div
+                  className={clsx(
+                    youtubeFitToWidth ? "w-full" : "h-full",
+                    "relative p-3 rounded-sq-xl",
+                    // levelBgColors[levelTypes.indexOf(currentLevel?.meta.type || "")] ||
+                    //   levelBgColors[1],
+                    chart || "invisible",
+                    colorThief.boxStyle
+                  )}
+                  style={{ color: colorThief.currentColor }}
+                >
+                  <span className={clsx("fn-glass-1")} />
+                  <span className={clsx("fn-glass-2")} />
+                  <FlexYouTube
+                    fixedSide={youtubeFitToWidth ? "width" : "height"}
+                    className={youtubeFitToWidth ? "w-full" : "h-full"}
+                    control={true}
+                    id={chart?.meta.ytId}
+                    ytPlayer={ytPlayer}
+                    onReady={onReady}
+                    onStart={onStart}
+                    onStop={onStop}
+                    onPlaybackRateChange={setPlaybackRate}
+                  />
+                  {chart?.meta.ytId && (
+                    <img
+                      ref={colorThief.imgRef}
+                      className="hidden"
+                      src={`https://i.ytimg.com/vi/${chart?.meta.ytId}/mqdefault.jpg`}
+                      crossOrigin="anonymous"
+                    />
+                  )}
+                </div>
+              </div>
+              <div
+                ref={fallingWindowSpace.ref}
+                className={clsx(
+                  "w-full aspect-square min-h-0",
+                  "edit-wide:flex-1 edit-wide:aspect-auto"
+                )}
+              >
+                <div
+                  className="m-auto relative border border-gray-400/25"
+                  style={{
+                    width: `min(${fallingWindowSpace.width}px,${fallingWindowSpace.height}px)`,
+                    height: `min(${fallingWindowSpace.width}px,${fallingWindowSpace.height}px)`,
                   }}
                 >
-                  <ArrowLeft className="inline-block align-middle mr-2 " />
-                  {t("back")}
-                </button>
-              )}
-              <span className="min-w-0 overflow-clip grow-1 flex flex-row items-baseline space-x-2">
-                <span className="whitespace-nowrap ">{t("titleShort")}</span>
-                <span className="grow-1 whitespace-nowrap ">
-                  ID: {chart?.cid}
-                </span>
-                <span className="min-w-0 overflow-clip shrink-1 whitespace-nowrap text-dim">
-                  <span className="">ver.</span>
-                  <span className="ml-1">{process.env.buildVersion}</span>
-                </span>
-              </span>
-              <Button text={t("help")} onClick={openGuide} />
-            </div>
-            <div
-              ref={youtubeSpace.ref}
-              className="grow-0 shrink-0 grid-centering edit-wide:h-9/25"
-            >
-              <div
-                className={clsx(
-                  youtubeFitToWidth ? "w-full" : "h-full",
-                  "relative p-3 rounded-sq-xl",
-                  // levelBgColors[levelTypes.indexOf(currentLevel?.meta.type || "")] ||
-                  //   levelBgColors[1],
-                  chart || "invisible",
-                  colorThief.boxStyle
-                )}
-                style={{ color: colorThief.currentColor }}
-              >
-                <span className={clsx("fn-glass-1")} />
-                <span className={clsx("fn-glass-2")} />
-                <FlexYouTube
-                  fixedSide={youtubeFitToWidth ? "width" : "height"}
-                  className={youtubeFitToWidth ? "w-full" : "h-full"}
-                  control={true}
-                  id={chart?.meta.ytId}
-                  ytPlayer={ytPlayer}
-                  onReady={onReady}
-                  onStart={onStart}
-                  onStop={onStop}
-                  onPlaybackRateChange={setPlaybackRate}
-                />
-                {chart?.meta.ytId && (
-                  <img
-                    ref={colorThief.imgRef}
-                    className="hidden"
-                    src={`https://i.ytimg.com/vi/${chart?.meta.ytId}/mqdefault.jpg`}
-                    crossOrigin="anonymous"
+                  <FallingWindow
+                    inCodeTab={isCodeTab}
+                    className="absolute inset-0"
+                    chart={chart}
+                    dragMode={dragMode}
+                    setDragMode={setDragMode}
+                    dragStyle={dragStyle}
+                    playing={playing}
                   />
-                )}
-              </div>
-            </div>
-            <div
-              ref={fallingWindowSpace.ref}
-              className={clsx(
-                "w-full aspect-square min-h-0",
-                "edit-wide:flex-1 edit-wide:aspect-auto"
-              )}
-            >
-              <div
-                className="m-auto relative border border-gray-400/25"
-                style={{
-                  width: `min(${fallingWindowSpace.width}px,${fallingWindowSpace.height}px)`,
-                  height: `min(${fallingWindowSpace.width}px,${fallingWindowSpace.height}px)`,
-                }}
-              >
-                <FallingWindow
-                  inCodeTab={isCodeTab}
-                  className="absolute inset-0"
-                  chart={chart}
-                  dragMode={dragMode}
-                  setDragMode={setDragMode}
-                />
-                <div
-                  className={clsx(
-                    "absolute -top-[200%] bottom-full -left-[50%] -right-[250%]",
-                    "z-edit-blur-overlay backdrop-blur-2xs"
-                  )}
-                />
-                <div
-                  className={clsx(
-                    "absolute top-full -bottom-[300vh] -left-[50%] -right-[250%]",
-                    "z-edit-blur-overlay backdrop-blur-2xs"
-                  )}
-                />
-                <div
-                  className={clsx(
-                    "absolute inset-y-0 -left-[50%] right-full",
-                    "z-edit-blur-overlay backdrop-blur-2xs"
-                  )}
-                />
-                <div
-                  className={clsx(
-                    "absolute inset-y-0 left-full -right-[250%]",
-                    "z-edit-blur-overlay backdrop-blur-2xs"
-                  )}
-                />
-              </div>
-            </div>
-            {chart && isTouch && (
-              <button
-                className={clsx(
-                  "self-start flex flex-row items-center",
-                  "fn-link-1"
-                )}
-                onClick={() => {
-                  setDragMode(
-                    dragMode === "p" ? "v" : dragMode === "v" ? null : "p"
-                  );
-                }}
-              >
-                <span className="relative inline-block w-8 h-8 ">
-                  {dragMode === null ? (
-                    <>
-                      <Move className="absolute text-xl inset-0 w-max h-max m-auto " />
-                      <Forbid className="absolute text-3xl inset-0 w-max h-max m-auto " />
-                    </>
-                  ) : (
-                    <>
-                      <Move
-                        className="absolute text-xl inset-0 w-max h-max m-auto "
-                        theme="two-tone"
-                        fill={["#333", "#fc5"]}
-                      />
-                    </>
-                  )}
-                </span>
-                <span className="">
-                  {t.rich("touchMode", {
-                    mode: dragMode || "null",
-                    var: (c) => <var className="italic">{c}</var>,
-                  })}
-                </span>
-              </button>
-            )}
-          </div>
-          <div
-            className={clsx(
-              "flex flex-col items-stretch",
-              "h-5/6",
-              "min-w-0", // timebarのwidthが大きいので
-              "edit-wide:h-full edit-wide:basis-main edit-wide:shrink-1"
-            )}
-          >
-            <div>
-              <span className="mr-1">{t("playerControl")}:</span>
-              <Select
-                options={["0.25", "0.5", "0.75", "1", "1.5", "2"].map((s) => ({
-                  label: (
-                    <>
-                      ×
-                      <span className="inline-block text-left ml-1 w-9">
-                        {s}
-                      </span>
-                    </>
-                  ),
-                  value: s,
-                }))}
-                value={playbackRate.toString()}
-                onSelect={(s: string) => changePlaybackRate(Number(s))}
-                showValue
-              />
-              <Button
-                onClick={() => {
-                  if (ready) {
-                    if (!playing) {
-                      start();
-                    } else {
-                      stop();
-                    }
-                  }
-                }}
-                text={
-                  playing ? t("playerControls.pause") : t("playerControls.play")
-                }
-                keyName="Space"
-              />
-              <span className="inline-block">
-                <Button
-                  onClick={() => {
-                    if (ready && currentLevel) {
-                      seekStepRel(-currentLevel.meta.snapDivider * 4);
-                    }
-                  }}
-                  text={t("playerControls.moveStep", {
-                    step: -(currentLevel?.meta.snapDivider || 1) * 4,
-                  })}
-                  keyName="PageUp"
-                />
-                <Button
-                  onClick={() => {
-                    if (ready && currentLevel) {
-                      seekStepRel(currentLevel.meta.snapDivider * 4);
-                    }
-                  }}
-                  text={t("playerControls.moveStep", {
-                    step: (currentLevel?.meta.snapDivider || 1) * 4,
-                  })}
-                  keyName="PageDn"
-                />
-              </span>
-              <span className="inline-block">
-                <Button
-                  onClick={() => {
-                    if (ready) {
-                      seekLeft1();
-                    }
-                  }}
-                  text={t("playerControls.moveStep", { step: -1 })}
-                  keyName="←"
-                />
-                <Button
-                  onClick={() => {
-                    if (ready) {
-                      seekRight1();
-                    }
-                  }}
-                  text={t("playerControls.moveStep", { step: 1 })}
-                  keyName="→"
-                />
-              </span>
-              <span className="inline-block">
-                <Button
-                  onClick={() => {
-                    if (ready) {
-                      seekSec(-1 / 30);
-                    }
-                  }}
-                  text={t("playerControls.moveMinus1F")}
-                  keyName=","
-                />
-                <Button
-                  onClick={() => {
-                    if (ready) {
-                      seekSec(1 / 30);
-                    }
-                  }}
-                  text={t("playerControls.movePlus1F")}
-                  keyName="."
-                />
-              </span>
-            </div>
-            <TimeBar
-              chart={chart}
-              setAndSeekCurrentTimeWithoutOffset={
-                setAndSeekCurrentTimeWithoutOffset
-              }
-            />
-            <div className="flex flex-row items-baseline">
-              <span>{t("stepUnit")} =</span>
-              <span className="ml-2">1</span>
-              <span className="ml-1">/</span>
-              <Input
-                className="w-12"
-                actualValue={String((currentLevel?.meta.snapDivider ?? 1) * 4)}
-                updateValue={(v: string) => {
-                  currentLevel?.updateMeta({ snapDivider: Number(v) / 4 });
-                }}
-                isValid={(v) =>
-                  !isNaN(Number(v)) &&
-                  String(Math.floor(Number(v) / 4) * 4) === v
-                }
-              />
-              <HelpIcon className="self-center">
-                {t.rich("stepUnitHelp", { br: () => <br /> })}
-              </HelpIcon>
-              <div className="flex-1" />
-              <span className="mr-1">{t("zoom")}</span>
-              <Button
-                small
-                text="-"
-                onClick={() => chart?.setZoom(chart.zoom - 1)}
-              />
-              <Button
-                small
-                text="+"
-                onClick={() => chart?.setZoom(chart.zoom + 1)}
-              />
-            </div>
-            <div className="flex flex-row ml-6 mt-3">
-              {tabNameKeys.map((key, i) =>
-                i === tab ? (
-                  <Box
-                    key={i}
-                    classNameOuter="sq-unset rounded-t-2xl rounded-b-none px-3 pt-2 pb-1"
-                    classNameBorder="border-b-0"
-                  >
-                    {t(`${key}.title`)}
-                  </Box>
-                ) : (
-                  <button
-                    key={i}
+                  <div
                     className={clsx(
-                      "rounded-t-2xl px-3 pt-2 pb-1",
-                      "fn-flat-button fn-sky"
+                      "absolute -top-[200%] bottom-full -left-[50%] -right-[250%]",
+                      "z-edit-blur-overlay backdrop-blur-2xs"
                     )}
-                    onClick={() => {
-                      setTab(i);
-                      ref.current?.focus();
-                    }}
-                  >
-                    <span className={clsx("fn-glass-1", "border-b-0")} />
-                    <span className={clsx("fn-glass-2", "border-b-0")} />
-                    <ButtonHighlight />
-                    {t(`${key}.title`)}
-                  </button>
-                )
-              )}
-            </div>
-            <Box
-              classNameOuter={clsx(
-                "min-h-96",
-                "edit-wide:flex-1 edit-wide:min-h-0"
-              )}
-              classNameInner={clsx("relative")}
-              scrollableX
-              scrollableY
-              padding={3}
-            >
-              {tab === 0 ? (
-                <MetaTab
-                  saveEditSession={saveEditSession}
-                  sessionId={sessionId}
-                  sessionDataRef={sessionDataRef}
-                  chart={chart}
-                  locale={locale}
-                  savePasswd={!!savePasswd}
-                  setSavePasswd={setSavePasswd}
-                  remoteSave={remoteSave}
-                  saveState={saveState}
-                  remoteDelete={remoteDelete}
-                  localSaveState={localSaveState}
-                  localSave={localSave}
-                  localLoadState={localLoadState}
-                  localLoad={localLoad}
-                />
-              ) : tab === 1 ? (
-                <TimingTab
-                  chart={chart}
-                  enableHitSE={enableHitSE}
-                  setEnableHitSE={setEnableHitSE}
-                  hitVolume={hitVolume}
-                  setHitVolume={setHitVolume}
-                  enableBeatSE={enableBeatSE}
-                  setEnableBeatSE={setEnableBeatSE}
-                  beatVolume={beatVolume}
-                  setBeatVolume={setBeatVolume}
-                />
-              ) : tab === 2 ? (
-                <LevelTab chart={chart} />
-              ) : tab === 3 ? (
-                <NoteTab chart={chart} aceSessionRef={aceSessionRef} />
-              ) : null}
-              <LuaTabPlaceholder parentContainer={ref.current} />
-            </Box>
-            <Box
-              classNameOuter={clsx(
-                "fixed bottom-0 right-0 m-sai-1.5 w-max h-max shadow-modal z-edit-error",
-                "bg-gray-500/25",
-                !(
-                  luaExecutor.running ||
-                  (luaExecutor.result &&
-                    luaExecutor.result.levelIndex ===
-                      chart?.currentLevelIndex &&
-                    (luaExecutor.result.stdout.length > 0 ||
-                      luaExecutor.result.err.length > 0))
-                ) && "hidden"
-              )}
-              classNameInner={clsx(
-                // min-h: キャンセルボタンの高さ(8) + padding
-                "min-h-14 max-h-[20vh]",
-                // min-w: スクリプトを実行中...[キャンセル] が収まるサイズ
-                "edit-wide:min-w-85 edit-wide:max-w-[min(50rem,66vw)]",
-                "flex flex-col justify-center"
-              )}
-              scrollableX
-              scrollableY
-              padding={3}
-            >
-              {luaExecutor.running ? (
-                <div>
-                  <span className="inline-block ">
-                    <SlimeSVG />
-                    {t("running")}
-                  </span>
-                  <Button
-                    className="ml-2 my-0"
-                    small
-                    onClick={luaExecutor.abortExec}
-                    text={t("cancel")}
+                  />
+                  <div
+                    className={clsx(
+                      "absolute top-full -bottom-[300vh] -left-[50%] -right-[250%]",
+                      "z-edit-blur-overlay backdrop-blur-2xs"
+                    )}
+                  />
+                  <div
+                    className={clsx(
+                      "absolute inset-y-0 -left-[50%] right-full",
+                      "z-edit-blur-overlay backdrop-blur-2xs"
+                    )}
+                  />
+                  <div
+                    className={clsx(
+                      "absolute inset-y-0 left-full -right-[250%]",
+                      "z-edit-blur-overlay backdrop-blur-2xs"
+                    )}
                   />
                 </div>
-              ) : (
-                <>
-                  {/* mr-11: 閉じるボタンの分のスペース */}
-                  {luaExecutor.result?.stdout.map((s, i) => (
-                    <p className="text-sm mr-11" key={i}>
-                      {s}
-                    </p>
-                  ))}
-                  {luaExecutor.result?.err.map((e, i) => (
-                    <p
-                      className="text-sm text-red-600 dark:text-red-400 mr-11"
-                      key={i}
-                    >
-                      {e}
-                    </p>
-                  ))}
-                  <button
-                    className="fn-icon-button inline-block absolute top-3 right-3"
-                    onClick={() => {
-                      luaExecutor.clearResult();
-                    }}
+              </div>
+              {chart && (
+                <div className="self-start flex flex-wrap flex-row items-center gap-2 py-3">
+                  <CheckBox
+                    id="dragStyleSymmetry"
+                    value={dragStyle === "center"}
+                    onChange={(v) => setDragStyle(v ? "center" : "free")}
                   >
-                    <ButtonHighlight />
-                    <Close />
-                  </button>
-                </>
+                    {t("dragStyleSymmetry")}
+                  </CheckBox>
+                  {isTouch && (
+                    <button
+                      className={clsx(
+                        "flex flex-row items-center",
+                        "fn-link-1"
+                      )}
+                      onClick={() => {
+                        setDragMode(
+                          dragMode === "p" ? "v" : dragMode === "v" ? null : "p"
+                        );
+                      }}
+                    >
+                      <span className="relative inline-block w-8 h-8 ">
+                        {dragMode === null ? (
+                          <>
+                            <Move className="absolute text-xl inset-0 w-max h-max m-auto " />
+                            <Forbid className="absolute text-3xl inset-0 w-max h-max m-auto " />
+                          </>
+                        ) : (
+                          <>
+                            <Move
+                              className="absolute text-xl inset-0 w-max h-max m-auto "
+                              theme="two-tone"
+                              fill={["#333", "#fc5"]}
+                            />
+                          </>
+                        )}
+                      </span>
+                      <span className="whitespace-nowrap">
+                        {t.rich("touchMode", {
+                          mode: dragMode || "null",
+                          var: (c) => <var className="italic">{c}</var>,
+                        })}
+                      </span>
+                    </button>
+                  )}
+                </div>
               )}
-            </Box>
+            </div>
+            <div
+              className={clsx(
+                "flex flex-col items-stretch",
+                "h-5/6",
+                "min-w-0", // timebarのwidthが大きいので
+                "edit-wide:h-full edit-wide:basis-main edit-wide:shrink-1"
+              )}
+            >
+              <div>
+                <span className="mr-1">{t("playerControl")}:</span>
+                <Select
+                  options={["0.25", "0.5", "0.75", "1", "1.5", "2"].map(
+                    (s) => ({
+                      label: (
+                        <>
+                          ×
+                          <span className="inline-block text-left ml-1 w-9">
+                            {s}
+                          </span>
+                        </>
+                      ),
+                      value: s,
+                    })
+                  )}
+                  value={playbackRate.toString()}
+                  onSelect={(s: string) => changePlaybackRate(Number(s))}
+                  showValue
+                />
+                <Button
+                  onClick={() => {
+                    if (ready) {
+                      if (!playing) {
+                        start();
+                      } else {
+                        stop();
+                      }
+                    }
+                  }}
+                  text={
+                    playing
+                      ? t("playerControls.pause")
+                      : t("playerControls.play")
+                  }
+                  keyName="Space"
+                />
+                <span className="inline-block">
+                  <Button
+                    onClick={() => {
+                      if (ready && currentLevel) {
+                        seekStepRel(-currentLevel.meta.snapDivider * 4);
+                      }
+                    }}
+                    text={t("playerControls.moveStep", {
+                      step: -(currentLevel?.meta.snapDivider || 1) * 4,
+                    })}
+                    keyName="PageUp"
+                  />
+                  <Button
+                    onClick={() => {
+                      if (ready && currentLevel) {
+                        seekStepRel(currentLevel.meta.snapDivider * 4);
+                      }
+                    }}
+                    text={t("playerControls.moveStep", {
+                      step: (currentLevel?.meta.snapDivider || 1) * 4,
+                    })}
+                    keyName="PageDn"
+                  />
+                </span>
+                <span className="inline-block">
+                  <Button
+                    onClick={() => {
+                      if (ready) {
+                        seekLeft1();
+                      }
+                    }}
+                    text={t("playerControls.moveStep", { step: -1 })}
+                    keyName="←"
+                  />
+                  <Button
+                    onClick={() => {
+                      if (ready) {
+                        seekRight1();
+                      }
+                    }}
+                    text={t("playerControls.moveStep", { step: 1 })}
+                    keyName="→"
+                  />
+                </span>
+                <span className="inline-block">
+                  <Button
+                    onClick={() => {
+                      if (ready) {
+                        seekSec(-1 / 30);
+                      }
+                    }}
+                    text={t("playerControls.moveMinus1F")}
+                    keyName=","
+                  />
+                  <Button
+                    onClick={() => {
+                      if (ready) {
+                        seekSec(1 / 30);
+                      }
+                    }}
+                    text={t("playerControls.movePlus1F")}
+                    keyName="."
+                  />
+                </span>
+              </div>
+              <TimeBar
+                playing={playing}
+                chart={chart}
+                setAndSeekCurrentTimeWithoutOffset={
+                  setAndSeekCurrentTimeWithoutOffset
+                }
+              />
+              <div className="flex flex-row flex-wrap items-baseline">
+                <span>{t("stepUnit")} =</span>
+                <span className="ml-2">1</span>
+                <span className="ml-1">/</span>
+                <Input
+                  className="w-12"
+                  actualValue={String(
+                    (currentLevel?.meta.snapDivider ?? 1) * 4
+                  )}
+                  updateValue={(v: string) => {
+                    currentLevel?.updateMeta({ snapDivider: Number(v) / 4 });
+                  }}
+                  isValid={(v) =>
+                    !isNaN(Number(v)) &&
+                    Number(v) > 0 &&
+                    String(Math.floor(Number(v) / 4) * 4) === v
+                  }
+                />
+                <Range
+                  className="mx-2 self-center"
+                  min={0}
+                  max={stepUnitRangeValues.length - 1}
+                  value={stepUnitRangeValues.findLastIndex(
+                    (u) => u <= (currentLevel?.meta.snapDivider ?? 1) * 4
+                  )}
+                  onChange={(v) => {
+                    currentLevel?.updateMeta({
+                      snapDivider: stepUnitRangeValues[v] / 4,
+                    });
+                  }}
+                />
+                <HelpIcon className="self-center">
+                  {t.rich("stepUnitHelp", { br: () => <br /> })}
+                </HelpIcon>
+                <div className="flex-1 flex flex-row items-baseline justify-end">
+                  <span className="mr-1">{t("zoom")}</span>
+                  <Button
+                    small
+                    text="-"
+                    onClick={() => chart?.setZoom(chart.zoom - 1)}
+                  />
+                  <Button
+                    small
+                    text="+"
+                    onClick={() => chart?.setZoom(chart.zoom + 1)}
+                  />
+                </div>
+              </div>
+              <div className="flex flex-row ml-6 mt-3">
+                {tabNameKeys.map((key, i) =>
+                  i === tab ? (
+                    <Box
+                      key={i}
+                      classNameOuter="sq-unset rounded-t-2xl rounded-b-none px-3 pt-2 pb-1"
+                      classNameBorder="border-b-0"
+                    >
+                      {t(`${key}.title`)}
+                    </Box>
+                  ) : (
+                    <button
+                      key={i}
+                      className={clsx(
+                        "rounded-t-2xl px-3 pt-2 pb-1",
+                        "fn-flat-button fn-sky"
+                      )}
+                      onClick={() => {
+                        setTab(i);
+                        ref.current?.focus();
+                      }}
+                    >
+                      <span className={clsx("fn-glass-1", "border-b-0")} />
+                      <span className={clsx("fn-glass-2", "border-b-0")} />
+                      <ButtonHighlight />
+                      {t(`${key}.title`)}
+                    </button>
+                  )
+                )}
+              </div>
+              <Box
+                classNameOuter={clsx(
+                  "min-h-96",
+                  "edit-wide:flex-1 edit-wide:min-h-0"
+                )}
+                classNameInner={clsx("relative")}
+                scrollableX
+                scrollableY
+                padding={3}
+              >
+                {tab === 0 ? (
+                  <MetaTab
+                    saveEditSession={saveEditSession}
+                    sessionId={sessionId}
+                    sessionDataRef={sessionDataRef}
+                    chart={chart}
+                    locale={locale}
+                    savePasswd={!!savePasswd}
+                    setSavePasswd={setSavePasswd}
+                    remoteSave={remoteSave}
+                    saveState={saveState}
+                    remoteDelete={remoteDelete}
+                    localSaveState={localSaveState}
+                    localSave={localSave}
+                    localLoadState={localLoadState}
+                    localLoad={localLoad}
+                  />
+                ) : tab === 1 ? (
+                  <TimingTab
+                    chart={chart}
+                    enableHitSE={enableHitSE}
+                    setEnableHitSE={setEnableHitSE}
+                    hitVolume={hitVolume}
+                    setHitVolume={setHitVolume}
+                    enableBeatSE={enableBeatSE}
+                    setEnableBeatSE={setEnableBeatSE}
+                    beatVolume={beatVolume}
+                    setBeatVolume={setBeatVolume}
+                  />
+                ) : tab === 2 ? (
+                  <LevelTab chart={chart} />
+                ) : tab === 3 ? (
+                  <NoteTab
+                    chart={chart}
+                    aceSessionRef={aceSessionRef}
+                    playing={playing}
+                  />
+                ) : null}
+                <LuaTabPlaceholder parentContainer={ref.current} />
+              </Box>
+              <Box
+                classNameOuter={clsx(
+                  "fixed bottom-0 right-0 m-sai-1.5 w-max h-max shadow-modal z-edit-error",
+                  "bg-gray-500/25",
+                  !(
+                    luaExecutor.running ||
+                    (luaExecutor.result &&
+                      luaExecutor.result.levelIndex ===
+                        chart?.currentLevelIndex &&
+                      (luaExecutor.result.stdout.length > 0 ||
+                        luaExecutor.result.err.length > 0))
+                  ) && "hidden"
+                )}
+                classNameInner={clsx(
+                  // min-h: キャンセルボタンの高さ(8) + padding
+                  "min-h-14 max-h-[20vh]",
+                  // min-w: スクリプトを実行中...[キャンセル] が収まるサイズ
+                  "edit-wide:min-w-85 edit-wide:max-w-[min(50rem,66vw)]",
+                  "flex flex-col justify-center"
+                )}
+                scrollableX
+                scrollableY
+                padding={3}
+              >
+                {luaExecutor.running ? (
+                  <div>
+                    <span className="inline-block ">
+                      <SlimeSVG />
+                      {t("running")}
+                    </span>
+                    <Button
+                      className="ml-2 my-0"
+                      small
+                      onClick={luaExecutor.abortExec}
+                      text={t("cancel")}
+                    />
+                  </div>
+                ) : (
+                  <>
+                    {/* mr-11: 閉じるボタンの分のスペース */}
+                    {luaExecutor.result?.stdout.map((s, i) => (
+                      <p className="text-sm mr-11" key={i}>
+                        {s}
+                      </p>
+                    ))}
+                    {luaExecutor.result?.err.map((e, i) => (
+                      <p
+                        className="text-sm text-red-600 dark:text-red-400 mr-11"
+                        key={i}
+                      >
+                        {e}
+                      </p>
+                    ))}
+                    <button
+                      className="fn-icon-button inline-block absolute top-3 right-3"
+                      onClick={() => {
+                        luaExecutor.clearResult();
+                      }}
+                    >
+                      <ButtonHighlight />
+                      <Close />
+                    </button>
+                  </>
+                )}
+              </Box>
+            </div>
           </div>
-        </div>
-      </LuaTabProvider>
-    </main>
+        </LuaTabProvider>
+      </main>
+    </DisableScrollable>
   );
 }
