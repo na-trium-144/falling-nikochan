@@ -41,18 +41,36 @@ export function useCanvasProps() {
   });
   const [dpr, setDpr] = useState<number>(1);
   useEffect(() => {
-    if (ref.current && marginX !== undefined && marginY !== undefined) {
-      const elementRect = (
-        ref.current as HTMLDivElement
-      ).getBoundingClientRect();
-      setCanvasRect({
-        left: -(elementRect.left + window.scrollX),
-        top: -(elementRect.top + window.scrollY),
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-      setDpr(window.devicePixelRatio || 1);
-    }
+    const update = () => {
+      if (ref.current && marginX !== undefined && marginY !== undefined) {
+        const elementRect = (
+          ref.current as HTMLDivElement
+        ).getBoundingClientRect();
+        const editScrollElement = document.querySelector(
+          "main.overflow-y-auto"
+        );
+        setCanvasRect({
+          left: -elementRect.left,
+          top: -(
+            elementRect.top +
+            window.scrollY +
+            (editScrollElement?.scrollTop ?? 0)
+          ),
+          width: window.innerWidth,
+          height: Math.max(
+            window.innerHeight,
+            elementRect.top +
+              window.scrollY +
+              (editScrollElement?.scrollTop ?? 0) +
+              elementRect.height
+          ),
+        });
+        setDpr(window.devicePixelRatio || 1);
+      }
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
   }, [ref, marginX, marginY]);
   const canvasMarginX =
     marginX !== undefined ? -canvasRect.left + marginX : undefined;
