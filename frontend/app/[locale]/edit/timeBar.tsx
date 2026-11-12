@@ -159,6 +159,8 @@ export default function TimeBar(props: Props) {
     };
   }, [timeBarRef]);
 
+  const snapDivider = currentLevel?.meta.snapDivider;
+
   const timeBarBeginSec =
     (Math.round(((cur ? cur.timeSec : 0) * zoomPxPerSec()) / timeBarWidth - 1) *
       timeBarWidth) /
@@ -170,27 +172,27 @@ export default function TimeBar(props: Props) {
     zoomPxPerSec();
   const timeBarBeginStep = useMemo(
     () =>
-      currentLevel
+      currentLevel && snapDivider
         ? stepAdd(
             getStep(
               currentLevel.freeze.bpmChanges,
               timeBarBeginSec,
-              currentLevel.meta.snapDivider
+              snapDivider
             ),
             {
               fourth: 0,
               numerator: -1,
-              denominator: currentLevel.meta.snapDivider,
+              denominator: snapDivider,
             }
           )
         : stepZero(),
-    [currentLevel, timeBarBeginSec]
+    [currentLevel, timeBarBeginSec, snapDivider]
   );
 
   // timebarに表示するstep目盛りのリスト
   const timeBarSteps = useMemo(() => {
     const timeBarSteps: { step: Step; timeSec: number }[] = [];
-    if (chart && currentLevel) {
+    if (chart && currentLevel && snapDivider) {
       timeBarSteps.push({
         step: timeBarBeginStep,
         timeSec: getTimeSec(currentLevel.freeze.bpmChanges, timeBarBeginStep),
@@ -199,7 +201,7 @@ export default function TimeBar(props: Props) {
         const s = stepAdd(timeBarSteps[timeBarSteps.length - 1].step, {
           fourth: 0,
           numerator: 1,
-          denominator: currentLevel.meta.snapDivider,
+          denominator: snapDivider,
         });
         const t = getTimeSec(currentLevel.freeze.bpmChanges, s) + chart.offset;
         if (
@@ -215,7 +217,7 @@ export default function TimeBar(props: Props) {
       }
     }
     return timeBarSteps;
-  }, [currentLevel, timeBarEndSec, timeBarBeginStep, chart]);
+  }, [currentLevel, timeBarEndSec, timeBarBeginStep, chart, snapDivider]);
 
   const barTop = 2.5 * rem;
   const barHeight = 1.5 * rem;
