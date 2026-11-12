@@ -706,7 +706,7 @@ export default function Edit(props: {
                 </div>
               </div>
               {chart && (
-                <div className="self-start flex flex-row items-center gap-2 py-3">
+                <div className="self-start flex flex-wrap flex-row items-center gap-2 py-3">
                   <CheckBox
                     id="dragStyleSymmetry"
                     value={dragStyle === "center"}

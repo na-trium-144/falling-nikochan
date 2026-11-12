@@ -50,9 +50,9 @@ export function GuideMain(props: Props) {
             <>
               <hr className="fn-hr" />
               <h4 className="fn-heading-box">{t("initNoteStyle")}</h4>
-              <div className="flex justify-center gap-2">
+              <div className="flex justify-center items-center gap-2 mb-2">
                 {initNoteStyles.map((s) => (
-                  <div className="flex flex-col items-center gap-2" key={s}>
+                  <div className="shrink-1 basis-32 min-w-0 flex flex-col items-center gap-2" key={s}>
                     <button
                       className={clsx(
                         "fn-toggle",
@@ -73,7 +73,7 @@ export function GuideMain(props: Props) {
                         `/assets/initNoteStyle-${s}.png` +
                         process.env.ASSET_NOTE_STYLE
                       }
-                      className="w-32 dark:hidden"
+                      className="w-full dark:hidden"
                       decoding="async"
                       fetchPriority="low"
                     />
@@ -83,7 +83,7 @@ export function GuideMain(props: Props) {
                         `/assets/initNoteStyle-${s}-dark.png` +
                         process.env.ASSET_NOTE_STYLE
                       }
-                      className="w-32 hidden dark:block"
+                      className="w-full hidden dark:block"
                       decoding="async"
                       fetchPriority="low"
                     />

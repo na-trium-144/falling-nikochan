@@ -301,6 +301,10 @@ export default {
       },
       agreeClose: "Agree to the terms and close",
       close: "Close",
+      initNoteStyle: "Default note style",
+      free: "Free",
+      vertical: "Vertical drop",
+      center: "Symmetrical",
     },
   },
 };

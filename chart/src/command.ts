@@ -41,7 +41,7 @@ export function defaultCopyBufferObj(initNoteStyle?: InitNoteStyle): CopyBuffer 
     case "vertical":
       return { "0": [0, 0, 3, false, true] };
     case "center":
-      return { "0": [-3, 1, 3, false, true] };
+      return { "0": [-3, 0.5, 3, false, true] };
     default:
       return { "0": [-3, 1, 3, false, true] };
   }

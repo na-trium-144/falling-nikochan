@@ -277,6 +277,10 @@ export default {
       },
       agreeClose: "利用規約に同意して閉じる",
       close: "閉じる",
+      initNoteStyle: "デフォルトの譜面スタイル",
+      free: "フリー",
+      vertical: "垂直落下",
+      center: "左右対称",
     },
   },
 };
