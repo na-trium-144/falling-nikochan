@@ -678,6 +678,7 @@ export default function Edit(props: {
                     dragMode={dragMode}
                     setDragMode={setDragMode}
                     dragStyle={dragStyle}
+                    playing={playing}
                   />
                   <div
                     className={clsx(

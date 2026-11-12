@@ -33,6 +33,7 @@ interface Props {
   setDragMode: (mode: null | "p" | "v" | "a") => void;
   dragStyle: DragStyle;
   inCodeTab: boolean;
+  playing: boolean;
 }
 
 export default function FallingWindow(props: Props) {
@@ -199,7 +200,8 @@ export default function FallingWindow(props: Props) {
           marginX !== undefined &&
           marginY !== undefined &&
           currentLevel?.currentNoteEditable &&
-          !props.inCodeTab && (
+          !props.inCodeTab &&
+          !props.playing && (
             <>
               {pendingNoteUpdate && (
                 <div
