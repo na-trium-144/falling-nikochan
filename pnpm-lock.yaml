@@ -372,8 +372,8 @@ importers:
         specifier: catalog:next
         version: 16.1.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.3.0)(react@19.3.0)(sass@1.104.1)
       prettier:
-        specifier: 3.9.6
-        version: 3.9.6
+        specifier: 3.10.0
+        version: 3.10.0
       semver:
         specifier: ^7.8.5
         version: 7.8.5
@@ -478,8 +478,8 @@ importers:
         specifier: catalog:sentry
         version: 10.73.0(@opentelemetry/core@2.9.0)(@opentelemetry/sdk-trace-base@2.9.0)(next@16.1.7)(react@19.3.0)(supports-color@8.1.1)(webpack@5.111.0)
       ace-builds:
-        specifier: 1.44.0
-        version: 1.44.0
+        specifier: 1.45.2
+        version: 1.45.2
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -3002,8 +3002,8 @@ packages:
   '@xtuc/long@4.2.2':
     resolution: {integrity: sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==}
 
-  ace-builds@1.44.0:
-    resolution: {integrity: sha512-PFNMSYqFdEUkul2Ntud0HvA09AgY+F1ag0UYdpMH60wNI/qOA8cB8tlTgoALMEwIdUPJK2CjrIQ7OnbiSS/ugQ==}
+  ace-builds@1.45.2:
+    resolution: {integrity: sha512-a0IADaETGBnBW5CIkniUJn7F+NyTuHWKqlv1A8FXaMmFflJsMGnU3TzkiyslInqIZ3odfcVKOdXBGIKBefzFDA==}
 
   acorn-import-attributes@1.9.5:
     resolution: {integrity: sha512-n02Vykv5uA3eHGM/Z2dQrcD56kL8TyDb2p1+0P83PClMnC/nc+anbQRhIOWnSq4Ke/KvDPrY3C9hDtC/A3eHnQ==}
@@ -4846,8 +4846,8 @@ packages:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
 
-  prettier@3.9.6:
-    resolution: {integrity: sha512-OpN0zzVdiaiAhxpuuj5efpIS4sY9j7bY6uR5mnj5yPzGkdkjNKSJeUThPb60Jw29QuAZgA4o+/iB49kFiaBX6g==}
+  prettier@3.10.0:
+    resolution: {integrity: sha512-mBi4765LgjO1PFjlEs7pUeK0nb1bw71c+N4/ItfeUWNdY5cV2pRKaFpbbFRYmDJMO+5ZwzGxHRqHxFZna7iv5w==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -7831,7 +7831,7 @@ snapshots:
 
   '@xtuc/long@4.2.2': {}
 
-  ace-builds@1.44.0: {}
+  ace-builds@1.45.2: {}
 
   acorn-import-attributes@1.9.5(acorn@8.18.0):
     dependencies:
@@ -9962,7 +9962,7 @@ snapshots:
 
   prelude-ls@1.2.1: {}
 
-  prettier@3.9.6: {}
+  prettier@3.10.0: {}
 
   pretty-checkbox-react@3.2.0(pretty-checkbox@3.0.3)(react-dom@19.3.0)(react@19.3.0):
     dependencies:
@@ -10001,7 +10001,7 @@ snapshots:
 
   react-ace@15.0.0(react-dom@19.3.0)(react@19.3.0):
     dependencies:
-      ace-builds: 1.44.0
+      ace-builds: 1.45.2
       diff-match-patch: 1.0.5
       fast-equals: 5.4.1
       prop-types: 15.8.1
