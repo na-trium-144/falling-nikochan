@@ -37,7 +37,7 @@
     "mongodb": "catalog:",
     "pino": "10.3.1",
     "react": "catalog:react",
-    "sitemap": "9.0.1",
+    "sitemap": "10.0.0",
     "twitter-text": "3.1.0",
     "valibot": "catalog:",
     "xmlbuilder2": "4.0.3"
