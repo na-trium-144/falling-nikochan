@@ -34,7 +34,7 @@
     "@noble/curves": "catalog:",
     "@sentry/browser": "catalog:sentry",
     "@sentry/nextjs": "catalog:sentry",
-    "ace-builds": "1.44.0",
+    "ace-builds": "1.45.2",
     "clsx": "^2.1.1",
     "colorthief": "catalog:",
     "file-saver": "2.0.5",
