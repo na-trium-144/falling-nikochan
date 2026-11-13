@@ -478,8 +478,8 @@ importers:
         specifier: catalog:sentry
         version: 10.73.0(@opentelemetry/core@2.9.0)(@opentelemetry/sdk-trace-base@2.9.0)(next@16.1.7)(react@19.3.0)(supports-color@8.1.1)(webpack@5.111.0)
       ace-builds:
-        specifier: 1.44.0
-        version: 1.44.0
+        specifier: 1.45.2
+        version: 1.45.2
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -3002,8 +3002,8 @@ packages:
   '@xtuc/long@4.2.2':
     resolution: {integrity: sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==}
 
-  ace-builds@1.44.0:
-    resolution: {integrity: sha512-PFNMSYqFdEUkul2Ntud0HvA09AgY+F1ag0UYdpMH60wNI/qOA8cB8tlTgoALMEwIdUPJK2CjrIQ7OnbiSS/ugQ==}
+  ace-builds@1.45.2:
+    resolution: {integrity: sha512-a0IADaETGBnBW5CIkniUJn7F+NyTuHWKqlv1A8FXaMmFflJsMGnU3TzkiyslInqIZ3odfcVKOdXBGIKBefzFDA==}
 
   acorn-import-attributes@1.9.5:
     resolution: {integrity: sha512-n02Vykv5uA3eHGM/Z2dQrcD56kL8TyDb2p1+0P83PClMnC/nc+anbQRhIOWnSq4Ke/KvDPrY3C9hDtC/A3eHnQ==}
@@ -7865,7 +7865,7 @@ snapshots:
 
   '@xtuc/long@4.2.2': {}
 
-  ace-builds@1.44.0: {}
+  ace-builds@1.45.2: {}
 
   acorn-import-attributes@1.9.5(acorn@8.18.0):
     dependencies:
@@ -10063,7 +10063,7 @@ snapshots:
 
   react-ace@15.0.0(react-dom@19.3.0)(react@19.3.0):
     dependencies:
-      ace-builds: 1.44.0
+      ace-builds: 1.45.2
       diff-match-patch: 1.0.5
       fast-equals: 5.4.1
       prop-types: 15.8.1
