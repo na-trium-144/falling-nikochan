@@ -387,14 +387,14 @@ importers:
         specifier: 8.70.0
         version: 8.70.0(eslint@9.39.5)(supports-color@8.1.1)(typescript@5.9.3)
       webpack:
-        specifier: 5.111.0
-        version: 5.111.0(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.3.1)
+        specifier: 5.112.2
+        version: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2)
       webpack-cli:
         specifier: 7.3.1
         version: 7.3.1(js-yaml@4.3.0)(json5@2.2.3)(webpack-bundle-analyzer@4.10.1)(webpack@5.111.0)
       webpack-license-plugin:
         specifier: 4.5.1
-        version: 4.5.1(webpack@5.111.0)
+        version: 4.5.1(webpack@5.112.2)
 
   chart:
     dependencies:
@@ -458,7 +458,7 @@ importers:
         version: 1.4.2(react-dom@19.3.0)(react@19.3.0)
       '@mdx-js/loader':
         specifier: 3.1.1
-        version: 3.1.1(supports-color@8.1.1)(webpack@5.111.0)
+        version: 3.1.1(supports-color@8.1.1)(webpack@5.112.2)
       '@mdx-js/react':
         specifier: 3.1.1
         version: 3.1.1(@types/react@19.3.0)(react@19.3.0)
@@ -476,7 +476,7 @@ importers:
         version: 10.73.0
       '@sentry/nextjs':
         specifier: catalog:sentry
-        version: 10.73.0(@opentelemetry/core@2.9.0)(@opentelemetry/sdk-trace-base@2.9.0)(next@16.1.7)(react@19.3.0)(supports-color@8.1.1)(webpack@5.111.0)
+        version: 10.73.0(@opentelemetry/core@2.9.0)(@opentelemetry/sdk-trace-base@2.9.0)(next@16.1.7)(react@19.3.0)(supports-color@8.1.1)(webpack@5.112.2)
       ace-builds:
         specifier: 1.45.2
         version: 1.45.2
@@ -509,7 +509,7 @@ importers:
         version: 4.14.5(next@16.1.7)(react@19.3.0)
       next-license-list:
         specifier: 1.0.1
-        version: 1.0.1(webpack@5.111.0)
+        version: 1.0.1(webpack@5.112.2)
       pretty-checkbox:
         specifier: 3.0.3
         version: 3.0.3
@@ -719,7 +719,7 @@ importers:
     devDependencies:
       babel-loader:
         specifier: 10.1.1
-        version: 10.1.1(@babel/core@7.29.7)(webpack@5.111.0)
+        version: 10.1.1(@babel/core@7.29.7)(webpack@5.112.2)
       dotenv:
         specifier: 'catalog:'
         version: 18.0.10
@@ -3499,6 +3499,10 @@ packages:
     resolution: {integrity: sha512-nGXts5znJzmWPu+mIE9izCOzdg63oJca2mDzGWWTth7sr4aCToKcoyFVBQwN75Ij5Pf6p510EwkTqViTRzDV+w==}
     engines: {node: '>=10.13.0'}
 
+  enhanced-resolve@5.26.1:
+    resolution: {integrity: sha512-PPnnSJq3azKOIewXR/uppBV/6h98dprBJ/WaQ9Qgj10xX1lJLNfg+XShpbsrSqcDSy2yYYyhfXM1wWhftqgyzw==}
+    engines: {node: '>=10.13.0'}
+
   entities@4.5.0:
     resolution: {integrity: sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==}
     engines: {node: '>=0.12'}
@@ -4508,8 +4512,8 @@ packages:
   minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
 
-  minimizer-webpack-plugin@5.10.1:
-    resolution: {integrity: sha512-+dsZEyTcy1lkq41lxdiOqvb26gXbYGgwY+30w37f9PqUVkuEBejBLDotsHOTjuga9xJyGLW2DqzKDUyJ4W/PMQ==}
+  minimizer-webpack-plugin@5.14.0:
+    resolution: {integrity: sha512-PnvQXCJxhgH2ZVVO7Lj0sM6q8L1XGxnUvd8wVQIRwi8khMCLq5wg0Ngxe44bcuZL2FSN81RdVE7YHEVzTKsQDQ==}
     engines: {node: '>= 10.13.0'}
     peerDependencies:
       '@minify-html/node': '*'
@@ -5071,9 +5075,15 @@ packages:
   scheduler@0.28.0:
     resolution: {integrity: sha512-juorfCmIkIw8tT+p5BXSm6PJjQF/ycEYmKyzURCIt/RaZIhL+PulbQ9Yu2z1HdOJDdqDTlxA1+xKBmHXJsczAw==}
 
-  schema-utils@4.5.0:
-    resolution: {integrity: sha512-zJlMCZ0cAR5p/Y4oVpRoqioDMJcGxaXRrQ/4rP4WyR84vc5z/DolXdbvXeDpTwbtocDFr2rhPqHPErDCUtz2kA==}
+  schema-utils@4.8.3:
+    resolution: {integrity: sha512-qIfo3f+lRNqnMPgpXSKvUhsT3pY5U+ppmgGr4j8LanFP3W/Ze+xj8DY/dPb5qVu3m6qFIMyMWKVRLNKxrNhxWg==}
     engines: {node: '>= 10.13.0'}
+    hasBin: true
+    peerDependencies:
+      webpack: ^5.0.0
+    peerDependenciesMeta:
+      webpack:
+        optional: true
 
   seedrandom@3.0.5:
     resolution: {integrity: sha512-8OwmbklUNzwezjGInmZ+2clQmExQPvomqjL7LFqOYqtmuxRgQYqOD3mHaU+MvZn5FLUeVxVfQjwLZW/n/JFuqg==}
@@ -5488,8 +5498,8 @@ packages:
     resolution: {integrity: sha512-FlRLb15WwAOz1A9OQDbf6oOKKSiefi5VK0ZRF2wgH9xk3o5SnU11tNPaOnQuAh1Ucr66cwwvVXaeVRaFdRBt5g==}
     hasBin: true
 
-  watchpack@2.5.2:
-    resolution: {integrity: sha512-6i/00NBjP4yGPs+caKSyRfpTF/8Torsu0MOW3mMzIbhgISFder8i7xbqgHlLMwJrdiN8ndBV3UA1/AfzPSr+jg==}
+  watchpack@2.6.4:
+    resolution: {integrity: sha512-5H3Tce2GfzWbcr9VnSqyak2whFaONw4BdmI5BDnMXold4qSlCFd64XaMQESRh2vkDKmdUkv6rUo17UvZ9f9nXw==}
     engines: {node: '>=10.13.0'}
 
   webidl-conversions@3.0.1:
@@ -5544,8 +5554,12 @@ packages:
     resolution: {integrity: sha512-jyuiGJdtvY434z5bUZrjz67v76/ePNvFZTp9Mdz29IlH4+GPsgyGjiv0fKI+M7BdkU6ADjulUcKAd3tUK3WlEw==}
     engines: {node: '>=10.13.0'}
 
-  webpack@5.111.0:
-    resolution: {integrity: sha512-A2R74kfE6b3eLKS91iZiol03Ebx7avmJJBOyiP+4LePW9NNeNJGQkKeSQos4dk6R4H0YAMYlv+aOrs1CyWT3eA==}
+  webpack-sources@3.7.0:
+    resolution: {integrity: sha512-PdUhbCycwEgiS1hB/FBDksWKg/ashAIuJKqwdbPn8/dFVgU5LxQiBvG0js6VRRIzPujMrStYCczywp82P0KWng==}
+    engines: {node: '>=10.13.0'}
+
+  webpack@5.112.2:
+    resolution: {integrity: sha512-B2tp1LI9D8GVpPDqprdt12ukTkXXahj9MzqSWJq4faSPgOUM7CdZaGAB6HrL/8E6UwbBpdj4vzWDbKoFnVoU6g==}
     engines: {node: '>=10.13.0'}
     hasBin: true
     peerDependencies:
@@ -6743,12 +6757,12 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.6.0
 
-  '@mdx-js/loader@3.1.1(supports-color@8.1.1)(webpack@5.111.0)':
+  '@mdx-js/loader@3.1.1(supports-color@8.1.1)(webpack@5.112.2)':
     dependencies:
       '@mdx-js/mdx': 3.1.1(supports-color@8.1.1)
       source-map: 0.7.6
     optionalDependencies:
-      webpack: 5.111.0(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.3.1)
+      webpack: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2)
     transitivePeerDependencies:
       - supports-color
 
@@ -6818,7 +6832,7 @@ snapshots:
     dependencies:
       source-map: 0.7.6
     optionalDependencies:
-      '@mdx-js/loader': 3.1.1(supports-color@8.1.1)(webpack@5.111.0)
+      '@mdx-js/loader': 3.1.1(supports-color@8.1.1)(webpack@5.112.2)
       '@mdx-js/react': 3.1.1(@types/react@19.3.0)(react@19.3.0)
 
   '@next/swc-darwin-arm64@16.1.7':
@@ -7238,7 +7252,7 @@ snapshots:
       '@sentry/cloudflare': 10.73.0
       '@sentry/node': 10.73.0(@opentelemetry/core@2.9.0)(supports-color@8.1.1)
 
-  '@sentry/nextjs@10.73.0(@opentelemetry/core@2.9.0)(@opentelemetry/sdk-trace-base@2.9.0)(next@16.1.7)(react@19.3.0)(supports-color@8.1.1)(webpack@5.111.0)':
+  '@sentry/nextjs@10.73.0(@opentelemetry/core@2.9.0)(@opentelemetry/sdk-trace-base@2.9.0)(next@16.1.7)(react@19.3.0)(supports-color@8.1.1)(webpack@5.112.2)':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@rollup/plugin-commonjs': 28.0.1(rollup@4.60.3)
@@ -7251,7 +7265,7 @@ snapshots:
       '@sentry/react': 10.73.0(react@19.3.0)
       '@sentry/server-utils': 10.73.0
       '@sentry/vercel-edge': 10.73.0
-      '@sentry/webpack-plugin': 5.3.0(supports-color@8.1.1)(webpack@5.111.0)
+      '@sentry/webpack-plugin': 5.3.0(supports-color@8.1.1)(webpack@5.112.2)
       next: 16.1.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.3.0)(react@19.3.0)(sass@1.104.1)
       rollup: 4.60.3
       stacktrace-parser: 0.1.11
@@ -7327,10 +7341,10 @@ snapshots:
       '@opentelemetry/api': 1.9.1
       '@sentry/core': 10.73.0
 
-  '@sentry/webpack-plugin@5.3.0(supports-color@8.1.1)(webpack@5.111.0)':
+  '@sentry/webpack-plugin@5.3.0(supports-color@8.1.1)(webpack@5.112.2)':
     dependencies:
       '@sentry/bundler-plugin-core': 5.3.0(supports-color@8.1.1)
-      webpack: 5.111.0(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.3.1)
+      webpack: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2)
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -7982,12 +7996,12 @@ snapshots:
 
   axobject-query@4.1.0: {}
 
-  babel-loader@10.1.1(@babel/core@7.29.7)(webpack@5.111.0):
+  babel-loader@10.1.1(@babel/core@7.29.7)(webpack@5.112.2):
     dependencies:
       '@babel/core': 7.29.7(supports-color@8.1.1)
       find-up: 5.0.0
     optionalDependencies:
-      webpack: 5.111.0(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.3.1)
+      webpack: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2)
 
   babel-plugin-polyfill-corejs2@0.4.17(@babel/core@7.29.7)(supports-color@8.1.1):
     dependencies:
@@ -8324,6 +8338,11 @@ snapshots:
   emoji-regex@9.2.2: {}
 
   enhanced-resolve@5.25.1:
+    dependencies:
+      graceful-fs: 4.2.11
+      tapable: 2.3.3
+
+  enhanced-resolve@5.26.1:
     dependencies:
       graceful-fs: 4.2.11
       tapable: 2.3.3
@@ -9698,13 +9717,12 @@ snapshots:
 
   minimist@1.2.8: {}
 
-  minimizer-webpack-plugin@5.10.1(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack@5.111.0):
+  minimizer-webpack-plugin@5.14.0(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack@5.112.2):
     dependencies:
-      '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2)
       terser: 5.51.2
-      webpack: 5.111.0(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.3.1)
+      webpack: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2)
     optionalDependencies:
       '@swc/core': 1.16.2
       csso: 5.0.5
@@ -9773,9 +9791,9 @@ snapshots:
     transitivePeerDependencies:
       - '@swc/helpers'
 
-  next-license-list@1.0.1(webpack@5.111.0):
+  next-license-list@1.0.1(webpack@5.112.2):
     dependencies:
-      webpack-license-plugin: 4.5.1(webpack@5.111.0)
+      webpack-license-plugin: 4.5.1(webpack@5.112.2)
     transitivePeerDependencies:
       - webpack
 
@@ -10284,12 +10302,14 @@ snapshots:
 
   scheduler@0.28.0: {}
 
-  schema-utils@4.5.0:
+  schema-utils@4.8.3(webpack@5.112.2):
     dependencies:
       '@types/json-schema': 7.0.15
       ajv: 8.20.0
       ajv-formats: 3.0.1
       ajv-keywords: 5.1.0(ajv@8.20.0)
+    optionalDependencies:
+      webpack: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2)
 
   seedrandom@3.0.5: {}
 
@@ -10808,7 +10828,7 @@ snapshots:
     dependencies:
       '@types/emscripten': 1.39.10
 
-  watchpack@2.5.2:
+  watchpack@2.6.4:
     dependencies:
       graceful-fs: 4.2.11
 
@@ -10842,20 +10862,20 @@ snapshots:
       envinfo: 7.21.0
       interpret: 3.1.1
       rechoir: 1.0.0
-      webpack: 5.111.0(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.3.1)
+      webpack: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2)
       webpack-merge: 6.0.1
     optionalDependencies:
       js-yaml: 4.3.0
       json5: 2.2.3
       webpack-bundle-analyzer: 4.10.1
 
-  webpack-license-plugin@4.5.1(webpack@5.111.0):
+  webpack-license-plugin@4.5.1(webpack@5.112.2):
     dependencies:
       chalk: 5.6.2
       lodash: 4.18.1
       needle: 3.3.1
       spdx-expression-validate: 2.0.0
-      webpack: 5.111.0(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.3.1)
+      webpack: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2)
       webpack-sources: 3.5.1
 
   webpack-merge@6.0.1:
@@ -10866,7 +10886,9 @@ snapshots:
 
   webpack-sources@3.5.1: {}
 
-  webpack@5.111.0(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.3.1):
+  webpack-sources@3.7.0: {}
+
+  webpack@5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2):
     dependencies:
       '@types/estree': 1.0.9
       '@types/json-schema': 7.0.15
@@ -10875,18 +10897,18 @@ snapshots:
       '@webassemblyjs/wasm-parser': 1.14.1
       browserslist: 4.29.0
       chrome-trace-event: 1.0.4
-      enhanced-resolve: 5.25.1
+      enhanced-resolve: 5.26.1
       es-module-lexer: 2.3.2
       events: 3.3.0
       graceful-fs: 4.2.11
       mime-db: 1.54.0
-      minimizer-webpack-plugin: 5.10.1(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack@5.111.0)
-      schema-utils: 4.5.0
+      minimizer-webpack-plugin: 5.14.0(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack@5.112.2)
+      schema-utils: 4.8.3(webpack@5.112.2)
       tapable: 2.3.3
-      watchpack: 2.5.2
-      webpack-sources: 3.5.1
+      watchpack: 2.6.4
+      webpack-sources: 3.7.0
     optionalDependencies:
-      webpack-cli: 7.3.1(js-yaml@4.3.0)(json5@2.2.3)(webpack-bundle-analyzer@4.10.1)(webpack@5.111.0)
+      webpack-cli: 7.2.2(js-yaml@4.3.0)(json5@2.2.3)(webpack-bundle-analyzer@4.10.1)(webpack@5.112.2)
     transitivePeerDependencies:
       - '@minify-html/node'
       - '@napi-rs/image'
