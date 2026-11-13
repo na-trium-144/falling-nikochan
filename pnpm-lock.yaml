@@ -209,8 +209,8 @@ catalogs:
       specifier: 1.5.0
       version: 1.5.0
     isbot:
-      specifier: ~5.2.1
-      version: 5.2.1
+      specifier: ~5.2.3
+      version: 5.2.3
     mongodb:
       specifier: 7.5.0
       version: 7.5.0
@@ -494,7 +494,7 @@ importers:
         version: 1.1.0
       isbot:
         specifier: 'catalog:'
-        version: 5.2.1
+        version: 5.2.3
       keyboard-css:
         specifier: 1.2.4
         version: 1.2.4
@@ -657,7 +657,7 @@ importers:
         version: 1.5.0(@valibot/to-json-schema@1.7.1)(hono@4.13.8)(valibot@1.4.2)(zod@4.6.5)
       isbot:
         specifier: 'catalog:'
-        version: 5.2.1
+        version: 5.2.3
       moji:
         specifier: 0.5.1
         version: 0.5.1
@@ -4142,8 +4142,8 @@ packages:
   isarray@2.0.5:
     resolution: {integrity: sha512-xHjhDr3cNBK0BzdUJSPXZntQUx/mwMS5Rw4A7lPJ90XGAO6ISP/ePDNuo0vhqOZU+UD5JoodwCAAoZQd3FeAKw==}
 
-  isbot@5.2.1:
-    resolution: {integrity: sha512-dJ+LpKyClQZ7NG+j3OensC/mAZkGpukE9YUrgPYvAZj2doVL0edfDgywTUh5CXa0o+nW9a1V9e5+CJTX8+SxRw==}
+  isbot@5.2.3:
+    resolution: {integrity: sha512-e8gGz3VzAuImtTMnB5PqNRRWGAswObTc+X+X5a8PttKT78VSSFec98w9ZwUoy6jJdlvJkVdLiN+WMgA8TewoZg==}
     engines: {node: '>=18'}
 
   isexe@2.0.0:
@@ -9187,7 +9187,7 @@ snapshots:
 
   isarray@2.0.5: {}
 
-  isbot@5.2.1: {}
+  isbot@5.2.3: {}
 
   isexe@2.0.0: {}
 
