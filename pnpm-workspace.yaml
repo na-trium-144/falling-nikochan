@@ -65,7 +65,7 @@ catalogs:
   react:
     "@types/react": ^19.3.0
     "@types/react-dom": ^19.3.0
-    react: ^19.3.0
+    react: ^19.3.1
     react-dom: ^19.3.0
   sentry:
     "@sentry/browser": 10.73.0
