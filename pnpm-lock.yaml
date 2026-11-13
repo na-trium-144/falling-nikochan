@@ -318,7 +318,7 @@ importers:
         version: 0.1.0(hono@4.13.18)
       '@sentry/hono':
         specifier: catalog:sentry
-        version: 10.73.0(@hono/node-server@2.1.7)(@sentry/bun@10.73.0)(@sentry/cloudflare@10.73.0)(@sentry/node@10.73.0)(hono@4.13.8)
+        version: 10.73.0(@hono/node-server@2.1.7)(@sentry/bun@10.73.0)(@sentry/cloudflare@10.73.0)(@sentry/node@10.73.0)(hono@4.13.18)
       '@vercel/functions':
         specifier: 3.11.1
         version: 3.11.1(ws@8.21.3)
@@ -388,10 +388,10 @@ importers:
         version: 8.70.0(eslint@9.39.5)(supports-color@8.1.1)(typescript@5.9.3)
       webpack:
         specifier: 5.112.2
-        version: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2)
+        version: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.32)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.3.1)
       webpack-cli:
         specifier: 7.3.1
-        version: 7.3.1(js-yaml@4.3.0)(json5@2.2.3)(webpack-bundle-analyzer@4.10.1)(webpack@5.111.0)
+        version: 7.3.1(js-yaml@4.3.0)(json5@2.2.3)(webpack-bundle-analyzer@4.10.1)(webpack@5.112.2)
       webpack-license-plugin:
         specifier: 4.5.1
         version: 4.5.1(webpack@5.112.2)
@@ -406,7 +406,7 @@ importers:
         version: 5.0.4
       hono-openapi:
         specifier: 'catalog:'
-        version: 1.5.0(@valibot/to-json-schema@1.7.1)(hono@4.13.8)(valibot@1.4.2)(zod@4.6.5)
+        version: 1.5.0(@valibot/to-json-schema@1.7.1)(hono@4.13.18)(valibot@1.4.2)(zod@4.6.7)
       valibot:
         specifier: 'catalog:'
         version: 1.4.2(typescript@5.9.3)
@@ -612,10 +612,10 @@ importers:
         version: link:../i18n
       '@hono/node-server':
         specifier: 2.1.7
-        version: 2.1.7(hono@4.13.8)
+        version: 2.1.7(hono@4.13.18)
       '@hono/standard-validator':
-        specifier: 0.2.3
-        version: 0.2.3(@standard-schema/spec@1.1.0)(hono@4.13.18)
+        specifier: 0.4.1
+        version: 0.4.1(@standard-schema/spec@1.1.0)(hono@4.13.18)
       '@hono/structured-logger':
         specifier: 'catalog:'
         version: 0.1.0(hono@4.13.18)
@@ -627,7 +627,7 @@ importers:
         version: 3.1.3
       '@scalar/hono-api-reference':
         specifier: 0.12.19
-        version: 0.12.19(hono@4.13.8)
+        version: 0.12.19(hono@4.13.18)
       '@sentry/bun':
         specifier: catalog:sentry
         version: 10.73.0(@opentelemetry/core@2.9.0)(supports-color@8.1.1)
@@ -654,7 +654,7 @@ importers:
         version: 4.13.18
       hono-openapi:
         specifier: 'catalog:'
-        version: 1.5.0(@valibot/to-json-schema@1.7.1)(hono@4.13.8)(valibot@1.4.2)(zod@4.6.5)
+        version: 1.5.0(@valibot/to-json-schema@1.7.1)(hono@4.13.18)(valibot@1.4.2)(zod@4.6.7)
       isbot:
         specifier: 'catalog:'
         version: 5.2.3
@@ -1527,12 +1527,6 @@ packages:
     engines: {node: '>=20'}
     peerDependencies:
       hono: ^4 || ^5.0.0-0
-
-  '@hono/standard-validator@0.2.3':
-    resolution: {integrity: sha512-bp9vHu6Va6SfMHC3D4ZLBbT/woi+AZ9CRdTXQu3kLJuLh2W/Gb9UO4hijS+BQAGFXi4EGpXdetxpzwTAawSVeg==}
-    peerDependencies:
-      '@standard-schema/spec': ^1.0.0
-      hono: '>=3.9.0'
 
   '@hono/standard-validator@0.4.1':
     resolution: {integrity: sha512-Q0+1dgMKAXEvsmJ5FNoamwnfrf/I5JNnKn7WzfynH8nJlNe1lNOW1+vlKpEQZbrBLEgmxIeys6HjRotDvZzq+A==}
@@ -2722,9 +2716,6 @@ packages:
   '@types/node@22.19.7':
     resolution: {integrity: sha512-MciR4AKGHWl7xwxkBa6xUGxQJ4VBOmPTF7sL+iGzuahOFaO0jHCsuEfS80pan1ef4gWId1oWOweIhrDEYLuaOw==}
 
-  '@types/node@24.10.9':
-    resolution: {integrity: sha512-ne4A0IpG3+2ETuREInjPNhUGis1SFjv1d5asp8MzEAGtOZeTeHVDOYqOgqfhvseqg/iXty2hjBf1zAOb7RNiNw==}
-
   '@types/react-dom@19.3.0':
     resolution: {integrity: sha512-ZI7bU42mZXXKHn/qNLEw2IrbiINU7X5+vfgdixBHkCNpYWXjKgfQ/P+uyGb5CjOLB9UcnTeg3rylQtV2hym44Q==}
     peerDependencies:
@@ -3494,10 +3485,6 @@ packages:
 
   emoji-regex@9.2.2:
     resolution: {integrity: sha512-L18DaJsXSUk2+42pv8mLs5jJT2hqFkFE4j21wOmgbUqsZ2hL72NsUU785g9RXgo3s0ZNgVl42TiHp3ZtOv/Vyg==}
-
-  enhanced-resolve@5.25.1:
-    resolution: {integrity: sha512-nGXts5znJzmWPu+mIE9izCOzdg63oJca2mDzGWWTth7sr4aCToKcoyFVBQwN75Ij5Pf6p510EwkTqViTRzDV+w==}
-    engines: {node: '>=10.13.0'}
 
   enhanced-resolve@5.26.1:
     resolution: {integrity: sha512-PPnnSJq3azKOIewXR/uppBV/6h98dprBJ/WaQ9Qgj10xX1lJLNfg+XShpbsrSqcDSy2yYYyhfXM1wWhftqgyzw==}
@@ -4615,11 +4602,6 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
-  nanoid@3.3.18:
-    resolution: {integrity: sha512-DTg4MJbGMWkfi6VZFdNt2/caMbQy4Ou+Op/hJQvGEWcnVfoA1QA+xzRKAzw9jD6+GVOOeYr/mIcuDSdug6F6+w==}
-    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
-    hasBin: true
-
   nanoid@3.3.20:
     resolution: {integrity: sha512-uKdg2G3GNCKQn9byYOpxbGqrT2fGO5KRt5J/8b3pok8rT6qxGWF6hxMyJiEYtAf+FVyYuD9hRaDqX5uPFYJ4ZQ==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
@@ -5159,10 +5141,6 @@ packages:
   sonic-boom@4.2.1:
     resolution: {integrity: sha512-w6AxtubXa2wTXAUsZMMWERrsIRAdrK0Sc+FUytWvYAhBJLyuI4llrMIC1DtlNSdI99EI86KZum2MMq3EAZlF9Q==}
 
-  source-map-js@1.2.1:
-    resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
-    engines: {node: '>=0.10.0'}
-
   source-map-js@1.2.2:
     resolution: {integrity: sha512-KGj/8Y43x35aZVDtt+J4mK1hoLGHULMYfSkODJNQjNDC3oW1PqPoxMwo0pLUsWM/UEGzON/NxeHywEfNXNP3Vw==}
     engines: {node: '>=0.10.0'}
@@ -5416,9 +5394,6 @@ packages:
   undici-types@6.21.0:
     resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
 
-  undici-types@7.16.0:
-    resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
-
   undici@6.28.0:
     resolution: {integrity: sha512-LIY910g9TI13YS95lrMFrs8Rm/u/irgHeTWoKCoteeJ04CUJ92eEfj0rVn+7VKMPBpUPiUoBKfhNyLI23EE/KA==}
     engines: {node: '>=18.17'}
@@ -5550,10 +5525,6 @@ packages:
     resolution: {integrity: sha512-hXXvrjtx2PLYx4qruKl+kyRSLc52V+cCvMxRjmKwoA+CBbbF5GfIBtR6kCvl0fYGqTUPKB+1ktVmTHqMOzgCBg==}
     engines: {node: '>=18.0.0'}
 
-  webpack-sources@3.5.1:
-    resolution: {integrity: sha512-jyuiGJdtvY434z5bUZrjz67v76/ePNvFZTp9Mdz29IlH4+GPsgyGjiv0fKI+M7BdkU6ADjulUcKAd3tUK3WlEw==}
-    engines: {node: '>=10.13.0'}
-
   webpack-sources@3.7.0:
     resolution: {integrity: sha512-PdUhbCycwEgiS1hB/FBDksWKg/ashAIuJKqwdbPn8/dFVgU5LxQiBvG0js6VRRIzPujMrStYCczywp82P0KWng==}
     engines: {node: '>=10.13.0'}
@@ -5666,9 +5637,6 @@ packages:
     engines: {node: '>=18.0.0'}
     peerDependencies:
       zod: ^3.25.0 || ^4.0.0
-
-  zod@4.6.5:
-    resolution: {integrity: sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q==}
 
   zod@4.6.7:
     resolution: {integrity: sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==}
@@ -6596,21 +6564,16 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.28.6
 
-  '@hono/node-server@2.1.7(hono@4.13.8)':
+  '@hono/node-server@2.1.7(hono@4.13.18)':
     dependencies:
       hono: 4.13.18
 
-  '@hono/standard-validator@0.2.3(@standard-schema/spec@1.1.0)(hono@4.13.18)':
+  '@hono/standard-validator@0.4.1(@standard-schema/spec@1.1.0)(hono@4.13.18)':
     dependencies:
       '@standard-schema/spec': 1.1.0
       hono: 4.13.18
 
-  '@hono/standard-validator@0.4.1(@standard-schema/spec@1.1.0)(hono@4.13.8)':
-    dependencies:
-      '@standard-schema/spec': 1.1.0
-      hono: 4.13.8
-
-  '@hono/structured-logger@0.1.0(hono@4.13.8)':
+  '@hono/structured-logger@0.1.0(hono@4.13.18)':
     dependencies:
       hono: 4.13.18
 
@@ -6762,7 +6725,7 @@ snapshots:
       '@mdx-js/mdx': 3.1.1(supports-color@8.1.1)
       source-map: 0.7.6
     optionalDependencies:
-      webpack: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2)
+      webpack: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.32)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.3.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -7116,10 +7079,10 @@ snapshots:
 
   '@scalar/helpers@0.17.1': {}
 
-  '@scalar/hono-api-reference@0.12.19(hono@4.13.8)':
+  '@scalar/hono-api-reference@0.12.19(hono@4.13.18)':
     dependencies:
       '@scalar/client-side-rendering': 0.4.18
-      hono: 4.13.8
+      hono: 4.13.18
 
   '@scalar/schemas@0.17.0':
     dependencies:
@@ -7240,14 +7203,14 @@ snapshots:
     dependencies:
       '@sentry/core': 10.73.0
 
-  '@sentry/hono@10.73.0(@hono/node-server@2.1.7)(@sentry/bun@10.73.0)(@sentry/cloudflare@10.73.0)(@sentry/node@10.73.0)(hono@4.13.8)':
+  '@sentry/hono@10.73.0(@hono/node-server@2.1.7)(@sentry/bun@10.73.0)(@sentry/cloudflare@10.73.0)(@sentry/node@10.73.0)(hono@4.13.18)':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@sentry/conventions': 0.16.0
       '@sentry/core': 10.73.0
       hono: 4.13.18
     optionalDependencies:
-      '@hono/node-server': 2.1.1(hono@4.13.8)
+      '@hono/node-server': 2.1.7(hono@4.13.18)
       '@sentry/bun': 10.73.0(@opentelemetry/core@2.9.0)(supports-color@8.1.1)
       '@sentry/cloudflare': 10.73.0
       '@sentry/node': 10.73.0(@opentelemetry/core@2.9.0)(supports-color@8.1.1)
@@ -7344,7 +7307,7 @@ snapshots:
   '@sentry/webpack-plugin@5.3.0(supports-color@8.1.1)(webpack@5.112.2)':
     dependencies:
       '@sentry/bundler-plugin-core': 5.3.0(supports-color@8.1.1)
-      webpack: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2)
+      webpack: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.32)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.3.1)
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -7354,7 +7317,7 @@ snapshots:
       fflate: 0.7.4
       string.prototype.codepointat: 0.2.1
 
-  '@standard-community/standard-json@0.3.7(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.7.1)(valibot@1.4.2)(zod@4.6.5)':
+  '@standard-community/standard-json@0.3.7(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.7.1)(valibot@1.4.2)(zod@4.6.7)':
     dependencies:
       '@standard-schema/spec': 1.1.0
       '@types/json-schema': 7.0.15
@@ -7364,9 +7327,9 @@ snapshots:
       valibot: 1.4.2(typescript@5.9.3)
       zod: 4.6.7
 
-  '@standard-community/standard-openapi@0.2.11(@standard-community/standard-json@0.3.7)(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.4.2)(zod@4.6.5)':
+  '@standard-community/standard-openapi@0.2.11(@standard-community/standard-json@0.3.7)(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.4.2)(zod@4.6.7)':
     dependencies:
-      '@standard-community/standard-json': 0.3.7(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.7.1)(valibot@1.4.2)(zod@4.6.5)
+      '@standard-community/standard-json': 0.3.7(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.7.1)(valibot@1.4.2)(zod@4.6.7)
       '@standard-schema/spec': 1.1.0
       openapi-types: 12.1.3
     optionalDependencies:
@@ -7442,11 +7405,11 @@ snapshots:
   '@tailwindcss/node@4.3.3':
     dependencies:
       '@jridgewell/remapping': 2.3.5
-      enhanced-resolve: 5.25.1
+      enhanced-resolve: 5.26.1
       jiti: 2.7.0
       lightningcss: 1.32.0
       magic-string: 0.30.21
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
       tailwindcss: 4.3.3
 
   '@tailwindcss/oxide-android-arm64@4.3.3':
@@ -7560,10 +7523,6 @@ snapshots:
     dependencies:
       undici-types: 6.21.0
 
-  '@types/node@24.10.9':
-    dependencies:
-      undici-types: 7.16.0
-
   '@types/react-dom@19.3.0(@types/react@19.3.0)':
     dependencies:
       '@types/react': 19.3.0
@@ -7574,7 +7533,7 @@ snapshots:
 
   '@types/sax@1.2.7':
     dependencies:
-      '@types/node': 24.10.9
+      '@types/node': 22.19.7
 
   '@types/twitter-text@3.1.10': {}
 
@@ -8001,7 +7960,7 @@ snapshots:
       '@babel/core': 7.29.7(supports-color@8.1.1)
       find-up: 5.0.0
     optionalDependencies:
-      webpack: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2)
+      webpack: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.32)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.3.1)
 
   babel-plugin-polyfill-corejs2@0.4.17(@babel/core@7.29.7)(supports-color@8.1.1):
     dependencies:
@@ -8197,12 +8156,12 @@ snapshots:
   css-tree@2.2.1:
     dependencies:
       mdn-data: 2.0.28
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
 
   css-tree@3.2.1:
     dependencies:
       mdn-data: 2.27.1
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
 
   css-what@6.2.2: {}
 
@@ -8336,11 +8295,6 @@ snapshots:
   emoji-regex-xs@2.0.1: {}
 
   emoji-regex@9.2.2: {}
-
-  enhanced-resolve@5.25.1:
-    dependencies:
-      graceful-fs: 4.2.11
-      tapable: 2.3.3
 
   enhanced-resolve@5.26.1:
     dependencies:
@@ -8619,8 +8573,8 @@ snapshots:
       '@babel/parser': 7.29.7
       eslint: 9.39.5(jiti@2.7.0)(supports-color@8.1.1)
       hermes-parser: 0.25.1
-      zod: 4.6.5
-      zod-validation-error: 4.0.2(zod@4.6.5)
+      zod: 4.6.7
+      zod-validation-error: 4.0.2(zod@4.6.7)
     transitivePeerDependencies:
       - supports-color
 
@@ -8991,14 +8945,14 @@ snapshots:
 
   hex-rgb@4.3.0: {}
 
-  hono-openapi@1.5.0(@valibot/to-json-schema@1.7.1)(hono@4.13.8)(valibot@1.4.2)(zod@4.6.5):
+  hono-openapi@1.5.0(@valibot/to-json-schema@1.7.1)(hono@4.13.18)(valibot@1.4.2)(zod@4.6.7):
     dependencies:
-      '@hono/standard-validator': 0.4.1(@standard-schema/spec@1.1.0)(hono@4.13.8)
-      '@standard-community/standard-json': 0.3.7(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.7.1)(valibot@1.4.2)(zod@4.6.5)
-      '@standard-community/standard-openapi': 0.2.11(@standard-community/standard-json@0.3.7)(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.4.2)(zod@4.6.5)
+      '@hono/standard-validator': 0.4.1(@standard-schema/spec@1.1.0)(hono@4.13.18)
+      '@standard-community/standard-json': 0.3.7(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.7.1)(valibot@1.4.2)(zod@4.6.7)
+      '@standard-community/standard-openapi': 0.2.11(@standard-community/standard-json@0.3.7)(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.4.2)(zod@4.6.7)
       '@standard-schema/spec': 1.1.0
       '@types/json-schema': 7.0.15
-      hono: 4.13.8
+      hono: 4.13.18
       openapi-types: 12.1.3
     transitivePeerDependencies:
       - '@valibot/to-json-schema'
@@ -9717,18 +9671,18 @@ snapshots:
 
   minimist@1.2.8: {}
 
-  minimizer-webpack-plugin@5.14.0(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack@5.112.2):
+  minimizer-webpack-plugin@5.14.0(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.32)(sharp@0.34.5)(svgo@4.0.2)(webpack@5.112.2):
     dependencies:
       jest-worker: 27.5.1
       schema-utils: 4.8.3(webpack@5.112.2)
       terser: 5.51.2
-      webpack: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2)
+      webpack: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.32)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.3.1)
     optionalDependencies:
       '@swc/core': 1.16.2
       csso: 5.0.5
       esbuild: 0.28.2
       lightningcss: 1.32.0
-      postcss: 8.5.26
+      postcss: 8.5.32
       sharp: 0.34.5
       svgo: 4.0.2
 
@@ -9754,8 +9708,6 @@ snapshots:
   mrmime@2.0.1: {}
 
   ms@2.1.3: {}
-
-  nanoid@3.3.18: {}
 
   nanoid@3.3.20: {}
 
@@ -9993,9 +9945,9 @@ snapshots:
 
   postcss@8.4.31:
     dependencies:
-      nanoid: 3.3.18
+      nanoid: 3.3.20
       picocolors: 1.1.1
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
 
   postcss@8.5.32:
     dependencies:
@@ -10010,7 +9962,7 @@ snapshots:
   pretty-checkbox-react@3.2.0(pretty-checkbox@3.0.3)(react-dom@19.3.0)(react@19.3.0):
     dependencies:
       clsx: 1.2.1
-      nanoid: 3.3.18
+      nanoid: 3.3.20
       pretty-checkbox: 3.0.3
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
@@ -10280,7 +10232,7 @@ snapshots:
     dependencies:
       chokidar: 5.0.0
       immutable: 5.1.9
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
     optionalDependencies:
       '@parcel/watcher': 2.6.0
 
@@ -10309,7 +10261,7 @@ snapshots:
       ajv-formats: 3.0.1
       ajv-keywords: 5.1.0(ajv@8.20.0)
     optionalDependencies:
-      webpack: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2)
+      webpack: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.32)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.3.1)
 
   seedrandom@3.0.5: {}
 
@@ -10421,15 +10373,13 @@ snapshots:
 
   sitemap@10.0.0:
     dependencies:
-      '@types/node': 24.10.9
+      '@types/node': 22.19.7
       '@types/sax': 1.2.7
       sax: 1.6.1
 
   sonic-boom@4.2.1:
     dependencies:
       atomic-sleep: 1.0.0
-
-  source-map-js@1.2.1: {}
 
   source-map-js@1.2.2: {}
 
@@ -10711,8 +10661,6 @@ snapshots:
 
   undici-types@6.21.0: {}
 
-  undici-types@7.16.0: {}
-
   undici@6.28.0: {}
 
   unicode-canonical-property-names-ecmascript@2.0.1: {}
@@ -10855,14 +10803,14 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  webpack-cli@7.3.1(js-yaml@4.3.0)(json5@2.2.3)(webpack-bundle-analyzer@4.10.1)(webpack@5.111.0):
+  webpack-cli@7.3.1(js-yaml@4.3.0)(json5@2.2.3)(webpack-bundle-analyzer@4.10.1)(webpack@5.112.2):
     dependencies:
       '@discoveryjs/json-ext': 1.1.0
       commander: 14.0.3
       envinfo: 7.21.0
       interpret: 3.1.1
       rechoir: 1.0.0
-      webpack: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2)
+      webpack: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.32)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.3.1)
       webpack-merge: 6.0.1
     optionalDependencies:
       js-yaml: 4.3.0
@@ -10875,8 +10823,8 @@ snapshots:
       lodash: 4.18.1
       needle: 3.3.1
       spdx-expression-validate: 2.0.0
-      webpack: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2)
-      webpack-sources: 3.5.1
+      webpack: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.32)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.3.1)
+      webpack-sources: 3.7.0
 
   webpack-merge@6.0.1:
     dependencies:
@@ -10884,11 +10832,9 @@ snapshots:
       flat: 5.0.2
       wildcard: 2.0.1
 
-  webpack-sources@3.5.1: {}
-
   webpack-sources@3.7.0: {}
 
-  webpack@5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.2.2):
+  webpack@5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.32)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.3.1):
     dependencies:
       '@types/estree': 1.0.9
       '@types/json-schema': 7.0.15
@@ -10902,13 +10848,13 @@ snapshots:
       events: 3.3.0
       graceful-fs: 4.2.11
       mime-db: 1.54.0
-      minimizer-webpack-plugin: 5.14.0(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26)(sharp@0.34.5)(svgo@4.0.2)(webpack@5.112.2)
+      minimizer-webpack-plugin: 5.14.0(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.32)(sharp@0.34.5)(svgo@4.0.2)(webpack@5.112.2)
       schema-utils: 4.8.3(webpack@5.112.2)
       tapable: 2.3.3
       watchpack: 2.6.4
       webpack-sources: 3.7.0
     optionalDependencies:
-      webpack-cli: 7.2.2(js-yaml@4.3.0)(json5@2.2.3)(webpack-bundle-analyzer@4.10.1)(webpack@5.112.2)
+      webpack-cli: 7.3.1(js-yaml@4.3.0)(json5@2.2.3)(webpack-bundle-analyzer@4.10.1)(webpack@5.112.2)
     transitivePeerDependencies:
       - '@minify-html/node'
       - '@napi-rs/image'
@@ -11020,11 +10966,9 @@ snapshots:
 
   yoga-layout@3.2.1: {}
 
-  zod-validation-error@4.0.2(zod@4.6.5):
+  zod-validation-error@4.0.2(zod@4.6.7):
     dependencies:
-      zod: 4.6.5
-
-  zod@4.6.5: {}
+      zod: 4.6.7
 
   zod@4.6.7: {}
 
