@@ -20,7 +20,6 @@
     "@hono/node-server": "2.1.7",
     "@hono/standard-validator": "0.4.1",
     "@hono/structured-logger": "catalog:",
-    "@hono/swagger-ui": "0.6.1",
     "@msgpack/msgpack": "catalog:",
     "@scalar/hono-api-reference": "0.12.19",
     "@sentry/bun": "catalog:sentry",
