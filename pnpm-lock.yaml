@@ -391,7 +391,7 @@ importers:
         version: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.32)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.3.1)
       webpack-cli:
         specifier: 7.3.1
-        version: 7.3.1(js-yaml@4.3.0)(json5@2.2.3)(webpack-bundle-analyzer@4.10.1)(webpack@5.112.2)
+        version: 7.3.1(js-yaml@4.3.2)(json5@2.2.3)(webpack-bundle-analyzer@4.10.1)(webpack@5.112.2)
       webpack-license-plugin:
         specifier: 4.5.1
         version: 4.5.1(webpack@5.112.2)
@@ -4155,10 +4155,6 @@ packages:
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
-
-  js-yaml@4.3.0:
-    resolution: {integrity: sha512-1td788aAnnZ5qs7V2QIRl1owjtYpbKt749Y3xauqQgwIIGF/xXWz1wMTEBx5O3LK3lXLVuqXPdPxj2BoFHaW9Q==}
-    hasBin: true
 
   js-yaml@4.3.2:
     resolution: {integrity: sha512-SFNOvSJ+Dgf/9An904Yx+CgSlIPCkIpao4qo51lpee25TIRejdH3rhR4EZMGoNx3/TP3O+wzWuiTFl4sqbltzA==}
@@ -9187,10 +9183,6 @@ snapshots:
 
   js-tokens@4.0.0: {}
 
-  js-yaml@4.3.0:
-    dependencies:
-      argparse: 2.0.1
-
   js-yaml@4.3.2:
     dependencies:
       argparse: 2.0.1
@@ -10811,20 +10803,6 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  webpack-cli@7.3.1(js-yaml@4.3.0)(json5@2.2.3)(webpack-bundle-analyzer@4.10.1)(webpack@5.112.2):
-    dependencies:
-      '@discoveryjs/json-ext': 1.1.0
-      commander: 14.0.3
-      envinfo: 7.21.0
-      interpret: 3.1.1
-      rechoir: 1.0.0
-      webpack: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.32)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.3.1)
-      webpack-merge: 6.0.1
-    optionalDependencies:
-      js-yaml: 4.3.0
-      json5: 2.2.3
-      webpack-bundle-analyzer: 4.10.1
-
   webpack-cli@7.3.1(js-yaml@4.3.2)(json5@2.2.3)(webpack-bundle-analyzer@4.10.1)(webpack@5.112.2):
     dependencies:
       '@discoveryjs/json-ext': 1.1.0
@@ -10832,7 +10810,7 @@ snapshots:
       envinfo: 7.21.0
       interpret: 3.1.1
       rechoir: 1.0.0
-      webpack: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.32)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.3.1)
+      webpack: 5.112.2(@swc/core@1.16.2)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.32)(sharp@0.34.5)(svgo@4.0.2)(webpack-cli@7.3.1)
       webpack-merge: 6.0.1
     optionalDependencies:
       js-yaml: 4.3.2
@@ -10876,7 +10854,7 @@ snapshots:
       watchpack: 2.6.4
       webpack-sources: 3.7.0
     optionalDependencies:
-      webpack-cli: 7.3.1(js-yaml@4.3.0)(json5@2.2.3)(webpack-bundle-analyzer@4.10.1)(webpack@5.112.2)
+      webpack-cli: 7.3.1(js-yaml@4.3.2)(json5@2.2.3)(webpack-bundle-analyzer@4.10.1)(webpack@5.112.2)
     transitivePeerDependencies:
       - '@minify-html/node'
       - '@napi-rs/image'
@@ -10978,7 +10956,7 @@ snapshots:
       '@oozcitak/dom': 2.0.2
       '@oozcitak/infra': 2.0.2
       '@oozcitak/util': 10.0.0
-      js-yaml: 4.3.0
+      js-yaml: 4.3.2
 
   yallist@3.1.1: {}
 
