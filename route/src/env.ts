@@ -157,7 +157,7 @@ export function requestServeStatic(serveStatic: MiddlewareHandler) {
 }
 
 export function rewriteRequestPath(path: string) {
-  if (path.match(/\/[^/]+\.[^/]+$/)) {
+  if (path.split("/").at(-1)!.includes(".")) {
     // path with extension
     return path;
   } else if (path.endsWith("/")) {
