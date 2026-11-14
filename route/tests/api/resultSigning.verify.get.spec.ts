@@ -10,7 +10,7 @@ import {
 import { resultSecretKey } from "../../src/env.js";
 import * as msgpack from "@msgpack/msgpack";
 
-const testResultParams: ResultParams = {
+export const testResultParams: ResultParams = {
   date: new Date(2026, 4, 1),
   lvName: "testLevel",
   lvType: 1,
@@ -25,7 +25,7 @@ const testResultParams: ResultParams = {
   playbackRate4: 4,
   cid: dummyCid,
 };
-const resultSerialized = Buffer.from(
+export const resultSerialized = Buffer.from(
   msgpack.encode([
     4,
     serializeDate4(testResultParams.date!),
