@@ -15,7 +15,8 @@ import {
   getBrief,
   methodNotAllowed,
   etag,
-  ResponseOK,
+  requestServeStatic,
+  rewriteRequestPath,
 } from "./src/index.js";
 import { Hono } from "hono";
 import { ImageResponse } from "@vercel/og";
@@ -54,28 +55,9 @@ const fetchBrief = (_e: Bindings, cid: string) => getBrief(db!, cid);
 
 const serveStatic = honoServeStatic({
   root: "../frontend/out",
-  rewriteRequestPath: (path) => {
-    if (path.match(/\/[^/]+\.[^/]+$/)) {
-      // path with extension
-      return path;
-    } else if (path.endsWith("/")) {
-      return path.slice(0, -1) + ".html";
-    } else if (path.endsWith("LICENSE")) {
-      return path;
-    } else {
-      // access to html file without extension
-      return path + ".html";
-    }
-  },
+  rewriteRequestPath,
 });
-async function fetchStatic(e: Bindings, url: URL): Promise<ResponseOK> {
-  const res = await new Hono({ strict: false }).use(serveStatic).request(url);
-  if (res.ok) {
-    return res as ResponseOK;
-  } else {
-    throw new Error(`File ${url.pathname} not found`);
-  }
-}
+const fetchStatic = requestServeStatic(serveStatic);
 
 console.log(`Server is running on http://localhost:${port}`);
 

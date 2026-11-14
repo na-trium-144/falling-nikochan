@@ -31,9 +31,9 @@ import {
   notFound,
   onError,
   languageDetector,
-  fetchStatic,
   getBrief,
   etag,
+  requestServeStatic,
 } from "@falling-nikochan/route";
 import { inspect } from "node:util";
 import { createMiddleware } from "hono/factory";
@@ -74,10 +74,12 @@ const dbMiddleware = createMiddleware(async (c, next) => {
 });
 const fetchBrief = (_e: Bindings, cid: string) => getBrief(db!, cid);
 
-export { db };
+export { db, dbMiddleware, fetchBrief };
 
 import { sign } from "hono/jwt";
 import type { ResponseOK } from "@falling-nikochan/route";
+import { serveStatic as honoServeStatic } from "@hono/node-server/serve-static";
+import { rewriteRequestPath } from "../../src";
 
 let testResultBuildKeyPair: CryptoKeyPair;
 export async function getTestResultBuildKeyPair() {
@@ -103,7 +105,11 @@ export const testFetchStatic = async (
       headers: { "Content-Type": "application/json" },
     }) as ResponseOK;
   }
-  return fetchStatic(e, url);
+  const serveStatic = honoServeStatic({
+    root: "../frontend/out",
+    rewriteRequestPath,
+  });
+  return requestServeStatic(serveStatic)(e, url);
 };
 
 export const app = new Hono<{ Bindings: Bindings }>({ strict: false });

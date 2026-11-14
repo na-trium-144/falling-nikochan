@@ -3,7 +3,7 @@ import { languageDetector as honoLanguageDetector } from "hono/language";
 import { methodNotAllowed as honoMethodNotAllowed } from "hono/method-not-allowed";
 import dotenv from "dotenv";
 import { dirname, join } from "node:path";
-import { Context, type Hono } from "hono";
+import { type Context, Hono, type MiddlewareHandler } from "hono";
 import { fetchError } from "./error.js";
 import { env } from "hono/adapter";
 import { etag as honoETag, RETAINED_304_HEADERS } from "hono/etag";
@@ -118,6 +118,8 @@ export type ResponseOK = Response & { ok: true };
 /**
  * URLをfetch()してリソースを取得。OKの場合のみreturnする。
  * ネットワークエラー時HTTPException(502), エラーレスポンス時Responseを含むErrorをthrowする
+ *
+ * vercelで使用
  */
 export async function fetchStatic(e: Bindings, url: URL): Promise<ResponseOK> {
   const res = await fetch(new URL(url.pathname, e.ASSET_PREFIX || url.origin), {
@@ -135,6 +137,36 @@ export async function fetchStatic(e: Bindings, url: URL): Promise<ResponseOK> {
     return res as ResponseOK;
   } else {
     throw new Error(`failed to fetch ${url} (${res.status})`, { cause: res });
+  }
+}
+/**
+ * serveStatic() (内部でfs.readFileやBun.Fileを使用) に対してファイルをリクエストする。
+ *
+ * Node.jsとBunで使用
+ */
+export function requestServeStatic(serveStatic: MiddlewareHandler) {
+  const app = new Hono({ strict: false }).use(serveStatic);
+  return async (e: Bindings, url: URL): Promise<ResponseOK> => {
+    const res = await app.request(url, undefined, e);
+    if (res.ok) {
+      return res as ResponseOK;
+    } else {
+      throw new Error(`File ${url.pathname} not found`);
+    }
+  };
+}
+
+export function rewriteRequestPath(path: string) {
+  if (path.match(/\/[^/]+\.[^/]+$/)) {
+    // path with extension
+    return path;
+  } else if (path.endsWith("/")) {
+    return path.slice(0, -1) + ".html";
+  } else if (path.endsWith("LICENSE")) {
+    return path;
+  } else {
+    // access to html file without extension
+    return path + ".html";
   }
 }
 

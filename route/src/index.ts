@@ -10,6 +10,8 @@ export {
   methodNotAllowed,
   etag,
   fetchStatic,
+  requestServeStatic,
+  rewriteRequestPath,
   sentryBeforeSend,
   type ResponseOK,
 } from "./env.js";
