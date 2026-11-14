@@ -27,47 +27,6 @@ jobs:
     - name: Show output size
       run: du -sk frontend/out/*
 
-  test:
-    runs-on: ubuntu-latest
-    env:
-      MONGODB_URI: mongodb://localhost:27017
-      API_ENV: development
-      # API_NO_RATELIMIT: "1"
-    steps:
-    - uses: actions/checkout@v6
-    - uses: pnpm/action-setup@v6
-    - uses: actions/setup-node@v4
-      with:
-        node-version: 24.x
-        cache: 'pnpm'
-    - run: pnpm install --frozen-lockfile
-    - run: pnpm run mongo-docker
-    - run: pnpm run test
-    # seedスクリプトが動作するかどうかもチェックする
-    - run: pnpm run seed
-
-  test-bun:
-    runs-on: ubuntu-latest
-    env:
-      MONGODB_URI: mongodb://localhost:27017
-      API_ENV: development
-      # API_NO_RATELIMIT: "1"
-    steps:
-    - uses: actions/checkout@v6
-    - uses: pnpm/action-setup@v6
-    - uses: actions/setup-node@v4
-      with:
-        node-version: 24.x
-        cache: 'pnpm'
-    - uses: oven-sh/setup-bun@v2
-      with:
-        bun-version: 1.4.x
-    - run: pnpm install --frozen-lockfile
-    - run: pnpm run t
-    - run: pnpm run mongo-docker
-    - run: bun ./replaceForBun.js
-    - run: bun test
-
   format:
     runs-on: ubuntu-latest
     steps:
@@ -182,7 +141,7 @@ jobs:
       run: docker stop falling-nikochan-ci || true
 
   vercel-deploy:
-    needs: [lint, test, test-bun, vercel-build]
+    needs: [lint, vercel-build]
     runs-on: ubuntu-latest
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -207,6 +166,63 @@ jobs:
         path: .vercel/output
     - name: Deploy Project Artifacts to Vercel
       run: pnpm dlx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --archive=tgz
+
+  test:
+    needs: [vercel-build]
+    runs-on: ubuntu-latest
+    env:
+      MONGODB_URI: mongodb://localhost:27017
+      API_ENV: development
+      # API_NO_RATELIMIT: "1"
+    steps:
+    - uses: actions/checkout@v6
+    - uses: pnpm/action-setup@v6
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24.x
+        cache: 'pnpm'
+    - run: pnpm install --frozen-lockfile
+    - name: Download .vercel/output
+      uses: actions/download-artifact@v4
+      with:
+        name: vercel-output
+        path: .vercel/output
+        include-hidden-files: true
+    - run: cp -r .vercel/output/static ./frontend/out
+    - run: pnpm run mongo-docker
+    - run: pnpm run test
+    # seedスクリプトが動作するかどうかもチェックする
+    - run: pnpm run seed
+
+  test-bun:
+    needs: [vercel-build]
+    runs-on: ubuntu-latest
+    env:
+      MONGODB_URI: mongodb://localhost:27017
+      API_ENV: development
+      # API_NO_RATELIMIT: "1"
+    steps:
+    - uses: actions/checkout@v6
+    - uses: pnpm/action-setup@v6
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24.x
+        cache: 'pnpm'
+    - uses: oven-sh/setup-bun@v2
+      with:
+        bun-version: 1.4.x
+    - run: pnpm install --frozen-lockfile
+    - run: pnpm run t
+    - name: Download .vercel/output
+      uses: actions/download-artifact@v4
+      with:
+        name: vercel-output
+        path: .vercel/output
+        include-hidden-files: true
+    - run: cp -r .vercel/output/static ./frontend/out
+    - run: pnpm run mongo-docker
+    - run: bun ./replaceForBun.js
+    - run: bun test
 
   notify-failure:
     # lint, test, format のいずれかが失敗した場合に実行

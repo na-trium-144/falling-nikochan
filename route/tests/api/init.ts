@@ -80,6 +80,7 @@ import { sign } from "hono/jwt";
 import type { ResponseOK } from "@falling-nikochan/route";
 import { serveStatic as honoServeStatic } from "@hono/node-server/serve-static";
 import { rewriteRequestPath } from "../../src";
+import { existsSync } from "node:fs";
 
 let testResultBuildKeyPair: CryptoKeyPair;
 export async function getTestResultBuildKeyPair() {
@@ -106,7 +107,7 @@ export const testFetchStatic = async (
     }) as ResponseOK;
   }
   const serveStatic = honoServeStatic({
-    root: "../frontend/out",
+    root: existsSync("./frontend") ? "./frontend/out" : "../frontend/out",
     rewriteRequestPath,
   });
   return requestServeStatic(serveStatic)(e, url);
