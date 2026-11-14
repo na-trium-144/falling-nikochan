@@ -382,10 +382,15 @@ export function dummyChart4(): Chart4 {
 
 /*
 cid100000に最新バージョンのchart(dummyChart()参照)を、
-100004〜100013にそれぞれver4〜13のchartを保存する
+100004〜100013にそれぞれver4〜13のchartを保存する。
+100001はdeleted、100002と100003は存在しない。
+
+それ以外の100000-109999のデータはinitDbですべて削除する。
+追加でテスト用にchartを挿入する場合はこの範囲のcidを使用すること。
 */
 export async function initDb() {
   const pSecretSalt = process.env.SECRET_SALT || "SecretSalt";
+  await db.collection("chart").deleteMany({ cid: { $lt: "110000" } });
   await db.collection("rateLimit").deleteMany({});
   await db.collection<PlayRecordEntry>("playRecord").deleteMany({});
   // 本番環境ではcreateIndex.tsで貼る

@@ -142,7 +142,7 @@ describe("GET /api/search", () => {
     test("excludes non-existent or deleted cids", async () => {
       await initDb();
       const deletedCid = String(Number(dummyCid) + 1);
-      const nonExistentCid = "999999";
+      const nonExistentCid = "100002";
       const res = await app.request(
         `/api/search?c=${dummyCid}&c=${deletedCid}&c=${nonExistentCid}`
       );
