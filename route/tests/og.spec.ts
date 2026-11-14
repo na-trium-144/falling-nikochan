@@ -2,7 +2,12 @@ import { describe, test } from "node:test";
 import { expect } from "chai";
 import ogApp from "../src/og/app";
 import { ImageResponse } from "@vercel/og";
-import { fetchBrief, initDb, testFetchStatic } from "./api/init";
+import {
+  fetchBrief,
+  frontendFilesExist,
+  initDb,
+  testFetchStatic,
+} from "./api/init";
 import { onError } from "../src/error";
 import { Bindings, resultSecretKey } from "../src/env";
 import {
@@ -82,12 +87,16 @@ describe("ogApp", () => {
       expect(location.searchParams.get("lang")).to.equal("ja"); // default
       expect(location.searchParams.has("brief")).to.be.true;
     });
-    test("should return image on /share/:cid after one redirect", async () => {
-      await initDb();
-      const res = await app.request("/og/share/100000");
-      const res2 = await app.request(res.headers.get("Location")!);
-      await assertOGImage(res2);
-    });
+    test(
+      "should return image on /share/:cid after one redirect",
+      { skip: !frontendFilesExist },
+      async () => {
+        await initDb();
+        const res = await app.request("/og/share/100000");
+        const res2 = await app.request(res.headers.get("Location")!);
+        await assertOGImage(res2);
+      }
+    );
     test("should return 404 for nonexistent cid", async () => {
       await initDb();
       const res = await app.request("/og/share/100002");
@@ -98,18 +107,22 @@ describe("ogApp", () => {
       const res = await app.request("/og/share/100001");
       expect(res.status).to.equal(404);
     });
-    // test("should return 400 for invalid cid", async () => {
+    // test("should return 400 for invalid cid", { skip: !frontendFilesExist },async () => {
     //   await initDb();
     //   const res = await app.request("/og/share/invalid");
     //   expect(res.status).to.equal(400);
     // });
 
-    test("should not fail on unsupported lang", async () => {
-      await initDb();
-      const res = await app.request("/og/share/100000?lang=foo");
-      const res2 = await app.request(res.headers.get("Location")!);
-      await assertOGImage(res2);
-    });
+    test(
+      "should not fail on unsupported lang",
+      { skip: !frontendFilesExist },
+      async () => {
+        await initDb();
+        const res = await app.request("/og/share/100000?lang=foo");
+        const res2 = await app.request(res.headers.get("Location")!);
+        await assertOGImage(res2);
+      }
+    );
   });
 
   describe("result", () => {
@@ -131,24 +144,28 @@ describe("ogApp", () => {
       expect(location.searchParams.get("lang")).to.equal("ja"); // default
       expect(location.searchParams.has("brief")).to.be.true;
     });
-    test("should return image on /result/:cid with valid result param after one redirect", async () => {
-      await initDb();
-      const key = await resultSecretKey(process.env as any);
-      const signature = await crypto.subtle.sign(
-        { name: "HMAC", hash: { name: "SHA-256" } },
-        key,
-        Buffer.from(resultSerialized, "base64url")
-      );
-      const signatureBase64Url = Buffer.from(signature.slice(0, 12)).toString(
-        "base64url"
-      );
-      const param = `${resultSerialized}.${signatureBase64Url}`;
-      const res = await app.request(
-        `/og/result/100000?result=${encodeURIComponent(param)}`
-      );
-      const res2 = await app.request(res.headers.get("Location")!);
-      await assertOGImage(res2);
-    });
+    test(
+      "should return image on /result/:cid with valid result param after one redirect",
+      { skip: !frontendFilesExist },
+      async () => {
+        await initDb();
+        const key = await resultSecretKey(process.env as any);
+        const signature = await crypto.subtle.sign(
+          { name: "HMAC", hash: { name: "SHA-256" } },
+          key,
+          Buffer.from(resultSerialized, "base64url")
+        );
+        const signatureBase64Url = Buffer.from(signature.slice(0, 12)).toString(
+          "base64url"
+        );
+        const param = `${resultSerialized}.${signatureBase64Url}`;
+        const res = await app.request(
+          `/og/result/100000?result=${encodeURIComponent(param)}`
+        );
+        const res2 = await app.request(res.headers.get("Location")!);
+        await assertOGImage(res2);
+      }
+    );
 
     test("should return 422 for tampered signature", async () => {
       await initDb();
@@ -162,16 +179,20 @@ describe("ogApp", () => {
       expect(res2.status).to.equal(422);
     });
 
-    test("should return image for legacy result version (ver < 4)", async () => {
-      await initDb();
+    test(
+      "should return image for legacy result version (ver < 4)",
+      { skip: !frontendFilesExist },
+      async () => {
+        await initDb();
 
-      const legacySerialized = serializeResultParamsLegacy(testResultParams);
-      const res = await app.request(
-        `/og/result/100000?result=${encodeURIComponent(legacySerialized)}`
-      );
-      const res2 = await app.request(res.headers.get("Location")!);
-      await assertOGImage(res2);
-    });
+        const legacySerialized = serializeResultParamsLegacy(testResultParams);
+        const res = await app.request(
+          `/og/result/100000?result=${encodeURIComponent(legacySerialized)}`
+        );
+        const res2 = await app.request(res.headers.get("Location")!);
+        await assertOGImage(res2);
+      }
+    );
 
     test("should return 400 for invalid result parameter", async () => {
       await initDb();
@@ -205,23 +226,27 @@ describe("ogApp", () => {
     //   expect(res.status).to.equal(400);
     // });
 
-    test("should not fail on unsupported lang", async () => {
-      await initDb();
-      const key = await resultSecretKey(process.env as any);
-      const signature = await crypto.subtle.sign(
-        { name: "HMAC", hash: { name: "SHA-256" } },
-        key,
-        Buffer.from(resultSerialized, "base64url")
-      );
-      const signatureBase64Url = Buffer.from(signature.slice(0, 12)).toString(
-        "base64url"
-      );
-      const param = `${resultSerialized}.${signatureBase64Url}`;
-      const res = await app.request(
-        `/og/result/100000?lang=foo&result=${encodeURIComponent(param)}`
-      );
-      const res2 = await app.request(res.headers.get("Location")!);
-      await assertOGImage(res2);
-    });
+    test(
+      "should not fail on unsupported lang",
+      { skip: !frontendFilesExist },
+      async () => {
+        await initDb();
+        const key = await resultSecretKey(process.env as any);
+        const signature = await crypto.subtle.sign(
+          { name: "HMAC", hash: { name: "SHA-256" } },
+          key,
+          Buffer.from(resultSerialized, "base64url")
+        );
+        const signatureBase64Url = Buffer.from(signature.slice(0, 12)).toString(
+          "base64url"
+        );
+        const param = `${resultSerialized}.${signatureBase64Url}`;
+        const res = await app.request(
+          `/og/result/100000?lang=foo&result=${encodeURIComponent(param)}`
+        );
+        const res2 = await app.request(res.headers.get("Location")!);
+        await assertOGImage(res2);
+      }
+    );
   });
 });

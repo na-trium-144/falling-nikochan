@@ -113,6 +113,13 @@ export const testFetchStatic = async (
   return requestServeStatic(serveStatic)(e, url);
 };
 
+export const frontendFilesExist = await testFetchStatic(
+  {} as any,
+  new URL("http://localhost/ja/share/placeholder")
+)
+  .then(() => true)
+  .catch(() => false);
+
 export const app = new Hono<{ Bindings: Bindings }>({ strict: false });
 app
   .use(
