@@ -32,7 +32,7 @@ catalog:
   hono-openapi: 1.5.0
   isbot: ~5.2.3
   mongodb: 7.5.0
-  next-intl: 4.14.5
+  next-intl: 4.15.1
   "@noble/curves": 2.4.0
   postcss: 8.5.32
   valibot: 1.4.2
