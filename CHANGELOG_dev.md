@@ -1,3 +1,9 @@
+## ver. 18.15 - 2026/11/15 [#1478](https://github.com/na-trium-144/falling-nikochan/pull/1478)
+
+- og, rss, sitemap, share のテストを追加
+- serveStatic経由でファイルを取得する関数をenv.tsに移動
+- rewriteRequestPathをenv.tsに移動
+
 ## ver. 18.13 - 2026/11/12 [#1379](https://github.com/na-trium-144/falling-nikochan/pull/1379)
 
 - guide1ページ目に3パターンの譜面スタイル選択を実装
