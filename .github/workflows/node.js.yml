@@ -41,8 +41,6 @@ jobs:
 
   vercel-build:
     runs-on: ubuntu-latest
-    # 外部コントリビューターでないPRの場合のみ
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -55,6 +53,7 @@ jobs:
         cache: 'pnpm'
     - run: pnpm config set node-linker hoisted --location=project
     - name: Pull Vercel Environment Information
+      continue-on-error: true
       run: pnpm dlx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
     - name: Build Project Artifacts
       env:
@@ -68,7 +67,12 @@ jobs:
         SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         SENTRY_TUNNEL: ${{ secrets.SENTRY_TUNNEL }}
-      run: pnpm dlx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      run: |
+        if [[ -d .vercel ]]; then
+          pnpm dlx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        else
+          pnpm install --frozen-lockfile && pnpm run allbuild && mkdir -p .vercel/output && cp -r ./frontend/out .vercel/output/static
+        fi
     - name: Show output size
       run: du -sk .vercel/output/static/*
     - name: Upload .vercel/output
@@ -143,6 +147,8 @@ jobs:
   vercel-deploy:
     needs: [lint, vercel-build]
     runs-on: ubuntu-latest
+    # 外部コントリビューターでないPRの場合のみ
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -226,7 +232,7 @@ jobs:
 
   notify-failure:
     # lint, test, format のいずれかが失敗した場合に実行
-    needs: [lint, test, test-bun, format]
+    needs: [lint, test, test-bun, format, vercel-build]
     if: failure() && github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
