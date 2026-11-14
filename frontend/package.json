@@ -56,7 +56,7 @@
     "valibot": "catalog:",
     "wasmoon": "catalog:",
     "wretch": "3.0.9",
-    "yaml": "2.9.0"
+    "yaml": "2.9.1"
   },
   "devDependencies": {
     "@gera2ld/tarjs": "catalog:",
@@ -71,7 +71,7 @@
     "gnirts": "1.1.8",
     "postcss": "catalog:",
     "sass": "1.104.1",
-    "svgo": "4.0.2",
+    "svgo": "4.1.0",
     "tailwindcss": "catalog:tailwindcss",
     "woff2sfnt-sfnt2woff": "^1.0.0"
   }
