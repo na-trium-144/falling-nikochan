@@ -99,7 +99,8 @@ const SlimeSVGInner = memo(function SlimeSVGInner(props: Props) {
         // reactの再レンダリングを待たずに即座にdurを更新し、今のアニメーションに反映させる
         ref.current?.setAttribute("dur", duration + "s");
       }
-      ref.current?.beginElementAt(jumpStart);
+      // なぜかわらかないがs.current?.beginElementAt is not a function がsentryに報告されているのでnullチェック
+      ref.current?.beginElementAt?.(jumpStart);
     }
   }, []);
   useEffect(() => {
