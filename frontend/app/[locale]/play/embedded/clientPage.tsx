@@ -121,14 +121,27 @@ interface FinishData {
   bigCount: number;
 }
 
-// Helper to send to Flutter
+// Helper to send to Flutter (supports both native flutter_inappwebview and Web postMessage)
 function callFlutter(handlerName: string, data: any) {
-  if (window.flutter_inappwebview?.callHandler) {
+  // Native WebView bridge
+  if (typeof window !== "undefined" && window.flutter_inappwebview?.callHandler) {
     window.flutter_inappwebview.callHandler(handlerName, data);
-  } else {
-    // Debug fallback: log to console when not in Flutter WebView
-    console.log(`[Flutter Bridge] ${handlerName}:`, data);
   }
+
+  // Web environment: postMessage to parent window (Flutter Web iframe)
+  if (typeof window !== "undefined") {
+    const payload = {
+      type: "nikochan_flutter_bridge",
+      handler: handlerName,
+      data: data,
+    };
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage(payload, "*");
+    }
+    window.postMessage(payload, "*");
+  }
+
+  console.log(`[Flutter Bridge] ${handlerName}:`, data);
 }
 
 export default function EmbeddedPlay() {
@@ -647,6 +660,35 @@ export default function EmbeddedPlay() {
     checkGameEnd,
   ]);
 
+  // Listen for control commands from parent window (Flutter Web via postMessage)
+  useEffect(() => {
+    const handleCommandMessage = (event: MessageEvent) => {
+      let msg = event.data;
+      if (typeof msg === "string") {
+        try {
+          msg = JSON.parse(msg);
+        } catch (_) {}
+      }
+      if (msg && typeof msg === "object" && msg.type === "nikochan_command") {
+        const action = msg.action;
+        const args = msg.args || [];
+        const bridge = window.nikochanBridge;
+        if (!bridge) return;
+
+        if (action === "start") bridge.start();
+        else if (action === "pause") bridge.pause();
+        else if (action === "resume") bridge.resume();
+        else if (action === "restart") bridge.restart();
+        else if (action === "setVolume") bridge.setVolume(args[0]);
+      }
+    };
+
+    window.addEventListener("message", handleCommandMessage);
+    return () => {
+      window.removeEventListener("message", handleCommandMessage);
+    };
+  }, []);
+
   return (
     <div
       style={{
@@ -692,7 +734,6 @@ export default function EmbeddedPlay() {
       </div>
 
       {/* Debug info (only visible in standalone browser, hidden in Flutter) */}
-      {!window.flutter_inappwebview && (
         <div
           style={{
             position: "absolute",
@@ -714,7 +755,6 @@ export default function EmbeddedPlay() {
           </div>
           <div>Playing: {String(chartPlaying)}</div>
         </div>
-      )}
     </div>
   );
 }
