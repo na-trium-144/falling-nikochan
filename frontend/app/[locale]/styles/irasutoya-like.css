@@ -86,6 +86,12 @@ body.fn-body {
     }
   }
 }
+:root:has(.fn-embedded){
+  background: unset !important;
+  .fn-fallback-bg, .fn-irasutoya-like-bg {
+    display: none;
+  }
+}
 
 @layer components {
   .fn-irasutoya-like-bg {

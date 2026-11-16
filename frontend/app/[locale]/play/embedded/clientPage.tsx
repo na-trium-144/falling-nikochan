@@ -43,6 +43,7 @@ import {
   ChartBrief,
 } from "@falling-nikochan/chart";
 import * as msgpack from "@msgpack/msgpack";
+import clsx from "clsx/lite";
 
 // Extend window for bridge
 declare global {
@@ -690,33 +691,12 @@ export default function EmbeddedPlay() {
   }, []);
 
   return (
-    <div
-      style={{
-        width: "100vw",
-        height: "100vh",
-        // Transparent background so Flutter's CustomPaint shows through
-        backgroundColor: "transparent",
-        overflow: "hidden",
-        position: "relative",
-        // Ensure touch events are captured
-        touchAction: "none",
-        userSelect: "none",
-        WebkitUserSelect: "none",
-      }}
+    <main
+      className={clsx("fn-embedded w-screen h-screen overflow-hidden relative",
+        "touch-none select-none")}
     >
-      {/* YouTube player - small, positioned in corner, nearly invisible
-          but must have real dimensions for YouTube to function */}
       <div
-        style={{
-          position: "absolute",
-          top: 0,
-          right: 0,
-          width: 320,
-          height: 180,
-          zIndex: 1,
-          opacity: 0.01, // Nearly invisible but functional
-          pointerEvents: "none", // Don't intercept game input
-        }}
+        className="absolute top-0 right-0 w-[30vw] z-1"
       >
         <FlexYouTube
           id={ytId}
@@ -732,29 +712,6 @@ export default function EmbeddedPlay() {
           fixedSide="width"
         />
       </div>
-
-      {/* Debug info (only visible in standalone browser, hidden in Flutter) */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: 8,
-            left: 8,
-            color: "#666",
-            fontSize: 12,
-            fontFamily: "monospace",
-            zIndex: 10,
-            pointerEvents: "none",
-          }}
-        >
-          <div>
-            Embedded Mode | CID: {cid} | Lv: {lvIndex}
-          </div>
-          <div>
-            YT Ready: {String(ytReady)} | Chart:{" "}
-            {chartSeq ? "loaded" : "loading"}
-          </div>
-          <div>Playing: {String(chartPlaying)}</div>
-        </div>
-    </div>
+    </main>
   );
 }
