@@ -1,4 +1,4 @@
-import { serveStatic } from "hono/bun";
+import { serveStatic as honoServeStatic } from "hono/bun";
 import {
   apiApp,
   ogApp,
@@ -10,12 +10,13 @@ import {
   languageDetector,
   onError,
   notFound,
-  fetchStatic,
   getBrief,
   sentryBeforeSend,
   finalRoutePath,
   methodNotAllowed,
   etag,
+  requestServeStatic,
+  rewriteRequestPath,
 } from "./src/index.js";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
@@ -69,6 +70,13 @@ const dbMiddleware = createMiddleware(async (c, next) => {
 });
 const fetchBrief = (_e: Bindings, cid: string) => getBrief(db!, cid);
 
+const serveStatic = honoServeStatic({
+  root: "./frontend/out",
+  rewriteRequestPath,
+});
+
+const fetchStatic = requestServeStatic(serveStatic);
+
 const app = new Hono<{ Bindings: Bindings }>({ strict: false });
 app.use(sentryMiddleware(app));
 app
@@ -102,25 +110,7 @@ app
   .route("/rss.xml", await rssApp({ dbMiddleware }))
   .route("/share", shareApp({ fetchBrief, fetchStatic }))
   .route("/", redirectApp({ fetchStatic }))
-  .use(
-    "/*",
-    serveStatic({
-      root: "./frontend/out",
-      rewriteRequestPath: (path) => {
-        if (path.match(/\/[^/]+\.[^/]+$/)) {
-          // path with extension
-          return path;
-        } else if (path.endsWith("/")) {
-          return path.slice(0, -1) + ".html";
-        } else if (path.endsWith("LICENSE")) {
-          return path;
-        } else {
-          // access to html file without extension
-          return path + ".html";
-        }
-      },
-    })
-  )
+  .use("/*", serveStatic)
   .use(languageDetector())
   .onError(
     onError({

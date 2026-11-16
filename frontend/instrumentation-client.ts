@@ -2,8 +2,6 @@ import { APIError } from "@/common/apiError";
 import * as Sentry from "@sentry/nextjs";
 import { isbot } from "isbot";
 
-// Sentryの初期化箇所はここ以外に app/[locale]/edit/luaExecWorker.ts にもあるので注意！(そちらも同様に編集すること)
-
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
   tunnel: process.env.SENTRY_TUNNEL || undefined,

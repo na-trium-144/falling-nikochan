@@ -24,7 +24,6 @@ describe("GET /api/stats", () => {
     expect(body).to.have.property("chartCount").that.is.a("number");
     expect(body).to.have.property("playCount").that.is.a("number");
     expect(body.chartCount).to.equal(expectedChartCount);
-    expect(body.playCount).to.equal(5);
     expect(body.playCount).to.equal(expectedPlayCount);
   });
 
@@ -54,7 +53,7 @@ describe("GET /api/stats", () => {
             lua: [],
             levelsFreeze: [],
           },
-          "999998",
+          "100098",
           dummyDate.getTime(),
           null,
           undefined,
@@ -90,7 +89,7 @@ describe("GET /api/stats", () => {
             lua: [],
             levelsFreeze: [],
           },
-          "999997",
+          "100097",
           dummyDate.getTime(),
           null,
           undefined,
@@ -134,7 +133,7 @@ describe("GET /api/stats", () => {
             lua: [],
             levelsFreeze: [],
           },
-          "999996",
+          "100096",
           dummyDate.getTime(),
           null,
           undefined,

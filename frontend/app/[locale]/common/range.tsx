@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { useState } from "react";
+import { memo, useState, useRef, useCallback } from "react";
 import { Range as ReactRange } from "react-range";
 import { IThumbProps } from "react-range/lib/types";
 
@@ -12,8 +12,20 @@ interface Props {
   disabled?: boolean;
   value: number;
   onChange: (value: number) => void;
+  // ReactRangeはレンダー時にthumbの位置を計算するので、scaleアニメーションなどと相性が悪い
+  // workaroundとして、memoを無視して再レンダーするためのpropを用意する
+  rerenderKey?: number;
 }
 export default function Range(rangeProps: Props) {
+  const onChangeRef = useRef<(value: number) => void>(undefined!);
+  onChangeRef.current = rangeProps.onChange;
+  const onChange = useCallback(
+    (value: number) => onChangeRef.current(value),
+    []
+  );
+  return <RangeInner {...rangeProps} onChange={onChange} />;
+}
+const RangeInner = memo(function RangeInner(rangeProps: Props) {
   return (
     <ReactRange
       step={1}
@@ -48,7 +60,7 @@ export default function Range(rangeProps: Props) {
       )}
     />
   );
-}
+});
 
 function RenderThumb(props: IThumbProps & { disabled?: boolean }) {
   const [hovered, setHovered] = useState(false);

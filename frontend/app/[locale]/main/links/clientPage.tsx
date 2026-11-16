@@ -100,16 +100,16 @@ export default function LinksPage({ locale }: { locale: string }) {
             })}
           </p>
         </div>
-        {showDev && (
-          <ul className="list-disc ml-6 space-y-1 text-left">
-            <li>
-              <APIDocsLink />
-            </li>
+        <ul className="list-disc ml-6 space-y-1 text-left">
+          <li>
+            <APIDocsLink />
+          </li>
+          {showDev && (
             <li>
               <DevPageLink locale={locale} />
             </li>
-          </ul>
-        )}
+          )}
+        </ul>
       </section>
     </IndexMain>
   );

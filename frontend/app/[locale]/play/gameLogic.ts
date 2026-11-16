@@ -25,10 +25,10 @@ export default function useGameLogic(
   // ここで指定するuserOffsetは判定には影響しない
   userOffset: number,
   autoOffset: boolean,
-  setUserOffset: (v: number) => void,
+  setUserOffset: null | ((v: number) => void),
   playbackRate: number,
-  playSE: (s: SEType) => void,
-  flash: (x: { targetX: number }) => void
+  playSE: null | ((s: SEType) => void),
+  flash: null | ((x: { targetX: number }) => void)
 ) {
   const [notesDone, setNotesDone] = useState<NoteDone[][]>([]);
 
@@ -42,6 +42,7 @@ export default function useGameLogic(
   const judgeScore = judgeCount[0] * 1 + judgeCount[1] * okBaseScore;
   const [bonus, setBonus] = useState<number>(0); // 1 + 2 + ... + 100 + 100 + ...
   const [bigCount, setBigCount] = useState<number>(0);
+  const [bigMiss, setBigMiss] = useState<number>(0);
   const baseScore = (judgeScore / (judge.notesTotal || 1)) * baseScoreRate;
   const chainScore = (bonus / (judge.bonusTotal || 1)) * chainScoreRate;
   const bigScore = (bigCount / (judge.bigTotal || 1)) * bigScoreRate;
@@ -50,7 +51,8 @@ export default function useGameLogic(
   const [hitType, setHitType] = useState<number | null>(null);
 
   const chartEnd =
-    judgeCount.reduce((sum, j) => sum + j, 0) == judge.notesTotal;
+    judgeCount.reduce((sum, j) => sum + j, 0) == judge.notesTotal &&
+    bigCount + bigMiss == judge.bigTotal;
 
   const [chain, setChain] = useState<number>(0);
   const [maxChain, setMaxChain] = useState<number>(0);
@@ -116,7 +118,7 @@ export default function useGameLogic(
           const timeOfs = timeOfsEstimator.current.update(
             ofs - posOfs.current / dn.vel.y
           );
-          setUserOffset(timeOfs);
+          setUserOffset?.(timeOfs);
         }
       }
     },
@@ -129,6 +131,8 @@ export default function useGameLogic(
       if (bigHit) {
         if (c.judge <= 2) {
           setBigCount((big) => big + 1);
+        } else {
+          setBigMiss((big) => big + 1);
         }
       } else {
         // c.judge = 1 ~ 4
@@ -290,24 +294,15 @@ export default function useGameLogic(
         }
       };
     }
-  }, [
-    auto,
-    getCurrentTimeSec,
-    hit,
-    playbackRate,
-    judge,
-    playSE,
-    flash,
-    judgeForAuto,
-  ]);
+  }, [auto, getCurrentTimeSec, hit, playbackRate, judge, judgeForAuto]);
 
   const judgeOpts = useMemo<JudgeOptions>(
     () => ({
       judgeForAuto,
       playbackRate,
       onJudge,
-      onPlaySE: playSE,
-      onFlash: flash,
+      onPlaySE: playSE ?? (() => undefined),
+      onFlash: flash ?? (() => undefined),
     }),
     [judgeForAuto, playbackRate, onJudge, playSE, flash]
   );
@@ -323,6 +318,7 @@ export default function useGameLogic(
       setMaxChain(0);
       setBonus(0);
       setBigCount(0);
+      setBigMiss(0);
       hitCountByType.current = {};
       setHitType(null);
       initTimeOfsEstimator();

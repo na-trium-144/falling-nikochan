@@ -1,10 +1,10 @@
-FROM node:20-slim AS builder
+FROM node:24-slim AS builder
 
 WORKDIR /app
 ENV CI=true
 
 # Install pnpm
-RUN npm install -g pnpm@10
+RUN npm install -g pnpm@12
 
 # Copy package files
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
@@ -21,13 +21,13 @@ COPY . .
 
 RUN pnpm run t
 
-FROM node:20-slim AS prod-deps
+FROM node:22-slim AS prod-deps
 
 WORKDIR /app
 ENV CI=true
 
 # Install pnpm
-RUN npm install -g pnpm@10
+RUN npm install -g pnpm@12
 
 # Copy package files
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
@@ -56,6 +56,8 @@ COPY --from=prod-deps /app/i18n ./i18n
 COPY --from=builder /app/route/dist ./route/dist
 COPY --from=builder /app/chart/dist ./chart/dist
 COPY .vercel/output/static ./frontend/out
+
+ENV NODE_ENV=production
 
 # The server will be started by docker-compose, but we can define a default command.
 CMD ["bun", "./route/serve-bun-prod.ts"]

@@ -1,3 +1,62 @@
+## ver. 18.15 - 2026/11/15 [#1478](https://github.com/na-trium-144/falling-nikochan/pull/1478)
+
+- og, rss, sitemap, share のテストを追加
+- serveStatic経由でファイルを取得する関数をenv.tsに移動
+- rewriteRequestPathをenv.tsに移動
+
+## ver. 18.13 - 2026/11/12 [#1379](https://github.com/na-trium-144/falling-nikochan/pull/1379)
+
+- guide1ページ目に3パターンの譜面スタイル選択を実装
+- 音符をドラッグした際に左右対称に動くモードを追加
+- keyupとkeydownで条件が異なっており、埋め込みyoutubeが準備完了でないときshiftキーを解除できないのを修正
+- 譜面作成中に Ctrl+Z すると，ステップも戻ってしまうのを修正
+- x,vx,vyのドラッグでの編集単位を0.5に変更
+- ステップ単位を変更するスライダーを追加
+- timeBarのレンダリングを1ページごとに行う・メモ化
+- CopyPasteButtonがなぜか重いようなので再生中は消す
+- 譜面編集にて1ステップ＝1/〇の〇のところに0を入れるとフリーズするのを修正
+- 譜面編集のタイムバーをドラッグした際にテキスト選択にならないようにする
+- luaExecWorkerからsentryを消す
+    - このworkerからのエラー報告は今のところなく、初期化が重いだけな気がしたので
+- luaコードをキャッシュしてundo時に利用
+- 再生中はscrollableの再レンダリングを行わない & タイトルを書き換えない
+- editで画面リサイズ時のキャンバスの範囲指定を修正
+- guideを外側クリックで閉じられるようにする
+
+## ver. 18.12 - 2026/11/7 [#1442](https://github.com/na-trium-144/falling-nikochan/pull/1442)
+
+* topDemoがデモデータの取得失敗時に無限ループするのを修正
+* 左右のsafe-areaが揃っていない場合のトップページとプレイ画面の中央揃えを修正
+* プレイ画面の音量のRangeの見た目が初期状態で0になるのを修正
+* モバイル表示の時のみMusicAreaのshadow削除、各丸をはみ出させる、余裕があればsafearea考慮
+* editのtimerをフックに切り出す
+* 譜面編集側のx,vx,vyもinspectにあわせて斜体に変更
+* 小さいselectのコンポーネントをSmallSelectとして抽出・リファクタ
+* fn-smallが小さくないのを修正
+
+## ver. 18.11 - 2026/11/7 [#1441](https://github.com/na-trium-144/falling-nikochan/pull/1441)
+
+* pnpm12
+
+## ver. 18.8 - 2026/10/25 [#1436](https://github.com/na-trium-144/falling-nikochan/pull/1436)
+
+* フレームレート関連の処理をhookに切り出す
+* 毎フレームreactの再レンダリングをトリガーするのをやめ、requestAnimationFrameの中で直接canvasのレンダリングをするようにする
+* 比較検証用に `ignoreRunDelta=1` でフレームレート調整機能を無効化できるようにする
+* playページで、処理が重くメモ化できるコンポーネントは雑にメモ化した
+* 不要なstate更新を避ける
+    * fps表示がオフの場合はfpsの状態を更新しない
+    * targetlineのアニメーションにstateを使わず直接refを更新する
+
+## ver. 18.7 - 2026/10/23 [#1433](https://github.com/na-trium-144/falling-nikochan/pull/1433)
+
+* 開発環境でプレイ記録の署名のチェックを省略できるようにする `API_NO_RESULT_VERIFY` 環境変数を追加
+* 開発環境のfetchStaticで500エラーにならないようfetchではなくreadFileに変更
+* ogResultでBig判定数が0のとき00と表示されるのを修正
+* Bigのミス数をカウントするようにし、すべてのBig判定が完了するまで譜面を終了しない
+* 譜面よりも先に動画が終了した場合は、譜面が終了したものとして扱う
+* resultParamで inputType: 0 を許可する
+
 ## ver. 18.6 - 2026/10/15 [#1366](https://github.com/na-trium-144/falling-nikochan/pull/1366)
 
 * stats APIを追加、トップページに譜面数と再生数の統計の表示を追加

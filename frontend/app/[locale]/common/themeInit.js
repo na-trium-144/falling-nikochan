@@ -12,9 +12,7 @@ window.fnCurrentThemeIsDark = () => {
     case "light":
       return false;
     default:
-      return (
-        window?.matchMedia("(prefers-color-scheme: dark)").matches || false
-      );
+      return window.matchMedia("(prefers-color-scheme: dark)").matches || false;
   }
 };
 window.fnApplyTheme = () => {

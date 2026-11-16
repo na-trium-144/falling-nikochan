@@ -73,12 +73,16 @@ const redirectApp = (config: {
       const lang = c.get("language");
       const redirected = new URL(`/${lang}${path}${search}`, backendOrigin(c));
       if (isbot(c.req.header("User-Agent"))) {
-        // crawlerに対してはリダイレクトのレスポンスを返す代わりにリダイレクト先のページを直接返す
-        const res = await config.fetchStatic(env(c), new URL(redirected));
-        return c.body(res.body as ReadableStream, 200, {
-          "Content-Type": res.headers.get("Content-Type") || "text/html",
-          "Cache-Control": "no-store",
-        });
+        try {
+          // crawlerに対してはリダイレクトのレスポンスを返す代わりにリダイレクト先のページを直接返す
+          const res = await config.fetchStatic(env(c), new URL(redirected));
+          return c.body(res.body as ReadableStream, 200, {
+            "Content-Type": res.headers.get("Content-Type") || "text/html",
+            "Cache-Control": "no-store",
+          });
+        } catch {
+          // ignore when the redirected url does not exist (is also redirect)
+        }
       }
       c.header("cache-control", "no-store, private");
       return c.redirect(redirected, 307);

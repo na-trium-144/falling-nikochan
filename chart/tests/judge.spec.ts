@@ -65,6 +65,25 @@ describe("Judge", () => {
       expect(judged[0].judge).to.equal(5);
       expect(judged[0].note.done).to.equal(5);
     });
+    test("should call onJudge twice on skipped big notes", () => {
+      const note1 = createDummyNote({ id: 1, hitTimeSec: 0.5, big: true });
+      const note2 = createDummyNote({ id: 2, hitTimeSec: 1.5 });
+      const judged: HitCandidate[] = [];
+
+      const judge = new Judge(
+        [note1, note2],
+        { ...defaultJudgeOpts, onJudge: (c) => judged.push(c) },
+        1.0
+      );
+
+      expect(judged).to.have.lengthOf(2);
+      expect(judged[0].note.id).to.equal(1);
+      expect(judged[0].judge).to.equal(5);
+      expect(judged[0].note.done).to.equal(5);
+      expect(judged[1].note.id).to.equal(1);
+      expect(judged[1].judge).to.equal(5);
+      expect(judged[1].note.done).to.equal(5);
+    });
   });
 
   describe("hit timing windows", () => {
@@ -595,6 +614,27 @@ describe("Judge", () => {
       expect(judged).to.have.lengthOf(2);
       expect(judged[1].judge).to.equal(4);
       // next miss time for note2 at 3.0: badLateSec - (1.2 - 3.0) = 0.15 + 1.8 = 1.95
+      expect(nextMissTime).to.be.closeTo(badLateSec - (1.2 - 3.0), 0.001);
+    });
+
+    test("should call onJudge twice on missed big note", () => {
+      const note1 = createDummyNote({ id: 1, hitTimeSec: 1.0, big: true });
+      const note2 = createDummyNote({ id: 2, hitTimeSec: 3.0 });
+      const judged: HitCandidate[] = [];
+
+      const judge = new Judge([note1, note2], {
+        ...defaultJudgeOpts,
+        onJudge: (c) => judged.push(c),
+        // onPlaySE: (se) => sePlayed.push(se),
+      });
+
+      // At now = 1.2 (> 1.0 + badLateSec), note1 should be missed
+      const nextMissTime = judge.checkMiss(1.2);
+      expect(judged).to.have.lengthOf(2);
+      expect(judged[0].note.id).to.equal(1);
+      expect(judged[0].judge).to.equal(4);
+      expect(judged[1].note.id).to.equal(1);
+      expect(judged[1].judge).to.equal(4);
       expect(nextMissTime).to.be.closeTo(badLateSec - (1.2 - 3.0), 0.001);
     });
 

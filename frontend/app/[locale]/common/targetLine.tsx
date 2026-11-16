@@ -1,54 +1,91 @@
 import clsx from "clsx/lite";
-import { useEffect, useRef, useState } from "react";
+import { Ref, useCallback, useImperativeHandle, useRef } from "react";
+
+export interface TargetLineHandler {
+  flash: (x: FlashPos) => void;
+}
+export type FlashPos = { targetX: number } | { clientX: number } | undefined;
+
+export function useFlash() {
+  const flashRef = useRef<TargetLineHandler | null>(null);
+  const flash = useCallback(
+    (pos: FlashPos) => flashRef.current?.flash(pos),
+    []
+  );
+  return { flashRef, flash };
+}
+
 interface Props {
   className?: string;
   style?: object;
-  // shadowが広がるアニメーションの開始位置
-  // TargetLineの左端からの画面上のx座標距離(px), またはleft: calc({} - 100%)に入れられる文字列
-  barFlash?: number | string;
   left: number | string;
   right?: number | string;
   width?: number | string;
   bottom: number | string;
+  // TargetLineの左端からの画面上のx座標距離(px), またはleft: calc({} - 100%)に入れられる文字列
+  flashPosToPixel: (pos: FlashPos) => number | string | undefined;
+  ref?: Ref<TargetLineHandler>;
 }
 export default function TargetLine(props: Props) {
-  const [spreadShadow, setSpreadShadow] = useState(false);
-  useEffect(() => {
-    // console.log(props.barFlash);
-    if (props.barFlash !== undefined) {
-      // なぜかrequestAnimationFrameだけではdelayが足りない
-      const t = setTimeout(() =>
-        requestAnimationFrame(() => {
-          setSpreadShadow(true);
-        })
-      );
-      return () => {
-        clearTimeout(t);
-      };
-    } else {
-      const t = setTimeout(() => {
-        setSpreadShadow(false);
-      }, 400);
-      return () => {
-        setSpreadShadow(false);
-        clearTimeout(t);
-      };
-    }
-  }, [props.barFlash]);
-  const flashPos = useRef<number | string>(0);
-  if (props.barFlash !== undefined) {
-    flashPos.current = props.barFlash;
-  }
+  const divRef = useRef<HTMLDivElement>(null);
+  const divShadowRef = useRef<HTMLDivElement>(null);
+  const { flashPosToPixel } = props;
+
+  // キーを押したとき一定時間光らせる
+  // shadowが広がるアニメーションの開始位置
+  const timeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const animationFrame = useRef<ReturnType<
+    typeof requestAnimationFrame
+  > | null>(null);
+  useImperativeHandle(
+    props.ref,
+    () => ({
+      flash: function flash_(x: FlashPos) {
+        if (timeout.current !== null) {
+          clearTimeout(timeout.current);
+        }
+        if (animationFrame.current !== null) {
+          cancelAnimationFrame(animationFrame.current);
+        }
+        if (divRef.current?.classList.contains("fn-flash")) {
+          divRef.current?.classList.remove("fn-flash");
+          divShadowRef.current?.classList.remove("fn-flash");
+          animationFrame.current = requestAnimationFrame(() => flash_(x));
+        } else {
+          divRef.current?.classList.remove("fn-flash");
+          divShadowRef.current?.classList.remove("fn-flash");
+          const pos = flashPosToPixel(x);
+          if (pos !== undefined) {
+            divRef.current?.classList.add("fn-flash");
+
+            timeout.current = setTimeout(() => {
+              animationFrame.current = requestAnimationFrame(() => {
+                if (divShadowRef.current) {
+                  divShadowRef.current.classList.add("fn-flash");
+                  divShadowRef.current.style.left =
+                    typeof pos === "number"
+                      ? `calc(${pos}px - 100%)`
+                      : `calc(${pos} - 100%)`;
+                }
+              });
+              timeout.current = setTimeout(() => {
+                divRef.current?.classList.remove("fn-flash");
+                timeout.current = setTimeout(() => {
+                  divShadowRef.current?.classList.remove("fn-flash");
+                }, 400);
+              }, 100);
+            });
+          }
+        }
+      },
+    }),
+    [flashPosToPixel]
+  );
+
   return (
     <div
-      className={clsx(
-        "absolute h-0.5 transition-all",
-        "overflow-x-clip",
-        props.barFlash !== undefined
-          ? "bg-amber-400/70 duration-0"
-          : "bg-black/35 dark:bg-white/35 duration-500",
-        props.className
-      )}
+      ref={divRef}
+      className={clsx("fn-target-line", props.className)}
       style={{
         left: props.left,
         right: props.right,
@@ -57,27 +94,7 @@ export default function TargetLine(props: Props) {
         ...props.style,
       }}
     >
-      <div
-        className={clsx(
-          "absolute inset-y-0 rounded-[50%]",
-          "shadow-[0_0_1rem_0.05rem] shadow-yellow-400",
-          "origin-center transition ease-linear",
-          spreadShadow
-            ? "scale-x-100 opacity-0 duration-400"
-            : "scale-x-0 opacity-100 duration-0"
-          // props.barFlash === undefined && spreadShadow
-          //   ? "opacity-0"
-          //   : "opacity-100",
-          // props.barFlash === undefined && !spreadShadow && "hidden"
-        )}
-        style={{
-          left:
-            typeof flashPos.current === "number"
-              ? `calc(${flashPos.current}px - 100%)`
-              : `calc(${flashPos.current ?? "0px"} - 100%)`,
-          width: "200%",
-        }}
-      />
+      <div ref={divShadowRef} className="fn-target-line-shadow" />
     </div>
   );
 }

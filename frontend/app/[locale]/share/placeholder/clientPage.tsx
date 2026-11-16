@@ -161,7 +161,9 @@ export default function ShareChart(props: Props) {
 
       <Features locale={locale} />
       <SocialLinks />
-      <hr className="fn-hr" />
+      <div className="w-full px-sai">
+        <hr className="fn-hr" />
+      </div>
       <PoliciesAndLinks locale={locale} />
 
       <div className="flex-none basis-mobile-footer no-pc" />

@@ -73,7 +73,6 @@ export default function OGTemplate() {
       <Title
         className="absolute top-0 inset-x-0 origin-top "
         style={{ height: options.titleHeight, scale: options.titleScale }}
-        anim={false}
       />
       <div className="absolute bottom-0 w-full h-6">
         <IrasutoyaLikeGrassInner

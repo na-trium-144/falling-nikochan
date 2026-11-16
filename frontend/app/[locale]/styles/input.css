@@ -19,5 +19,25 @@
         @apply text-inherit;
       }
     }
+
+    &.fn-small-select {
+      @apply relative inline-block align-top pr-6 text-center;
+      > .fn-small-select-inner {
+        @apply relative flex flex-row items-center justify-center;
+      }
+      > .fn-small-select-arrow {
+        @apply absolute right-1 inset-y-0 h-max m-auto pointer-events-none;
+      }
+    }
+  }
+
+  .fn-select {
+    @apply pr-6;
+    > .fn-select-inner {
+      @apply relative flex flex-row items-center justify-center;
+    }
+    > .fn-select-arrow {
+      @apply absolute inset-y-0 my-auto h-max right-2 pointer-events-none;
+    }
   }
 }

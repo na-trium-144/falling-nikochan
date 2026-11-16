@@ -143,7 +143,7 @@ export const ResultSerializedSchema = () =>
       v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(12000)), // [8] score100
       v.pipe(v.array(v.pipe(v.number(), v.integer())), v.length(4)), // [9] judgeCount
       v.nullable(v.pipe(v.number(), v.integer(), v.minValue(0))), // [10] bigCount
-      v.nullable(v.pipe(v.number(), v.integer(), v.minValue(1))), // [11] inputType
+      v.nullable(v.pipe(v.number(), v.integer(), v.minValue(0))), // [11] inputType
       v.pipe(v.number(), v.minValue(0)), // [12] playbackRate4
       v.pipe(v.array(v.pipe(v.number(), v.integer())), v.length(3)), // [13] cid 7bit*3
     ]),

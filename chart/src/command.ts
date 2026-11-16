@@ -32,6 +32,18 @@ export function defaultCopyBuffer() {
     Array.from(new Array(9)).map(() => null)
   );
 }
-export function defaultCopyBufferObj(): CopyBuffer {
-  return { "0": [-3, 1, 3, false, true] };
+
+export const initNoteStyles = ["free", "vertical", "center"] as const;
+export type InitNoteStyle = (typeof initNoteStyles)[number];
+export function defaultCopyBufferObj(
+  initNoteStyle?: InitNoteStyle
+): CopyBuffer {
+  switch (initNoteStyle) {
+    case "vertical":
+      return { "0": [0, 0, 3, false, true] };
+    case "center":
+      return { "0": [-3, 0.5, 3, false, true] };
+    default:
+      return { "0": [-3, 1, 3, false, true] };
+  }
 }

@@ -34,7 +34,7 @@ import { luaAddBpmChange } from "./lua/bpm.js";
 import { luaAddBeatChange } from "./lua/signature.js";
 import { luaAddSpeedChange } from "./lua/speed.js";
 import { stepZero, stepSimplify } from "./step.js";
-import { defaultCopyBufferObj, NoteCommand } from "./command.js";
+import { defaultCopyBufferObj, InitNoteStyle, NoteCommand } from "./command.js";
 import {
   Chart13Edit,
   ChartEditSchema13,
@@ -348,7 +348,10 @@ export function numEvents(chart: Chart14Edit | Chart15 | Chart17): number {
     .reduce((a, b) => a + b);
 }
 
-export function emptyChart(locale: string): ChartEdit {
+export function emptyChart(
+  locale: string,
+  initNoteStyle?: InitNoteStyle
+): ChartEdit {
   const { min, freeze, lua } = emptyLevel();
   let chart: ChartEdit = {
     falling: "nikochan",
@@ -364,7 +367,7 @@ export function emptyChart(locale: string): ChartEdit {
     changePasswd: null,
     published: false,
     locale,
-    copyBuffer: defaultCopyBufferObj(),
+    copyBuffer: defaultCopyBufferObj(initNoteStyle),
     zoom: 0,
   };
   return chart;

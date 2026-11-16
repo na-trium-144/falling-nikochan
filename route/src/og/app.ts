@@ -172,6 +172,7 @@ const ogApp = (config: {
           throw new HTTPException(400, { message: "invalidResultParam" });
         }
         if (
+          !env(c).API_NO_RESULT_VERIFY &&
           isVerificationRequired(resultParams) &&
           !(await verifyResultParams(
             { result, sign },
@@ -283,6 +284,7 @@ const ogApp = (config: {
           case inputTypes.gamepad:
             imagePath = "/og-icons/game-three.svg";
             break;
+          case 0:
           case null:
             imagePath = null;
             break;

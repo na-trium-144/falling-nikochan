@@ -50,7 +50,7 @@ export function StatsDisplay() {
   }, []);
 
   return (
-    <div className="w-full max-w-main px-3 mb-6 main-wide:px-6 main-wide:mb-8 grid-centering">
+    <div className="w-full max-w-main px-sai-3 mb-6 main-wide:px-sai-6 main-wide:mb-8 grid-centering">
       <Box classNameInner="flex flex-row items-center" padding={4}>
         <div className="shrink w-36 min-w-0 flex items-center gap-2">
           <Music className="text-3xl text-sky-600 dark:text-sky-400" />

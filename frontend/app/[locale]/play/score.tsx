@@ -4,7 +4,7 @@ import clsx from "clsx/lite";
 import { useTheme } from "@/common/theme";
 import { useDisplayMode } from "@/scale.js";
 import { useTranslations } from "next-intl";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { memo, ReactNode, useEffect, useRef, useState } from "react";
 
 interface CProps {
   className?: string;
@@ -13,8 +13,9 @@ interface CProps {
 }
 function Cloud(props: CProps) {
   const themeState = useTheme();
-  const { playUIScale } = useDisplayMode();
+  const { isMobileGame, playUIScale } = useDisplayMode();
 
+  const xMargin = 0.75 * playUIScale + "rem";
   return (
     <div
       className={clsx(
@@ -24,8 +25,15 @@ function Cloud(props: CProps) {
       style={{
         width: 225,
         height: 115,
-        left: props.left ? 0.75 * playUIScale + "rem" : undefined,
-        right: props.left ? undefined : 0.75 * playUIScale + "rem",
+        left: props.left
+          ? `max(0px, calc(${xMargin} - var(--sai-l)))`
+          : undefined,
+        // mobileでない場合右側にはMusicAreaがあるのでsafe-areaは無関係
+        right: props.left
+          ? undefined
+          : isMobileGame
+            ? `max(0px, calc(${xMargin} - var(--sai-r)))`
+            : xMargin,
         transform: `scale(${playUIScale * 0.8})`,
       }}
     >
@@ -72,6 +80,9 @@ export interface NoteDone {
   chain: number;
 }
 export function ScoreDisp(props: Props) {
+  return <ScoreDispInner {...props} />;
+}
+const ScoreDispInner = memo(function ScoreDispInner(props: Props) {
   const t = useTranslations("play.score");
   const { score, best } = props;
   const lch = useColorWithLerp(props.pc ? props.baseScore / 80 : 0);
@@ -112,7 +123,7 @@ export function ScoreDisp(props: Props) {
       )}
     </Cloud>
   );
-}
+});
 function ScoreDiffAnim({ nd }: { nd: NoteDone }) {
   const ref = useRef<HTMLDivElement>(null!);
   useEffect(() => {
@@ -193,6 +204,9 @@ interface ChainProps {
 // slate-800: oklch(0.279 0.041 260.031); -> orange-500: oklch(0.705 0.213 47.604);
 // stone-300: oklch(0.869 0.005 56.366); -> yellow-400: oklch(0.852 0.199 91.936);
 export function ChainDisp(props: ChainProps) {
+  return <ChainDispInner {...props} />;
+}
+const ChainDispInner = memo(function ChainDispInner(props: ChainProps) {
   const t = useTranslations("play.score");
   const lch = useColorWithLerp(props.fc ? props.chain / 100 : 0);
   return (
@@ -243,7 +257,8 @@ export function ChainDisp(props: ChainProps) {
       />
     </Cloud>
   );
-}
+});
+
 function ChainBigAnim(props: { className: string; chain: number }) {
   const [animChain, setAnimChain] = useState<number>(0);
   const ref = useRef<HTMLSpanElement | null>(null);

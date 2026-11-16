@@ -3,7 +3,14 @@ import { ChartBrief } from "@falling-nikochan/chart";
 import ProgressBar from "@/common/progressBar.js";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { useDisplayMode } from "@/scale.js";
-import { RefObject, useEffect, useRef, useState } from "react";
+import {
+  memo,
+  RefObject,
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 import { useResizeDetector } from "react-resize-detector";
 import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
 import VolumeNotice from "@icon-park/react/lib/icons/VolumeNotice";
@@ -41,6 +48,37 @@ interface Props {
   setSEVolume: (vol: number) => void;
 }
 export function MusicArea(props: Props) {
+  const ytCalllbacksRef = useRef<{
+    onReady: () => void;
+    onStart: () => void;
+    onStop: () => void;
+    onPlaybackRateChange: (rate: number) => void;
+    onError: (ec: number) => void;
+  }>(undefined!);
+  ytCalllbacksRef.current = { ...props };
+  const onReady = useCallback(() => ytCalllbacksRef.current.onReady(), []);
+  const onStart = useCallback(() => ytCalllbacksRef.current.onStart(), []);
+  const onStop = useCallback(() => ytCalllbacksRef.current.onStop(), []);
+  const onError = useCallback(
+    (ec: number) => ytCalllbacksRef.current.onError(ec),
+    []
+  );
+  const onPlaybackRateChange = useCallback(
+    (rate: number) => ytCalllbacksRef.current.onPlaybackRateChange(rate),
+    []
+  );
+  return (
+    <MusicAreaInner
+      {...props}
+      onReady={onReady}
+      onStart={onStart}
+      onStop={onStop}
+      onError={onError}
+      onPlaybackRateChange={onPlaybackRateChange}
+    />
+  );
+}
+const MusicAreaInner = memo(function MusicAreaInner(props: Props) {
   const { width, height, ref } = useResizeDetector();
   const { rem, screenHeight, mobilePlayUIHeightScale } = useDisplayMode();
   const ytHalf = width && width / 2 < 200;
@@ -56,6 +94,7 @@ export function MusicArea(props: Props) {
   const t = useTranslations("play.message");
 
   const [volumeCtrlOpen, setVolumeCtrlOpen] = useState(false);
+  const [rerenderVolume, setRerenderVolume] = useState(0);
   const [ytVolumeCtrlAvailable, setYtVolumeCtrlAvailable] = useState(true);
   useEffect(() => {
     if (detectOS() === "ios") {
@@ -70,6 +109,11 @@ export function MusicArea(props: Props) {
       const t = setTimeout(() => {
         setVolumeCtrlOpen(true);
         initialVolumeCtrlOpenDone.current = true;
+        for (let delay = 0; delay <= 250; delay += 50) {
+          setTimeout(() => {
+            setRerenderVolume((prev) => prev + 1);
+          }, delay);
+        }
       }, 500);
       return () => clearTimeout(t);
     }
@@ -103,7 +147,7 @@ export function MusicArea(props: Props) {
           )
         );
       }
-    }, 50);
+    }, 250);
     return () => clearInterval(id);
   }, [props.ytPlayer, props.ytBeginSec, levelLength]);
 
@@ -132,7 +176,7 @@ export function MusicArea(props: Props) {
         "grow-0 shrink-0 flex",
         // levelBgColors.at(levelTypes.indexOf(props.lvType)) || levelBgColors[1],
         props.isMobile
-          ? "rounded-b-sq-xl pb-1"
+          ? "rounded-b-sq-xl pb-1 -mx-1 px-1 inset-shadow-none"
           : "rounded-bl-sq-box pl-3 pb-1.5",
         "relative flex-col",
         props.className,
@@ -172,8 +216,12 @@ export function MusicArea(props: Props) {
             )}
             style={{
               width: props.isMobile
-                ? 50 * mobilePlayUIHeightScale + "%"
+                ? `${50 * mobilePlayUIHeightScale}%`
                 : "100%",
+              // 動画を小さくする必要がありその結果無駄なスペースが空く場合に限り右側safe-areaを使う
+              marginRight: props.isMobile
+                ? `min(var(--sai-r), ${50 - 50 * mobilePlayUIHeightScale}%)`
+                : undefined,
             }}
             scale={ytHalf ? 0.5 : 1}
             id={props.chartBrief?.ytId}
@@ -398,7 +446,7 @@ export function MusicArea(props: Props) {
           "fg-base",
           props.isMobile
             ? clsx(
-                "-bottom-9 inset-x-0 mx-auto w-max text-xl",
+                "-bottom-9 left-(--sai-l) right-(--sai-r) mx-auto w-max text-xl",
                 props.isTouch ? "fn-with-bg" : ""
               )
             : "bottom-0 right-1 mr-sai",
@@ -421,7 +469,7 @@ export function MusicArea(props: Props) {
           "flex flex-col",
           props.isMobile
             ? clsx(
-                "bottom-0 inset-x-0 mx-auto w-80 max-w-full",
+                "bottom-0 left-(--sai-l) right-(--sai-r) mx-auto w-80 max-w-full",
                 largeTitle
                   ? "rounded-sq-box p-4 gap-3"
                   : "rounded-sq-xl px-3 py-2 gap-1"
@@ -485,6 +533,7 @@ export function MusicArea(props: Props) {
             disabled={!ytVolumeCtrlAvailable}
             value={ytVolumeCtrlAvailable ? props.ytVolume : 100}
             onChange={props.setYtVolume}
+            rerenderKey={rerenderVolume}
           />
         </div>
         <div className="flex flex-row items-center">
@@ -510,9 +559,10 @@ export function MusicArea(props: Props) {
             disabled={!props.enableSE}
             value={props.enableSE ? props.seVolume : 0}
             onChange={props.setSEVolume}
+            rerenderKey={rerenderVolume}
           />
         </div>
       </div>
     </div>
   );
-}
+});

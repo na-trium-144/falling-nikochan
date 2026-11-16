@@ -6,17 +6,45 @@ import CheckBox from "@/common/checkBox.js";
 import Select from "@/common/select";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
-import { ChartEditing } from "@falling-nikochan/chart";
+import { ChartEditing, SignatureState } from "@falling-nikochan/chart";
 import type { Ace } from "ace-builds";
 import { RefObject } from "react";
 
+export function CurrentStepText({
+  ss,
+}: {
+  ss: SignatureState | undefined | null;
+}) {
+  return (
+    <>
+      <span className="inline-block text-right w-8">{ss && ss.barNum + 1}</span>
+      <span className="ml-1 ">;</span>
+      <span className="inline-block text-right w-6">
+        {ss && ss.count.fourth + 1}
+      </span>
+      <div className="min-w-20 inline-block">
+        {ss && ss.count.numerator > 0 && (
+          <>
+            <span className="ml-2 ">+</span>
+            <span className="inline-block text-right w-6">
+              {ss.count.numerator}
+            </span>
+            <span className="ml-1 mr-1">/</span>
+            <span>{ss.count.denominator * 4}</span>
+          </>
+        )}
+      </div>
+    </>
+  );
+}
 interface Props {
   chart?: ChartEditing;
   aceSessionRef: RefObject<(Ace.EditSession | null)[]>;
+  playing: boolean;
 }
 export default function NoteTab(props: Props) {
   const t = useTranslations("edit.note");
-  const { chart } = props;
+  const { chart, playing } = props;
   const currentLevel = chart?.currentLevel;
   const cur = currentLevel?.current;
   const ss = cur?.signatureState;
@@ -24,25 +52,7 @@ export default function NoteTab(props: Props) {
     <div className="flex flex-col h-full">
       <div>
         <span>{t("step")}</span>
-        <span className="inline-block text-right w-6">
-          {ss && ss.barNum + 1}
-        </span>
-        <span className="ml-1 ">;</span>
-        <span className="inline-block text-right w-6">
-          {ss && ss.count.fourth + 1}
-        </span>
-        <div className="w-20 inline-block">
-          {ss && ss.count.numerator > 0 && (
-            <>
-              <span className="ml-2 ">+</span>
-              <span className="inline-block text-right w-6">
-                {ss?.count.numerator}
-              </span>
-              <span className="ml-1 mr-1">/</span>
-              <span>{ss && ss.count.denominator * 4}</span>
-            </>
-          )}
-        </div>
+        <CurrentStepText ss={ss} />
         <div className="inline-block ml-2 w-28">
           <span>{t("noteNum")}</span>
           <span className="inline-block text-right w-6">
@@ -89,12 +99,16 @@ export default function NoteTab(props: Props) {
       </div>
       <NoteEdit {...props} />
       <span className="flex-1 mb-4 " />
-      <div className="flex flex-row items-baseline mb-2">
-        <UndoRedoButton {...props} />
-      </div>
-      <div className="flex flex-row ">
-        <CopyPasteButton {...props} />
-      </div>
+      {!playing && (
+        <>
+          <div className="flex flex-row items-baseline mb-2">
+            <UndoRedoButton {...props} />
+          </div>
+          <div className="flex flex-row ">
+            <CopyPasteButton {...props} />
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -191,10 +205,15 @@ function NoteEdit(props: Props) {
                   (<Mouse className="inline-block" />)
                 </span>
                 <HelpIcon>
-                  {t.rich("positionHelp", { br: () => <br /> })}
+                  {t.rich("positionHelp", {
+                    var: (c) => <var className="italic">{c}</var>,
+                    br: () => <br />,
+                  })}
                 </HelpIcon>
               </td>
-              <td>x =</td>
+              <td>
+                <var className="italic">x</var> =
+              </td>
               <td>
                 <MathInput
                   className="w-20"
@@ -241,13 +260,23 @@ function NoteEdit(props: Props) {
                   <Mouse className="inline-block" />)
                 </span>
                 <HelpIcon>
-                  <p>{t.rich("velocityHelp1", { br: () => <br /> })}</p>
+                  <p>
+                    {t.rich("velocityHelp1", {
+                      var: (c) => <var className="italic">{c}</var>,
+                      br: () => <br />,
+                    })}
+                  </p>
                   <p className="mt-2">
-                    {t.rich("velocityHelp2", { br: () => <br /> })}
+                    {t.rich("velocityHelp2", {
+                      var: (c) => <var className="italic">{c}</var>,
+                      br: () => <br />,
+                    })}
                   </p>
                 </HelpIcon>
               </td>
-              <td>vx =</td>
+              <td>
+                <var className="italic">vx</var> =
+              </td>
               <td>
                 <MathInput
                   className="w-20"
@@ -263,7 +292,9 @@ function NoteEdit(props: Props) {
                 />
               </td>
               <td>,</td>
-              <td>vy =</td>
+              <td>
+                <var className="italic">vy</var> =
+              </td>
               <td>
                 <MathInput
                   className="w-20"
@@ -281,7 +312,9 @@ function NoteEdit(props: Props) {
             </tr>
             <tr>
               <td></td>
-              <td>|v| =</td>
+              <td>
+                |<var className="italic">v</var>| =
+              </td>
               <td>
                 <MathInput
                   className="w-20"
