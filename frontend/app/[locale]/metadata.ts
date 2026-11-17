@@ -29,7 +29,7 @@ export interface MetadataProps {
   params: Promise<{ locale: string }>;
 }
 export async function initMetadata(
-  params: Promise<{ locale?: string }>,
+  params: Promise<{ locale?: string }> | null,
   path: string | null,
   title: string,
   description: string | null,
@@ -40,7 +40,7 @@ export async function initMetadata(
     alternateTypes?: { [key: string]: string };
   }
 ): Promise<Metadata> {
-  const locale = (await params).locale || "en";
+  const locale = (await params)?.locale || "en";
   const t = await getTranslations(locale, "main");
   if (description === null) {
     description = t("description");
