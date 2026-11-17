@@ -1,16 +1,13 @@
 "use client";
 
 /**
- * Embedded Play Page for Flutter WebView integration.
+ * Embedded Play Page for WebView/IFrame integration.
  *
- * This page runs the game logic (Judge, timing, scoring) inside the WebView.
- * The WebView is displayed fullscreen with a transparent background so that
- * Flutter's CustomPaint rendering is visible behind it.
+ * This page runs the game logic (Judge, timing, scoring) inside the WebView or IFrame.
  *
- * Input (touch/keyboard) is handled DIRECTLY by the WebView — no round-trip
- * through Flutter, eliminating input latency entirely.
+ * Input (touch/keyboard) is handled but nothing will be displayed in this page.
  *
- * URL: /ja/play/embedded?cid=XXXXXX&lvIndex=0
+ * URL: /embed-play?cid=XXXXXX&lvIndex=0
  *
  * Flutter → Web (control commands only, no input):
  *   window.nikochanBridge.start()
@@ -146,10 +143,6 @@ function callFlutter(handlerName: string, data: any) {
 }
 
 export default function EmbeddedPlay() {
-  // URL params
-  const [cid, setCid] = useState<string>("");
-  const [lvIndex, setLvIndex] = useState<number>(0);
-
   // Chart data
   const [chartSeq, setChartSeq] = useState<ChartSeqData | null>(null);
   const [brief, setBrief] = useState<ChartBrief | null>(null);
@@ -466,8 +459,8 @@ export default function EmbeddedPlay() {
     const params = new URLSearchParams(window.location.search);
     const cidParam = params.get("cid") || "";
     const lvParam = parseInt(params.get("lvIndex") || "0", 10);
-    setCid(cidParam);
-    setLvIndex(lvParam);
+    // setCid(cidParam);
+    // setLvIndex(lvParam);
 
     if (!cidParam) {
       callFlutter("onError", "Missing cid parameter");
