@@ -11,5 +11,11 @@ export async function generateMetadata() {
 }
 
 export default function EmbeddedPlayPage() {
-  return <EmbeddedPlay />;
+  return (
+    <html>
+      <body className="fn-body relative touch-none select-none">
+        <EmbeddedPlay />
+      </body>
+    </html>
+  );
 }

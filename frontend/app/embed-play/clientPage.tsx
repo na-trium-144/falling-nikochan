@@ -684,10 +684,6 @@ export default function EmbeddedPlay() {
   }, []);
 
   return (
-    <main
-      className={clsx("fn-embedded w-screen h-screen overflow-hidden relative",
-        "touch-none select-none")}
-    >
       <div
         className="absolute top-0 right-0 w-[30vw] z-1"
       >
@@ -705,6 +701,5 @@ export default function EmbeddedPlay() {
           fixedSide="width"
         />
       </div>
-    </main>
   );
 }
