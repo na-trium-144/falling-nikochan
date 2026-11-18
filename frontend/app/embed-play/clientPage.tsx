@@ -7,21 +7,25 @@
  *
  * Input (touch/keyboard) is handled but nothing will be displayed in this page.
  *
- * URL: /embed-play?cid=XXXXXX&lvIndex=0
+ * URL: /embed-play
  *
- * Flutter → Web (control commands only, no input):
- *   window.nikochanBridge.start()
- *   window.nikochanBridge.pause()
- *   window.nikochanBridge.resume()
- *   window.nikochanBridge.restart()
- *   window.nikochanBridge.setVolume(volume)
+ * Host → Web (control commands only, no input):
+ *   window.nikochanEmbed.init(cid, lvIndex)
+ *   window.nikochanEmbed.start()
+ *   window.nikochanEmbed.pause()
+ *   window.nikochanEmbed.resume()
+ *   window.nikochanEmbed.restart()
+ *   window.nikochanEmbed.setVolume(volume)
  *
- * Web → Flutter (via flutter_inappwebview):
- *   window.flutter_inappwebview.callHandler('onReady', chartData)
- *   window.flutter_inappwebview.callHandler('onTimeUpdate', timeSec)
- *   window.flutter_inappwebview.callHandler('onJudge', judgeEvent)
- *   window.flutter_inappwebview.callHandler('onFinish', result)
- *   window.flutter_inappwebview.callHandler('onError', message)
+ * Web → Host (via flutter_inappwebview / postMessage):
+ *   onLoaded
+ *   onReady
+ *   onStart
+ *   onStop
+ *   onTimeUpdate
+ *   onJudge
+ *   onFinish
+ *   onError
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -40,19 +44,19 @@ import {
   ChartBrief,
 } from "@falling-nikochan/chart";
 import * as msgpack from "@msgpack/msgpack";
-import clsx from "clsx/lite";
 
 // Extend window for bridge
 declare global {
   interface Window {
-    nikochanBridge: NikochanBridge;
+    nikochanEmbed: NikochanEmbed;
     flutter_inappwebview?: {
       callHandler(name: string, ...args: any[]): Promise<any>;
     };
   }
 }
 
-interface NikochanBridge {
+interface NikochanEmbed {
+  init(cid: string, lvIndex: number): void;
   start(): void;
   pause(): void;
   resume(): void;
@@ -119,17 +123,17 @@ interface FinishData {
   bigCount: number;
 }
 
-// Helper to send to Flutter (supports both native flutter_inappwebview and Web postMessage)
-function callFlutter(handlerName: string, data: any) {
+// Helper to send to Host (supports both native flutter_inappwebview and Web postMessage)
+function notifyHost(handlerName: string, data: any) {
   // Native WebView bridge
   if (typeof window !== "undefined" && window.flutter_inappwebview?.callHandler) {
     window.flutter_inappwebview.callHandler(handlerName, data);
   }
 
-  // Web environment: postMessage to parent window (Flutter Web iframe)
+  // Web environment: postMessage to parent window (Host iframe)
   if (typeof window !== "undefined") {
     const payload = {
-      type: "nikochan_flutter_bridge",
+      type: "nikochanEmbed",
       handler: handlerName,
       data: data,
     };
@@ -139,7 +143,7 @@ function callFlutter(handlerName: string, data: any) {
     window.postMessage(payload, "*");
   }
 
-  console.log(`[Flutter Bridge] ${handlerName}:`, data);
+  console.log(`[Embed Bridge] ${handlerName}:`, data);
 }
 
 export default function EmbeddedPlay() {
@@ -251,9 +255,10 @@ export default function EmbeddedPlay() {
   const onJudge = useCallback(
     (
       candidate: HitCandidate,
-      now: number,
+      _now: number,
       bigHit: boolean,
-      thisChain: number
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      _thisChain: number
     ) => {
       const s = scoreState.current;
       const judgeMap = {
@@ -311,7 +316,7 @@ export default function EmbeddedPlay() {
         notesDone: s.notesDone,
       };
 
-      callFlutter("onJudge", event);
+      notifyHost("onJudge", event);
     },
     [calcScore]
   );
@@ -344,7 +349,7 @@ export default function EmbeddedPlay() {
         judgeCount: [s.goodCount, s.okCount, s.badCount, s.missCount],
         bigCount: s.bigCount,
       };
-      callFlutter("onFinish", result);
+      notifyHost("onFinish", result);
       setChartPlaying(false);
       inputEnabledRef.current = false;
     }
@@ -435,7 +440,7 @@ export default function EmbeddedPlay() {
       const perfNow = performance.now();
       if (perfNow - timeUpdateThrottle.current > 16) {
         timeUpdateThrottle.current = perfNow;
-        callFlutter("onTimeUpdate", now);
+        notifyHost("onTimeUpdate", now);
       }
 
       // Check for game end via ytEndSec
@@ -454,16 +459,10 @@ export default function EmbeddedPlay() {
     };
   }, [getCurrentTimeSec, checkGameEnd]);
 
-  // Fetch chart data on mount
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const cidParam = params.get("cid") || "";
-    const lvParam = parseInt(params.get("lvIndex") || "0", 10);
-    // setCid(cidParam);
-    // setLvIndex(lvParam);
-
+  // Initialize chart data via method call
+  const initChart = useCallback((cidParam: string, lvParam: number) => {
     if (!cidParam) {
-      callFlutter("onError", "Missing cid parameter");
+      notifyHost("onError", "Missing cid parameter");
       return;
     }
 
@@ -491,11 +490,11 @@ export default function EmbeddedPlay() {
         setChartSeq(decoded);
       })
       .catch((err) => {
-        callFlutter("onError", String(err));
+        notifyHost("onError", String(err));
       });
   }, []);
 
-  // When chart data + YouTube are both ready, send onReady to Flutter
+  // When chart data + YouTube are both ready, send onReady to Host
   useEffect(() => {
     if (chartSeq && ytReady && brief) {
       const readyData: ReadyData = {
@@ -533,7 +532,7 @@ export default function EmbeddedPlay() {
         bigTotal: chartSeq.notes.filter((n: any) => n.big).length,
       };
 
-      callFlutter("onReady", readyData);
+      notifyHost("onReady", readyData);
     }
   }, [chartSeq, ytReady, brief]);
 
@@ -576,7 +575,7 @@ export default function EmbeddedPlay() {
         playbackRate: playbackRate,
         onJudge,
         onPlaySE: () => {}, // SE not needed in embedded mode
-        onFlash: () => {}, // Flash handled by Flutter
+        onFlash: () => {}, // Flash handled by host
       };
 
       judgeRef.current = new Judge(notes, judgeOpts, now);
@@ -584,96 +583,86 @@ export default function EmbeddedPlay() {
     [chartSeq, onJudge]
   );
 
-  // Set up the bridge on window (Flutter → Web control commands)
+  // Set up the bridge on window (Host → Web control commands)
   useEffect(() => {
-    window.nikochanBridge = {
+    window.nikochanEmbed = {
+      init(cid: string, lvIndex: number) {
+        initChart(cid, lvIndex);
+      },
+
       start() {
-        if (!chartSeq) return;
-        const ytBegin = (chartSeq as any).ytBegin ?? 0;
+        const seq = chartSeqRef.current;
+        if (!seq) return;
+        judgeRef.current = null;
+        const ytBegin = (seq as any).ytBegin ?? 0;
         ytPlayer.current?.seekTo?.(ytBegin, true);
         ytPlayer.current?.playVideo?.();
-
-        // Reset time sync
-        rawStartTimeStamp.current = null;
-        filteredStartTimeStamp.current = null;
-        perfStarted.current = null;
-        sampleTimestamps.current = [];
-        timeStampLastAdjusted.current = performance.now();
-
-        setChartPlaying(true);
-
-        // Initialize judge with current time
-        setTimeout(() => {
-          const now = getCurrentTimeSec();
-          initJudge(now ?? -Infinity);
-          scheduleMissCheck();
-          // Enable direct input handling
-          inputEnabledRef.current = true;
-        }, 100);
       },
 
       pause() {
         ytPlayer.current?.pauseVideo?.();
-        setChartPlaying(false);
-        inputEnabledRef.current = false;
-        if (missCheckTimer.current) clearTimeout(missCheckTimer.current);
       },
 
       resume() {
         ytPlayer.current?.playVideo?.();
-        setChartPlaying(true);
-        inputEnabledRef.current = true;
-        scheduleMissCheck();
       },
 
       restart() {
-        if (!chartSeq) return;
-        const ytBegin = (chartSeq as any).ytBegin ?? 0;
+        const seq = chartSeqRef.current;
+        if (!seq) return;
+        judgeRef.current = null;
+        const ytBegin = (seq as any).ytBegin ?? 0;
         ytPlayer.current?.seekTo?.(ytBegin, true);
         ytPlayer.current?.pauseVideo?.();
-        setChartPlaying(false);
-        inputEnabledRef.current = false;
-        if (missCheckTimer.current) clearTimeout(missCheckTimer.current);
-
-        // Reset time sync
-        rawStartTimeStamp.current = null;
-        filteredStartTimeStamp.current = null;
-        perfStarted.current = null;
-        sampleTimestamps.current = [];
       },
 
       setVolume(volume: number) {
         ytPlayer.current?.setVolume?.(volume);
       },
     };
-  }, [
-    chartSeq,
-    getCurrentTimeSec,
-    initJudge,
-    scheduleMissCheck,
-    checkGameEnd,
-  ]);
 
-  // Listen for control commands from parent window (Flutter Web via postMessage)
+    if ((window as any)._pendingInit) {
+      const [pCid, pLv] = (window as any)._pendingInit;
+      delete (window as any)._pendingInit;
+      initChart(pCid, pLv);
+    }
+
+    notifyHost("onLoaded", null);
+  }, [initChart]);
+
+  // Listen for control commands from parent window (Host iframe via postMessage)
   useEffect(() => {
     const handleCommandMessage = (event: MessageEvent) => {
       let msg = event.data;
       if (typeof msg === "string") {
         try {
           msg = JSON.parse(msg);
-        } catch (_) {}
+        } catch {
+          // Ignore invalid JSON
+        }
       }
-      if (msg && typeof msg === "object" && msg.type === "nikochan_command") {
+      if (
+        msg &&
+        typeof msg === "object" &&
+        msg.type === "nikochanEmbed" &&
+        msg.action
+      ) {
         const action = msg.action;
         const args = msg.args || [];
-        const bridge = window.nikochanBridge;
-        if (!bridge) return;
+        const embed = window.nikochanEmbed;
+        if (!embed) {
+          if (action === "init") {
+            (window as any)._pendingInit = [args[0], Number(args[1] ?? 0)];
+          }
+          return;
+        }
 
-        if (action === "start") bridge.start();
-        else if (action === "pause") bridge.pause();
-        else if (action === "resume") bridge.resume();
-        else if (action === "restart") bridge.restart();
-        else if (action === "setVolume") bridge.setVolume(args[0]);
+        if (action === "init") embed.init(args[0], Number(args[1] ?? 0));
+        else if (action === "start") embed.start();
+        else if (action === "pause") embed.pause();
+        else if (action === "resume") embed.resume();
+        else if (action === "restart") embed.restart();
+        else if (action === "setVolume") embed.setVolume(args[0]);
       }
     };
 
@@ -684,22 +673,41 @@ export default function EmbeddedPlay() {
   }, []);
 
   return (
-      <div
-        className="absolute top-0 right-0 w-[30vw] z-1"
-      >
-        <FlexYouTube
-          id={ytId}
-          control={false}
-          ytPlayer={ytPlayer}
-          onReady={() => setYtReady(true)}
-          onStart={() => {
-            // YouTube started playing
-          }}
-          onStop={() => {
-            // YouTube stopped
-          }}
-          fixedSide="width"
-        />
-      </div>
+    <div className="absolute top-0 right-0 w-[30vw] z-1">
+      <FlexYouTube
+        id={ytId}
+        control={false}
+        ytPlayer={ytPlayer}
+        onReady={() => setYtReady(true)}
+        onStart={() => {
+          // YouTube started playing
+          rawStartTimeStamp.current = null;
+          filteredStartTimeStamp.current = null;
+          perfStarted.current = null;
+          sampleTimestamps.current = [];
+          timeStampLastAdjusted.current = performance.now();
+
+          setChartPlaying(true);
+
+          const now = getCurrentTimeSec();
+          if (!judgeRef.current) {
+            initJudge(now ?? -Infinity);
+          }
+          scheduleMissCheck();
+          inputEnabledRef.current = true;
+
+          notifyHost("onStart", null);
+        }}
+        onStop={() => {
+          // YouTube stopped
+          setChartPlaying(false);
+          inputEnabledRef.current = false;
+          if (missCheckTimer.current) clearTimeout(missCheckTimer.current);
+
+          notifyHost("onStop", null);
+        }}
+        fixedSide="width"
+      />
+    </div>
   );
 }
