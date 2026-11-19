@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
 import HamburgerButton from "@icon-park/react/lib/icons/HamburgerButton";
 import Comment from "@icon-park/react/lib/icons/Comment";
@@ -22,6 +22,7 @@ import {
   GitHubLink,
   XLink,
 } from "./contactLinks.js";
+import { OpenDevCounter } from "./counter.js";
 
 const pcTabTitleKeys = ["play", "edit"] as const;
 const tabURLs = {
@@ -151,19 +152,6 @@ export function PCMenuPopup(props: PopupProps) {
     setPopupOpened(props.open);
   }, [props.open, setPopupOpened]);
 
-  const clickCount = useRef<number>(0);
-  const prevClickCount = useRef<DOMHighResTimeStamp>(0);
-  const [showDev, setShowDev] = useState(false);
-  const clickCounter = () => {
-    if (performance.now() - prevClickCount.current > 1000) {
-      clickCount.current = 0;
-    }
-    prevClickCount.current = performance.now();
-    if (++clickCount.current >= 7) {
-      setShowDev(true);
-    }
-    console.log(clickCount.current);
-  };
   return (
     popupOpened && (
       <>
@@ -174,9 +162,8 @@ export function PCMenuPopup(props: PopupProps) {
             e.stopPropagation();
           }}
         />
-        <div
+        <OpenDevCounter
           className={clsx("absolute top-full mt-1 right-0 w-max z-changelog")}
-          onClick={clickCounter}
         >
           <Box
             classNameOuter={clsx(
@@ -209,14 +196,12 @@ export function PCMenuPopup(props: PopupProps) {
               <li>
                 <APIDocsLink small />
               </li>
-              {showDev && (
-                <li>
-                  <DevPageLink locale={props.locale} />
-                </li>
-              )}
+              <li className="fn-counter-hidden">
+                <DevPageLink locale={props.locale} />
+              </li>
             </ul>
           </Box>
-        </div>
+        </OpenDevCounter>
       </>
     )
   );
