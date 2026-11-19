@@ -6,8 +6,8 @@ import { Box } from "./box";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
-import { updateLastVisited } from "./version";
 import { useDelayedDisplayState } from "./delayedDisplayState";
+import { UpdateLastVisited } from "./version";
 
 const ChangeLogContext = createContext<ReactNode>(null);
 export const useChangeLog = () => useContext(ChangeLogContext);
@@ -33,14 +33,12 @@ export function ChangeLogPopup(props: PopupProps) {
   const [popupOpened, popupAppearing, setPopupOpened] =
     useDelayedDisplayState(200);
   useEffect(() => {
-    if (props.open) {
-      updateLastVisited();
-    }
     setPopupOpened(props.open);
   }, [props.open, setPopupOpened]);
   return (
     popupOpened && (
       <>
+        <UpdateLastVisited />
         <div
           className={clsx("fixed z-changelog-bg inset-0")}
           onClick={(e) => {

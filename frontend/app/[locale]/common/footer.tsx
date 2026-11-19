@@ -7,10 +7,9 @@ import More from "@icon-park/react/lib/icons/More";
 import Search from "@icon-park/react/lib/icons/Search";
 import { useTheme } from "./theme.js";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
-import { lastVisitedOld } from "./version.js";
 import { LinkWithReview } from "./pwaInstall.jsx";
 import { ButtonHighlight } from "./button.jsx";
+import { LastVisitedIndicator } from "./version.js";
 
 export type TabKeys = "top" | "play" | "edit" | "policies" | "links" | null;
 const mobileTabTitleKeys = ["top", "play", "edit", "links"] as const;
@@ -30,11 +29,6 @@ interface MobileProps {
 export function MobileFooter(props: MobileProps) {
   const tm = useTranslations("main");
   const themeState = useTheme();
-  const [isLastVisitedOld, setIsLastVisitedOld] = useState<boolean>(false);
-
-  useEffect(() => {
-    setIsLastVisitedOld(lastVisitedOld());
-  }, []);
 
   const iconFill = themeState.isDark
     ? ["#d6d3d1" /*stone-300*/, "#a6a09b" /*stone-400*/]
@@ -93,12 +87,9 @@ export function MobileFooter(props: MobileProps) {
                   theme={props.tabKey === key ? "two-tone" : "outline"}
                   fill={props.tabKey === key ? iconFill : iconFill[0]}
                 />
-                {isLastVisitedOld && (
-                  <span
-                    className={clsx("absolute w-3 h-3 rounded-full bg-red-500")}
-                    style={{ top: "-0.1rem", right: "-0.5rem" }}
-                  />
-                )}
+                <LastVisitedIndicator
+                  style={{ top: "-0.1rem", right: "-0.5rem" }}
+                />
               </div>
             )}
             <span className="text-xs">{tm(key + ".titleShort")}</span>

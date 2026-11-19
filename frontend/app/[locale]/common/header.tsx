@@ -9,7 +9,7 @@ import { historyBackWithReview, LinkWithReview } from "./pwaInstall.jsx";
 import { ButtonHighlight } from "./button.jsx";
 import Title from "./titleLogo.js";
 import { useTranslations } from "next-intl";
-import { lastVisitedOld } from "./version.js";
+import { LastVisitedIndicator } from "./version.js";
 import { ChangeLogPopup } from "./changeLog.js";
 import { useDelayedDisplayState } from "./delayedDisplayState.js";
 import { Box } from "./box.js";
@@ -95,8 +95,6 @@ interface Props2 {
 export function PCHeader2(props: Props2) {
   const [showChangeLog, setShowChangeLog] = useState<boolean>(false);
   const [showMenu, setShowMenu] = useState<boolean>(false);
-  const [isLastVisitedOld, setIsLastVisitedOld] = useState<boolean>(false);
-  useEffect(() => setIsLastVisitedOld(lastVisitedOld()), []);
   return (
     <aside className={clsx("no-mobile fn-pc-header2", props.className)}>
       {props.backdropBlur && (
@@ -113,12 +111,7 @@ export function PCHeader2(props: Props2) {
           <span>ver.</span>
           <span className="ml-1 mr-0.5">{process.env.buildVersion}</span>
           <Comment className="inline-block align-middle" />
-          {isLastVisitedOld && (
-            <span
-              className={clsx("absolute w-3 h-3 rounded-full bg-red-500")}
-              style={{ top: "-0.1rem", right: "-0.25rem" }}
-            />
-          )}
+          <LastVisitedIndicator style={{ top: "-0.1rem", right: "-0.25rem" }} />
         </button>
         <ChangeLogPopup
           locale={props.locale}
