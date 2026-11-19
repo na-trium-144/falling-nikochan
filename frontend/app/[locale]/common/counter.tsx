@@ -21,9 +21,9 @@ export function OpenDevCounter<T extends ElementType = "div">(props: Props<T>) {
     }
     prevClickCount.current = performance.now();
     if (++clickCount.current >= 7) {
-      if(props.pushHref)
-          {router.push(props.pushHref);
-      }else{
+      if (props.pushHref) {
+        router.push(props.pushHref);
+      } else {
         setShowDev(true);
       }
     }

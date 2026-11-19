@@ -23,8 +23,6 @@ export function EditCidInput({ locale }: { locale: string }) {
   const te = useTranslations("error");
   const router = useRouter();
 
-  const isSafari = useSafariDetector();
-
   const [cidErrorMsg, setCIdErrorMsg] = useState<Error>();
   const [cidFetching, setCidFetching] = useState<boolean>(false);
   const [inputCId, setInputCId] = useState<string>("");

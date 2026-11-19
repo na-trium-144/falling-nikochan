@@ -47,7 +47,6 @@ interface PProps {
   badge?: boolean;
 }
 export default function ChartListPage(props: PProps) {
-  const { openModal, openShareInternal } = useSharePageModal();
   const boxSize = useResizeDetector();
   return (
     <IndexMain

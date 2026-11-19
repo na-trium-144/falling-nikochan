@@ -4,7 +4,14 @@ import { IndexMain } from "../main.js";
 import { MenuLangSwitcher } from "@/common/langSwitcher.js";
 import { MenuThemeSwitcher } from "@/common/theme.js";
 import { PWAInstallDesc } from "@/common/pwaInstall.js";
-import { APIDocsLink, ContactFormLink, DeferredEMail, DevPageLink, GitHubLink, XLink } from "@/common/contactLinks.js";
+import {
+  APIDocsLink,
+  ContactFormLink,
+  DeferredEMail,
+  DevPageLink,
+  GitHubLink,
+  XLink,
+} from "@/common/contactLinks.js";
 import { OpenDevCounter } from "@/common/counter.js";
 import { LastVisitedIndicator } from "@/common/version.js";
 import Link from "next/link.js";
@@ -16,9 +23,10 @@ export async function generateMetadata({ params }: MetadataProps) {
 }
 
 export default async function Page({ params }: MetadataProps) {
-  const locale = (await params).locale
-  const t = await getTranslations(locale, "main.links")
-  return <IndexMain
+  const locale = (await params).locale;
+  const t = await getTranslations(locale, "main.links");
+  return (
+    <IndexMain
       title={t("titleShort")}
       tabKey="links"
       mobileTabKey="links"
@@ -65,7 +73,9 @@ export default async function Page({ params }: MetadataProps) {
               prefetch={process.env.PREFETCH as "auto"}
             >
               {t("changelog")}
-              <LastVisitedIndicator style={{ top: "-0.1rem", right: "-0.35rem" }} />
+              <LastVisitedIndicator
+                style={{ top: "-0.1rem", right: "-0.35rem" }}
+              />
             </Link>
           </p>
           <p>
@@ -84,4 +94,5 @@ export default async function Page({ params }: MetadataProps) {
         </ul>
       </OpenDevCounter>
     </IndexMain>
+  );
 }
