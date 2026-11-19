@@ -169,7 +169,7 @@ export async function Features({ locale }: { locale: string }) {
               className="fn-link-3 space-x-1"
               prefetch={process.env.PREFETCH as "auto"}
             >
-              {t("howToPlay.about")}
+              <span>{t("howToPlay.about")}</span>
               <ArrowRightIcon />
             </Link>
           </div>
@@ -269,7 +269,7 @@ export async function PoliciesAndLinks({
             className="fn-link-3 space-x-1"
             prefetch={process.env.PREFETCH as "auto"}
           >
-            {t("policies.title")}
+            <span>{t("policies.title")}</span>
             <ArrowRightIcon />
           </Link>
         </div>

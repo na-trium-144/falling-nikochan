@@ -109,7 +109,8 @@ interface Props {
   dateDiff?: boolean;
   showCount?: boolean;
   search?: boolean;
-  href?: (cid: string) => string; // default: /share/cid
+  locale?: string;
+  hrefEdit?: boolean; // -> /${locale}/edit?cid=${cid}  default: /share/${cid}
   useSharePageModal?: boolean; // open modal instead of opening link when clicked
   newTab?: boolean;
   moreHref?: string | null;
@@ -463,8 +464,9 @@ export function ChartList(props: Props) {
                 updatedAt={filteredBriefs.at(i)!.updatedAt}
                 brief={filteredBriefs.at(i)!.brief}
                 href={
-                  props.href?.(filteredBriefs.at(i)!.cid) ??
-                  `/share/${filteredBriefs.at(i)!.cid}`
+                  props.hrefEdit
+                    ? `/${props.locale}/edit?cid=${filteredBriefs.at(i)!.cid}`
+                    : `/share/${filteredBriefs.at(i)!.cid}`
                 }
                 onClick={
                   props.useSharePageModal

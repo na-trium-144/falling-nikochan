@@ -2,11 +2,9 @@
 
 import clsx from "clsx/lite";
 import { useState } from "react";
-import { IndexMain } from "../main.js";
 import Input from "@/common/input.js";
-import { ChartList } from "../chartList.js";
 import { ExternalLink } from "@/common/extLink.js";
-import { CidSchema, rateLimit } from "@falling-nikochan/chart";
+import { CidSchema } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import * as v from "valibot";
 import { SlimeSVG } from "@/common/slime.js";
@@ -16,13 +14,11 @@ import {
   useSafariDetector,
 } from "@/common/pwaInstall.js";
 import { useRouter } from "next/navigation";
-import Caution from "@icon-park/react/lib/icons/Caution.js";
 import { captureAndWrap, fetchBackend, formatError } from "@/common/fetch.js";
 import { markAsExpected } from "@/common/apiError.js";
-import Link from "next/link";
-import ArrowRight from "@icon-park/react/lib/icons/ArrowRight.js";
+import Caution from "@icon-park/react/lib/icons/Caution";
 
-export default function EditTab({ locale }: { locale: string }) {
+export function EditCidInput({ locale }: { locale: string }) {
   const t = useTranslations("main.edit");
   const te = useTranslations("error");
   const router = useRouter();
@@ -60,89 +56,46 @@ export default function EditTab({ locale }: { locale: string }) {
   };
 
   return (
-    <IndexMain
-      title={t("title")}
-      tabKey="edit"
-      mobileTabKey="edit"
-      noBackButtonMobile
-      noBackButtonPC
-      locale={locale}
-    >
-      <section className="fn-sect">
-        <p className="mb-1">{t("welcome")}</p>
-        <p>
-          <Link
-            href={`/${locale}/main/guide/1`}
-            className="fn-link-3"
-            prefetch={process.env.PREFETCH as "auto"}
-          >
-            {t("guide")}
-            <ArrowRight
-              className="inline-block align-middle ml-1"
-              theme="filled"
-            />
-          </Link>
-        </p>
-      </section>
-      <section className="fn-sect">
-        <h3>
-          <span className="fn-heading-sect">{t("inputId")}:</span>
-          <Input
-            className="ml-4 w-20"
-            actualValue={inputCId}
-            updateValue={gotoCId}
-            updateInvalidValue={() => setInputCId("")}
-            isValid={(t) => v.safeParse(CidSchema(), t).success}
-            left
-          />
-          {inputCId !== "" && (
-            <ExternalLink
-              className={clsx("ml-1")}
-              // use encodeURIComponent to silence CodeQL false positive alert
-              href={`/${locale}/edit?cid=${encodeURIComponent(inputCId)}`}
-            >
-              {t("newTab")}
-            </ExternalLink>
-          )}
-          <span className={clsx(cidFetching ? "inline-block" : "hidden")}>
-            <SlimeSVG />
-            Loading...
-          </span>
-          {cidErrorMsg instanceof Error && (
-            <span className="ml-1 inline-block">
-              {formatError(cidErrorMsg, te)}
-            </span>
-          )}
-        </h3>
-        <p>{t("inputIdDesc")}</p>
-      </section>
-      <section className="fn-sect">
-        <h3>
-          <span className="fn-heading-sect">{t("new")}:</span>
-          <ExternalLink className="ml-3" href={`/${locale}/edit?cid=new`}>
-            {t("newButton")}
-          </ExternalLink>
-        </h3>
-        <p>{t("newDesc", { rateLimitMin: rateLimit.newChartFile / 60 })}</p>
-      </section>
-      <section className="fn-sect">
-        <h3 className="fn-heading-sect">{t("recentEdit")}</h3>
-        {isSafari && (
-          <p className="mb-1">
-            <Caution className="inline-block mr-1 translate-y-0.5 " />
-            {t("safariLSWarning")}
-          </p>
-        )}
-        <ChartList
-          type="recentEdit"
-          fetchAll
-          href={(cid) => `/${locale}/edit?cid=${cid}`}
-          newTab
-          showLoading
-          moreHref={null}
-          small
-        />
-      </section>
-    </IndexMain>
+    <>
+      <Input
+        className="ml-4 w-20"
+        actualValue={inputCId}
+        updateValue={gotoCId}
+        updateInvalidValue={() => setInputCId("")}
+        isValid={(t) => v.safeParse(CidSchema(), t).success}
+        left
+      />
+      {inputCId !== "" && (
+        <ExternalLink
+          className={clsx("ml-1")}
+          // use encodeURIComponent to silence CodeQL false positive alert
+          href={`/${locale}/edit?cid=${encodeURIComponent(inputCId)}`}
+        >
+          {t("newTab")}
+        </ExternalLink>
+      )}
+      <span className={clsx(cidFetching ? "inline-block" : "hidden")}>
+        <SlimeSVG />
+        Loading...
+      </span>
+      {cidErrorMsg instanceof Error && (
+        <span className="ml-1 inline-block">
+          {formatError(cidErrorMsg, te)}
+        </span>
+      )}
+    </>
+  );
+}
+
+export function SafariLSWarning() {
+  const t = useTranslations("main.edit");
+  const isSafari = useSafariDetector();
+  return (
+    isSafari && (
+      <p className="mb-1">
+        <Caution className="inline-block mr-1 translate-y-0.5 " />
+        {t("safariLSWarning")}
+      </p>
+    )
   );
 }
