@@ -1,4 +1,4 @@
-import { EditCidInput, SafariLSWarning } from "./clientPage.js";
+import { EditCidInput, SafariLSWarning } from "./cidInput.js";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic";
 import { initMetadata, MetadataProps } from "@/metadata.js";
 import { rateLimit } from "@falling-nikochan/chart";
