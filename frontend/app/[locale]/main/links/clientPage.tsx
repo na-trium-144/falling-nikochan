@@ -15,7 +15,7 @@ import {
   DevPageLink,
   GitHubLink,
   XLink,
-} from "@/clientPage";
+} from "@/common/contactLinks";
 
 export default function LinksPage({ locale }: { locale: string }) {
   const t = useTranslations("main.links");

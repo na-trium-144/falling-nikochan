@@ -21,7 +21,7 @@ import {
   DevPageLink,
   GitHubLink,
   XLink,
-} from "@/clientPage.js";
+} from "./contactLinks.js";
 
 const pcTabTitleKeys = ["play", "edit"] as const;
 const tabURLs = {

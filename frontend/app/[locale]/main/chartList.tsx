@@ -71,9 +71,7 @@ export default function ChartListPage(props: PProps) {
         <ChartList
           type={props.type}
           creator
-          href={(cid) => `/share/${cid}`}
-          onClick={openModal}
-          onClickMobile={openShareInternal}
+          useSharePageModal
           showLoading
           dateDiff={props.dateDiff}
           moreHref={null}
@@ -111,9 +109,8 @@ interface Props {
   dateDiff?: boolean;
   showCount?: boolean;
   search?: boolean;
-  href: (cid: string) => string;
-  onClick?: (cid: string) => void;
-  onClickMobile?: (cid: string) => void;
+  href?: (cid: string) => string; // default: /share/cid
+  useSharePageModal?: boolean; // open modal instead of opening link when clicked
   newTab?: boolean;
   moreHref?: string | null;
   onMoreClick?: () => void;
@@ -437,6 +434,8 @@ export function ChartList(props: Props) {
     props.containerHeight,
   ]);
 
+  const { openModal, openShareInternal } = useSharePageModal();
+
   return (
     <div
       className={clsx("relative w-full h-max isolate", props.classNameOuter)}
@@ -463,15 +462,18 @@ export function ChartList(props: Props) {
                 cid={filteredBriefs.at(i)!.cid}
                 updatedAt={filteredBriefs.at(i)!.updatedAt}
                 brief={filteredBriefs.at(i)!.brief}
-                href={props.href(filteredBriefs.at(i)!.cid)}
+                href={
+                  props.href?.(filteredBriefs.at(i)!.cid) ??
+                  `/share/${filteredBriefs.at(i)!.cid}`
+                }
                 onClick={
-                  props.onClick
-                    ? () => props.onClick!(filteredBriefs.at(i)!.cid)
+                  props.useSharePageModal
+                    ? () => openModal(filteredBriefs.at(i)!.cid)
                     : undefined
                 }
                 onClickMobile={
-                  props.onClickMobile
-                    ? () => props.onClickMobile!(filteredBriefs.at(i)!.cid)
+                  props.useSharePageModal
+                    ? () => openShareInternal(filteredBriefs.at(i)!.cid)
                     : undefined
                 }
                 creator={props.creator}

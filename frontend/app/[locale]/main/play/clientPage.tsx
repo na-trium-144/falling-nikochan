@@ -435,9 +435,7 @@ function PlayTabInternal(
         briefs={waitingDebounce ? undefined : searchResult}
         search
         creator
-        href={(cid) => `/share/${cid}`}
-        onClick={openModal}
-        onClickMobile={openShareInternal}
+        useSharePageModal
         showLoading
         badge
         dateDiff={params.sort === "latest"}
