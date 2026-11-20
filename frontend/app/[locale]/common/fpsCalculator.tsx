@@ -1,45 +1,47 @@
 "use client";
 
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
 import * as v from "valibot";
 
-const FPSContext = createContext<{ realFps: number; stable: boolean }>({
-  realFps: 20,
-  stable: false,
-});
-
-export const useRealFPS = () => useContext(FPSContext);
-
-export function FPSCalculatorProvider(props: { children: ReactNode }) {
+function parseFromLocalStorage() {
+  try {
+    if (localStorage.getItem("fpsCalculator")) {
+      const parsed = v.parse(
+        v.object({ fps: v.number(), hasStableValue: v.boolean() }),
+        JSON.parse(localStorage.getItem("fpsCalculator")!)
+      );
+      return parsed;
+    }
+  } catch (e) {
+    console.error(
+      `Error parsing fpsCalculator:`,
+      v.isValiError(e) ? v.flatten(e.issues) : e
+    );
+    // ignore error
+  }
+  return { fps: 20, hasStableValue: false };
+}
+export function useRealFPS() {
   const [fps, setFPS] = useState(20);
   const [hasStableValue, setHasStableValue] = useState(false);
   useEffect(() => {
-    let fps = 20;
-    let hasStableValue = false;
-    try {
-      if (localStorage.getItem("fpsCalculator")) {
-        const parsed = v.parse(
-          v.object({ fps: v.number(), hasStableValue: v.boolean() }),
-          JSON.parse(localStorage.getItem("fpsCalculator")!)
-        );
-        fps = parsed.fps;
-        setFPS(fps);
-        hasStableValue = parsed.hasStableValue;
-        setHasStableValue(hasStableValue);
-      }
-    } catch (e) {
-      console.error(
-        `Error parsing fpsCalculator:`,
-        v.isValiError(e) ? v.flatten(e.issues) : e
-      );
-      // ignore error
-    }
+    const update = () => {
+      let { fps, hasStableValue } = parseFromLocalStorage();
+      setFPS(fps);
+      setHasStableValue(hasStableValue);
+    };
+    update();
+    const i = setInterval(update, 100);
+    return () => clearInterval(i);
+  }, []);
+  return { fps, hasStableValue };
+}
+
+export function FPSCalculator() {
+  const [fps, setFPS] = useState(20);
+  const [hasStableValue, setHasStableValue] = useState(false);
+  useEffect(() => {
+    let { fps, hasStableValue } = parseFromLocalStorage();
     let deltas = new Float64Array(Math.max(100, Math.min(1000, fps * 5)));
     let i = 0;
     let lastTimeStamp = performance.now();
@@ -78,9 +80,5 @@ export function FPSCalculatorProvider(props: { children: ReactNode }) {
     return () => cancelAnimationFrame(req);
   }, []);
 
-  return (
-    <FPSContext.Provider value={{ realFps: fps, stable: hasStableValue }}>
-      {props.children}
-    </FPSContext.Provider>
-  );
+  return null;
 }

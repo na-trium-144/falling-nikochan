@@ -313,7 +313,7 @@ export function WithTopDemo(props: { children: ReactNode }) {
 export function TopDemo(
   props: { visible: boolean; bottom: number } & Partial<DemoChart>
 ) {
-  const { realFps, stable: realFpsStable } = useRealFPS();
+  const { fps: realFps, hasStableValue: realFpsStable } = useRealFPS();
   const [runFps, setRunFps] = useState<number>(0);
   const [renderFps, setRenderFps] = useState<number>(0);
   const [showFps, setShowFps] = useState<boolean>(false);

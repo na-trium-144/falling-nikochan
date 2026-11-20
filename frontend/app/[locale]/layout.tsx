@@ -2,7 +2,7 @@ import { locales } from "@falling-nikochan/i18n/dynamic";
 import { initMetadata, initViewport, MetadataProps } from "./metadata.js";
 import { ThemeInitializer } from "./common/theme.jsx";
 import { PWAInstallInitializer } from "./common/pwaInstall.jsx";
-import { FPSCalculatorProvider } from "./common/fpsCalculator.jsx";
+import { FPSCalculator } from "./common/fpsCalculator.jsx";
 
 export async function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -26,7 +26,8 @@ export default async function RootLayout({
     <html lang={locale}>
       <body className="fn-body" suppressHydrationWarning>
         <ThemeInitializer />
-                  <FPSCalculatorProvider>{children}</FPSCalculatorProvider>
+                  <FPSCalculator />
+                    {children}
             <PWAInstallInitializer />
       </body>
     </html>
