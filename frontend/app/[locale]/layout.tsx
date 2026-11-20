@@ -1,7 +1,7 @@
 import { locales } from "@falling-nikochan/i18n/dynamic";
 import IntlProvider from "./intlProvider.js";
 import { initMetadata, initViewport, MetadataProps } from "./metadata.js";
-import { ThemeProvider } from "./common/theme.jsx";
+import { ThemeInitializer } from "./common/theme.jsx";
 import { PWAInstallProvider } from "./common/pwaInstall.jsx";
 import { ShareImageModalProvider } from "./common/shareLinkAndImage.jsx";
 import { ChangeLogProvider } from "./common/changeLog.jsx";
@@ -30,7 +30,7 @@ export default async function RootLayout({
   return (
     <html lang={locale}>
       <body className="fn-body" suppressHydrationWarning>
-        <ThemeProvider>
+        <ThemeInitializer />
           <IntlProvider locale={locale}>
             <ChangeLogProvider changeLog={<ChangeLog />}>
               <PWAInstallProvider>
@@ -40,17 +40,6 @@ export default async function RootLayout({
               </PWAInstallProvider>
             </ChangeLogProvider>
           </IntlProvider>
-        </ThemeProvider>
-        <div className="fn-ios-dummy-block fn-ios-dummy-block-top" />
-        <div className="fn-ios-dummy-block fn-ios-dummy-block-bottom" />
-        {process.env.NODE_ENV === "development" && (
-          <>
-            <div className="fn-dev-safe-area fn-dev-sai-t" />
-            <div className="fn-dev-safe-area fn-dev-sai-b" />
-            <div className="fn-dev-safe-area fn-dev-sai-l" />
-            <div className="fn-dev-safe-area fn-dev-sai-r" />
-          </>
-        )}
       </body>
     </html>
   );

@@ -1,5 +1,5 @@
 import { CenterBox } from "@/common/box";
-import { ThemeProvider } from "@/common/theme";
+import { ThemeInitializer } from "@/common/theme";
 import { initMetadata, MetadataProps } from "@/metadata.js";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic";
 import { GoHomeButton } from "@/common/errorPageComponent";
@@ -14,23 +14,12 @@ export default async function NotFoundPage() {
   return (
     <html>
       <body className="fn-body" suppressHydrationWarning>
-        <ThemeProvider>
+<ThemeInitializer />
           <CenterBox classNameInner="flex flex-col items-center">
             <h4 className="fn-heading-box">Error 404</h4>
             <p className="mb-3">{t("api.notFound")}</p>
             <GoHomeButton goHome={t("errorPage.goHome")} />
           </CenterBox>
-        </ThemeProvider>
-        <div className="fn-ios-dummy-block fn-ios-dummy-block-top" />
-        <div className="fn-ios-dummy-block fn-ios-dummy-block-bottom" />
-        {process.env.NODE_ENV === "development" && (
-          <>
-            <div className="fn-dev-safe-area fn-dev-sai-t" />
-            <div className="fn-dev-safe-area fn-dev-sai-b" />
-            <div className="fn-dev-safe-area fn-dev-sai-l" />
-            <div className="fn-dev-safe-area fn-dev-sai-r" />
-          </>
-        )}
       </body>
     </html>
   );

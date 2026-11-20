@@ -5,8 +5,11 @@ import {
   ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useLayoutEffect,
+  useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import { useTranslations } from "next-intl";
 import { IrasutoyaLikeBg } from "./irasutoyaLike.jsx";
@@ -25,68 +28,77 @@ declare global {
 export interface ThemeState {
   theme: "dark" | "light" | null;
   isDark: boolean;
-  setTheme: (theme: "dark" | "light" | null) => void;
-  updateTheme: () => void;
 }
-const ThemeContext = createContext<ThemeState>({
-  theme: null,
-  isDark: false,
-  setTheme: () => {},
-  updateTheme: () => {},
-});
-export const useTheme = () => useContext(ThemeContext);
-
-export function ThemeProvider(props: { children: ReactNode }) {
-  const [theme, setTheme] = useState<"dark" | "light" | null>(null);
-  const [isDark, setIsDark] = useState<boolean>(false);
+export function useTheme() {
   const pathname = usePathname();
-  const updateTheme = useCallback(() => {
+  const subscribe = useCallback(
+    (updateTheme: () => void) => {
+      const storageUpdate = (e: StorageEvent) => {
+        if (e.key === "theme") {
+          updateTheme();
+        }
+      };
+      const mql = window.matchMedia("(prefers-color-scheme: dark)");
+      mql.addEventListener("change", updateTheme);
+      window.addEventListener("storage", storageUpdate);
+      window.addEventListener("visibilitychange", updateTheme); // 別タブからもどってきたとき
+      window.addEventListener("popstate", updateTheme); // router.push()からもどってきたとき
+      return () => {
+        mql.removeEventListener("change", updateTheme);
+        window.removeEventListener("storage", storageUpdate);
+        window.removeEventListener("visibilitychange", updateTheme);
+        window.removeEventListener("popstate", updateTheme);
+      };
+    },
+    // ナビゲーション時(pathname変化時)にも再実行
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [pathname]
+  );
+  const prevTheme = useRef<ThemeState>({ theme: null, isDark: false });
+  const { theme, isDark } = useSyncExternalStore(
+    subscribe,
+    () => {
+      try {
+        const theme = window.fnGetCurrentTheme();
+        const isDark = window.fnCurrentThemeIsDark();
+        if (
+          prevTheme.current.theme !== theme ||
+          prevTheme.current.isDark !== isDark
+        ) {
+          prevTheme.current = { theme, isDark };
+        }
+      } catch (e) {
+        console.error(e);
+        // Sentryに報告せず無視
+      }
+      return prevTheme.current;
+    },
+    () => prevTheme.current
+  );
+  const setTheme = useCallback((theme: "dark" | "light" | null) => {
+    if (theme !== null) {
+      localStorage?.setItem("theme", theme);
+    } else {
+      localStorage?.removeItem("theme");
+    }
+    window.dispatchEvent(new StorageEvent("storage", { key: "theme" }));
+  }, []);
+
+  return { theme, isDark, setTheme };
+}
+
+export function ThemeInitializer() {
+  const { theme } = useTheme();
+  useEffect(() => {
     try {
-      setTheme(window.fnGetCurrentTheme());
-      const isDark = window.fnCurrentThemeIsDark();
-      setIsDark(isDark);
       window.fnApplyTheme();
     } catch (e) {
       console.error(e);
       // Sentryに報告せず無視
     }
-  }, []);
-  useLayoutEffect(() => {
-    updateTheme();
-    const storageUpdate = (e: StorageEvent) => {
-      if (e.key === "theme") {
-        updateTheme();
-      }
-    };
-    const mql = window.matchMedia("(prefers-color-scheme: dark)");
-    mql.addEventListener("change", updateTheme);
-    window.addEventListener("storage", storageUpdate);
-    window.addEventListener("visibilitychange", updateTheme); // 別タブからもどってきたとき
-    window.addEventListener("popstate", updateTheme); // router.push()からもどってきたとき
-    return () => {
-      mql.removeEventListener("change", updateTheme);
-      window.removeEventListener("storage", storageUpdate);
-      window.removeEventListener("visibilitychange", updateTheme);
-      window.removeEventListener("popstate", updateTheme);
-    };
-    // ナビゲーション時(pathname変化時)にも再実行
-  }, [updateTheme, pathname]);
+  }, [theme]);
   return (
-    <ThemeContext.Provider
-      value={{
-        theme,
-        isDark,
-        setTheme: (theme: "dark" | "light" | null) => {
-          if (theme !== null) {
-            localStorage?.setItem("theme", theme);
-          } else {
-            localStorage?.removeItem("theme");
-          }
-          updateTheme();
-        },
-        updateTheme,
-      }}
-    >
+    <>
       <script
         suppressHydrationWarning
         dangerouslySetInnerHTML={{
@@ -95,8 +107,17 @@ export function ThemeProvider(props: { children: ReactNode }) {
       />
       <div className="fn-fallback-bg" />
       <IrasutoyaLikeBg />
-      {props.children}
-    </ThemeContext.Provider>
+      <div className="fn-ios-dummy-block fn-ios-dummy-block-top" />
+      <div className="fn-ios-dummy-block fn-ios-dummy-block-bottom" />
+      {process.env.NODE_ENV === "development" && (
+        <>
+          <div className="fn-dev-safe-area fn-dev-sai-t" />
+          <div className="fn-dev-safe-area fn-dev-sai-b" />
+          <div className="fn-dev-safe-area fn-dev-sai-l" />
+          <div className="fn-dev-safe-area fn-dev-sai-r" />
+        </>
+      )}
+    </>
   );
 }
 
