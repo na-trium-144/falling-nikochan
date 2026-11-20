@@ -1,25 +1,27 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { createContext, ReactNode, useContext, useEffect } from "react";
+import { useEffect } from "react";
 import { Box } from "./box";
 import Link from "next/link";
 import { useTranslations } from "@/intlProvider";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useDelayedDisplayState } from "./delayedDisplayState";
 import { UpdateLastVisited } from "./version";
+import { useParams } from "next/navigation";
+import ChangeLogJa from "@falling-nikochan/i18n/ja/changelog.mdx";
+import ChangeLogEn from "@falling-nikochan/i18n/en/changelog.mdx";
 
-const ChangeLogContext = createContext<ReactNode>(null);
-export const useChangeLog = () => useContext(ChangeLogContext);
-export function ChangeLogProvider(props: {
-  children: ReactNode;
-  changeLog: ReactNode;
-}) {
-  return (
-    <ChangeLogContext.Provider value={props.changeLog}>
-      {props.children}
-    </ChangeLogContext.Provider>
-  );
+function ChangeLog() {
+  const { locale } = useParams<{ locale: string }>();
+  switch (locale) {
+    case "ja":
+      return <ChangeLogJa />;
+    case "en":
+      return <ChangeLogEn />;
+    default:
+      throw new Error(`Unknown locale ${locale}`);
+  }
 }
 
 interface PopupProps {
@@ -29,7 +31,6 @@ interface PopupProps {
 }
 export function ChangeLogPopup(props: PopupProps) {
   const t = useTranslations("main.version");
-  const changeLog = useChangeLog();
   const [popupOpened, popupAppearing, setPopupOpened] =
     useDelayedDisplayState(200);
   useEffect(() => {
@@ -84,7 +85,9 @@ export function ChangeLogPopup(props: PopupProps) {
               <h3 className="fn-heading-sect text-center mb-2">
                 {t("changelog")}
               </h3>
-              <div className="fn-mdx-changelog">{changeLog}</div>
+              <div className="fn-mdx-changelog">
+                <ChangeLog />
+              </div>
             </div>
             <div className={clsx("absolute bottom-4 inset-x-0")}>
               <Link

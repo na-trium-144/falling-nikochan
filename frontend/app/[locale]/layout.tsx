@@ -3,7 +3,6 @@ import { initMetadata, initViewport, MetadataProps } from "./metadata.js";
 import { ThemeInitializer } from "./common/theme.jsx";
 import { PWAInstallInitializer } from "./common/pwaInstall.jsx";
 import { ShareImageModalProvider } from "./common/shareLinkAndImage.jsx";
-import { ChangeLogProvider } from "./common/changeLog.jsx";
 import { importChangeLogMDX } from "@falling-nikochan/i18n/mdx.js";
 import { FPSCalculatorProvider } from "./common/fpsCalculator.jsx";
 
@@ -25,16 +24,13 @@ export default async function RootLayout({
   params: Promise<{ locale: string }>;
 }>) {
   const locale = (await params).locale;
-  const ChangeLog = await importChangeLogMDX(locale);
   return (
     <html lang={locale}>
       <body className="fn-body" suppressHydrationWarning>
         <ThemeInitializer />
-            <ChangeLogProvider changeLog={<ChangeLog />}>
                 <ShareImageModalProvider >
                   <FPSCalculatorProvider>{children}</FPSCalculatorProvider>
                 </ShareImageModalProvider>
-            </ChangeLogProvider>
             <PWAInstallInitializer />
       </body>
     </html>
