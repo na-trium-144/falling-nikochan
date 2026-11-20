@@ -22,8 +22,8 @@ export default async function Page({ params }: MetadataProps) {
       locale={locale}
     >
       <SharePageModalProvider from="play">
-      <PlayTab locale={locale} />
-    </SharePageModalProvider>
-  </IndexMain>
+        <PlayTab locale={locale} />
+      </SharePageModalProvider>
+    </IndexMain>
   );
 }

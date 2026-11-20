@@ -2,11 +2,7 @@
 
 import clsx from "clsx/lite";
 import { ChartBrief, ChartUntil17Min } from "@falling-nikochan/chart";
-import {
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "@/intlProvider";
 import packageJson from "@/../../package.json" with { type: "json" };
 import { Box } from "./box";
@@ -303,7 +299,7 @@ export function ShareImageModalButton(props: { ogPath: string; cid: string }) {
                     <Button
                       className="mx-0.5"
                       text={t("download")}
-                      onClick={() => saveAs(imageBlob, `${cid}.png`)}
+                      onClick={() => saveAs(imageBlob, `${props.cid}.png`)}
                     />
                     <>
                       <Button
@@ -321,7 +317,7 @@ export function ShareImageModalButton(props: { ogPath: string; cid: string }) {
                           disabled={!shareData}
                         />
                       )}
-                    </>{" "}
+                    </>
                   </p>
                 )}
                 <Button text={t("close")} onClick={closeModal} />

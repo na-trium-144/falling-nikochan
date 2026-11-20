@@ -12,10 +12,11 @@ export async function generateMetadata({ params }: MetadataProps) {
 }
 
 export default async function Page({ params }: MetadataProps) {
-  const locale = (await params).locale
+  const locale = (await params).locale;
   const t = await getTranslations(params, "dev");
 
-  return <main className="w-full h-full overflow-clip ">
+  return (
+    <main className="w-full h-full overflow-clip ">
       <div className="flex flex-col w-full h-full items-center ">
         <MobileHeader className="no-pc">{t("title")}</MobileHeader>
         <div
@@ -31,10 +32,11 @@ export default async function Page({ params }: MetadataProps) {
             padding={6}
           >
             <DevPage />
-            </Box>
+          </Box>
         </div>
         <div className="flex-none basis-mobile-footer no-pc" />
       </div>
       <MobileFooter fixed locale={locale} tabKey={null} />
     </main>
+  );
 }

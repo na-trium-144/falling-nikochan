@@ -1,13 +1,7 @@
 "use client";
 
 import clsx from "clsx/lite";
-import {
-  ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "@/intlProvider";
 import Button from "./button";
 import { hasTouch } from "@/scale";
@@ -250,9 +244,7 @@ export function PWAInstallInitializer() {
       androidTWA: isAndroidTWA(),
       insideFrame: isInsideFrame(),
     });
-    
   }, []);
-
 
   const updateFetching = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
@@ -395,21 +387,21 @@ export function PWAInstallInitializer() {
   const pathname = usePathname();
 
   return (
-      <Box
-        classNameOuter={clsx(
-          "fn-pwa-install",
-          "transition-all duration-200 origin-bottom",
-          workerUpdate !== null && !pathname.match(/^\/[a-zA-Z-]*\/(play|edit)/)
-            ? "ease-in scale-100 opacity-100"
-            : "ease-out scale-0 opacity-0"
-        )}
-        padding={2}
-      >
-        {workerUpdate?.state === "updating" ? (
-          <>
-            <SlimeSVG />
-            {t("updating")}
-            {/*workerUpdate?.progressSize !== undefined && (
+    <Box
+      classNameOuter={clsx(
+        "fn-pwa-install",
+        "transition-all duration-200 origin-bottom",
+        workerUpdate !== null && !pathname.match(/^\/[a-zA-Z-]*\/(play|edit)/)
+          ? "ease-in scale-100 opacity-100"
+          : "ease-out scale-0 opacity-0"
+      )}
+      padding={2}
+    >
+      {workerUpdate?.state === "updating" ? (
+        <>
+          <SlimeSVG />
+          {t("updating")}
+          {/*workerUpdate?.progressSize !== undefined && (
               <span className="ml-2 text-sm">
                 (
                 <span className="inline-block mr-1 min-w-max w-8 text-center">
@@ -419,23 +411,22 @@ export function PWAInstallInitializer() {
                 MB)
               </span>
             )*/}
-            {workerUpdate?.progressNum !== undefined && (
-              <ProgressBar
-                className="absolute bottom-1 inset-x-2.5 "
-                fixedColor="fn-pbar-yellow"
-                value={
-                  (workerUpdate?.progressNum || 0) /
-                  (workerUpdate?.totalNum || 1)
-                }
-              />
-            )}
-          </>
-        ) : workerUpdate?.state === "done" ? (
-          t("updateDone")
-        ) : workerUpdate?.state === "failed" ? (
-          t("updateFailed")
-        ) : null}
-      </Box>
+          {workerUpdate?.progressNum !== undefined && (
+            <ProgressBar
+              className="absolute bottom-1 inset-x-2.5 "
+              fixedColor="fn-pbar-yellow"
+              value={
+                (workerUpdate?.progressNum || 0) / (workerUpdate?.totalNum || 1)
+              }
+            />
+          )}
+        </>
+      ) : workerUpdate?.state === "done" ? (
+        t("updateDone")
+      ) : workerUpdate?.state === "failed" ? (
+        t("updateFailed")
+      ) : null}
+    </Box>
   );
 }
 
@@ -447,14 +438,16 @@ export function PWAInstallMain() {
     setDismissed(
       isStandalone() || localStorage.getItem("PWADismissed") === "1"
     );
-}, []);
+  }, []);
   const dismiss = useCallback(() => {
     localStorage.setItem("PWADismissed", "1");
     setDismissed(true);
   }, []);
-  const {os} = useOSDetector();
+  const { os } = useOSDetector();
   return (
-    <WarningBox hidden={dismissed === true || dismissed === null || os === null}>
+    <WarningBox
+      hidden={dismissed === true || dismissed === null || os === null}
+    >
       <PWAInstallDesc />
       <Button text={t("dismiss")} onClick={dismiss} />
     </WarningBox>
@@ -465,10 +458,10 @@ export function PWAInstallMain() {
 // standaloneとPCでは非表示にする
 export function PWAInstallDesc(props: { block?: boolean; className?: string }) {
   const t = useTranslations("main.pwa");
-  const {os} = useOSDetector();
+  const { os } = useOSDetector();
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-    useEffect(() => {
+  useEffect(() => {
     switch (os) {
       case "android": {
         // beforeinstallpromptイベントが発火するのを待つ

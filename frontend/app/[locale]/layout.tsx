@@ -26,9 +26,9 @@ export default async function RootLayout({
     <html lang={locale}>
       <body className="fn-body" suppressHydrationWarning>
         <ThemeInitializer />
-                  <FPSCalculator />
-                    {children}
-            <PWAInstallInitializer />
+        <FPSCalculator />
+        {children}
+        <PWAInstallInitializer />
       </body>
     </html>
   );

@@ -23,7 +23,10 @@ import { useRouter } from "next/navigation";
 import { BadgeStatus, getBadge, LevelBadge } from "@/common/levelBadge";
 import { SlimeSVG } from "@/common/slime";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
-import { ShareImageModalButton, useShareLink } from "@/common/shareLinkAndImage";
+import {
+  ShareImageModalButton,
+  useShareLink,
+} from "@/common/shareLinkAndImage";
 import { formatError } from "@/common/fetch";
 
 interface Props {
@@ -503,7 +506,7 @@ function SelectedLevelInfo(props: {
       {showBestDetail && selectedBestScore && (
         <span className="inline-block space-x-1 mt-1 ">
           {shareLink.buttons}
-          <ShareImageModalButton ogPath={shareLink.ogPath} cid={props.cid}/>
+          <ShareImageModalButton ogPath={shareLink.ogPath} cid={props.cid} />
         </span>
       )}
     </>

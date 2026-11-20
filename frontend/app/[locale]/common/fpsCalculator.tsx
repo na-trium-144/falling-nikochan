@@ -38,8 +38,6 @@ export function useRealFPS() {
 }
 
 export function FPSCalculator() {
-  const [fps, setFPS] = useState(20);
-  const [hasStableValue, setHasStableValue] = useState(false);
   useEffect(() => {
     let { fps, hasStableValue } = parseFromLocalStorage();
     let deltas = new Float64Array(Math.max(100, Math.min(1000, fps * 5)));
@@ -60,10 +58,8 @@ export function FPSCalculator() {
             console.log("FPSCalculator: variation too large.");
           } else {
             fps = 1000 / deltas[Math.round(deltas.length / 2)];
-            setFPS(fps);
             // console.log("FPSCalculator:", fps);
             hasStableValue = isStable;
-            setHasStableValue(isStable);
             localStorage.setItem(
               "fpsCalculator",
               JSON.stringify({ fps, hasStableValue })

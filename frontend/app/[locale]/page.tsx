@@ -31,13 +31,9 @@ export default async function Page({ params }: MetadataProps) {
   const locale = (await params).locale;
   const t = await getTranslations(locale, "main");
   return (
-      <main className="fn-body-scrollable flex flex-col items-center relative">
-        <PCHeader2
-          className="fixed top-0 right-0"
-          locale={locale}
-          backdropBlur
-        />
-        <SharePageModalProvider from="top">
+    <main className="fn-body-scrollable flex flex-col items-center relative">
+      <PCHeader2 className="fixed top-0 right-0" locale={locale} backdropBlur />
+      <SharePageModalProvider from="top">
         <WithTopDemo>
           <FestivalLink large />
           <h1 className="text-4xl min-[64rem]:text-6xl min-[82rem]:text-8xl semibold-by-stroke">
@@ -128,16 +124,16 @@ export default async function Page({ params }: MetadataProps) {
         </div>
       </SharePageModalProvider>
 
-        <Features locale={locale} />
-        <SocialLinks />
-        <div className="w-full px-sai">
-          <hr className="fn-hr" />
-        </div>
-        <PoliciesAndLinks locale={locale} />
+      <Features locale={locale} />
+      <SocialLinks />
+      <div className="w-full px-sai">
+        <hr className="fn-hr" />
+      </div>
+      <PoliciesAndLinks locale={locale} />
 
-        <div className="flex-none basis-mobile-footer no-pc" />
-        <MobileFooter fixed locale={locale} tabKey="top" />
-      </main>
+      <div className="flex-none basis-mobile-footer no-pc" />
+      <MobileFooter fixed locale={locale} tabKey="top" />
+    </main>
   );
 }
 

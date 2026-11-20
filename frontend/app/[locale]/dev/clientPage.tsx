@@ -56,50 +56,48 @@ export function DevPage() {
 
   return (
     <>
-            <div className="no-mobile mb-3 flex flex-row items-center">
-              <button
-                className={clsx("block w-max", "fn-link-1")}
-                onClick={() => history.back()}
-              >
-                <ArrowLeft className="inline-block align-middle mr-2 " />
-                {t("back")}
-              </button>
-              <span className="flex-1 text-center fn-heading-sect">
-                {t("title")}
-              </span>
-            </div>
-            <StorageEditor storage={ls} name="LocalStorage" />
-            <StorageEditor storage={ss} name="SessionStorage" />
-            {isAndroidTWA && (
-              <div className="text-center">
-                <Button onClick={forceRequestReview}>forceRequestReview</Button>
-                <Button onClick={historyBackWithForceReview}>
-                  historyBackWithForceReview
-                </Button>
-              </div>
-            )}
-            <pre
-              className={clsx(
-                "relative fn-sky fn-pre",
-                "mb-3 p-2 rounded-sq-xl text-xs",
-                "whitespace-pre-wrap",
-                "text-center"
-              )}
-              suppressHydrationWarning
-            >
-              <span className="fn-glass-1" />
-              <span className="fn-glass-2" />
-              {navigator.userAgent}
-            </pre>
-            <ul className="text-center">
-              <li>isStandalone: {String(standalone)}</li>
-              <li>androidTWA: {String(androidTWA)}</li>
-              <li>insideFrame: {String(insideFrame)}</li>
-              <li>os: {String(os)}</li>
-              <li>iOS27OrLater: {String(iOS27OrLater)}</li>
-              <li>safari: {String(safari)}</li>
-            </ul>
-          </>
+      <div className="no-mobile mb-3 flex flex-row items-center">
+        <button
+          className={clsx("block w-max", "fn-link-1")}
+          onClick={() => history.back()}
+        >
+          <ArrowLeft className="inline-block align-middle mr-2 " />
+          {t("back")}
+        </button>
+        <span className="flex-1 text-center fn-heading-sect">{t("title")}</span>
+      </div>
+      <StorageEditor storage={ls} name="LocalStorage" />
+      <StorageEditor storage={ss} name="SessionStorage" />
+      {isAndroidTWA && (
+        <div className="text-center">
+          <Button onClick={forceRequestReview}>forceRequestReview</Button>
+          <Button onClick={historyBackWithForceReview}>
+            historyBackWithForceReview
+          </Button>
+        </div>
+      )}
+      <pre
+        className={clsx(
+          "relative fn-sky fn-pre",
+          "mb-3 p-2 rounded-sq-xl text-xs",
+          "whitespace-pre-wrap",
+          "text-center"
+        )}
+        suppressHydrationWarning
+      >
+        <span className="fn-glass-1" />
+        <span className="fn-glass-2" />
+        {navigator.userAgent}
+      </pre>
+      <ul className="text-center">
+        <li>isStandalone: {String(standalone)}</li>
+        <li>androidTWA: {String(androidTWA)}</li>
+        <li>insideFrame: {String(insideFrame)}</li>
+        <li>os: {String(os)}</li>
+        <li>iOS27OrLater: {String(iOS27OrLater)}</li>
+        <li>safari: {String(safari)}</li>
+      </ul>
+    </>
   );
 }
 

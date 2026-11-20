@@ -20,7 +20,6 @@ import Range from "@/common/range";
 import { useColorThief } from "@/common/colorThief";
 import { ButtonHighlight } from "@/common/button";
 import { YouTubeLogo } from "@/common/youtubeLogo";
-import { useTheme } from "@/common/theme";
 
 interface Props {
   ready: boolean;
@@ -152,7 +151,6 @@ const MusicAreaInner = memo(function MusicAreaInner(props: Props) {
   }, [props.ytPlayer, props.ytBeginSec, levelLength]);
 
   const colorThief = useColorThief();
-  const { updateTheme } = useTheme();
 
   useEffect(() => {
     if (colorThief.ready) {
@@ -160,15 +158,25 @@ const MusicAreaInner = memo(function MusicAreaInner(props: Props) {
         "--fn-play-current-color",
         colorThief.currentColor
       );
-      updateTheme();
+      try {
+        window.fnApplyTheme();
+      } catch (e) {
+        console.error(e);
+        // Sentryに報告せず無視
+      }
       return () => {
         document.documentElement.style.removeProperty(
           "--fn-play-current-color"
         );
-        updateTheme();
+        try {
+          window.fnApplyTheme();
+        } catch (e) {
+          console.error(e);
+          // Sentryに報告せず無視
+        }
       };
     }
-  }, [colorThief.ready, colorThief.currentColor, updateTheme]);
+  }, [colorThief.ready, colorThief.currentColor]);
 
   return (
     <div

@@ -201,7 +201,7 @@ export function ChartList(props: Props) {
           }
         }
       }
-      if(props.inScrollableMainContainer){
+      if (props.inScrollableMainContainer) {
         containerRef.current = document.querySelector(".fn-index-main");
         setContainerHeight(containerRef.current?.clientHeight);
         // 正確にはPCでは見出しなどの分実際に表示できるサイズは小さかったりするが、面倒だし、はみ出すくらいでよい
@@ -219,14 +219,19 @@ export function ChartList(props: Props) {
   const [pagination, setPagination] = useState<number>(1);
   // 1ページあたりに表示できる最大数
   const maxRowPerPage =
-    props.inScrollableMainContainer && itemMinHeight && itemGap && containerHeight
-      ? Math.ceil(containerHeight / ((itemMinHeight + itemGap) * rem)) *
-        ulCols
+    props.inScrollableMainContainer &&
+    itemMinHeight &&
+    itemGap &&
+    containerHeight
+      ? Math.ceil(containerHeight / ((itemMinHeight + itemGap) * rem)) * ulCols
       : undefined;
   // この個数は空でも枠を表示する
   const fixedRow = props.fixedRows ?? 0;
   // 最大で表示する個数
-  const maxRow = props.inScrollableMainContainer && containerHeight ? maxRowPerPage! * pagination : fixedRow;
+  const maxRow =
+    props.inScrollableMainContainer && containerHeight
+      ? maxRowPerPage! * pagination
+      : fixedRow;
   const fetchAll = props.fetchAll;
 
   useEffect(() => {
@@ -334,7 +339,8 @@ export function ChartList(props: Props) {
     : briefs;
   // エラーなどを除いた実際のbriefの項目数
   const filteredNumRows =
-    Array.isArray(filteredBriefs) && (fetchAll || props.inScrollableMainContainer)
+    Array.isArray(filteredBriefs) &&
+    (fetchAll || props.inScrollableMainContainer)
       ? filteredBriefs.length
       : 0;
   // loadingを表示するための、filteredBriefs内で最初にfetch中のbriefのインデックス
@@ -356,7 +362,7 @@ export function ChartList(props: Props) {
   useEffect(() => {
     const onScroll = () => {
       if (
-        props.inScrollableMainContainer && 
+        props.inScrollableMainContainer &&
         containerRef.current &&
         containerHeight &&
         padHeightForScroll > 0 &&
@@ -367,8 +373,7 @@ export function ChartList(props: Props) {
         setPagination((pagination) =>
           Math.max(
             Math.floor(
-              (containerRef.current!.scrollTop +
-                containerHeight) /
+              (containerRef.current!.scrollTop + containerHeight) /
                 (((itemMinHeight + itemGap) * rem * maxRowPerPage!) / ulCols)
             ) + 1,
             pagination
@@ -392,8 +397,10 @@ export function ChartList(props: Props) {
     containerHeight,
   ]);
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const { openModal, openShareInternal } = props.useSharePageModal ? useSharePageModal() : {};
+  const { openModal, openShareInternal } = props.useSharePageModal
+    ? // eslint-disable-next-line react-hooks/rules-of-hooks
+      useSharePageModal()
+    : {};
 
   return (
     <div
