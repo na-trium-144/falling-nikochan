@@ -10,6 +10,7 @@ import Translate from "@icon-park/react/lib/icons/Translate";
 import { YouTubeLogo } from "./youtubeLogo";
 import PlayOne from "@icon-park/react/lib/icons/PlayOne.js";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
+import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
 
 export function TranslateIcon() {
   return <Translate className="inline-block align-middle" />;

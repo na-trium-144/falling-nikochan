@@ -1,14 +1,11 @@
-"use client";
-
 import clsx from "clsx/lite";
 import { MobileHeader, PCHeader, PCHeader2 } from "@/common/header.js";
 import { Box } from "@/common/box.js";
 import { MobileFooter, TabKeys } from "@/common/footer.js";
-import { ReactNode, RefObject } from "react";
-import { useTranslations } from "@/intlProvider";
+import { ReactNode } from "react";
 import { RedirectedWarning } from "@/common/redirectedWarning";
-import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
-import { historyBackWithReview } from "@/common/pwaInstall";
+import { ChartList, ChartListType } from "./chartList";
+import { BackButton } from "./clientMain";
 
 interface Props {
   classNameInner?: string;
@@ -20,11 +17,14 @@ interface Props {
   noBackButtonPC?: boolean;
   afterBackButtonPC?: ReactNode;
   locale: string;
-  boxRef?: RefObject<HTMLDivElement | null>;
 }
 export function IndexMain(props: Props) {
   const locale = props.locale;
-  const t = useTranslations("main");
+  // const t = await getTranslations(locale, "main");
+
+  // できればserver componentにしたいが、shareInternalだけはどうしてもIndexMainをclient componentで呼ぶ必要があるため、
+  // どちらからも呼べるようにする
+  // そのためにtranslationがここでは使用できない
 
   return (
     <main className="relative flex flex-col w-full h-full items-center">
@@ -43,25 +43,18 @@ export function IndexMain(props: Props) {
         )}
       >
         <Box
-          refInner={props.boxRef}
+          // fn-index-main クラスはChartListがスクロールコンテナ基準としてこれを見つけるための指定
           classNameOuter={clsx("min-h-0 basis-main shrink-1 min-w-0")}
-          classNameInner={clsx("flex flex-col", props.classNameInner)}
+          classNameInner={clsx(
+            "fn-index-main flex flex-col",
+            props.classNameInner
+          )}
           scrollableY
           defaultFadeY
           padding={6}
         >
           <div className="flex items-start">
-            {!props.noBackButtonPC && (
-              <button
-                className={clsx("no-mobile w-max mb-3 mr-3 fn-link-1")}
-                onClick={() => {
-                  historyBackWithReview();
-                }}
-              >
-                <ArrowLeft className="inline-block align-middle mr-2 " />
-                {t("back")}
-              </button>
-            )}
+            {!props.noBackButtonPC && <BackButton />}
             {props.afterBackButtonPC}
           </div>
           {props.children}
@@ -69,5 +62,49 @@ export function IndexMain(props: Props) {
       </div>
       <MobileFooter locale={locale} tabKey={props.mobileTabKey} />
     </main>
+  );
+}
+
+interface PProps {
+  locale: string;
+  title: string;
+  rssButton?: boolean;
+  tabKey: TabKeys;
+  mobileTabKey: "top" | "play";
+  type: ChartListType;
+  dateDiff?: boolean;
+  badge?: boolean;
+}
+export function ChartListPage(props: PProps) {
+  return (
+    <IndexMain
+      title={props.title}
+      tabKey={props.tabKey}
+      mobileTabKey={props.mobileTabKey}
+      locale={props.locale}
+    >
+      <section className="fn-sect">
+        <h3 className="no-mobile flex items-center justify-between">
+          <span className="fn-heading-sect">{props.title}</span>
+          {props.rssButton && (
+            <a
+              href={process.env.BACKEND_PREFIX + "/rss.xml"}
+              target="_blank"
+              className="fn-rss-button"
+            />
+          )}
+        </h3>
+        <ChartList
+          type={props.type}
+          creator
+          useSharePageModal
+          showLoading
+          dateDiff={props.dateDiff}
+          moreHref={null}
+          badge={props.badge}
+          inScrollableMainContainer
+        />
+      </section>
+    </IndexMain>
   );
 }

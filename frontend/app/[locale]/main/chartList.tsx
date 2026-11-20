@@ -21,9 +21,7 @@ import {
   useInsideFrameDetector,
   useStandaloneDetector,
 } from "@/common/pwaInstall.js";
-import { IndexMain } from "./main.js";
 import { getRecent, recentKey, updateRecent } from "@/common/recent.js";
-import { TabKeys } from "@/common/footer.jsx";
 import { BadgeStatus, getBadge, LevelBadge } from "@/common/levelBadge.jsx";
 import { bestKey, getBestScore } from "@/common/bestScore.js";
 import { useSharePageModal } from "@/common/sharePageModal.jsx";
@@ -35,53 +33,6 @@ import { captureAndWrap, fetchBackend, formatError } from "@/common/fetch.js";
 import * as v from "valibot";
 import { useDisplayMode } from "@/scale.js";
 import PlayOne from "@icon-park/react/lib/icons/PlayOne.js";
-
-interface PProps {
-  locale: string;
-  title: string;
-  rssButton?: boolean;
-  tabKey: TabKeys;
-  mobileTabKey: "top" | "play";
-  type: ChartListType;
-  dateDiff?: boolean;
-  badge?: boolean;
-}
-export default function ChartListPage(props: PProps) {
-  const boxSize = useResizeDetector();
-  return (
-    <IndexMain
-      title={props.title}
-      tabKey={props.tabKey}
-      mobileTabKey={props.mobileTabKey}
-      locale={props.locale}
-      boxRef={boxSize.ref as RefObject<HTMLDivElement | null>}
-    >
-      <section className="fn-sect">
-        <h3 className="no-mobile flex items-center justify-between">
-          <span className="fn-heading-sect">{props.title}</span>
-          {props.rssButton && (
-            <a
-              href={process.env.BACKEND_PREFIX + "/rss.xml"}
-              target="_blank"
-              className="fn-rss-button"
-            />
-          )}
-        </h3>
-        <ChartList
-          type={props.type}
-          creator
-          useSharePageModal
-          showLoading
-          dateDiff={props.dateDiff}
-          moreHref={null}
-          badge={props.badge}
-          containerRef={boxSize.ref as RefObject<HTMLDivElement | null>}
-          containerHeight={boxSize.height} // 正確にはPCでは見出しなどの分実際に表示できるサイズは小さかったりするが、面倒だし、はみ出すくらいでよい
-        />
-      </section>
-    </IndexMain>
-  );
-}
 
 export type ChartListType = "recent" | "recentEdit" | "popular" | "latest";
 
@@ -101,8 +52,7 @@ interface Props {
   briefs?: ChartLineBrief[] | Error | undefined | "loading" | "empty"; // undefined is loading
   fetchAll?: boolean;
   fixedRows?: number; // 表示数を固定する
-  containerHeight?: number;
-  containerRef?: RefObject<HTMLElement | null>;
+  inScrollableMainContainer?: boolean;
   creator?: boolean;
   showLoading?: boolean; // briefsがundefinedか、briefsにfetched:falseが含まれる場合にloadingを表示する
   dateDiff?: boolean;
@@ -229,6 +179,8 @@ export function ChartList(props: Props) {
   const [itemMinWidth, setItemMinWidth] = useState<number>(); // * rem;
   const [itemMinHeight, setItemMinHeight] = useState<number>(); // * rem;
   const [itemGap, setItemGap] = useState<number>(); // * rem;
+  const [containerHeight, setContainerHeight] = useState<number>();
+  const containerRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     function updateSize() {
       if (ulSize.ref.current instanceof HTMLElement) {
@@ -249,11 +201,16 @@ export function ChartList(props: Props) {
           }
         }
       }
+      if(props.inScrollableMainContainer){
+        containerRef.current = document.querySelector(".fn-index-main");
+        setContainerHeight(containerRef.current?.clientHeight);
+        // 正確にはPCでは見出しなどの分実際に表示できるサイズは小さかったりするが、面倒だし、はみ出すくらいでよい
+      }
     }
     updateSize();
     window.addEventListener("resize", updateSize);
     return () => window.removeEventListener("resize", updateSize);
-  }, [rem, ulSize.ref]);
+  }, [rem, ulSize.ref, props.inScrollableMainContainer]);
   const ulCols =
     itemMinWidth && ulSize.width
       ? Math.max(1, Math.floor(ulSize.width / (itemMinWidth * rem)))
@@ -262,14 +219,14 @@ export function ChartList(props: Props) {
   const [pagination, setPagination] = useState<number>(1);
   // 1ページあたりに表示できる最大数
   const maxRowPerPage =
-    itemMinHeight && itemGap && props.containerHeight
-      ? Math.ceil(props.containerHeight / ((itemMinHeight + itemGap) * rem)) *
+    props.inScrollableMainContainer && itemMinHeight && itemGap && containerHeight
+      ? Math.ceil(containerHeight / ((itemMinHeight + itemGap) * rem)) *
         ulCols
       : undefined;
   // この個数は空でも枠を表示する
   const fixedRow = props.fixedRows ?? 0;
   // 最大で表示する個数
-  const maxRow = props.containerHeight ? maxRowPerPage! * pagination : fixedRow;
+  const maxRow = props.inScrollableMainContainer && containerHeight ? maxRowPerPage! * pagination : fixedRow;
   const fetchAll = props.fetchAll;
 
   useEffect(() => {
@@ -377,7 +334,7 @@ export function ChartList(props: Props) {
     : briefs;
   // エラーなどを除いた実際のbriefの項目数
   const filteredNumRows =
-    Array.isArray(filteredBriefs) && (fetchAll || props.containerRef)
+    Array.isArray(filteredBriefs) && (fetchAll || props.inScrollableMainContainer)
       ? filteredBriefs.length
       : 0;
   // loadingを表示するための、filteredBriefs内で最初にfetch中のbriefのインデックス
@@ -392,15 +349,16 @@ export function ChartList(props: Props) {
     Array.isArray(briefs) &&
     maxRow !== undefined &&
     briefs.filter((b) => b !== null).length > maxRow &&
-    props.containerRef
+    props.inScrollableMainContainer
       ? 2 * rem
       : 0;
 
   useEffect(() => {
     const onScroll = () => {
       if (
-        props.containerRef?.current &&
-        props.containerHeight &&
+        props.inScrollableMainContainer && 
+        containerRef.current &&
+        containerHeight &&
         padHeightForScroll > 0 &&
         maxRowPerPage &&
         itemMinHeight &&
@@ -409,8 +367,8 @@ export function ChartList(props: Props) {
         setPagination((pagination) =>
           Math.max(
             Math.floor(
-              (props.containerRef!.current!.scrollTop +
-                props.containerHeight!) /
+              (containerRef.current!.scrollTop +
+                containerHeight) /
                 (((itemMinHeight + itemGap) * rem * maxRowPerPage!) / ulCols)
             ) + 1,
             pagination
@@ -418,20 +376,20 @@ export function ChartList(props: Props) {
         );
       }
     };
-    if (props.containerRef?.current) {
-      props.containerRef.current.addEventListener("scroll", onScroll);
+    if (props.inScrollableMainContainer && containerRef.current) {
+      containerRef.current.addEventListener("scroll", onScroll);
       return () =>
-        props.containerRef?.current?.removeEventListener("scroll", onScroll);
+        containerRef.current?.removeEventListener("scroll", onScroll);
     }
   }, [
-    props.containerRef,
+    props.inScrollableMainContainer,
     padHeightForScroll,
     itemMinHeight,
     itemGap,
     rem,
     maxRowPerPage,
     ulCols,
-    props.containerHeight,
+    containerHeight,
   ]);
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
