@@ -26,13 +26,20 @@ import { LazyImg } from "./common/lazyImage.js";
 import { YouTubeLogo } from "./common/youtubeLogo.js";
 import { SmallDomainShare } from "./common/small.js";
 import { ExternalLink } from "./common/extLink.js";
+import { importChangeLogMDX } from "@falling-nikochan/i18n/mdx.js";
 
 export default async function Page({ params }: MetadataProps) {
   const locale = (await params).locale;
   const t = await getTranslations(locale, "main");
+  const ChangeLog = await importChangeLogMDX(locale);
   return (
     <main className="fn-body-scrollable flex flex-col items-center relative">
-      <PCHeader2 className="fixed top-0 right-0" locale={locale} backdropBlur />
+      <PCHeader2
+        className="fixed top-0 right-0"
+        locale={locale}
+        backdropBlur
+        changeLog={<ChangeLog />}
+      />
       <SharePageModalProvider from="top">
         <WithTopDemo>
           <FestivalLink large />

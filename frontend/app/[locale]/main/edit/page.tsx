@@ -2,11 +2,11 @@ import { EditCidInput, SafariLSWarning } from "./cidInput.js";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic";
 import { initMetadata, MetadataProps } from "@/metadata.js";
 import { rateLimit } from "@falling-nikochan/chart";
-import { IndexMain } from "../main.js";
 import Link from "next/link.js";
 import { ArrowRightIcon } from "@/common/mdxIcons.js";
 import { ExternalLink } from "@/common/extLink.js";
 import { ChartList } from "../chartList.js";
+import { IndexMainPage } from "../serverMain.js";
 
 export async function generateMetadata({ params }: MetadataProps) {
   const t = await getTranslations(params, "main.edit");
@@ -22,7 +22,7 @@ export default async function Page({ params }: MetadataProps) {
   const locale = (await params).locale;
   const t = await getTranslations(locale, "main.edit");
   return (
-    <IndexMain
+    <IndexMainPage
       title={t("title")}
       tabKey="edit"
       mobileTabKey="edit"
@@ -73,6 +73,6 @@ export default async function Page({ params }: MetadataProps) {
           small
         />
       </section>
-    </IndexMain>
+    </IndexMainPage>
   );
 }

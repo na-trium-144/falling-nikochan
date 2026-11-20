@@ -1,33 +1,19 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { useEffect } from "react";
+import { ReactNode, useEffect } from "react";
 import { Box } from "./box";
 import Link from "next/link";
 import { useTranslations } from "@/intlProvider";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useDelayedDisplayState } from "./delayedDisplayState";
 import { UpdateLastVisited } from "./version";
-import { useParams } from "next/navigation";
-import ChangeLogJa from "@falling-nikochan/i18n/ja/changelog.mdx";
-import ChangeLogEn from "@falling-nikochan/i18n/en/changelog.mdx";
-
-function ChangeLog() {
-  const { locale } = useParams<{ locale: string }>();
-  switch (locale) {
-    case "ja":
-      return <ChangeLogJa />;
-    case "en":
-      return <ChangeLogEn />;
-    default:
-      throw new Error(`Unknown locale ${locale}`);
-  }
-}
 
 interface PopupProps {
   locale: string;
   open: boolean;
   onClose: () => void;
+  changeLog: ReactNode;
 }
 export function ChangeLogPopup(props: PopupProps) {
   const t = useTranslations("main.version");
@@ -85,9 +71,7 @@ export function ChangeLogPopup(props: PopupProps) {
               <h3 className="fn-heading-sect text-center mb-2">
                 {t("changelog")}
               </h3>
-              <div className="fn-mdx-changelog">
-                <ChangeLog />
-              </div>
+              <div className="fn-mdx-changelog">{props.changeLog}</div>
             </div>
             <div className={clsx("absolute bottom-4 inset-x-0")}>
               <Link

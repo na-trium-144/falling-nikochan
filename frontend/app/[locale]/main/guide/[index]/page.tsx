@@ -1,9 +1,9 @@
-import { IndexMain } from "../../main.js";
 import { initMetadata } from "@/metadata.js";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic";
 import { importGuideMDX } from "@falling-nikochan/i18n/mdx";
 import { Pager } from "@/common/pager.js";
 import { notFound } from "next/navigation";
+import { IndexMainPage } from "@/main/serverMain.js";
 
 const maxIndex = 7;
 
@@ -34,7 +34,7 @@ export default async function GuidePage({ params }: GuideProps) {
   const t = await getTranslations(params, "edit.guide");
 
   return (
-    <IndexMain
+    <IndexMainPage
       // title={t(`titles.${index}`)}
       // Pagerに各ページのタイトルはすでに表示しているので、mobileHeaderには「譜面編集 ヘルプ」を表示
       title={t(`titles.1`)}
@@ -58,6 +58,6 @@ export default async function GuidePage({ params }: GuideProps) {
       }
     >
       <Content />
-    </IndexMain>
+    </IndexMainPage>
   );
 }

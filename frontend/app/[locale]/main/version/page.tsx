@@ -2,9 +2,9 @@ import { getTranslations } from "@falling-nikochan/i18n/dynamic";
 import { importChangeLogMDX } from "@falling-nikochan/i18n/mdx";
 import { initMetadata, MetadataProps } from "@/metadata.js";
 import { MDXRenderAll } from "@/common/mdxHiddenPart.jsx";
-import { IndexMain } from "../main.js";
 import { UpdateLastVisited } from "@/common/version.js";
 import { OpenDevCounter } from "@/common/counter.js";
+import { IndexMainPage } from "../serverMain.js";
 
 export async function generateMetadata({ params }: MetadataProps) {
   const t = await getTranslations(params, "main.version");
@@ -15,7 +15,7 @@ export default async function Page({ params }: MetadataProps) {
   const ChangeLog = await importChangeLogMDX(locale);
   const t = await getTranslations(locale, "main.version");
   return (
-    <IndexMain
+    <IndexMainPage
       title={t("title")}
       tabKey={null}
       mobileTabKey="links"
@@ -51,6 +51,6 @@ export default async function Page({ params }: MetadataProps) {
           <ChangeLog />
         </MDXRenderAll>
       </section>
-    </IndexMain>
+    </IndexMainPage>
   );
 }

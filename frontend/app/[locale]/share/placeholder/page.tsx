@@ -7,6 +7,7 @@ import { Features, PoliciesAndLinks } from "@/page.js";
 import { SocialLinks } from "@/common/social.js";
 import { MobileFooter } from "@/common/footer.js";
 import { ShareBoxFromSSR } from "./shareBox.js";
+import { importChangeLogMDX } from "@falling-nikochan/i18n/mdx.js";
 
 export async function generateMetadata({ params }: MetadataProps) {
   return initMetadata(
@@ -32,9 +33,15 @@ export async function generateMetadata({ params }: MetadataProps) {
 
 export default async function Page({ params }: MetadataProps) {
   const locale = (await params).locale;
+  const ChangeLog = await importChangeLogMDX(locale);
   return (
     <main className="fn-body-scrollable flex flex-col items-center relative pt-sai">
-      <PCHeader2 className="fixed top-0 right-0" locale={locale} backdropBlur />
+      <PCHeader2
+        className="fixed top-0 right-0"
+        locale={locale}
+        backdropBlur
+        changeLog={<ChangeLog />}
+      />
 
       <TitleAsLink className="grow-3 shrink-0" locale={locale} />
       <RedirectedWarning className="mx-3 main-wide:mx-6 mb-2" />

@@ -1,3 +1,4 @@
+import { importChangeLogMDX } from "@falling-nikochan/i18n/mdx.js";
 import ShareInternal from "./clientPage.js";
 import { initMetadata, MetadataProps } from "@/metadata.js";
 
@@ -6,5 +7,9 @@ export async function generateMetadata({ params }: MetadataProps) {
 }
 
 export default async function Page({ params }: MetadataProps) {
-  return <ShareInternal locale={(await params).locale} />;
+  const locale = (await params).locale;
+  const ChangeLog = await importChangeLogMDX(locale);
+  return (
+    <ShareInternal locale={(await params).locale} changeLog={<ChangeLog />} />
+  );
 }

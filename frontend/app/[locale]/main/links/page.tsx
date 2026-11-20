@@ -1,6 +1,5 @@
 import { initMetadata, MetadataProps } from "@/metadata.js";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic";
-import { IndexMain } from "../main.js";
 import { MenuLangSwitcher } from "@/common/langSwitcher.js";
 import { MenuThemeSwitcher } from "@/common/theme.js";
 import { PWAInstallDesc } from "@/common/pwaInstall.js";
@@ -16,6 +15,7 @@ import { OpenDevCounter } from "@/common/counter.js";
 import { LastVisitedIndicator } from "@/common/version.js";
 import Link from "next/link.js";
 import clsx from "clsx/lite";
+import { IndexMainPage } from "../serverMain.js";
 
 export async function generateMetadata({ params }: MetadataProps) {
   const t = await getTranslations(params, "main.links");
@@ -26,7 +26,7 @@ export default async function Page({ params }: MetadataProps) {
   const locale = (await params).locale;
   const t = await getTranslations(locale, "main.links");
   return (
-    <IndexMain
+    <IndexMainPage
       title={t("titleShort")}
       tabKey="links"
       mobileTabKey="links"
@@ -93,6 +93,6 @@ export default async function Page({ params }: MetadataProps) {
           </li>
         </ul>
       </OpenDevCounter>
-    </IndexMain>
+    </IndexMainPage>
   );
 }

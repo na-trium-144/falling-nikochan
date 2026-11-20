@@ -92,6 +92,7 @@ interface Props2 {
   className?: string;
   locale: string;
   backdropBlur?: boolean;
+  changeLog: ReactNode;
 }
 export function PCHeader2(props: Props2) {
   const [showChangeLog, setShowChangeLog] = useState<boolean>(false);
@@ -118,6 +119,7 @@ export function PCHeader2(props: Props2) {
           locale={props.locale}
           open={showChangeLog}
           onClose={() => setShowChangeLog(false)}
+          changeLog={props.changeLog}
         />
       </div>
       <div className="relative">
@@ -204,5 +206,20 @@ export function PCMenuPopup(props: PopupProps) {
         </OpenDevCounter>
       </>
     )
+  );
+}
+
+export function MainBackButton() {
+  const t = useTranslations("main");
+  return (
+    <button
+      className={clsx("no-mobile w-max mb-3 mr-3 fn-link-1 space-x-2")}
+      onClick={() => {
+        historyBackWithReview();
+      }}
+    >
+      <ArrowLeft className="inline-block align-middle" />
+      <span>{t("back")}</span>
+    </button>
   );
 }
