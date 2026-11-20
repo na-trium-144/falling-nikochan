@@ -2,7 +2,7 @@ import { locales } from "@falling-nikochan/i18n/dynamic";
 import IntlProvider from "./intlProvider.js";
 import { initMetadata, initViewport, MetadataProps } from "./metadata.js";
 import { ThemeInitializer } from "./common/theme.jsx";
-import { PWAInstallProvider } from "./common/pwaInstall.jsx";
+import { PWAInstallInitializer } from "./common/pwaInstall.jsx";
 import { ShareImageModalProvider } from "./common/shareLinkAndImage.jsx";
 import { ChangeLogProvider } from "./common/changeLog.jsx";
 import { importChangeLogMDX } from "@falling-nikochan/i18n/mdx.js";
@@ -33,12 +33,11 @@ export default async function RootLayout({
         <ThemeInitializer />
           <IntlProvider locale={locale}>
             <ChangeLogProvider changeLog={<ChangeLog />}>
-              <PWAInstallProvider>
                 <ShareImageModalProvider>
                   <FPSCalculatorProvider>{children}</FPSCalculatorProvider>
                 </ShareImageModalProvider>
-              </PWAInstallProvider>
             </ChangeLogProvider>
+            <PWAInstallInitializer />
           </IntlProvider>
       </body>
     </html>
