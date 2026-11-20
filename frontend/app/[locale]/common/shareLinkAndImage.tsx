@@ -3,9 +3,7 @@
 import clsx from "clsx/lite";
 import { ChartBrief, ChartUntil17Min } from "@falling-nikochan/chart";
 import {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
   useState,
 } from "react";
@@ -21,6 +19,7 @@ import Pic from "@icon-park/react/lib/icons/Pic";
 import Select from "./select";
 import { XLogo } from "./x";
 import { fetchBackend } from "./fetch";
+import { createPortal } from "react-dom";
 
 export function useShareLink(
   cid: string | undefined,
@@ -128,12 +127,6 @@ export function useShareLink(
   const xPostIntent =
     "https://twitter.com/intent/tweet?" + xPostIntentParams.toString();
 
-  const shareImageCtx = useShareImageModalContext();
-  const openModal = useCallback(
-    () => shareImageCtx.openModal(ogPath, cid || "undefined"),
-    [shareImageCtx, ogPath, cid]
-  );
-
   const { os: detectedOS } = useOSDetector();
 
   return {
@@ -145,6 +138,7 @@ export function useShareLink(
       </>
     ),
     path: sharePath + "?" + shareParams,
+    ogPath,
     buttons: (
       <>
         <Button
@@ -188,37 +182,12 @@ export function useShareLink(
         )}
       </>
     ),
-    modalButton: (
-      <Button className="mx-0.5" onClick={openModal}>
-        <Pic className="inline-block align-middle " />
-      </Button>
-    ),
   };
 }
 
-export interface ShareImageModalState {
-  openModal: (ogPath: string, cid: string) => void;
-}
-const ShareImageModalContext = createContext<ShareImageModalState>({
-  openModal: () => undefined,
-});
-export const useShareImageModalContext = () =>
-  useContext(ShareImageModalContext);
-
-export function ShareImageModalProvider(props: { children: React.ReactNode }) {
+export function ShareImageModalButton(props: { ogPath: string; cid: string }) {
   const [modalOpened, modalAppearing, setModalOpened] =
     useDelayedDisplayState(200);
-  const [ogPath, setOgPath] = useState<string>("");
-  const [cid, setCid] = useState<string>("");
-
-  const openModal = useCallback(
-    (ogPath: string, cid: string) => {
-      setOgPath(ogPath);
-      setCid(cid);
-      setModalOpened(true);
-    },
-    [setModalOpened]
-  );
 
   const closeModal = useCallback(() => {
     setModalOpened(false);
@@ -229,11 +198,11 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
   useEffect(() => {
     if (modalOpened) {
       fetchBackend()
-        .get(ogPath)
+        .get(props.ogPath)
         .blob((b) => setImageBlob(b));
       // TODO: エラーの場合imageBlobがundefinedのままになっている。エラーであることをユーザーに表示するべき
     }
-  }, [ogPath, modalOpened]);
+  }, [props.ogPath, modalOpened]);
 
   const [hasClipboard, setHasClipboard] = useState<boolean>(false);
   const toClipboard = useCallback(() => {
@@ -251,7 +220,7 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
     if (imageBlob) {
       const shareData = {
         files: [
-          new File([imageBlob], `${cid}.png`, {
+          new File([imageBlob], `${props.cid}.png`, {
             type: "image/png",
           }),
         ],
@@ -264,99 +233,103 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
         setShareData(shareData);
       }
     }
-  }, [cid, imageBlob]);
+  }, [props.cid, imageBlob]);
 
   const { os: detectedOS } = useOSDetector();
 
   return (
-    <ShareImageModalContext.Provider value={{ openModal }}>
-      {props.children}
-      {modalOpened && (
-        <div
-          className={clsx(
-            "fn-modal-bg",
-            "transition-opacity duration-200 z-share-image-bg",
-            modalAppearing ? "ease-in opacity-100" : "ease-out opacity-0"
-          )}
-          onClick={closeModal}
-          onPointerDown={(e) => e.stopPropagation()}
-          onPointerUp={(e) => e.stopPropagation()}
-        >
-          <div className="absolute inset-12 grid-centering">
-            <Box
-              onClick={(e) => e.stopPropagation()}
-              classNameOuter={clsx(
-                "w-max h-max max-w-full max-h-full",
-                "shadow-modal",
-                "transition-transform duration-200 origin-center",
-                modalAppearing ? "ease-in scale-100" : "ease-out scale-0"
-              )}
-              classNameInner={clsx("flex flex-col items-center text-center")}
-              scrollableY
-              padding={6}
-            >
-              <p className="fn-heading-box">&lt; {t("shareImage")} &gt;</p>
-              <div
-                className="max-w-full relative aspect-1200/630 mb-2 isolate"
-                style={{
-                  width:
-                    "min(45rem, calc(100dvw - 9rem), max(20rem, calc((100dvh - 17.25rem) * (1200 / 630)))",
-                  // `min(` +
-                  // `45rem, ` +
-                  // // 12: 外側margin
-                  // // 6: padding
-                  // // 7+2: &lt; {t("shareImage")} &gt;
-                  // // 10: Button
-                  // `calc(100dvw - ${((12 + 6) * 2) / 4}rem), ` +
-                  // `max(20rem, calc((100dvh - ${((12 + 6) * 2 + 7 + 2 + 2 + 10 + 2 + 10) / 4}rem) * (1200 / 630))` +
-                  // `)`,
-                }}
+    <>
+      <Button className="mx-0.5" onClick={() => setModalOpened(true)}>
+        <Pic className="inline-block align-middle " />
+      </Button>
+      {modalOpened &&
+        createPortal(
+          <div
+            className={clsx(
+              "fn-modal-bg",
+              "transition-opacity duration-200 z-share-image-bg",
+              modalAppearing ? "ease-in opacity-100" : "ease-out opacity-0"
+            )}
+            onClick={closeModal}
+            onPointerDown={(e) => e.stopPropagation()}
+            onPointerUp={(e) => e.stopPropagation()}
+          >
+            <div className="absolute inset-12 grid-centering">
+              <Box
+                onClick={(e) => e.stopPropagation()}
+                classNameOuter={clsx(
+                  "w-max h-max max-w-full max-h-full",
+                  "shadow-modal",
+                  "transition-transform duration-200 origin-center",
+                  modalAppearing ? "ease-in scale-100" : "ease-out scale-0"
+                )}
+                classNameInner={clsx("flex flex-col items-center text-center")}
+                scrollableY
+                padding={6}
               >
-                <img
-                  src={process.env.BACKEND_PREFIX + ogPath}
-                  className="absolute inset-0 "
-                />
+                <p className="fn-heading-box">&lt; {t("shareImage")} &gt;</p>
                 <div
-                  className={clsx(
-                    "absolute inset-0 bg-gray-500/25 -z-1",
-                    "flex flex-row items-center justify-center "
-                  )}
+                  className="max-w-full relative aspect-1200/630 mb-2 isolate"
+                  style={{
+                    width:
+                      "min(45rem, calc(100dvw - 9rem), max(20rem, calc((100dvh - 17.25rem) * (1200 / 630)))",
+                    // `min(` +
+                    // `45rem, ` +
+                    // // 12: 外側margin
+                    // // 6: padding
+                    // // 7+2: &lt; {t("shareImage")} &gt;
+                    // // 10: Button
+                    // `calc(100dvw - ${((12 + 6) * 2) / 4}rem), ` +
+                    // `max(20rem, calc((100dvh - ${((12 + 6) * 2 + 7 + 2 + 2 + 10 + 2 + 10) / 4}rem) * (1200 / 630))` +
+                    // `)`,
+                  }}
                 >
-                  <SlimeSVG />
-                  Loading...
-                </div>
-              </div>
-              {imageBlob && (
-                <p className="mb-1">
-                  <Button
-                    className="mx-0.5"
-                    text={t("download")}
-                    onClick={() => saveAs(imageBlob, `${cid}.png`)}
+                  <img
+                    src={process.env.BACKEND_PREFIX + props.ogPath}
+                    className="absolute inset-0 "
                   />
-                  <>
+                  <div
+                    className={clsx(
+                      "absolute inset-0 bg-gray-500/25 -z-1",
+                      "flex flex-row items-center justify-center "
+                    )}
+                  >
+                    <SlimeSVG />
+                    Loading...
+                  </div>
+                </div>
+                {imageBlob && (
+                  <p className="mb-1">
                     <Button
                       className="mx-0.5"
-                      text={t("copyImage")}
-                      onClick={hasClipboard ? toClipboard : undefined}
+                      text={t("download")}
+                      onClick={() => saveAs(imageBlob, `${cid}.png`)}
                     />
-                    {detectedOS === undefined ? null : detectedOS ===
-                      null ? null : (
-                      // native share API on mobile
+                    <>
                       <Button
                         className="mx-0.5"
-                        text={t("share")}
-                        onClick={toAPI}
-                        disabled={!shareData}
+                        text={t("copyImage")}
+                        onClick={hasClipboard ? toClipboard : undefined}
                       />
-                    )}
-                  </>{" "}
-                </p>
-              )}
-              <Button text={t("close")} onClick={closeModal} />
-            </Box>
-          </div>
-        </div>
-      )}
-    </ShareImageModalContext.Provider>
+                      {detectedOS === undefined ? null : detectedOS ===
+                        null ? null : (
+                        // native share API on mobile
+                        <Button
+                          className="mx-0.5"
+                          text={t("share")}
+                          onClick={toAPI}
+                          disabled={!shareData}
+                        />
+                      )}
+                    </>{" "}
+                  </p>
+                )}
+                <Button text={t("close")} onClick={closeModal} />
+              </Box>
+            </div>
+          </div>,
+          document.body
+        )}
+    </>
   );
 }

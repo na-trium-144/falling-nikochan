@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: MetadataProps) {
 export default async function Page({ params }: MetadataProps) {
   const locale = (await params).locale;
   return (
-    <SharePageModalProvider locale={locale} from="play">
+    <SharePageModalProvider from="play">
       <PlayTab locale={locale} />
     </SharePageModalProvider>
   );

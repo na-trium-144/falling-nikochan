@@ -31,13 +31,13 @@ export default async function Page({ params }: MetadataProps) {
   const locale = (await params).locale;
   const t = await getTranslations(locale, "main");
   return (
-    <SharePageModalProvider locale={locale} from="top">
       <main className="fn-body-scrollable flex flex-col items-center relative">
         <PCHeader2
           className="fixed top-0 right-0"
           locale={locale}
           backdropBlur
         />
+        <SharePageModalProvider from="top">
         <WithTopDemo>
           <FestivalLink large />
           <h1 className="text-4xl min-[64rem]:text-6xl min-[82rem]:text-8xl semibold-by-stroke">
@@ -126,6 +126,7 @@ export default async function Page({ params }: MetadataProps) {
             </Link>
           </Box>
         </div>
+      </SharePageModalProvider>
 
         <Features locale={locale} />
         <SocialLinks />
@@ -137,7 +138,6 @@ export default async function Page({ params }: MetadataProps) {
         <div className="flex-none basis-mobile-footer no-pc" />
         <MobileFooter fixed locale={locale} tabKey="top" />
       </main>
-    </SharePageModalProvider>
   );
 }
 

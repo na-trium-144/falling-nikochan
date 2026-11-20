@@ -434,7 +434,8 @@ export function ChartList(props: Props) {
     props.containerHeight,
   ]);
 
-  const { openModal, openShareInternal } = useSharePageModal();
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { openModal, openShareInternal } = props.useSharePageModal ? useSharePageModal() : {};
 
   return (
     <div
@@ -469,12 +470,12 @@ export function ChartList(props: Props) {
                 }
                 onClick={
                   props.useSharePageModal
-                    ? () => openModal(filteredBriefs.at(i)!.cid)
+                    ? () => openModal!(filteredBriefs.at(i)!.cid)
                     : undefined
                 }
                 onClickMobile={
                   props.useSharePageModal
-                    ? () => openShareInternal(filteredBriefs.at(i)!.cid)
+                    ? () => openShareInternal!(filteredBriefs.at(i)!.cid)
                     : undefined
                 }
                 creator={props.creator}
