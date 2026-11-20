@@ -2,7 +2,7 @@ import Button from "@/common/button";
 import CheckBox from "@/common/checkBox";
 import Input from "@/common/input";
 import clsx from "clsx/lite";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/intlProvider";
 import { useEffect, useRef, useState } from "react";
 import { FetchChartOptions, LoadState } from "./chartState";
 import { SlimeSVG } from "@/common/slime";

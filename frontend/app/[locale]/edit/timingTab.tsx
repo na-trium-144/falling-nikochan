@@ -22,7 +22,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import Close from "@icon-park/react/lib/icons/Close";
 import CornerDownLeft from "@icon-park/react/lib/icons/CornerDownLeft";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/intlProvider";
 import { HelpIcon } from "@/common/caption";
 import VolumeNotice from "@icon-park/react/lib/icons/VolumeNotice";
 import Range from "@/common/range";

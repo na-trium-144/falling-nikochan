@@ -6,7 +6,7 @@ import {
 } from "@falling-nikochan/chart";
 import clsx from "clsx/lite";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/intlProvider";
 import Link from "next/link";
 import {
   Fragment,

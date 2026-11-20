@@ -9,7 +9,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/intlProvider";
 import packageJson from "@/../../package.json" with { type: "json" };
 import { Box } from "./box";
 import Button from "./button";

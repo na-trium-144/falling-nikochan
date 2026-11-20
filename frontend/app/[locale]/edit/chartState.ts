@@ -28,7 +28,7 @@ import {
 } from "@falling-nikochan/chart";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as msgpack from "@msgpack/msgpack";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/intlProvider";
 import { useRouter } from "next/navigation";
 import saveAs from "file-saver";
 import { luaExec } from "@falling-nikochan/chart/dist/luaExec";

@@ -9,7 +9,7 @@ import { HelpIcon } from "@/common/caption";
 import CheckBox from "@/common/checkBox.js";
 import Input from "@/common/input.js";
 import RightOne from "@icon-park/react/lib/icons/RightOne";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/intlProvider";
 import { Scrollable } from "@/common/scrollable";
 
 interface Props {

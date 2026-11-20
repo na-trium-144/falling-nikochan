@@ -3,7 +3,7 @@
 import clsx from "clsx/lite";
 import { useTheme } from "@/common/theme";
 import { useDisplayMode } from "@/scale.js";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/intlProvider";
 import { memo, ReactNode, useEffect, useRef, useState } from "react";
 
 interface CProps {

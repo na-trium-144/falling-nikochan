@@ -4,7 +4,7 @@ import { Box } from "@/common/box";
 import { MobileFooter } from "@/common/footer";
 import { MobileHeader } from "@/common/header";
 import clsx from "clsx/lite";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/intlProvider";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTheme } from "@/common/theme";
 import { useDisplayMode } from "@/scale";

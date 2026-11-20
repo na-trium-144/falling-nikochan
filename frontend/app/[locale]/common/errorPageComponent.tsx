@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/intlProvider";
 import clsx from "clsx/lite";
 import { ButtonHighlight } from "@/common/button";
 import { Box, WarningBox } from "./box";
@@ -8,14 +8,8 @@ import { useEffect, useState } from "react";
 import { ContactFormLink, GitHubLink, XLink } from "@/common/contactLinks";
 import * as v from "valibot";
 
-// IntlProvider内の場合はuseTranslationsで取得する。
-// IntlProvider外で使う場合はサーバーサイドでerror.errorPage.goHomeに相当するメッセージを取得してpropsに渡す。
-export function GoHomeButton({ goHome }: { goHome?: string }) {
-  if (!goHome) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const t = useTranslations("error.errorPage");
-    goHome = t("goHome");
-  }
+export function GoHomeButton() {
+  const t = useTranslations("error.errorPage");
 
   return (
     <div>
@@ -23,7 +17,7 @@ export function GoHomeButton({ goHome }: { goHome?: string }) {
         <span className="fn-glass-1" />
         <span className="fn-glass-2" />
         <ButtonHighlight />
-        {goHome}
+        {t("goHome")}
       </a>
     </div>
   );
@@ -70,18 +64,8 @@ export function LinksOnError({
 }
 
 export function ClientErrorTitle() {
-  let t: ReturnType<typeof useTranslations> | null = null;
-  try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    t = useTranslations("error.errorPage");
-  } catch {
-    // pass
-  }
-  return (
-    <h4 className="fn-heading-box">
-      {t?.("title") ?? "An error has occurred 😢"}
-    </h4>
-  );
+  const t = useTranslations("error.errorPage");
+  return <h4 className="fn-heading-box">{t("title")}</h4>;
 }
 
 export function ErrorMessage({
@@ -91,14 +75,7 @@ export function ErrorMessage({
   error: unknown;
   eventId?: string;
 }) {
-  let t: ReturnType<typeof useTranslations> | null = null;
-  try {
-    // global-errorやnot-foundなどNextIntlが初期化されていない環境では使えない
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    t = useTranslations("error.errorPage");
-  } catch {
-    // pass
-  }
+  const t = useTranslations("error.errorPage");
   const flattenedIssues = v.isValiError(error) ? v.flatten(error.issues) : null;
   if (error) {
     return (
@@ -132,13 +109,11 @@ export function ErrorMessage({
           )}
           {eventId && <div className="text-dim mt-1">EventID={eventId}</div>}
         </pre>
-        {t &&
-          error instanceof DOMException &&
-          error.name === "NotFoundError" && (
-            <WarningBox classNameOuter="mb-3">
-              {t("disableTranslation")}
-            </WarningBox>
-          )}
+        {error instanceof DOMException && error.name === "NotFoundError" && (
+          <WarningBox classNameOuter="mb-3">
+            {t("disableTranslation")}
+          </WarningBox>
+        )}
       </>
     );
   } else {

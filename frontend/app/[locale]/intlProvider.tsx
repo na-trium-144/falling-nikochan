@@ -1,26 +1,35 @@
 "use client";
-// https://medium.com/@kitagolda/next-js-v13-multilingual-server-components-adding-internationalization-in-a-statically-exported-a94e1c927d49
 
-import { NextIntlClientProvider } from "next-intl";
+import { createTranslator } from "next-intl";
 import { getMessages } from "@falling-nikochan/i18n/dynamic";
+import { useParams } from "next/navigation";
 
-function IntlProvider({
-  children,
-  locale,
-}: {
-  children: React.ReactNode;
-  locale: string;
-}) {
-  return (
-    <NextIntlClientProvider
-      locale={locale}
-      messages={getMessages(locale)}
-      // 使用していないが、指定しないとwarningが出る
-      timeZone="Etc/UTC"
-    >
-      {children}
-    </NextIntlClientProvider>
-  );
+const translatorsCache = new Map<
+  string,
+  Map<string, ReturnType<typeof createTranslator>>
+>();
+/**
+ * next-intlの useTranslations はNextIntlClientProviderの内側でしか使えない。
+ * このプロジェクトではlocaleは常にパスパラメーターで、RSCを避けるためにメッセージ全部をjsに入れているので、
+ * NextIntlClientProviderを使わずに直接translatorを構築することが可能
+ *
+ * サーバーコンポーネントでは getTranslations(locale, namespace) を使う。内容はキャッシュがなくなぜかasyncがついているだけでほぼ同じ。
+ */
+export function useTranslations(namespace: string) {
+  const params = useParams<{ locale?: string }>();
+  const locale = params.locale ?? "en";
+  if (!translatorsCache.has(locale)) {
+    translatorsCache.set(locale, new Map());
+  }
+  if (translatorsCache.get(locale)!.has(namespace)) {
+    return translatorsCache.get(locale)!.get(namespace)!;
+  } else {
+    const translator = createTranslator({
+      locale,
+      messages: getMessages(locale),
+      namespace,
+    });
+    translatorsCache.get(locale)!.set(namespace, translator);
+    return translator;
+  }
 }
-
-export default IntlProvider;

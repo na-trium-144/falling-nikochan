@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/intlProvider";
 import Button from "./button";
 import { hasTouch } from "@/scale";
 import { Box, WarningBox } from "./box";

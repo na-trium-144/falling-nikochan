@@ -5,7 +5,7 @@ import { IndexMain } from "../main.js";
 import { ChartList } from "../chartList.js";
 import { ExternalLink } from "@/common/extLink.js";
 import { CidSchema, maxLv, minLv, popularDays } from "@falling-nikochan/chart";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/intlProvider";
 import { ChartLineBrief } from "../chartList.js";
 import Input from "@/common/input.jsx";
 import {

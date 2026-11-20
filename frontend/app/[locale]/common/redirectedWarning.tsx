@@ -2,7 +2,7 @@
 
 import Caution from "@icon-park/react/lib/icons/Caution";
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/intlProvider";
 import { WarningBox } from "./box";
 
 export function RedirectedWarning(props: { className?: string }) {

@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/intlProvider";
 import { useEffect, useState } from "react";
 import { ExternalLink } from "./extLink";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";

@@ -24,7 +24,7 @@ import { Step } from "@falling-nikochan/chart";
 import { findStepFromLua } from "@falling-nikochan/chart";
 import { useTheme } from "@/common/theme.js";
 import { useResizeDetector } from "react-resize-detector";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/intlProvider";
 import dynamic from "next/dynamic";
 const AceEditor = dynamic(
   async () => {

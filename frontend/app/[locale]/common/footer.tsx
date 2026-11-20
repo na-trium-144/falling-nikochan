@@ -6,7 +6,7 @@ import Home from "@icon-park/react/lib/icons/Home";
 import More from "@icon-park/react/lib/icons/More";
 import Search from "@icon-park/react/lib/icons/Search";
 import { useTheme } from "./theme.js";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/intlProvider";
 import { LinkWithReview } from "./pwaInstall.jsx";
 import { ButtonHighlight } from "./button.jsx";
 import { LastVisitedIndicator } from "./version.js";

@@ -5,7 +5,7 @@ import { useState } from "react";
 import Input from "@/common/input.js";
 import { ExternalLink } from "@/common/extLink.js";
 import { CidSchema } from "@falling-nikochan/chart";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/intlProvider";
 import * as v from "valibot";
 import { SlimeSVG } from "@/common/slime.js";
 import {

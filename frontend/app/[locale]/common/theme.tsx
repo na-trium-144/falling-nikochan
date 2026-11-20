@@ -11,7 +11,7 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/intlProvider";
 import { IrasutoyaLikeBg } from "./irasutoyaLike.jsx";
 import Moon from "@icon-park/react/lib/icons/Moon";
 import Sun from "@icon-park/react/lib/icons/Sun";

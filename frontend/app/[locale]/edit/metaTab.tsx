@@ -12,7 +12,7 @@ import { ExternalLink } from "@/common/extLink.js";
 import ProgressBar from "@/common/progressBar.js";
 import CheckBox from "@/common/checkBox.js";
 import Caution from "@icon-park/react/lib/icons/Caution.js";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/intlProvider";
 import { HelpIcon } from "@/common/caption";
 import { chartMaxEvent } from "@falling-nikochan/chart";
 import { useShareLink } from "@/common/shareLinkAndImage";

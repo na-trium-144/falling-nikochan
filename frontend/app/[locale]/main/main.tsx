@@ -5,7 +5,7 @@ import { MobileHeader, PCHeader, PCHeader2 } from "@/common/header.js";
 import { Box } from "@/common/box.js";
 import { MobileFooter, TabKeys } from "@/common/footer.js";
 import { ReactNode, RefObject } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/intlProvider";
 import { RedirectedWarning } from "@/common/redirectedWarning";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
 import { historyBackWithReview } from "@/common/pwaInstall";

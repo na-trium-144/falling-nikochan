@@ -2,7 +2,7 @@
 
 import clsx from "clsx/lite";
 import { Box } from "@/common/box";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/intlProvider";
 import { useEffect, useState } from "react";
 import DownOne from "@icon-park/react/lib/icons/DownOne.js";
 import RightOne from "@icon-park/react/lib/icons/RightOne.js";

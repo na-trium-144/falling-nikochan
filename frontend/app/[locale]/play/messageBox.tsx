@@ -9,7 +9,7 @@ import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
 import Caution from "@icon-park/react/lib/icons/Caution";
 import Pause from "@icon-park/react/lib/icons/Pause";
 import RightOne from "@icon-park/react/lib/icons/RightOne";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/intlProvider";
 import { useEffect } from "react";
 import {
   badFastSec,

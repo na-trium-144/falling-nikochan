@@ -12,7 +12,7 @@ import {
   rankStr,
   RecordGetSummary,
 } from "@falling-nikochan/chart";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/intlProvider";
 import { useShareLink } from "@/common/shareLinkAndImage";
 import { useDisplayMode } from "@/scale";
 import { RecordHistogram } from "@/common/recordHistogram";

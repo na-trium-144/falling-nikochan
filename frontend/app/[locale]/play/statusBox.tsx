@@ -7,7 +7,7 @@ import DisappointedFace from "@icon-park/react/lib/icons/DisappointedFace";
 import DistraughtFace from "@icon-park/react/lib/icons/DistraughtFace";
 import GrinningFaceWithTightlyClosedEyesOpenMouth from "@icon-park/react/lib/icons/GrinningFaceWithTightlyClosedEyesOpenMouth";
 import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/intlProvider";
 import { memo, ReactNode } from "react";
 
 interface Props {

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/intlProvider";
 import { useState } from "react";
 import FormOne from "@icon-park/react/lib/icons/FormOne.js";
 import { ExternalLink } from "./extLink.js";
