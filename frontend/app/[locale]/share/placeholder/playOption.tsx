@@ -81,7 +81,7 @@ export function PlayOption(props: Props) {
 
   useLayoutEffect(() => {
     props.containerRef?.current?.dispatchEvent(new Event("scroll"));
-  }, [selectedLevel, props.containerRef]);
+  }, [selectedLevel, props.brief, props.containerRef]);
 
   return (
     <div
