@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
 import HamburgerButton from "@icon-park/react/lib/icons/HamburgerButton";
 import Comment from "@icon-park/react/lib/icons/Comment";
@@ -9,7 +9,7 @@ import { historyBackWithReview, LinkWithReview } from "./pwaInstall.jsx";
 import { ButtonHighlight } from "./button.jsx";
 import Title from "./titleLogo.js";
 import { useTranslations } from "next-intl";
-import { lastVisitedOld } from "./version.js";
+import { LastVisitedIndicator } from "./version.js";
 import { ChangeLogPopup } from "./changeLog.js";
 import { useDelayedDisplayState } from "./delayedDisplayState.js";
 import { Box } from "./box.js";
@@ -21,7 +21,8 @@ import {
   DevPageLink,
   GitHubLink,
   XLink,
-} from "@/clientPage.js";
+} from "./contactLinks.js";
+import { OpenDevCounter } from "./counter.js";
 
 const pcTabTitleKeys = ["play", "edit"] as const;
 const tabURLs = {
@@ -91,12 +92,11 @@ interface Props2 {
   className?: string;
   locale: string;
   backdropBlur?: boolean;
+  changeLog: ReactNode;
 }
 export function PCHeader2(props: Props2) {
   const [showChangeLog, setShowChangeLog] = useState<boolean>(false);
   const [showMenu, setShowMenu] = useState<boolean>(false);
-  const [isLastVisitedOld, setIsLastVisitedOld] = useState<boolean>(false);
-  useEffect(() => setIsLastVisitedOld(lastVisitedOld()), []);
   return (
     <aside className={clsx("no-mobile fn-pc-header2", props.className)}>
       {props.backdropBlur && (
@@ -113,17 +113,13 @@ export function PCHeader2(props: Props2) {
           <span>ver.</span>
           <span className="ml-1 mr-0.5">{process.env.buildVersion}</span>
           <Comment className="inline-block align-middle" />
-          {isLastVisitedOld && (
-            <span
-              className={clsx("absolute w-3 h-3 rounded-full bg-red-500")}
-              style={{ top: "-0.1rem", right: "-0.25rem" }}
-            />
-          )}
+          <LastVisitedIndicator style={{ top: "-0.1rem", right: "-0.25rem" }} />
         </button>
         <ChangeLogPopup
           locale={props.locale}
           open={showChangeLog}
           onClose={() => setShowChangeLog(false)}
+          changeLog={props.changeLog}
         />
       </div>
       <div className="relative">
@@ -158,19 +154,6 @@ export function PCMenuPopup(props: PopupProps) {
     setPopupOpened(props.open);
   }, [props.open, setPopupOpened]);
 
-  const clickCount = useRef<number>(0);
-  const prevClickCount = useRef<DOMHighResTimeStamp>(0);
-  const [showDev, setShowDev] = useState(false);
-  const clickCounter = () => {
-    if (performance.now() - prevClickCount.current > 1000) {
-      clickCount.current = 0;
-    }
-    prevClickCount.current = performance.now();
-    if (++clickCount.current >= 7) {
-      setShowDev(true);
-    }
-    console.log(clickCount.current);
-  };
   return (
     popupOpened && (
       <>
@@ -181,9 +164,8 @@ export function PCMenuPopup(props: PopupProps) {
             e.stopPropagation();
           }}
         />
-        <div
+        <OpenDevCounter
           className={clsx("absolute top-full mt-1 right-0 w-max z-changelog")}
-          onClick={clickCounter}
         >
           <Box
             classNameOuter={clsx(
@@ -216,15 +198,28 @@ export function PCMenuPopup(props: PopupProps) {
               <li>
                 <APIDocsLink small />
               </li>
-              {showDev && (
-                <li>
-                  <DevPageLink locale={props.locale} />
-                </li>
-              )}
+              <li className="fn-counter-hidden">
+                <DevPageLink locale={props.locale} />
+              </li>
             </ul>
           </Box>
-        </div>
+        </OpenDevCounter>
       </>
     )
+  );
+}
+
+export function MainBackButton() {
+  const t = useTranslations("main");
+  return (
+    <button
+      className={clsx("no-mobile w-max mb-3 mr-3 fn-link-1 space-x-2")}
+      onClick={() => {
+        historyBackWithReview();
+      }}
+    >
+      <ArrowLeft className="inline-block align-middle" />
+      <span>{t("back")}</span>
+    </button>
   );
 }

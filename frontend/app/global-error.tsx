@@ -29,10 +29,6 @@ export default function Error(props: ErrorProps) {
           }}
         />
         <div className="fn-fallback-bg" />
-        <CenterBox classNameInner="flex flex-col items-center">
-          <ClientErrorTitle />
-          <ErrorMessage error={props.error} />
-        </CenterBox>
         <div className="fn-ios-dummy-block fn-ios-dummy-block-top" />
         <div className="fn-ios-dummy-block fn-ios-dummy-block-bottom" />
         {process.env.NODE_ENV === "development" && (
@@ -43,6 +39,10 @@ export default function Error(props: ErrorProps) {
             <div className="fn-dev-safe-area fn-dev-sai-r" />
           </>
         )}
+        <CenterBox classNameInner="flex flex-col items-center">
+          <ClientErrorTitle />
+          <ErrorMessage error={props.error} />
+        </CenterBox>
       </body>
     </html>
   );

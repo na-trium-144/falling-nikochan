@@ -46,17 +46,19 @@ export function useFestival(): FesData {
   return { num, kind };
 }
 interface Props {
-  num: number | null;
-  kind: "mf" | "kf" | null;
+  // num: number | null;
+  // kind: "mf" | "kf" | null;
   className?: string;
   large?: boolean;
 }
 export function FestivalLink(props: Props) {
   const t = useTranslations("main");
-  if (props.num && props.kind) {
+  const fes = useFestival();
+
+  if (fes.num && fes.kind) {
     return (
       <span className={clsx(props.large && "text-lg", props.className)}>
-        <ExternalLink href={`https://${props.kind}${props.num}.utcode.net`}>
+        <ExternalLink href={`https://${fes.kind}${fes.num}.utcode.net`}>
           {props.large && (
             <ArrowLeft
               className="inline-block align-middle mr-1"
@@ -64,8 +66,8 @@ export function FestivalLink(props: Props) {
             />
           )}
           {t.rich("festival", {
-            kind: props.kind,
-            num: props.num,
+            kind: fes.kind,
+            num: fes.num,
             utcode: () =>
               props.large ? (
                 <img

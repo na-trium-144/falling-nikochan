@@ -5,7 +5,7 @@ import clsx from "clsx/lite";
 import { ButtonHighlight } from "@/common/button";
 import { Box, WarningBox } from "./box";
 import { useEffect, useState } from "react";
-import { ContactFormLink, GitHubLink, XLink } from "@/clientPage";
+import { ContactFormLink, GitHubLink, XLink } from "@/common/contactLinks";
 import * as v from "valibot";
 
 // IntlProvider内の場合はuseTranslationsで取得する。

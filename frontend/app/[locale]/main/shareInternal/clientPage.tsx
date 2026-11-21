@@ -7,14 +7,20 @@ import {
   RecordGetSummarySchema,
 } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { titleShare } from "@/common/title.js";
 import { ShareBox } from "@/share/placeholder/shareBox.jsx";
 import { fetchBrief } from "@/common/briefCache.js";
 import { captureAndWrap, fetchBackend } from "@/common/fetch.js";
 import * as v from "valibot";
 
-export default function ShareInternal({ locale }: { locale: string }) {
+export default function ShareInternal({
+  locale,
+  changeLog,
+}: {
+  locale: string;
+  changeLog: ReactNode;
+}) {
   const t = useTranslations("share");
   const te = useTranslations("error");
   const [cid, setCId] = useState<string | null>(null);
@@ -58,6 +64,7 @@ export default function ShareInternal({ locale }: { locale: string }) {
         fromPlay === true ? "play" : fromPlay === false ? "top" : null
       }
       locale={locale}
+      changeLog={changeLog}
     >
       {sessionError ? (
         te("noSession")

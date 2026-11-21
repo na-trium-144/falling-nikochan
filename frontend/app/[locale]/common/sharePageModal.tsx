@@ -19,28 +19,34 @@ import { useTranslations } from "next-intl";
 import { fetchBrief } from "@/common/briefCache";
 import { Box } from "@/common/box";
 import { ShareBox } from "@/share/placeholder/shareBox";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useDelayedDisplayState } from "./delayedDisplayState";
 import { historyBackWithReview } from "./pwaInstall";
 import { captureAndWrap, fetchBackend } from "./fetch";
 import * as v from "valibot";
+import { createPortal } from "react-dom";
 
 interface SharePageModalState {
   openModal: (cid: string) => void;
   openShareInternal: (cid: string) => void;
 }
-const SharePageModalContext = createContext<SharePageModalState>({
-  openModal: () => {},
-  openShareInternal: () => {},
-});
-export const useSharePageModal = () => useContext(SharePageModalContext);
+const SharePageModalContext = createContext<SharePageModalState | null>(null);
+export function useSharePageModal() {
+  const c = useContext(SharePageModalContext);
+  if (!c) {
+    throw new Error(
+      "useSharePageModal is used outside of SharePageModalProvider"
+    );
+  }
+  return c;
+}
 
 export function SharePageModalProvider(props: {
   children: ReactNode;
-  locale: string;
   from: "top" | "play";
   noResetTitle?: boolean;
 }) {
+  const { locale } = useParams<{ locale: string }>();
   const th = useTranslations("share");
   const tp = useTranslations("main.play");
   const [modalCId, setModalCId] = useState<string | null>(null);
@@ -88,11 +94,11 @@ export function SharePageModalProvider(props: {
   const openShareInternal = useCallback(
     (cid: string) => {
       router.push(
-        `/${props.locale}/main/shareInternal` +
+        `/${locale}/main/shareInternal` +
           `?cid=${cid}&fromPlay=${props.from === "play" ? "1" : ""}`
       );
     },
-    [props.locale, props.from, router]
+    [locale, props.from, router]
   );
 
   // modalのcloseと、exclusiveModeのリセットは window.history.back(); でpopstateイベントを呼び出しその中で行われる
@@ -125,43 +131,45 @@ export function SharePageModalProvider(props: {
   return (
     <SharePageModalContext.Provider value={{ openModal, openShareInternal }}>
       {props.children}
-      {modalOpened && (
-        <div
-          className={clsx(
-            "fn-modal-bg",
-            "transition-opacity duration-200",
-            modalAppearing ? "ease-in opacity-100" : "ease-out opacity-0"
-          )}
-          onClick={() => {
-            historyBackWithReview();
-          }}
-        >
-          <div className="absolute inset-x-24 inset-y-16 grid-centering">
-            <Box
-              onClick={(e) => e.stopPropagation()}
-              classNameOuter={clsx(
-                "w-max h-max max-w-full max-h-full",
-                "shadow-modal",
-                "transition-transform duration-200 origin-center",
-                modalAppearing ? "ease-in scale-100" : "ease-out scale-0"
-              )}
-              classNameInner={clsx("flex flex-col max-w-main")}
-              scrollableY
-              padding={6}
-            >
-              <ShareBox
-                cid={modalCId || ""}
-                brief={modalBrief}
-                record={modalRecord}
-                locale={props.locale}
-                backButton={() => {
-                  historyBackWithReview();
-                }}
-              />
-            </Box>
-          </div>
-        </div>
-      )}
+      {modalOpened &&
+        createPortal(
+          <div
+            className={clsx(
+              "fn-modal-bg",
+              "transition-opacity duration-200",
+              modalAppearing ? "ease-in opacity-100" : "ease-out opacity-0"
+            )}
+            onClick={() => {
+              historyBackWithReview();
+            }}
+          >
+            <div className="absolute inset-x-24 inset-y-16 grid-centering">
+              <Box
+                onClick={(e) => e.stopPropagation()}
+                classNameOuter={clsx(
+                  "w-max h-max max-w-full max-h-full",
+                  "shadow-modal",
+                  "transition-transform duration-200 origin-center",
+                  modalAppearing ? "ease-in scale-100" : "ease-out scale-0"
+                )}
+                classNameInner={clsx("flex flex-col max-w-main")}
+                scrollableY
+                padding={6}
+              >
+                <ShareBox
+                  cid={modalCId || ""}
+                  brief={modalBrief}
+                  record={modalRecord}
+                  locale={locale}
+                  backButton={() => {
+                    historyBackWithReview();
+                  }}
+                />
+              </Box>
+            </div>
+          </div>,
+          document.body
+        )}
     </SharePageModalContext.Provider>
   );
 }

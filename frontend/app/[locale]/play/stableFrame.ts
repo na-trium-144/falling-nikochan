@@ -30,7 +30,7 @@ export function useStableFrame({
   const callbackRef = useRef<() => void>(null!);
   callbackRef.current = callback;
 
-  const { realFps } = useRealFPS();
+  const { fps: realFps } = useRealFPS();
   const realFpsRef = useRef<number>(20);
   realFpsRef.current = realFps;
   const runTriggeredTimeStamp = useRef<DOMHighResTimeStamp | null>(null);

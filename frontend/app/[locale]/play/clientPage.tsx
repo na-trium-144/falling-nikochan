@@ -580,7 +580,7 @@ function Play(props: Props) {
     flash
   );
 
-  const { realFps, stable: realFpsStable } = useRealFPS();
+  const { fps: realFps, hasStableValue: realFpsStable } = useRealFPS();
   const [runFps, setRunFps] = useState<number>(0);
   const [renderFps, setRenderFps] = useState<number>(0);
 
