@@ -13,6 +13,8 @@ import {
   RefObject,
   useCallback,
   useEffect,
+  useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -329,14 +331,17 @@ export function ChartList(props: Props) {
     }
   }, [briefs, props.type]);
 
-  const filteredBriefs:
-    ChartLineBrief[] | Error | undefined | "loading" | "empty" = Array.isArray(
-    briefs
-  )
-    ? fetchAll
-      ? briefs.filter((b) => b !== null)
-      : briefs.filter((b) => b !== null).slice(0, maxRow)
-    : briefs;
+  const filteredBriefs = useMemo<
+    ChartLineBrief[] | Error | undefined | "loading" | "empty"
+  >(
+    () =>
+      Array.isArray(briefs)
+        ? fetchAll
+          ? briefs.filter((b) => b !== null)
+          : briefs.filter((b) => b !== null).slice(0, maxRow)
+        : briefs,
+    [briefs, fetchAll, maxRow]
+  );
   // エラーなどを除いた実際のbriefの項目数
   const filteredNumRows =
     Array.isArray(filteredBriefs) &&
@@ -401,6 +406,11 @@ export function ChartList(props: Props) {
     ? // eslint-disable-next-line react-hooks/rules-of-hooks
       useSharePageModal()
     : {};
+
+  useLayoutEffect(() => {
+    // 親の<Scrollable>の再レンダリングをトリガー
+    containerRef.current?.dispatchEvent(new Event("scroll"));
+  }, [filteredBriefs, containerRef]);
 
   return (
     <div

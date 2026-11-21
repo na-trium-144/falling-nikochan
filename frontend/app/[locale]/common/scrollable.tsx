@@ -157,22 +157,18 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
       const resizeObserver = new ResizeObserver(onScroll);
       resizeObserver.observe(refCurrent);
 
-      let childMutationObservers: MutationObserver[] = [];
+      let childMutationObserver: MutationObserver | null = null;
       const initChildObserver = () => {
         onScroll();
-        for (const observer of childMutationObservers) {
-          observer.disconnect();
-        }
-        childMutationObservers = [];
+        childMutationObserver?.disconnect();
+        childMutationObserver = new MutationObserver(onScroll);
         for (const child of refCurrent.childNodes) {
-          const childMutationObserver = new MutationObserver(onScroll);
           childMutationObserver.observe(child, {
             attributes: true,
             childList: true,
             characterData: true,
             subtree: true,
           });
-          childMutationObservers.push(childMutationObserver);
         }
       };
       const mutationObserver = new MutationObserver(initChildObserver);
@@ -185,9 +181,7 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
         refCurrent.removeEventListener("scroll", onScroll);
         resizeObserver.disconnect();
         mutationObserver.disconnect();
-        for (const observer of childMutationObservers) {
-          observer.disconnect();
-        }
+        childMutationObserver?.disconnect();
       };
     }
   }, [
