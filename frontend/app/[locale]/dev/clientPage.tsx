@@ -1,8 +1,6 @@
 "use client";
 
 import { Box } from "@/common/box";
-import { MobileFooter } from "@/common/footer";
-import { MobileHeader } from "@/common/header";
 import clsx from "clsx/lite";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -40,7 +38,7 @@ const AceEditor = dynamic(
   { ssr: false }
 );
 
-export function DevPage(props: { locale: string }) {
+export function DevPage() {
   const t = useTranslations("dev");
   const [ls, setLS] = useState<Storage | null>(null);
   const [ss, setSS] = useState<Storage | null>(null);
@@ -57,70 +55,49 @@ export function DevPage(props: { locale: string }) {
   const safari = useSafariDetector();
 
   return (
-    <main className="w-full h-full overflow-clip ">
-      <div className="flex flex-col w-full h-full items-center ">
-        <MobileHeader className="no-pc">{t("title")}</MobileHeader>
-        <div
-          className={clsx(
-            "flex-1 min-h-0 w-full px-6 main-wide:pt-3 main-wide:px-6",
-            "flex items-center justify-center"
-          )}
+    <>
+      <div className="no-mobile mb-3 flex flex-row items-center">
+        <button
+          className={clsx("block w-max", "fn-link-1")}
+          onClick={() => history.back()}
         >
-          <Box
-            classNameOuter="w-max h-max max-w-full max-h-full"
-            classNameInner="space-y-3"
-            scrollableY
-            padding={6}
-          >
-            <div className="no-mobile mb-3 flex flex-row items-center">
-              <button
-                className={clsx("block w-max", "fn-link-1")}
-                onClick={() => history.back()}
-              >
-                <ArrowLeft className="inline-block align-middle mr-2 " />
-                {t("back")}
-              </button>
-              <span className="flex-1 text-center fn-heading-sect">
-                {t("title")}
-              </span>
-            </div>
-            <StorageEditor storage={ls} name="LocalStorage" />
-            <StorageEditor storage={ss} name="SessionStorage" />
-            {isAndroidTWA && (
-              <div className="text-center">
-                <Button onClick={forceRequestReview}>forceRequestReview</Button>
-                <Button onClick={historyBackWithForceReview}>
-                  historyBackWithForceReview
-                </Button>
-              </div>
-            )}
-            <pre
-              className={clsx(
-                "relative fn-sky fn-pre",
-                "mb-3 p-2 rounded-sq-xl text-xs",
-                "whitespace-pre-wrap",
-                "text-center"
-              )}
-              suppressHydrationWarning
-            >
-              <span className="fn-glass-1" />
-              <span className="fn-glass-2" />
-              {navigator.userAgent}
-            </pre>
-            <ul className="text-center">
-              <li>isStandalone: {String(standalone)}</li>
-              <li>androidTWA: {String(androidTWA)}</li>
-              <li>insideFrame: {String(insideFrame)}</li>
-              <li>os: {String(os)}</li>
-              <li>iOS27OrLater: {String(iOS27OrLater)}</li>
-              <li>safari: {String(safari)}</li>
-            </ul>
-          </Box>
-        </div>
-        <div className="flex-none basis-mobile-footer no-pc" />
+          <ArrowLeft className="inline-block align-middle mr-2 " />
+          {t("back")}
+        </button>
+        <span className="flex-1 text-center fn-heading-sect">{t("title")}</span>
       </div>
-      <MobileFooter fixed locale={props.locale} tabKey={null} />
-    </main>
+      <StorageEditor storage={ls} name="LocalStorage" />
+      <StorageEditor storage={ss} name="SessionStorage" />
+      {isAndroidTWA && (
+        <div className="text-center">
+          <Button onClick={forceRequestReview}>forceRequestReview</Button>
+          <Button onClick={historyBackWithForceReview}>
+            historyBackWithForceReview
+          </Button>
+        </div>
+      )}
+      <pre
+        className={clsx(
+          "relative fn-sky fn-pre",
+          "mb-3 p-2 rounded-sq-xl text-xs",
+          "whitespace-pre-wrap",
+          "text-center"
+        )}
+        suppressHydrationWarning
+      >
+        <span className="fn-glass-1" />
+        <span className="fn-glass-2" />
+        {navigator.userAgent}
+      </pre>
+      <ul className="text-center">
+        <li>isStandalone: {String(standalone)}</li>
+        <li>androidTWA: {String(androidTWA)}</li>
+        <li>insideFrame: {String(insideFrame)}</li>
+        <li>os: {String(os)}</li>
+        <li>iOS27OrLater: {String(iOS27OrLater)}</li>
+        <li>safari: {String(safari)}</li>
+      </ul>
+    </>
   );
 }
 

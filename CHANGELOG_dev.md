@@ -1,3 +1,11 @@
+## ver. 18.16 - 2026/11/21 [#1479](https://github.com/na-trium-144/falling-nikochan/pull/1479)
+
+- トップページ, IndexMain, sharePlaceholderをできるだけサーバーコンポーネントにする
+- ThemeProvider, ChangeLogProvider, ShareImageModalProvider, FPSCalculatorProvider をコンテキストが不要な形にリファクタ
+- /main/play, shareInternalとsharePageModalでリストの更新時・レベル選択時にScrollableに対してscrollイベントをトリガー
+- クエリなしの/main/playに遷移した時fallbackSearchParamsがリセットされないのを修正
+- モーダル表示中はbodyをスクロールさせない
+
 ## ver. 18.15 - 2026/11/15 [#1478](https://github.com/na-trium-144/falling-nikochan/pull/1478)
 
 - og, rss, sitemap, share のテストを追加

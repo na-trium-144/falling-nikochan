@@ -6,8 +6,12 @@ import {
   ChartBrief,
   RecordGetSummary,
   ResultParams,
+  deserializeResultParams,
+  isVerificationRequired,
+  parseResultParams,
+  RecordGetSummarySchema,
 } from "@falling-nikochan/chart";
-import { useEffect, useRef, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft.js";
 import International from "@icon-park/react/lib/icons/International.js";
@@ -38,6 +42,8 @@ import {
   ErrorMessage,
   LinksOnError,
 } from "@/common/errorPageComponent.js";
+import { titleShare } from "@/common/title.js";
+import { etagContentRegex } from "@/common/briefCache.js";
 
 const YtMetaSchema = () =>
   v.object({
@@ -45,6 +51,121 @@ const YtMetaSchema = () =>
     channelTitle: v.string(),
   });
 type YtMeta = v.InferOutput<ReturnType<typeof YtMetaSchema>>;
+
+const dummyBrief = {
+  title: "placeholder",
+  composer: "placeholder",
+  chartCreator: "placeholder",
+  ytId: "",
+  updatedAt: 0,
+  published: true,
+  locale: "ja",
+  levels: [
+    {
+      name: "placeholder",
+      hash: "",
+      type: "Single" as const,
+      difficulty: 10,
+      noteCount: 100,
+      bpmMin: 1,
+      bpmMax: 999,
+      length: 1,
+      unlisted: false,
+    },
+  ],
+};
+export function ShareBoxFromSSR(props: { locale: string }) {
+  const t = useTranslations("share");
+  const te = useTranslations("error");
+  const { locale } = props;
+  const [cid, setCId] = useState<string>("");
+  // const { res, brief } = await getBrief(cid, true);
+  const [brief, setBrief] = useState<(ChartBrief & { etag: string }) | null>(
+    null
+  );
+  const [record, setRecord] = useState<RecordGetSummary[] | Error | null>(null);
+  const [sharedResult, setSharedResult] = useState<
+    ResultParams | string | null
+  >(null);
+  const [sharedResultVerified, setSharedResultVerified] = useState<
+    true | Error | null
+  >(null);
+
+  useEffect(() => {
+    const cid = window.location.pathname.split("/").pop()!;
+    setCId(cid);
+    const searchParams = new URLSearchParams(window.location.search);
+    let brief: ChartBrief;
+    let etag: string;
+    if (process.env.NODE_ENV === "development") {
+      brief = dummyBrief;
+      etag = "";
+    } else {
+      brief = JSON.parse(
+        document
+          .querySelector('meta[name="nikochanSharingBrief"]')!
+          .getAttribute("content")!
+      );
+      etag =
+        document
+          .querySelector('meta[name="nikochanSharingETag"]')!
+          .getAttribute("content")
+          ?.match(etagContentRegex)?.[0] ?? "";
+    }
+    setBrief({ ...brief, etag });
+    document.title = titleShare(t, cid, brief);
+    const titleUpdate = setInterval(() => {
+      // Next.jsが元のタイトルに戻してしまう場合があるので、再度上書き
+      if (document.title !== titleShare(t, cid, brief)) {
+        document.title = titleShare(t, cid, brief);
+      }
+    }, 100);
+    setRecord(null);
+    fetchBackend()
+      .get(`/api/record/${cid}`)
+      .json((record) => v.parse(v.array(RecordGetSummarySchema()), record))
+      .catch((e: unknown) => captureAndWrap(e, { cid }))
+      .then((record) => setRecord(record));
+    if (searchParams.get("result")) {
+      (async () => {
+        try {
+          const qResult = searchParams.get("result")!;
+          const { result } = await parseResultParams(qResult);
+          const resultParams = deserializeResultParams(result);
+          setSharedResult(resultParams);
+          setSharedResultVerified(null);
+          if (isVerificationRequired(resultParams)) {
+            fetchBackend()
+              .url(`/api/resultSigning/verify/${cid}`)
+              .query({ result: qResult })
+              .get()
+              .error(422, markAsExpected)
+              .res(() => setSharedResultVerified(true))
+              .catch((e: unknown) => {
+                setSharedResultVerified(captureAndWrap(e));
+              });
+          }
+        } catch (e) {
+          console.error(e);
+          setSharedResult(te("api.invalidResultParam"));
+        }
+      })();
+    }
+    return () => clearInterval(titleUpdate);
+  }, [t, te]);
+
+  return (
+    <ShareBox
+      cid={cid}
+      brief={brief}
+      record={record}
+      sharedResult={sharedResult}
+      sharedResultVerified={sharedResultVerified}
+      locale={locale}
+      forceShowCId
+    />
+  );
+}
 
 interface Props {
   cid: string | undefined;
@@ -55,6 +176,7 @@ interface Props {
   locale: string;
   backButton?: () => void;
   forceShowCId?: boolean; // 通常はPCでは表示、モバイルでは非表示だが、trueの場合モバイルでも表示する
+  containerRef?: RefObject<HTMLDivElement | null>;
 }
 export function ShareBox(props: Props) {
   const t = useTranslations("share");
@@ -371,6 +493,7 @@ export function ShareBox(props: Props) {
         brief={brief}
         record={props.record}
         locale={props.locale}
+        containerRef={props.containerRef}
       />
     </>
   );

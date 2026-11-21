@@ -1,0 +1,9 @@
+@layer components {
+  .fn-counter {
+    &:not(.fn-counter-done) {
+      .fn-counter-hidden {
+        @apply hidden;
+      }
+    }
+  }
+}

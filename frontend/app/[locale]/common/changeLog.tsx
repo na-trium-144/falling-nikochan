@@ -1,46 +1,31 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { createContext, ReactNode, useContext, useEffect } from "react";
+import { ReactNode, useEffect } from "react";
 import { Box } from "./box";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
-import { updateLastVisited } from "./version";
 import { useDelayedDisplayState } from "./delayedDisplayState";
-
-const ChangeLogContext = createContext<ReactNode>(null);
-export const useChangeLog = () => useContext(ChangeLogContext);
-export function ChangeLogProvider(props: {
-  children: ReactNode;
-  changeLog: ReactNode;
-}) {
-  return (
-    <ChangeLogContext.Provider value={props.changeLog}>
-      {props.children}
-    </ChangeLogContext.Provider>
-  );
-}
+import { UpdateLastVisited } from "./version";
 
 interface PopupProps {
   locale: string;
   open: boolean;
   onClose: () => void;
+  changeLog: ReactNode;
 }
 export function ChangeLogPopup(props: PopupProps) {
   const t = useTranslations("main.version");
-  const changeLog = useChangeLog();
   const [popupOpened, popupAppearing, setPopupOpened] =
     useDelayedDisplayState(200);
   useEffect(() => {
-    if (props.open) {
-      updateLastVisited();
-    }
     setPopupOpened(props.open);
   }, [props.open, setPopupOpened]);
   return (
     popupOpened && (
       <>
+        <UpdateLastVisited />
         <div
           className={clsx("fixed z-changelog-bg inset-0")}
           onClick={(e) => {
@@ -86,7 +71,7 @@ export function ChangeLogPopup(props: PopupProps) {
               <h3 className="fn-heading-sect text-center mb-2">
                 {t("changelog")}
               </h3>
-              <div className="fn-mdx-changelog">{changeLog}</div>
+              <div className="fn-mdx-changelog">{props.changeLog}</div>
             </div>
             <div className={clsx("absolute bottom-4 inset-x-0")}>
               <Link

@@ -8,6 +8,8 @@ import Move from "@icon-park/react/lib/icons/Move";
 import Sun from "@icon-park/react/lib/icons/Sun";
 import Translate from "@icon-park/react/lib/icons/Translate";
 import { YouTubeLogo } from "./youtubeLogo";
+import PlayOne from "@icon-park/react/lib/icons/PlayOne.js";
+import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 
 export function TranslateIcon() {
   return <Translate className="inline-block align-middle" />;
@@ -28,4 +30,10 @@ export function CautionIcon() {
 }
 export function YoutubeIcon() {
   return <YouTubeLogo />;
+}
+export function PlayOneIcon() {
+  return <PlayOne theme="filled" className="inline-block align-middle" />;
+}
+export function ArrowRightIcon() {
+  return <ArrowRight theme="filled" className="inline-block align-middle" />;
 }

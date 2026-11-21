@@ -13,7 +13,10 @@ import {
   RecordGetSummary,
 } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
-import { useShareLink } from "@/common/shareLinkAndImage";
+import {
+  ShareImageModalButton,
+  useShareLink,
+} from "@/common/shareLinkAndImage";
 import { useDisplayMode } from "@/scale";
 import { RecordHistogram } from "@/common/recordHistogram";
 import { formatError } from "@/common/fetch";
@@ -271,7 +274,10 @@ export default function Result(props: Props) {
               <span>{t("shareResult")}</span>
               <span className="inline-block">
                 {shareLink.buttons}
-                {shareLink.modalButton}
+                <ShareImageModalButton
+                  ogPath={shareLink.ogPath}
+                  cid={props.cid}
+                />
               </span>
             </div>
           )}

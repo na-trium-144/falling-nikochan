@@ -1,7 +1,6 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { IndexMain } from "../main.js";
 import { ChartList } from "../chartList.js";
 import { ExternalLink } from "@/common/extLink.js";
 import { CidSchema, maxLv, minLv, popularDays } from "@falling-nikochan/chart";
@@ -9,7 +8,6 @@ import { useTranslations } from "next-intl";
 import { ChartLineBrief } from "../chartList.js";
 import Input from "@/common/input.jsx";
 import {
-  RefObject,
   useCallback,
   useRef,
   useState,
@@ -20,7 +18,6 @@ import {
 } from "react";
 import { titleWithSiteName } from "@/common/title.js";
 import { useSharePageModal } from "@/common/sharePageModal.jsx";
-import { useResizeDetector } from "react-resize-detector";
 import { useDisplayMode } from "@/scale.jsx";
 import { XLogo } from "@/common/x.jsx";
 import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation.js";
@@ -55,7 +52,6 @@ function PlayTabInternal(
   props: Props & { searchParams?: ReturnType<typeof useSearchParams> }
 ) {
   const t = useTranslations("main.play");
-  const { locale } = props;
 
   // 基本的には現在のlocationのクエリパラメーター(props.searchParamsで得られる)を真とするが、
   // URLが/shareの場合のみそれを使用できないので、stateにもコピーを保存しておく
@@ -70,8 +66,8 @@ function PlayTabInternal(
       searchParams = fallbackSearchParams;
     } else {
       if (
-        window.location.search &&
-        window.location.search !== "?" + fallbackSearchParams?.toString()
+        (window.location.search || "?") !==
+        "?" + fallbackSearchParams?.toString()
       ) {
         if (prevPathName.current.includes("/share")) {
           searchParams = fallbackSearchParams;
@@ -274,9 +270,6 @@ function PlayTabInternal(
     };
   }, [t, params.search, params.sort, params.maxLv, params.minLv]);
 
-  const boxSize = useResizeDetector();
-  const { rem } = useDisplayMode();
-
   const [minLvCurrent, setMinLvCurrent] = useState(params.minLv);
   const [maxLvCurrent, setMaxLvCurrent] = useState(params.maxLv);
   const [difficultyDebounceTimer, setDifficultyDebounceTimer] =
@@ -311,15 +304,7 @@ function PlayTabInternal(
   };
 
   return (
-    <IndexMain
-      title={t("title")}
-      tabKey="play"
-      mobileTabKey="play"
-      noBackButtonMobile
-      noBackButtonPC
-      locale={locale}
-      boxRef={boxSize.ref as RefObject<HTMLDivElement | null>}
-    >
+    <>
       <section className="fn-sect relative">
         <p>
           {t("description")}
@@ -435,18 +420,13 @@ function PlayTabInternal(
         briefs={waitingDebounce ? undefined : searchResult}
         search
         creator
-        href={(cid) => `/share/${cid}`}
-        onClick={openModal}
-        onClickMobile={openShareInternal}
+        useSharePageModal
         showLoading
         badge
         dateDiff={params.sort === "latest"}
         // showCount={params.sort === "popular"}
-        containerRef={boxSize.ref as RefObject<HTMLDivElement | null>}
-        containerHeight={
-          boxSize.height ? boxSize.height - (12 / 4) * rem : undefined
-        }
+        inScrollableMainContainer
       />
-    </IndexMain>
+    </>
   );
 }

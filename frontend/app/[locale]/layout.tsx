@@ -1,12 +1,9 @@
 import { locales } from "@falling-nikochan/i18n/dynamic";
 import IntlProvider from "./intlProvider.js";
 import { initMetadata, initViewport, MetadataProps } from "./metadata.js";
-import { ThemeProvider } from "./common/theme.jsx";
+import { ThemeInitializer } from "./common/theme.jsx";
 import { PWAInstallProvider } from "./common/pwaInstall.jsx";
-import { ShareImageModalProvider } from "./common/shareLinkAndImage.jsx";
-import { ChangeLogProvider } from "./common/changeLog.jsx";
-import { importChangeLogMDX } from "@falling-nikochan/i18n/mdx.js";
-import { FPSCalculatorProvider } from "./common/fpsCalculator.jsx";
+import { FPSCalculator } from "./common/fpsCalculator.jsx";
 
 export async function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -26,31 +23,14 @@ export default async function RootLayout({
   params: Promise<{ locale: string }>;
 }>) {
   const locale = (await params).locale;
-  const ChangeLog = await importChangeLogMDX(locale);
   return (
     <html lang={locale}>
       <body className="fn-body" suppressHydrationWarning>
-        <ThemeProvider>
-          <IntlProvider locale={locale}>
-            <ChangeLogProvider changeLog={<ChangeLog />}>
-              <PWAInstallProvider>
-                <ShareImageModalProvider>
-                  <FPSCalculatorProvider>{children}</FPSCalculatorProvider>
-                </ShareImageModalProvider>
-              </PWAInstallProvider>
-            </ChangeLogProvider>
-          </IntlProvider>
-        </ThemeProvider>
-        <div className="fn-ios-dummy-block fn-ios-dummy-block-top" />
-        <div className="fn-ios-dummy-block fn-ios-dummy-block-bottom" />
-        {process.env.NODE_ENV === "development" && (
-          <>
-            <div className="fn-dev-safe-area fn-dev-sai-t" />
-            <div className="fn-dev-safe-area fn-dev-sai-b" />
-            <div className="fn-dev-safe-area fn-dev-sai-l" />
-            <div className="fn-dev-safe-area fn-dev-sai-r" />
-          </>
-        )}
+        <ThemeInitializer />
+        <FPSCalculator />
+        <IntlProvider locale={locale}>
+          <PWAInstallProvider>{children}</PWAInstallProvider>
+        </IntlProvider>
       </body>
     </html>
   );

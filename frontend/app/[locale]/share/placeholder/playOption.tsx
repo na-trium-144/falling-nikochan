@@ -16,14 +16,17 @@ import { JudgeIcon } from "@/play/statusBox.js";
 import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
 import Timer from "@icon-park/react/lib/icons/Timer";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { RefObject, useEffect, useLayoutEffect, useState } from "react";
 import { RecordHistogram } from "@/common/recordHistogram";
 import { isInsideFrame, isStandalone } from "@/common/pwaInstall";
 import { useRouter } from "next/navigation";
 import { BadgeStatus, getBadge, LevelBadge } from "@/common/levelBadge";
 import { SlimeSVG } from "@/common/slime";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
-import { useShareLink } from "@/common/shareLinkAndImage";
+import {
+  ShareImageModalButton,
+  useShareLink,
+} from "@/common/shareLinkAndImage";
 import { formatError } from "@/common/fetch";
 
 interface Props {
@@ -31,6 +34,7 @@ interface Props {
   cid?: string;
   brief: (ChartBrief & { etag: string }) | null;
   record: RecordGetSummary[] | Error | null;
+  containerRef?: RefObject<HTMLDivElement | null>;
 }
 export function PlayOption(props: Props) {
   const t = useTranslations("share");
@@ -71,11 +75,13 @@ export function PlayOption(props: Props) {
     null
   );
   const levelsNum = props.brief?.levels.filter((l) => !l.unlisted).length;
-  useEffect(() => {
-    if (selectedLevel === null && levelsNum === 1) {
-      setSelectedLevel(props.brief!.levels.findIndex((l) => !l.unlisted));
-    }
-  }, [props.brief, selectedLevel, levelsNum]);
+  if (selectedLevel === null && levelsNum === 1) {
+    setSelectedLevel(props.brief!.levels.findIndex((l) => !l.unlisted));
+  }
+
+  useLayoutEffect(() => {
+    props.containerRef?.current?.dispatchEvent(new Event("scroll"));
+  }, [selectedLevel, props.brief, props.containerRef]);
 
   return (
     <div
@@ -159,6 +165,7 @@ export function PlayOption(props: Props) {
                 record={props.record}
                 selectedLevel={selectedLevel}
                 locale={props.locale}
+                containerRef={props.containerRef}
               />
             ) : null}
           </div>
@@ -242,6 +249,7 @@ function SelectedLevelInfo(props: {
   record: RecordGetSummary[] | Error | null;
   selectedLevel: number;
   locale: string;
+  containerRef?: RefObject<HTMLDivElement | null>;
 }) {
   const t = useTranslations("share");
   const te = useTranslations("error");
@@ -299,6 +307,10 @@ function SelectedLevelInfo(props: {
     selectedBestScore?.sign,
     selectedBestScore?.resultParams.date?.getTime()
   );
+
+  useLayoutEffect(() => {
+    props.containerRef?.current?.dispatchEvent(new Event("scroll"));
+  }, [showBestDetail, selectedRecord, bestScoreState, props.containerRef]);
 
   return (
     <>
@@ -503,7 +515,7 @@ function SelectedLevelInfo(props: {
       {showBestDetail && selectedBestScore && (
         <span className="inline-block space-x-1 mt-1 ">
           {shareLink.buttons}
-          {shareLink.modalButton}
+          <ShareImageModalButton ogPath={shareLink.ogPath} cid={props.cid} />
         </span>
       )}
     </>

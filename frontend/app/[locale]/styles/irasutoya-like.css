@@ -3,7 +3,10 @@
     @apply w-screen h-dvh overflow-hidden;
   }
   &:has(> body > .fn-body-scrollable) {
-    @apply w-full min-h-dvh overflow-x-clip;
+    @apply w-full min-h-dvh overflow-x-clip scrollbar-gutter-stable;
+    &:has(.fn-modal-bg) {
+      @apply overflow-hidden;
+    }
   }
   &:has(> body.fn-csr-ready) {
     --fn-theme-top: var(--color-sky-200);

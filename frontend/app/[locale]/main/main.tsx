@@ -1,16 +1,16 @@
-"use client";
-
 import clsx from "clsx/lite";
-import { MobileHeader, PCHeader, PCHeader2 } from "@/common/header.js";
+import {
+  MainBackButton,
+  MobileHeader,
+  PCHeader,
+  PCHeader2,
+} from "@/common/header.js";
 import { Box } from "@/common/box.js";
 import { MobileFooter, TabKeys } from "@/common/footer.js";
 import { ReactNode, RefObject } from "react";
-import { useTranslations } from "next-intl";
 import { RedirectedWarning } from "@/common/redirectedWarning";
-import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
-import { historyBackWithReview } from "@/common/pwaInstall";
 
-interface Props {
+export interface Props {
   classNameInner?: string;
   children?: ReactNode | ReactNode[];
   title: string;
@@ -20,11 +20,16 @@ interface Props {
   noBackButtonPC?: boolean;
   afterBackButtonPC?: ReactNode;
   locale: string;
-  boxRef?: RefObject<HTMLDivElement | null>;
+  changeLog: ReactNode;
+  refInner?: RefObject<HTMLDivElement | null>;
 }
 export function IndexMain(props: Props) {
   const locale = props.locale;
-  const t = useTranslations("main");
+  // const t = await getTranslations(locale, "main");
+
+  // できればserver componentにしたいが、shareInternalだけはどうしてもIndexMainをclient componentで呼ぶ必要があるため、
+  // どちらからも呼べるようにする
+  // そのためにtranslationがここでは使用できない
 
   return (
     <main className="relative flex flex-col w-full h-full items-center">
@@ -32,7 +37,11 @@ export function IndexMain(props: Props) {
         {props.title}
       </MobileHeader>
       <PCHeader locale={locale} />
-      <PCHeader2 className="absolute top-0 right-0" locale={locale} />
+      <PCHeader2
+        className="absolute top-0 right-0"
+        locale={locale}
+        changeLog={props.changeLog}
+      />
       <RedirectedWarning className="mx-3 main-wide:mx-6 mb-2" />
       <div
         className={clsx(
@@ -43,25 +52,19 @@ export function IndexMain(props: Props) {
         )}
       >
         <Box
-          refInner={props.boxRef}
+          // fn-index-main クラスはChartListがスクロールコンテナ基準としてこれを見つけるための指定
           classNameOuter={clsx("min-h-0 basis-main shrink-1 min-w-0")}
-          classNameInner={clsx("flex flex-col", props.classNameInner)}
+          classNameInner={clsx(
+            "fn-index-main flex flex-col",
+            props.classNameInner
+          )}
           scrollableY
           defaultFadeY
           padding={6}
+          refInner={props.refInner}
         >
           <div className="flex items-start">
-            {!props.noBackButtonPC && (
-              <button
-                className={clsx("no-mobile w-max mb-3 mr-3 fn-link-1")}
-                onClick={() => {
-                  historyBackWithReview();
-                }}
-              >
-                <ArrowLeft className="inline-block align-middle mr-2 " />
-                {t("back")}
-              </button>
-            )}
+            {!props.noBackButtonPC && <MainBackButton />}
             {props.afterBackButtonPC}
           </div>
           {props.children}
