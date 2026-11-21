@@ -4,7 +4,7 @@ import clsx from "clsx/lite";
 import { ButtonHighlight } from "./button";
 import { XLogo } from "./x";
 import { YouTubeLogo } from "./youtubeLogo";
-import { useTranslations } from "@/intlProvider";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import * as v from "valibot";
 import { fetchBackend } from "./fetch";

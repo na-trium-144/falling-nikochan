@@ -4,7 +4,7 @@ import clsx from "clsx/lite";
 import { ReactNode, useEffect } from "react";
 import { Box } from "./box";
 import Link from "next/link";
-import { useTranslations } from "@/intlProvider";
+import { useTranslations } from "next-intl";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useDelayedDisplayState } from "./delayedDisplayState";
 import { UpdateLastVisited } from "./version";

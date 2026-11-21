@@ -34,7 +34,7 @@ import {
 import Forbid from "@icon-park/react/lib/icons/Forbid";
 import Move from "@icon-park/react/lib/icons/Move";
 import { GuideMain } from "./guideMain.js";
-import { useTranslations } from "@/intlProvider";
+import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption.js";
 import { titleWithSiteName } from "@/common/title.js";
 import { SlimeSVG } from "@/common/slime.js";

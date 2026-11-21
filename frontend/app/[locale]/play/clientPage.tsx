@@ -43,7 +43,7 @@ import { getBestScore, setBestScore } from "@/common/bestScore.js";
 import BPMSign from "./bpmSign.js";
 import { getSession } from "./session.js";
 import { MusicArea } from "./musicArea.js";
-import { useTranslations } from "@/intlProvider";
+import { useTranslations } from "next-intl";
 import { SlimeSVG } from "@/common/slime.js";
 import { useSE } from "@/common/se.js";
 import Pause from "@icon-park/react/lib/icons/Pause.js";

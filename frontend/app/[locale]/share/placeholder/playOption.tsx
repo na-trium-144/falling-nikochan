@@ -15,7 +15,7 @@ import { initSession } from "@/play/session.js";
 import { JudgeIcon } from "@/play/statusBox.js";
 import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
 import Timer from "@icon-park/react/lib/icons/Timer";
-import { useTranslations } from "@/intlProvider";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { RecordHistogram } from "@/common/recordHistogram";
 import { isInsideFrame, isStandalone } from "@/common/pwaInstall";

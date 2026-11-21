@@ -15,7 +15,7 @@ import { useEffect, useRef, useState } from "react";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft.js";
 import International from "@icon-park/react/lib/icons/International.js";
-import { useTranslations } from "@/intlProvider";
+import { useTranslations } from "next-intl";
 import { useShareLink } from "@/common/shareLinkAndImage.js";
 import { SharedResultBox } from "./sharedResult.js";
 import { useColorThief } from "@/common/colorThief.js";

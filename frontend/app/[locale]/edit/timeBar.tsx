@@ -27,7 +27,7 @@ import { useResizeDetector } from "react-resize-detector";
 import { timeSecStr, timeStr } from "./str.js";
 import { useDisplayMode } from "@/scale.js";
 import { getBarLength } from "@falling-nikochan/chart";
-import { useTranslations } from "@/intlProvider";
+import { useTranslations } from "next-intl";
 import { Scrollable } from "@/common/scrollable.jsx";
 
 interface Props {

@@ -4,7 +4,7 @@ import clsx from "clsx/lite";
 import Title from "@/common/titleLogo";
 import BPMSign from "@/play/bpmSign";
 import RhythmicalSlime from "@/play/rhythmicalSlime";
-import { useTranslations } from "@/intlProvider";
+import { useTranslations } from "next-intl";
 import { levelTypes, stepZero } from "@falling-nikochan/chart";
 import { useEffect, useState } from "react";
 import {

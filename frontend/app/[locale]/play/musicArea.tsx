@@ -14,7 +14,7 @@ import {
 import { useResizeDetector } from "react-resize-detector";
 import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
 import VolumeNotice from "@icon-park/react/lib/icons/VolumeNotice";
-import { useTranslations } from "@/intlProvider";
+import { useTranslations } from "next-intl";
 import { detectOS } from "@/common/pwaInstall";
 import Range from "@/common/range";
 import { useColorThief } from "@/common/colorThief";

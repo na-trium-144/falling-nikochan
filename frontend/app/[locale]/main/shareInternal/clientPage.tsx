@@ -6,7 +6,7 @@ import {
   RecordGetSummary,
   RecordGetSummarySchema,
 } from "@falling-nikochan/chart";
-import { useTranslations } from "@/intlProvider";
+import { useTranslations } from "next-intl";
 import { ReactNode, useEffect, useState } from "react";
 import { titleShare } from "@/common/title.js";
 import { ShareBox } from "@/share/placeholder/shareBox.jsx";

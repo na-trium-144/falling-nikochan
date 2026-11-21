@@ -1,4 +1,5 @@
 import { locales } from "@falling-nikochan/i18n/dynamic";
+import IntlProvider from "./intlProvider.js";
 import { initMetadata, initViewport, MetadataProps } from "./metadata.js";
 import { ThemeInitializer } from "./common/theme.jsx";
 import { PWAInstallProvider } from "./common/pwaInstall.jsx";
@@ -27,7 +28,9 @@ export default async function RootLayout({
       <body className="fn-body" suppressHydrationWarning>
         <ThemeInitializer />
         <FPSCalculator />
-        <PWAInstallProvider>{children}</PWAInstallProvider>
+        <IntlProvider locale={locale}>
+          <PWAInstallProvider>{children}</PWAInstallProvider>
+        </IntlProvider>
       </body>
     </html>
   );

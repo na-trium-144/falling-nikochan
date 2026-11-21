@@ -15,7 +15,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { useTranslations } from "@/intlProvider";
+import { useTranslations } from "next-intl";
 import { fetchBrief } from "@/common/briefCache";
 import { Box } from "@/common/box";
 import { ShareBox } from "@/share/placeholder/shareBox";

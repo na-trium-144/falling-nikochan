@@ -2,7 +2,7 @@
 
 import { Box } from "@/common/box";
 import clsx from "clsx/lite";
-import { useTranslations } from "@/intlProvider";
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTheme } from "@/common/theme";
 import { useDisplayMode } from "@/scale";

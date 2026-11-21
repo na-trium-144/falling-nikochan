@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "@/intlProvider";
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import * as v from "valibot";
 import { fetchBackend } from "./fetch.js";

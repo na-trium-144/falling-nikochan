@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useSyncExternalStore } from "react";
-import { useTranslations } from "@/intlProvider";
+import { useTranslations } from "next-intl";
 import { IrasutoyaLikeBg } from "./irasutoyaLike.jsx";
 import Moon from "@icon-park/react/lib/icons/Moon";
 import Sun from "@icon-park/react/lib/icons/Sun";

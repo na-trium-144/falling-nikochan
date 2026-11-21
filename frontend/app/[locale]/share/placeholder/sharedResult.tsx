@@ -15,7 +15,7 @@ import MouseOne from "@icon-park/react/lib/icons/MouseOne";
 import Write from "@icon-park/react/lib/icons/Write";
 import ClickTap from "@icon-park/react/lib/icons/ClickTap";
 import GameThree from "@icon-park/react/lib/icons/GameThree";
-import { useTranslations } from "@/intlProvider";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { formatError } from "@/common/fetch";
 

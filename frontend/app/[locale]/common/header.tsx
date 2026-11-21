@@ -8,7 +8,7 @@ import Comment from "@icon-park/react/lib/icons/Comment";
 import { historyBackWithReview, LinkWithReview } from "./pwaInstall.jsx";
 import { ButtonHighlight } from "./button.jsx";
 import Title from "./titleLogo.js";
-import { useTranslations } from "@/intlProvider";
+import { useTranslations } from "next-intl";
 import { LastVisitedIndicator } from "./version.js";
 import { ChangeLogPopup } from "./changeLog.js";
 import { useDelayedDisplayState } from "./delayedDisplayState.js";

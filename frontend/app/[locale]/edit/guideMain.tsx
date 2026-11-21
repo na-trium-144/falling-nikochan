@@ -4,7 +4,7 @@ import clsx from "clsx/lite";
 import { Box } from "@/common/box.js";
 import { Pager } from "@/common/pager.js";
 import Button, { ButtonHighlight } from "@/common/button.js";
-import { useTranslations } from "@/intlProvider";
+import { useTranslations } from "next-intl";
 import { ReactNode } from "react";
 import { InitNoteStyle, initNoteStyles } from "@falling-nikochan/chart";
 

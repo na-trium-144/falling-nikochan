@@ -28,7 +28,7 @@ import { ButtonHighlight } from "./common/button";
 import * as v from "valibot";
 import Link from "next/link";
 import Search from "@icon-park/react/lib/icons/Search";
-import { useTranslations } from "@/intlProvider";
+import { useTranslations } from "next-intl";
 
 export interface DemoChart {
   cid: string;

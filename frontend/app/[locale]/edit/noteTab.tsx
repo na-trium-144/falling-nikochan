@@ -4,7 +4,7 @@ import { Key } from "@/common/key.js";
 import Mouse from "@icon-park/react/lib/icons/Mouse";
 import CheckBox from "@/common/checkBox.js";
 import Select from "@/common/select";
-import { useTranslations } from "@/intlProvider";
+import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
 import { ChartEditing, SignatureState } from "@falling-nikochan/chart";
 import type { Ace } from "ace-builds";

@@ -3,7 +3,7 @@
 import clsx from "clsx/lite";
 import { ChartBrief, ChartUntil17Min } from "@falling-nikochan/chart";
 import { useCallback, useEffect, useState } from "react";
-import { useTranslations } from "@/intlProvider";
+import { useTranslations } from "next-intl";
 import packageJson from "@/../../package.json" with { type: "json" };
 import { Box } from "./box";
 import Button from "./button";
