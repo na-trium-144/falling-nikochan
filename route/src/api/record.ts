@@ -40,6 +40,7 @@ export interface PlayRecordEntry {
   fb: boolean;
   factor?: number;
   editing?: boolean;
+  fes?: string;
 }
 const recordApp = async (config: {
   getConnInfo: (c: Context) => ConnInfo | null;
@@ -264,6 +265,7 @@ const recordApp = async (config: {
           factor,
           editing,
           date,
+          fes,
         } = v.parse(RecordPostSchema(), payload);
 
         if (Math.abs(date - Date.now()) > 1000 * 60 * 60) {
@@ -296,6 +298,7 @@ const recordApp = async (config: {
             fb,
             factor: typeof factor === "number" ? factor : 1,
             editing: !!editing,
+            fes,
           });
           return c.body(null, 204);
         } catch (e) {

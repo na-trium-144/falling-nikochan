@@ -28,6 +28,7 @@ import {
   useShareLink,
 } from "@/common/shareLinkAndImage";
 import { formatError } from "@/common/fetch";
+import { useFestival } from "@/common/festival";
 
 interface Props {
   locale: string;
@@ -83,6 +84,7 @@ export function PlayOption(props: Props) {
     props.containerRef?.current?.dispatchEvent(new Event("scroll"));
   }, [selectedLevel, props.brief, props.containerRef]);
 
+  const { fesParam } = useFestival();
   return (
     <div
       className={clsx(
@@ -189,12 +191,14 @@ export function PlayOption(props: Props) {
                   brief: props.brief!,
                   editing: false as const,
                 });
+                const q = new URLSearchParams({ sid: String(sessionId) });
+                if (fesParam) {
+                  q.set("fes", fesParam);
+                }
                 if (isStandalone() || isInsideFrame()) {
-                  router.push(`/${props.locale}/play?sid=${sessionId}`);
+                  router.push(`/${props.locale}/play?${q}`);
                 } else {
-                  window
-                    .open(`/${props.locale}/play?sid=${sessionId}`, "_blank")
-                    ?.focus();
+                  window.open(`/${props.locale}/play?${q}`, "_blank")?.focus();
                 }
               }}
             />

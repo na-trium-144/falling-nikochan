@@ -9,6 +9,7 @@ import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
 export interface FesData {
   num: number | null;
   kind: "kf" | "mf" | null;
+  fesParam: string | null;
 }
 export function useFestival(): FesData {
   const [num, setNum] = useState<number | null>(null);
@@ -43,7 +44,8 @@ export function useFestival(): FesData {
       }
     }
   }, []);
-  return { num, kind };
+  const fesParam = num && kind ? `${kind}${num}` : null;
+  return { num, kind, fesParam };
 }
 interface Props {
   // num: number | null;

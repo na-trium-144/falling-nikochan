@@ -73,6 +73,7 @@ import {
   sendResultSerialized,
 } from "./resultSigningAuth.js";
 import { useFlash } from "@/common/targetLine.js";
+import { useFestival } from "@/common/festival.js";
 import { useYouTubeSync } from "./youtubeSync.js";
 
 export function InitPlay({ locale }: { locale: string }) {
@@ -442,6 +443,7 @@ function Play(props: Props) {
     }
   }, []);
 
+  const { fesParam } = useFestival();
   const {
     // playState,
     chartPlaying,
@@ -569,7 +571,8 @@ function Play(props: Props) {
                 // cid,
                 auto,
                 editing,
-                factor
+                factor,
+                fesParam ?? undefined
               );
               sendRecord(
                 cid,
