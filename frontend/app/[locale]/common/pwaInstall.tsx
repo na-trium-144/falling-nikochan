@@ -1,7 +1,15 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useTranslations } from "@/intlProvider";
 import Button from "./button";
 import { hasTouch } from "@/scale";
@@ -144,6 +152,20 @@ interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+interface PWAStates {
+  dismissed: boolean | null;
+  dismiss: () => void;
+  deferredPrompt: BeforeInstallPromptEvent | null;
+  install: () => void;
+}
+const PWAContext = createContext<PWAStates>({
+  dismissed: null,
+  dismiss: () => undefined,
+  deferredPrompt: null,
+  install: () => undefined,
+});
+const usePWAInstall = () => useContext(PWAContext);
+
 export function detectOS(): "android" | "ios" | null {
   const userAgent = (
     navigator.userAgent ||
@@ -226,12 +248,15 @@ interface InitAssetsState {
 }
 type InitAssetsResult =
   "done" | "failed" | "updating" | "noUpdate" | "inProgress";
-export function PWAInstallInitializer() {
-  // standaloneでない場合はアップデート状態に関わらず表示しないのでnull
-  const [workerUpdate, setWorkerUpdate] = useState<null | InitAssetsState>(
-    null
-  );
+export function PWAInstallProvider(props: { children: ReactNode }) {
+  const [dismissed, setDismissed] = useState<boolean | null>(null);
+  const [deferredPrompt, setDeferredPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
 
+  const dismiss = useCallback(() => {
+    localStorage.setItem("PWADismissed", "1");
+    setDismissed(true);
+  }, []);
   useEffect(() => {
     if (isStandalone()) {
       sessionStorage.setItem("fromHomeScreen", "1");
@@ -244,8 +269,42 @@ export function PWAInstallInitializer() {
       androidTWA: isAndroidTWA(),
       insideFrame: isInsideFrame(),
     });
+    setDismissed(
+      isStandalone() || localStorage.getItem("PWADismissed") === "1"
+    );
   }, []);
 
+  const install = useCallback(() => {
+    deferredPrompt?.prompt().then(({ outcome }) => {
+      if (outcome === "accepted") {
+        // localStorage.setItem("PWADismissed", "1");
+        setDismissed(true);
+      }
+      setDeferredPrompt(null);
+    });
+  }, [deferredPrompt]);
+  useEffect(() => {
+    switch (detectOS()) {
+      case "android": {
+        // beforeinstallpromptイベントが発火するのを待つ
+        const handler = ((e: BeforeInstallPromptEvent) => {
+          e.preventDefault();
+          setDeferredPrompt(e);
+        }) as EventListener;
+        window.addEventListener("beforeinstallprompt", handler);
+        return () => window.removeEventListener("beforeinstallprompt", handler);
+      }
+      case "ios":
+        break;
+      case null:
+        break;
+    }
+  }, []);
+
+  // standaloneでない場合はアップデート状態に関わらず表示しないのでnull
+  const [workerUpdate, setWorkerUpdate] = useState<null | InitAssetsState>(
+    null
+  );
   const updateFetching = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (
@@ -387,21 +446,30 @@ export function PWAInstallInitializer() {
   const pathname = usePathname();
 
   return (
-    <Box
-      classNameOuter={clsx(
-        "fn-pwa-install",
-        "transition-all duration-200 origin-bottom",
-        workerUpdate !== null && !pathname.match(/^\/[a-zA-Z-]*\/(play|edit)/)
-          ? "ease-in scale-100 opacity-100"
-          : "ease-out scale-0 opacity-0"
-      )}
-      padding={2}
+    <PWAContext.Provider
+      value={{
+        dismissed,
+        dismiss,
+        deferredPrompt,
+        install,
+      }}
     >
-      {workerUpdate?.state === "updating" ? (
-        <>
-          <SlimeSVG />
-          {t("updating")}
-          {/*workerUpdate?.progressSize !== undefined && (
+      {props.children}
+      <Box
+        classNameOuter={clsx(
+          "fn-pwa-install",
+          "transition-all duration-200 origin-bottom",
+          workerUpdate !== null && !pathname.match(/^\/[a-zA-Z-]*\/(play|edit)/)
+            ? "ease-in scale-100 opacity-100"
+            : "ease-out scale-0 opacity-0"
+        )}
+        padding={2}
+      >
+        {workerUpdate?.state === "updating" ? (
+          <>
+            <SlimeSVG />
+            {t("updating")}
+            {/*workerUpdate?.progressSize !== undefined && (
               <span className="ml-2 text-sm">
                 (
                 <span className="inline-block mr-1 min-w-max w-8 text-center">
@@ -411,38 +479,31 @@ export function PWAInstallInitializer() {
                 MB)
               </span>
             )*/}
-          {workerUpdate?.progressNum !== undefined && (
-            <ProgressBar
-              className="absolute bottom-1 inset-x-2.5 "
-              fixedColor="fn-pbar-yellow"
-              value={
-                (workerUpdate?.progressNum || 0) / (workerUpdate?.totalNum || 1)
-              }
-            />
-          )}
-        </>
-      ) : workerUpdate?.state === "done" ? (
-        t("updateDone")
-      ) : workerUpdate?.state === "failed" ? (
-        t("updateFailed")
-      ) : null}
-    </Box>
+            {workerUpdate?.progressNum !== undefined && (
+              <ProgressBar
+                className="absolute bottom-1 inset-x-2.5 "
+                fixedColor="fn-pbar-yellow"
+                value={
+                  (workerUpdate?.progressNum || 0) /
+                  (workerUpdate?.totalNum || 1)
+                }
+              />
+            )}
+          </>
+        ) : workerUpdate?.state === "done" ? (
+          t("updateDone")
+        ) : workerUpdate?.state === "failed" ? (
+          t("updateFailed")
+        ) : null}
+      </Box>
+    </PWAContext.Provider>
   );
 }
 
 // トップページに表示するPWAの案内表示
 export function PWAInstallMain() {
   const t = useTranslations("main.pwa");
-  const [dismissed, setDismissed] = useState<boolean | null>(null);
-  useEffect(() => {
-    setDismissed(
-      isStandalone() || localStorage.getItem("PWADismissed") === "1"
-    );
-  }, []);
-  const dismiss = useCallback(() => {
-    localStorage.setItem("PWADismissed", "1");
-    setDismissed(true);
-  }, []);
+  const { dismissed, dismiss } = usePWAInstall();
   const { os } = useOSDetector();
   return (
     <WarningBox
@@ -458,35 +519,8 @@ export function PWAInstallMain() {
 // standaloneとPCでは非表示にする
 export function PWAInstallDesc(props: { block?: boolean; className?: string }) {
   const t = useTranslations("main.pwa");
+  const { deferredPrompt, install } = usePWAInstall();
   const { os } = useOSDetector();
-  const [deferredPrompt, setDeferredPrompt] =
-    useState<BeforeInstallPromptEvent | null>(null);
-  useEffect(() => {
-    switch (os) {
-      case "android": {
-        // beforeinstallpromptイベントが発火するのを待つ
-        const handler = ((e: BeforeInstallPromptEvent) => {
-          e.preventDefault();
-          setDeferredPrompt(e);
-        }) as EventListener;
-        window.addEventListener("beforeinstallprompt", handler);
-        return () => window.removeEventListener("beforeinstallprompt", handler);
-      }
-      case "ios":
-        break;
-      case null:
-        break;
-    }
-  }, [os]);
-  const install = useCallback(() => {
-    deferredPrompt?.prompt().then(({ outcome }) => {
-      if (outcome === "accepted") {
-        localStorage.setItem("PWADismissed", "1");
-      }
-      setDeferredPrompt(null);
-    });
-  }, [deferredPrompt]);
-
   const isStandalone = useStandaloneDetector();
   if (isStandalone === false) {
     if (os === "android") {

@@ -1,7 +1,7 @@
 import { locales } from "@falling-nikochan/i18n/dynamic";
 import { initMetadata, initViewport, MetadataProps } from "./metadata.js";
 import { ThemeInitializer } from "./common/theme.jsx";
-import { PWAInstallInitializer } from "./common/pwaInstall.jsx";
+import { PWAInstallProvider } from "./common/pwaInstall.jsx";
 import { FPSCalculator } from "./common/fpsCalculator.jsx";
 
 export async function generateStaticParams() {
@@ -27,8 +27,7 @@ export default async function RootLayout({
       <body className="fn-body" suppressHydrationWarning>
         <ThemeInitializer />
         <FPSCalculator />
-        {children}
-        <PWAInstallInitializer />
+        <PWAInstallProvider>{children}</PWAInstallProvider>
       </body>
     </html>
   );
