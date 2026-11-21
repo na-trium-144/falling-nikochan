@@ -66,8 +66,8 @@ function PlayTabInternal(
       searchParams = fallbackSearchParams;
     } else {
       if (
-        window.location.search &&
-        window.location.search !== "?" + fallbackSearchParams?.toString()
+        (window.location.search || "?") !==
+        "?" + fallbackSearchParams?.toString()
       ) {
         if (prevPathName.current.includes("/share")) {
           searchParams = fallbackSearchParams;
