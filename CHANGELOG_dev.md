@@ -1,3 +1,7 @@
+## ver. 18.17 - 2026/11/21
+
+- ?fes=... パラメータを含むURLでトップページにアクセスした場合、プレイ記録にそれを含めて送信する
+
 ## ver. 18.16 - 2026/11/21 [#1479](https://github.com/na-trium-144/falling-nikochan/pull/1479)
 
 - トップページ, IndexMain, sharePlaceholderをできるだけサーバーコンポーネントにする

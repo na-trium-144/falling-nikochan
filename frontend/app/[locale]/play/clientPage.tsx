@@ -73,6 +73,7 @@ import {
   sendResultSerialized,
 } from "./resultSigningAuth.js";
 import { useFlash } from "@/common/targetLine.js";
+import { useFestival } from "@/common/festival.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -789,6 +790,7 @@ function Play(props: Props) {
   const [resultSign, setResultSign] = useState<string | Error | undefined>(
     undefined
   );
+  const { fesParam } = useFestival();
   useEffect(() => {
     if (chartPlaying && ((chartEnd && endSecPassed) || ytPlayerFinished)) {
       if (!showResult) {
@@ -854,7 +856,8 @@ function Play(props: Props) {
                   // cid,
                   auto,
                   editing,
-                  factor
+                  factor,
+                  fesParam ?? undefined
                 );
                 sendRecord(
                   cid,

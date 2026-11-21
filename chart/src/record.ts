@@ -49,6 +49,7 @@ export const RecordPostSchema = () =>
         )
       ),
       date: v.pipe(v.number(), v.integer(), v.minValue(0)),
+      fes: v.optional(v.pipe(v.string(), v.maxLength(5))),
     }),
     v.check((record) => {
       if (
@@ -92,7 +93,8 @@ export function createRecordPost(
   // cid: string,
   auto: boolean,
   editing: boolean,
-  factor: number
+  factor: number,
+  fes: string | undefined
 ) {
   return {
     lvHash: level.hash,
@@ -106,5 +108,6 @@ export function createRecordPost(
     editing,
     factor,
     date: date.getTime(),
+    fes,
   } satisfies RecordPost;
 }
