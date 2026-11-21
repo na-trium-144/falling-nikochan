@@ -11,7 +11,7 @@ import {
   parseResultParams,
   RecordGetSummarySchema,
 } from "@falling-nikochan/chart";
-import { useEffect, useRef, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft.js";
 import International from "@icon-park/react/lib/icons/International.js";
@@ -176,6 +176,7 @@ interface Props {
   locale: string;
   backButton?: () => void;
   forceShowCId?: boolean; // 通常はPCでは表示、モバイルでは非表示だが、trueの場合モバイルでも表示する
+  containerRef?: RefObject<HTMLDivElement | null>;
 }
 export function ShareBox(props: Props) {
   const t = useTranslations("share");
@@ -492,6 +493,7 @@ export function ShareBox(props: Props) {
         brief={brief}
         record={props.record}
         locale={props.locale}
+        containerRef={props.containerRef}
       />
     </>
   );

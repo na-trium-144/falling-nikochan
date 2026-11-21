@@ -41,6 +41,16 @@ interface Props<T extends ElementType> {
   carouselX?: boolean;
   onScroll?: () => void;
 }
+/**
+ * スクロールされた時・resizeされたとき・Scrollableの1階層下の子要素に変更があった時 にfadeの表示を更新する。
+ *
+ * 子を再帰的には監視しない。 (なんでだっけ?)
+ *
+ * 2階層以上の子要素を変更してfadeの再レンダリングをトリガーしたい場合は、
+ * Scrollableに対して(refまたはdocument.querySelectorで探すなどして) dispatchEvent(new Event("scroll")); をする
+ *
+ * または、<GuideMain> で行われているようにScrollable直下の要素に明示的にkeyを追加して再レンダーさせる
+ */
 export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
   const disableScrollable = useContext(DisableScrollableContext);
   const myRef = useRef<HTMLDivElement>(null);

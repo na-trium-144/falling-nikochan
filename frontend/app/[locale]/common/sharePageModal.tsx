@@ -13,6 +13,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { useTranslations } from "next-intl";
@@ -128,6 +129,8 @@ export function SharePageModalProvider(props: {
     return () => window.removeEventListener("popstate", handler);
   }, [openModal, props.from, tp, props.noResetTitle, setModalOpened]);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+
   return (
     <SharePageModalContext.Provider value={{ openModal, openShareInternal }}>
       {props.children}
@@ -155,6 +158,7 @@ export function SharePageModalProvider(props: {
                 classNameInner={clsx("flex flex-col max-w-main")}
                 scrollableY
                 padding={6}
+                refInner={containerRef}
               >
                 <ShareBox
                   cid={modalCId || ""}
@@ -164,6 +168,7 @@ export function SharePageModalProvider(props: {
                   backButton={() => {
                     historyBackWithReview();
                   }}
+                  containerRef={containerRef}
                 />
               </Box>
             </div>

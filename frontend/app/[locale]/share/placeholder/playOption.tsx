@@ -16,7 +16,7 @@ import { JudgeIcon } from "@/play/statusBox.js";
 import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
 import Timer from "@icon-park/react/lib/icons/Timer";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { RefObject, useEffect, useLayoutEffect, useState } from "react";
 import { RecordHistogram } from "@/common/recordHistogram";
 import { isInsideFrame, isStandalone } from "@/common/pwaInstall";
 import { useRouter } from "next/navigation";
@@ -34,6 +34,7 @@ interface Props {
   cid?: string;
   brief: (ChartBrief & { etag: string }) | null;
   record: RecordGetSummary[] | Error | null;
+  containerRef?: RefObject<HTMLDivElement | null>;
 }
 export function PlayOption(props: Props) {
   const t = useTranslations("share");
@@ -74,11 +75,13 @@ export function PlayOption(props: Props) {
     null
   );
   const levelsNum = props.brief?.levels.filter((l) => !l.unlisted).length;
-  useEffect(() => {
-    if (selectedLevel === null && levelsNum === 1) {
-      setSelectedLevel(props.brief!.levels.findIndex((l) => !l.unlisted));
-    }
-  }, [props.brief, selectedLevel, levelsNum]);
+  if (selectedLevel === null && levelsNum === 1) {
+    setSelectedLevel(props.brief!.levels.findIndex((l) => !l.unlisted));
+  }
+
+  useLayoutEffect(() => {
+    props.containerRef?.current?.dispatchEvent(new Event("scroll"));
+  }, [selectedLevel, props.containerRef]);
 
   return (
     <div

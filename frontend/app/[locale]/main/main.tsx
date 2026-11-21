@@ -7,7 +7,7 @@ import {
 } from "@/common/header.js";
 import { Box } from "@/common/box.js";
 import { MobileFooter, TabKeys } from "@/common/footer.js";
-import { ReactNode } from "react";
+import { ReactNode, RefObject } from "react";
 import { RedirectedWarning } from "@/common/redirectedWarning";
 
 export interface Props {
@@ -21,6 +21,7 @@ export interface Props {
   afterBackButtonPC?: ReactNode;
   locale: string;
   changeLog: ReactNode;
+  refInner?: RefObject<HTMLDivElement | null>;
 }
 export function IndexMain(props: Props) {
   const locale = props.locale;
@@ -60,6 +61,7 @@ export function IndexMain(props: Props) {
           scrollableY
           defaultFadeY
           padding={6}
+          refInner={props.refInner}
         >
           <div className="flex items-start">
             {!props.noBackButtonPC && <MainBackButton />}

@@ -1,10 +1,10 @@
 import clsx from "clsx/lite";
-import { ReactNode, MouseEvent } from "react";
+import { ReactNode, MouseEvent, RefObject } from "react";
 import { Scrollable } from "./scrollable";
 
 interface Props {
-  refOuter?: { current: HTMLDivElement | null };
-  refInner?: { current: HTMLDivElement | null };
+  refOuter?: RefObject<HTMLDivElement | null>;
+  refInner?: RefObject<HTMLDivElement | null>;
   scrollableX?: boolean;
   scrollableY?: boolean;
   defaultFadeY?: boolean;

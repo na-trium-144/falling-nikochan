@@ -7,7 +7,7 @@ import {
   RecordGetSummarySchema,
 } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { titleShare } from "@/common/title.js";
 import { ShareBox } from "@/share/placeholder/shareBox.jsx";
 import { fetchBrief } from "@/common/briefCache.js";
@@ -56,6 +56,8 @@ export default function ShareInternal({
     }
   }, [t]);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+
   return (
     <IndexMain
       title={`ID: ${cid || ""}`}
@@ -65,6 +67,7 @@ export default function ShareInternal({
       }
       locale={locale}
       changeLog={changeLog}
+      refInner={containerRef}
     >
       {sessionError ? (
         te("noSession")
@@ -74,6 +77,7 @@ export default function ShareInternal({
           brief={brief}
           record={record}
           locale={locale}
+          containerRef={containerRef}
         />
       )}
     </IndexMain>
