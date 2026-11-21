@@ -126,7 +126,10 @@ interface FinishData {
 // Helper to send to Host (supports both native flutter_inappwebview and Web postMessage)
 function notifyHost(handlerName: string, data: any) {
   // Native WebView bridge
-  if (typeof window !== "undefined" && window.flutter_inappwebview?.callHandler) {
+  if (
+    typeof window !== "undefined" &&
+    window.flutter_inappwebview?.callHandler
+  ) {
     window.flutter_inappwebview.callHandler(handlerName, data);
   }
 
@@ -152,16 +155,73 @@ export default function EmbeddedPlay() {
   const [brief, setBrief] = useState<ChartBrief | null>(null);
   const [ytId, setYtId] = useState<string>("");
 
-  // YouTube
-  const ytPlayer = useRef<YouTubePlayer | undefined>(undefined);
-  const [ytReady, setYtReady] = useState(false);
+  const userOffset = 0;
 
-  // Game state
-  const [chartPlaying, setChartPlaying] = useState(false);
+  const [chartPlaying, setChartPlaying] = useState<boolean>(false);
+  const [ytPlayerFinished, setYtPlayerFinished] = useState<boolean>(false);
+
+  const ytPlayer = useRef<YouTubePlayer>(undefined);
+  const [ytVolume, setYtVolume_] = useState<number>(100);
+  const setYtVolume = useCallback((v: number) => {
+    setYtVolume_(v);
+    ytPlayer.current?.setVolume?.(v);
+  }, []);
+
+  const ytBegin = chartSeq?.ytBegin ?? 0;
+  const ytEnd = chartSeq?.ytEndSec ?? 0;
+  const userBegin = null;
+  const begin = userBegin === null ? ytBegin : userBegin;
+  const playbackRate = 1;
+
+  const offsetPlusLatency = userOffset;
+
+  const rawStartTimeStamp = useRef<DOMHighResTimeStamp | null>(null);
+  const filteredStartTimeStamp = useRef<DOMHighResTimeStamp | null>(null);
+  const timeStampLastAdjusted = useRef<DOMHighResTimeStamp>(0);
+  const perfStarted = useRef<DOMHighResTimeStamp | null>(null);
+  const getCurrentTimeSec = useCallback(() => {
+    if (
+      ytPlayer.current?.getCurrentTime &&
+      chartSeq &&
+      chartPlaying &&
+      !ytPlayerFinished
+    ) {
+      const ytCurrentTime = ytPlayer.current.getCurrentTime();
+      const perfNow = performance.now();
+      const ytNow =
+        ytCurrentTime - chartSeq.offset - offsetPlusLatency * playbackRate;
+      rawStartTimeStamp.current = perfNow - (ytNow * 1000) / playbackRate;
+      if (filteredStartTimeStamp.current === null) {
+        filteredStartTimeStamp.current = rawStartTimeStamp.current;
+      }
+      if (perfStarted.current === null) {
+        perfStarted.current = perfNow;
+        // actualPlaybackRateRef.current = playbackRate;
+      }
+
+      const now =
+        ((perfNow - filteredStartTimeStamp.current) / 1000) * playbackRate;
+      const dt = (perfNow - timeStampLastAdjusted.current) / 1000;
+
+      // ずれを少しずつ補正する (ローパスフィルタ)
+      filteredStartTimeStamp.current =
+        filteredStartTimeStamp.current * Math.exp(-dt / 1.0) +
+        rawStartTimeStamp.current * (1 - Math.exp(-dt / 1.0));
+      timeStampLastAdjusted.current = perfNow;
+      return now;
+    }
+  }, [
+    chartSeq,
+    chartPlaying,
+    offsetPlusLatency,
+    playbackRate,
+    ytPlayerFinished,
+  ]);
+
+  // not using useGameLogic()
+
   const judgeRef = useRef<Judge | null>(null);
   const notesRef = useRef<NoteInGame[]>([]);
-
-  // Scoring state
   const scoreState = useRef({
     goodCount: 0,
     okCount: 0,
@@ -170,6 +230,7 @@ export default function EmbeddedPlay() {
     combo: 0,
     maxCombo: 0,
     bigCount: 0,
+    bigMiss: 0,
     bigTotal: 0,
     notesTotal: 0,
     bonusTotal: 0,
@@ -177,130 +238,58 @@ export default function EmbeddedPlay() {
     bonusSum: 0,
     notesDone: 0,
   });
-
-  // Time sync state
-  const rawStartTimeStamp = useRef<number | null>(null);
-  const filteredStartTimeStamp = useRef<number | null>(null);
-  const timeStampLastAdjusted = useRef<number>(0);
-  const perfStarted = useRef<number | null>(null);
-  const sampleTimestamps = useRef<{ perf: number; yt: number }[]>([]);
-  const chartPlayingRef = useRef(false);
-  const chartSeqRef = useRef<ChartSeqData | null>(null);
-  const playbackRate = 1;
-
-  // Animation frame & time update
   const animFrameRef = useRef<number | null>(null);
   const timeUpdateThrottle = useRef<number>(0);
-
-  // Track whether input is enabled (set by Flutter via bridge)
-  const inputEnabledRef = useRef(false);
-
-  // Update refs when state changes
-  useEffect(() => {
-    chartPlayingRef.current = chartPlaying;
-  }, [chartPlaying]);
-  useEffect(() => {
-    chartSeqRef.current = chartSeq;
-  }, [chartSeq]);
-
-  // getCurrentTimeSec - same logic as the main play page
-  const getCurrentTimeSec = useCallback((): number | undefined => {
-    const seq = chartSeqRef.current;
-    if (ytPlayer.current?.getCurrentTime && seq && chartPlayingRef.current) {
-      const ytCurrentTime = ytPlayer.current.getCurrentTime();
-      const perfNow = performance.now();
-      const ytNow = ytCurrentTime - seq.offset;
-      rawStartTimeStamp.current = perfNow - (ytNow * 1000) / playbackRate;
-
-      if (filteredStartTimeStamp.current === null) {
-        filteredStartTimeStamp.current = rawStartTimeStamp.current;
-      }
-      if (perfStarted.current === null) {
-        perfStarted.current = perfNow;
-      }
-
-      const now =
-        ((perfNow - filteredStartTimeStamp.current) / 1000) * playbackRate;
-      const dt = (perfNow - timeStampLastAdjusted.current) / 1000;
-
-      // Low-pass filter for timestamp smoothing
-      filteredStartTimeStamp.current =
-        filteredStartTimeStamp.current * Math.exp(-dt / 1.0) +
-        rawStartTimeStamp.current * (1 - Math.exp(-dt / 1.0));
-      timeStampLastAdjusted.current = perfNow;
-      return now;
-    }
-    return undefined;
-  }, []);
-
-  // Calculate score from current state
-  const calcScore = useCallback(() => {
-    const s = scoreState.current;
-    const base =
-      s.notesTotal > 0
-        ? (s.judgeScoreSum / s.notesTotal) * baseScoreRate
-        : 0;
-    const chain =
-      s.bonusTotal > 0
-        ? (s.bonusSum / s.bonusTotal) * chainScoreRate
-        : 0;
-    const big =
-      s.bigTotal > 0
-        ? (s.bigCount / s.bigTotal) * bigScoreRate
-        : 0;
-    return { base, chain, big, total: base + chain + big };
-  }, []);
-
-  // Judge callback
   const onJudge = useCallback(
     (
       candidate: HitCandidate,
       _now: number,
       bigHit: boolean,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      _thisChain: number
+      thisChain: number
     ) => {
       const s = scoreState.current;
       const judgeMap = {
         1: "good",
         2: "ok",
         3: "bad",
-        4: "bad",
+        4: "miss",
         5: "miss",
       } as const;
       const judgeName = judgeMap[candidate.judge] || "miss";
 
-      switch (candidate.judge) {
-        case 1: // good
-          s.goodCount++;
-          s.combo++;
-          s.judgeScoreSum += 1.0;
-          s.bonusSum += Math.min(s.combo, bonusMax);
-          break;
-        case 2: // ok
-          s.okCount++;
-          s.combo++;
-          s.judgeScoreSum += okBaseScore;
-          s.bonusSum += Math.min(s.combo, bonusMax);
-          break;
-        case 3: // bad
-          s.badCount++;
-          s.combo = 0;
-          break;
-        case 4: // bad (late)
-          s.badCount++;
-          s.combo = 0;
-          break;
-        case 5: // miss
-          s.missCount++;
-          s.combo = 0;
-          break;
+      if (bigHit) {
+        if (candidate.judge <= 2) {
+          s.bigCount++;
+        } else {
+          s.bigMiss++;
+        }
+      } else {
+        s.combo = thisChain;
+        s.notesDone++;
+        switch (candidate.judge) {
+          case 1:
+            s.goodCount++;
+            s.judgeScoreSum += 1.0;
+            s.bonusSum += Math.min(s.combo, bonusMax);
+            break;
+          case 2:
+            s.okCount++;
+            s.judgeScoreSum += okBaseScore;
+            s.bonusSum += Math.min(s.combo, bonusMax);
+            break;
+          case 3:
+            s.badCount++;
+            break;
+          case 4:
+          case 5:
+            s.missCount++;
+            break;
+        }
       }
-      if (s.combo > s.maxCombo) s.maxCombo = s.combo;
-      if (bigHit) s.bigCount++;
-      s.notesDone++;
 
-      const score = calcScore();
+      const base = (s.judgeScoreSum / (s.notesTotal || 1)) * baseScoreRate;
+      const chain = (s.bonusSum / (s.bonusTotal || 1)) * chainScoreRate;
+      const big = (s.bigCount / (s.bigTotal || 1)) * bigScoreRate;
 
       const event: JudgeEvent = {
         noteId: candidate.note.id,
@@ -309,7 +298,7 @@ export default function EmbeddedPlay() {
         isBig: candidate.note.big,
         bigHit,
         targetX: candidate.note.targetX,
-        score,
+        score: { base, chain, big, total: base + chain + big },
         combo: s.combo,
         maxCombo: s.maxCombo,
         judgeCount: [s.goodCount, s.okCount, s.badCount, s.missCount],
@@ -318,120 +307,249 @@ export default function EmbeddedPlay() {
 
       notifyHost("onJudge", event);
     },
-    [calcScore]
+    []
   );
 
-  // Check for missed notes periodically
-  const missCheckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const scheduleMissCheck = useCallback(() => {
-    if (missCheckTimer.current) clearTimeout(missCheckTimer.current);
-    const check = () => {
-      if (!judgeRef.current || !chartPlayingRef.current) return;
+  // badLateSec以上過ぎたものをmiss判定にする
+  useEffect(() => {
+    // if (auto) return;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const removeOneNote = () => {
+      timer = null;
       const now = getCurrentTimeSec();
-      if (now === undefined) return;
-      const nextMiss = judgeRef.current.checkMiss(now);
-      if (nextMiss !== null) {
-        const delay = Math.max(1, (nextMiss - now) * 1000);
-        missCheckTimer.current = setTimeout(check, delay);
+      if (now !== undefined && judgeRef.current) {
+        const nextMissTime = judgeRef.current.checkMiss(now);
+        if (nextMissTime !== null) {
+          timer = setTimeout(
+            removeOneNote,
+            (nextMissTime * 1000) / playbackRate
+          );
+        }
       }
     };
-    check();
-  }, [getCurrentTimeSec]);
+    removeOneNote();
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+  }, [getCurrentTimeSec, playbackRate]);
 
   // Check for game end
-  const checkGameEnd = useCallback(() => {
+  const checkChartEnd = useCallback(() => {
     const s = scoreState.current;
-    if (s.notesDone >= s.notesTotal && s.notesTotal > 0) {
-      const score = calcScore();
-      const result: FinishData = {
-        score,
-        maxCombo: s.maxCombo,
-        judgeCount: [s.goodCount, s.okCount, s.badCount, s.missCount],
-        bigCount: s.bigCount,
+    const judgeCount = [s.goodCount, s.okCount, s.badCount, s.missCount];
+    return (
+      judgeCount.reduce((sum, j) => sum + j, 0) == s.notesTotal &&
+      s.bigCount + s.bigMiss == s.bigTotal
+    );
+  }, []);
+
+  // Initialize Judge when chart is ready
+  const initJudge = useCallback(
+    (now: number) => {
+      if (!chartSeq) return;
+
+      // Reset scoring state
+      scoreState.current = {
+        goodCount: 0,
+        okCount: 0,
+        badCount: 0,
+        missCount: 0,
+        combo: 0,
+        maxCombo: 0,
+        bigCount: 0,
+        bigMiss: 0,
+        bigTotal: chartSeq.notes.filter((n: any) => n.big).length,
+        notesTotal: chartSeq.notes.length,
+        bonusTotal:
+          chartSeq.notes.length < bonusMax
+            ? (chartSeq.notes.length * (chartSeq.notes.length + 1)) / 2
+            : (bonusMax * (bonusMax + 1)) / 2 +
+              bonusMax * (chartSeq.notes.length - bonusMax),
+        judgeScoreSum: 0,
+        bonusSum: 0,
+        notesDone: 0,
       };
-      notifyHost("onFinish", result);
-      setChartPlaying(false);
-      inputEnabledRef.current = false;
+
+      // Create notes for game
+      const notes: NoteInGame[] = chartSeq.notes.map((n: any) => ({
+        ...n,
+        done: 0,
+        bigDone: false,
+      }));
+      notesRef.current = notes;
+
+      const judgeOpts: JudgeOptions = {
+        judgeForAuto: false,
+        playbackRate: playbackRate,
+        onJudge,
+        onPlaySE: () => {}, // SE not needed in embedded mode
+        onFlash: () => {}, // Flash handled by host
+      };
+
+      judgeRef.current = new Judge(notes, judgeOpts, now);
+    },
+    [chartSeq, onJudge]
+  );
+
+  useEffect(() => {
+    document.body.focus();
+  }, []);
+
+  const start = useCallback(() => {
+    // Space(スタートボタン)が押されたとき
+    switch (ytPlayer.current?.getPlayerState?.()) {
+      case 2:
+      case 0:
+        ytPlayer.current?.seekTo?.(begin, true);
+        ytPlayer.current?.playVideo?.();
+        break;
+      case 5:
+      default:
+        ytPlayer.current?.seekTo?.(begin, true);
+        break;
     }
-  }, [calcScore]);
+  }, [begin]);
+  const stop = useCallback(() => {
+    // Escが押された時&Result表示時
+    if (chartPlaying) {
+      notifyHost("onStop", null);
+      setChartPlaying(false);
+      for (let i = 1; i < 10; i++) {
+        setTimeout(() => {
+          ytPlayer.current?.setVolume?.(((10 - i) * ytVolume) / 10);
+        }, i * 100);
+        setTimeout(() => {
+          ytPlayer.current?.pauseVideo?.();
+        }, 1000);
+      }
+    }
+  }, [chartPlaying, ytVolume]);
 
-  // ============================================================
-  // DIRECT INPUT HANDLING
-  // Touch/pointer and keyboard events are handled here in the
-  // WebView — no round-trip to Flutter needed for input.
-  // ============================================================
+  const [ytReady, setYtReady] = useState<boolean>(false);
 
-  // Hit handler — called directly from pointer/keyboard events
-  const handleHit = useCallback(() => {
-    if (!judgeRef.current || !chartPlayingRef.current) return;
-    if (!inputEnabledRef.current) return;
-    const now = getCurrentTimeSec();
-    if (now === undefined) return;
-
-    judgeRef.current.hit(now);
-    // onJudge callback fires automatically via Judge if a note is hit
-    judgeRef.current.checkMiss(now);
-    checkGameEnd();
-  }, [getCurrentTimeSec, checkGameEnd]);
-
-  // Pointer events (touch/mouse/pen)
+  const [endSecPassed, setEndSecPassed] = useState<boolean>(false);
   useEffect(() => {
-    const onPointerDown = (e: PointerEvent) => {
-      if (!inputEnabledRef.current) return;
-      e.preventDefault();
-      handleHit();
-    };
+    if (chartPlaying && chartSeq) {
+      const checkEnd = () => {
+        if ((ytPlayer.current?.getCurrentTime?.() ?? 0) >= chartSeq.ytEndSec) {
+          setEndSecPassed(true);
+        }
+      };
+      const t = setInterval(checkEnd, 100);
+      return () => clearInterval(t);
+    }
+  }, [chartPlaying, chartSeq, getCurrentTimeSec]);
 
-    // Prevent context menu during gameplay
-    const onContextMenu = (e: Event) => {
-      if (inputEnabledRef.current) {
-        e.preventDefault();
+  useEffect(() => {
+    const i = setInterval(() => {
+      const chartEnd = checkChartEnd();
+      if (chartPlaying && ((chartEnd && endSecPassed) || ytPlayerFinished)) {
+        const t = setTimeout(() => {
+          const s = scoreState.current;
+          const base = (s.judgeScoreSum / (s.notesTotal || 1)) * baseScoreRate;
+          const chain = (s.bonusSum / (s.bonusTotal || 1)) * chainScoreRate;
+          const big = (s.bigCount / (s.bigTotal || 1)) * bigScoreRate;
+          const result: FinishData = {
+            score: { base, big, chain, total: base + chain + big },
+            maxCombo: s.maxCombo,
+            judgeCount: [s.goodCount, s.okCount, s.badCount, s.missCount],
+            bigCount: s.bigCount,
+          };
+          notifyHost("onFinish", result);
+          stop();
+        }, 1000);
+        return () => clearTimeout(t);
+      }
+    }, 100);
+    return () => clearInterval(i);
+  }, [chartPlaying, checkChartEnd, endSecPassed, ytPlayerFinished, stop]);
+
+  const onReady = useCallback(() => {
+    console.log("ready ->", ytPlayer.current?.getPlayerState?.());
+    setYtReady(true);
+  }, []);
+  const onStart = useCallback(() => {
+    console.log("start ->", ytPlayer.current?.getPlayerState?.());
+    if (chartSeq) {
+      setYtPlayerFinished(false);
+      setEndSecPassed(false);
+      setChartPlaying(true);
+      const now =
+        (ytPlayer.current?.getCurrentTime?.() ?? -Infinity) -
+        chartSeq.offset -
+        offsetPlusLatency * playbackRate;
+      initJudge(now);
+      ytPlayer.current?.setVolume?.(ytVolume);
+    }
+    document.body.focus();
+    filteredStartTimeStamp.current = perfStarted.current = null;
+    notifyHost("onStart", null);
+  }, [chartSeq, initJudge, ytVolume, playbackRate, offsetPlusLatency]);
+  const onStop = useCallback(() => {
+    console.log("stop ->", ytPlayer.current?.getPlayerState?.());
+    switch (ytPlayer.current?.getPlayerState?.()) {
+      case 0:
+        if (chartPlaying) {
+          setYtPlayerFinished(true);
+        }
+        break;
+      case 2:
+        if (chartPlaying) {
+          setChartPlaying(false);
+          notifyHost("onStop", null);
+        }
+        // ytPlayer.current?.seekTo(begin, true);
+        break;
+    }
+    document.body.focus();
+    filteredStartTimeStamp.current = perfStarted.current = null;
+  }, [chartPlaying]);
+  const onError = useCallback((ec: number) => {
+    console.error(ec);
+    notifyHost("onError", String(ec));
+  }, []);
+
+  useEffect(() => {
+    const disableMenu = (e: Event) => {
+      e.preventDefault();
+    };
+    document.addEventListener("contextmenu", disableMenu);
+    return () => document.removeEventListener("contextmenu", disableMenu);
+  }, []);
+
+  useEffect(() => {
+    const hit = () => {
+      const now = getCurrentTimeSec();
+      if (now !== undefined && judgeRef.current) {
+        const { candidate } = judgeRef.current.hit(now);
+        if (candidate) {
+          // flash({ targetX: candidate.note.targetX });
+        } else {
+          // flash({ targetX: 0.5 });
+        }
       }
     };
-
-    document.addEventListener("pointerdown", onPointerDown, {
-      passive: false,
-    });
-    document.addEventListener("contextmenu", onContextMenu);
-
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("contextmenu", onContextMenu);
-    };
-  }, [handleHit]);
-
-  // Keyboard events
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.repeat) return;
-      if (!inputEnabledRef.current) return;
-
-      // Any key (except modifiers/Escape/Space) triggers a hit during gameplay
-      if (
-        e.key === "Escape" ||
-        e.key === "Meta" ||
-        e.key === "Control" ||
-        e.key === "Alt" ||
-        e.key === "Shift"
-      ) {
-        return; // Let Flutter handle these via bridge
+    const keydown = (e: KeyboardEvent) => {
+      if (e.repeat) {
+        return;
       }
-
-      e.preventDefault();
-      handleHit();
+      hit();
     };
-
-    document.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keydown", keydown);
+    document.body.addEventListener("pointerdown", hit);
     return () => {
-      document.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keydown", keydown);
+      document.body.removeEventListener("pointerdown", hit);
     };
-  }, [handleHit]);
+  }, [getCurrentTimeSec]);
 
   // Animation loop: send time updates to Flutter
   useEffect(() => {
     const loop = () => {
       animFrameRef.current = requestAnimationFrame(loop);
-      if (!chartPlayingRef.current) return;
+      if (!chartPlaying) return;
 
       const now = getCurrentTimeSec();
       if (now === undefined) return;
@@ -442,22 +560,12 @@ export default function EmbeddedPlay() {
         timeUpdateThrottle.current = perfNow;
         notifyHost("onTimeUpdate", now);
       }
-
-      // Check for game end via ytEndSec
-      const seq = chartSeqRef.current;
-      if (seq && seq.ytEndSec > 0 && now + seq.offset >= seq.ytEndSec) {
-        // Mark remaining notes as miss
-        if (judgeRef.current) {
-          judgeRef.current.checkMiss(now + 10); // force all remaining
-        }
-        checkGameEnd();
-      }
     };
     animFrameRef.current = requestAnimationFrame(loop);
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-  }, [getCurrentTimeSec, checkGameEnd]);
+  }, [getCurrentTimeSec, chartPlaying]);
 
   // Initialize chart data via method call
   const initChart = useCallback((cidParam: string, lvParam: number) => {
@@ -536,99 +644,21 @@ export default function EmbeddedPlay() {
     }
   }, [chartSeq, ytReady, brief]);
 
-  // Initialize Judge when chart is ready
-  const initJudge = useCallback(
-    (now: number) => {
-      if (!chartSeq) return;
-
-      // Reset scoring state
-      scoreState.current = {
-        goodCount: 0,
-        okCount: 0,
-        badCount: 0,
-        missCount: 0,
-        combo: 0,
-        maxCombo: 0,
-        bigCount: 0,
-        bigTotal: chartSeq.notes.filter((n: any) => n.big).length,
-        notesTotal: chartSeq.notes.length,
-        bonusTotal:
-          chartSeq.notes.length < bonusMax
-            ? (chartSeq.notes.length * (chartSeq.notes.length + 1)) / 2
-            : (bonusMax * (bonusMax + 1)) / 2 +
-              bonusMax * (chartSeq.notes.length - bonusMax),
-        judgeScoreSum: 0,
-        bonusSum: 0,
-        notesDone: 0,
-      };
-
-      // Create notes for game
-      const notes: NoteInGame[] = chartSeq.notes.map((n: any) => ({
-        ...n,
-        done: 0,
-        bigDone: false,
-      }));
-      notesRef.current = notes;
-
-      const judgeOpts: JudgeOptions = {
-        judgeForAuto: false,
-        playbackRate: playbackRate,
-        onJudge,
-        onPlaySE: () => {}, // SE not needed in embedded mode
-        onFlash: () => {}, // Flash handled by host
-      };
-
-      judgeRef.current = new Judge(notes, judgeOpts, now);
-    },
-    [chartSeq, onJudge]
-  );
-
   // Set up the bridge on window (Host → Web control commands)
   useEffect(() => {
     window.nikochanEmbed = {
       init(cid: string, lvIndex: number) {
         initChart(cid, lvIndex);
       },
-
-      start() {
-        const seq = chartSeqRef.current;
-        if (!seq) return;
-        judgeRef.current = null;
-        const ytBegin = (seq as any).ytBegin ?? 0;
-        ytPlayer.current?.seekTo?.(ytBegin, true);
-        ytPlayer.current?.playVideo?.();
-      },
-
-      pause() {
-        ytPlayer.current?.pauseVideo?.();
-      },
-
-      resume() {
-        ytPlayer.current?.playVideo?.();
-      },
-
-      restart() {
-        const seq = chartSeqRef.current;
-        if (!seq) return;
-        judgeRef.current = null;
-        const ytBegin = (seq as any).ytBegin ?? 0;
-        ytPlayer.current?.seekTo?.(ytBegin, true);
-        ytPlayer.current?.pauseVideo?.();
-      },
-
-      setVolume(volume: number) {
-        ytPlayer.current?.setVolume?.(volume);
-      },
+      start,
+      pause: stop,
+      resume: start,
+      restart: start,
+      setVolume: setYtVolume,
     };
 
-    if ((window as any)._pendingInit) {
-      const [pCid, pLv] = (window as any)._pendingInit;
-      delete (window as any)._pendingInit;
-      initChart(pCid, pLv);
-    }
-
     notifyHost("onLoaded", null);
-  }, [initChart]);
+  }, [initChart, start, stop, setYtVolume]);
 
   // Listen for control commands from parent window (Host iframe via postMessage)
   useEffect(() => {
@@ -678,34 +708,10 @@ export default function EmbeddedPlay() {
         id={ytId}
         control={false}
         ytPlayer={ytPlayer}
-        onReady={() => setYtReady(true)}
-        onStart={() => {
-          // YouTube started playing
-          rawStartTimeStamp.current = null;
-          filteredStartTimeStamp.current = null;
-          perfStarted.current = null;
-          sampleTimestamps.current = [];
-          timeStampLastAdjusted.current = performance.now();
-
-          setChartPlaying(true);
-
-          const now = getCurrentTimeSec();
-          if (!judgeRef.current) {
-            initJudge(now ?? -Infinity);
-          }
-          scheduleMissCheck();
-          inputEnabledRef.current = true;
-
-          notifyHost("onStart", null);
-        }}
-        onStop={() => {
-          // YouTube stopped
-          setChartPlaying(false);
-          inputEnabledRef.current = false;
-          if (missCheckTimer.current) clearTimeout(missCheckTimer.current);
-
-          notifyHost("onStop", null);
-        }}
+        onReady={onReady}
+        onStart={onStart}
+        onStop={onStop}
+        onError={onError}
         fixedSide="width"
       />
     </div>
