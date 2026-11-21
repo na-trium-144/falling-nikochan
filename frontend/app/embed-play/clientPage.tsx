@@ -44,6 +44,7 @@ import {
   ChartBrief,
 } from "@falling-nikochan/chart";
 import * as msgpack from "@msgpack/msgpack";
+import { useYouTubeSync } from "@/play/youtubeSync";
 
 // Extend window for bridge
 declare global {
@@ -157,9 +158,6 @@ export default function EmbeddedPlay() {
 
   const userOffset = 0;
 
-  const [chartPlaying, setChartPlaying] = useState<boolean>(false);
-  const [ytPlayerFinished, setYtPlayerFinished] = useState<boolean>(false);
-
   const ytPlayer = useRef<YouTubePlayer>(undefined);
   const [ytVolume, setYtVolume_] = useState<number>(100);
   const setYtVolume = useCallback((v: number) => {
@@ -169,54 +167,72 @@ export default function EmbeddedPlay() {
 
   const ytBegin = chartSeq?.ytBegin ?? 0;
   const ytEnd = chartSeq?.ytEndSec ?? 0;
-  const userBegin = null;
-  const begin = userBegin === null ? ytBegin : userBegin;
-  const playbackRate = 1;
 
   const offsetPlusLatency = userOffset;
 
-  const rawStartTimeStamp = useRef<DOMHighResTimeStamp | null>(null);
-  const filteredStartTimeStamp = useRef<DOMHighResTimeStamp | null>(null);
-  const timeStampLastAdjusted = useRef<DOMHighResTimeStamp>(0);
-  const perfStarted = useRef<DOMHighResTimeStamp | null>(null);
-  const getCurrentTimeSec = useCallback(() => {
-    if (
-      ytPlayer.current?.getCurrentTime &&
-      chartSeq &&
-      chartPlaying &&
-      !ytPlayerFinished
-    ) {
-      const ytCurrentTime = ytPlayer.current.getCurrentTime();
-      const perfNow = performance.now();
-      const ytNow =
-        ytCurrentTime - chartSeq.offset - offsetPlusLatency * playbackRate;
-      rawStartTimeStamp.current = perfNow - (ytNow * 1000) / playbackRate;
-      if (filteredStartTimeStamp.current === null) {
-        filteredStartTimeStamp.current = rawStartTimeStamp.current;
-      }
-      if (perfStarted.current === null) {
-        perfStarted.current = perfNow;
-        // actualPlaybackRateRef.current = playbackRate;
-      }
-
-      const now =
-        ((perfNow - filteredStartTimeStamp.current) / 1000) * playbackRate;
-      const dt = (perfNow - timeStampLastAdjusted.current) / 1000;
-
-      // ずれを少しずつ補正する (ローパスフィルタ)
-      filteredStartTimeStamp.current =
-        filteredStartTimeStamp.current * Math.exp(-dt / 1.0) +
-        rawStartTimeStamp.current * (1 - Math.exp(-dt / 1.0));
-      timeStampLastAdjusted.current = perfNow;
-      return now;
-    }
-  }, [
-    chartSeq,
+  const {
+    // playState,
     chartPlaying,
-    offsetPlusLatency,
+    showStopped,
+    showResult,
+    userBegin,
+    setUserBegin,
     playbackRate,
+    setPlaybackRate,
+    changePlaybackRate,
+    minActualPlaybackRate,
+    rawStartTimeStamp,
+    filteredStartTimeStamp,
+    getCurrentTimeSec,
+    start: ytStart,
+    stop: ytStop,
+    finish: ytFinish,
+    ytReady,
+    ytError,
     ytPlayerFinished,
-  ]);
+    endSecPassed,
+    onStart: ytOnStart,
+    onStop: ytOnStop,
+    onReady: ytOnReady,
+    onError: ytOnError,
+  } = useYouTubeSync(
+    ytPlayer,
+    ytBegin,
+    ytEnd,
+    chartSeq?.offset ?? 0,
+    offsetPlusLatency,
+    ytVolume,
+    {
+      onStart() {
+        if (chartSeq) {
+          const now =
+            (ytPlayer.current?.getCurrentTime?.() ?? -Infinity) -
+            chartSeq.offset -
+            offsetPlusLatency * playbackRate;
+          initJudge(now);
+          document.body.focus();
+          notifyHost("onStart", null);
+        }
+      },
+      onStop() {
+        notifyHost("onStop", null);
+        document.body.focus();
+      },
+      onFinish() {
+        const s = scoreState.current;
+        const base = (s.judgeScoreSum / (s.notesTotal || 1)) * baseScoreRate;
+        const chain = (s.bonusSum / (s.bonusTotal || 1)) * chainScoreRate;
+        const big = (s.bigCount / (s.bigTotal || 1)) * bigScoreRate;
+        const result: FinishData = {
+          score: { base, big, chain, total: base + chain + big },
+          maxCombo: s.maxCombo,
+          judgeCount: [s.goodCount, s.okCount, s.badCount, s.missCount],
+          bigCount: s.bigCount,
+        };
+        notifyHost("onFinish", result);
+      },
+    }
+  );
 
   // not using useGameLogic()
 
@@ -397,120 +413,6 @@ export default function EmbeddedPlay() {
     document.body.focus();
   }, []);
 
-  const start = useCallback(() => {
-    // Space(スタートボタン)が押されたとき
-    switch (ytPlayer.current?.getPlayerState?.()) {
-      case 2:
-      case 0:
-        ytPlayer.current?.seekTo?.(begin, true);
-        ytPlayer.current?.playVideo?.();
-        break;
-      case 5:
-      default:
-        ytPlayer.current?.seekTo?.(begin, true);
-        break;
-    }
-  }, [begin]);
-  const stop = useCallback(() => {
-    // Escが押された時&Result表示時
-    if (chartPlaying) {
-      notifyHost("onStop", null);
-      setChartPlaying(false);
-      for (let i = 1; i < 10; i++) {
-        setTimeout(() => {
-          ytPlayer.current?.setVolume?.(((10 - i) * ytVolume) / 10);
-        }, i * 100);
-        setTimeout(() => {
-          ytPlayer.current?.pauseVideo?.();
-        }, 1000);
-      }
-    }
-  }, [chartPlaying, ytVolume]);
-
-  const [ytReady, setYtReady] = useState<boolean>(false);
-
-  const [endSecPassed, setEndSecPassed] = useState<boolean>(false);
-  useEffect(() => {
-    if (chartPlaying && chartSeq) {
-      const checkEnd = () => {
-        if ((ytPlayer.current?.getCurrentTime?.() ?? 0) >= chartSeq.ytEndSec) {
-          setEndSecPassed(true);
-        }
-      };
-      const t = setInterval(checkEnd, 100);
-      return () => clearInterval(t);
-    }
-  }, [chartPlaying, chartSeq, getCurrentTimeSec]);
-
-  useEffect(() => {
-    const i = setInterval(() => {
-      const chartEnd = checkChartEnd();
-      if (chartPlaying && ((chartEnd && endSecPassed) || ytPlayerFinished)) {
-        const t = setTimeout(() => {
-          const s = scoreState.current;
-          const base = (s.judgeScoreSum / (s.notesTotal || 1)) * baseScoreRate;
-          const chain = (s.bonusSum / (s.bonusTotal || 1)) * chainScoreRate;
-          const big = (s.bigCount / (s.bigTotal || 1)) * bigScoreRate;
-          const result: FinishData = {
-            score: { base, big, chain, total: base + chain + big },
-            maxCombo: s.maxCombo,
-            judgeCount: [s.goodCount, s.okCount, s.badCount, s.missCount],
-            bigCount: s.bigCount,
-          };
-          notifyHost("onFinish", result);
-          stop();
-        }, 1000);
-        return () => clearTimeout(t);
-      }
-    }, 100);
-    return () => clearInterval(i);
-  }, [chartPlaying, checkChartEnd, endSecPassed, ytPlayerFinished, stop]);
-
-  const onReady = useCallback(() => {
-    console.log("ready ->", ytPlayer.current?.getPlayerState?.());
-    setYtReady(true);
-  }, []);
-  const onStart = useCallback(() => {
-    console.log("start ->", ytPlayer.current?.getPlayerState?.());
-    if (chartSeq) {
-      setYtPlayerFinished(false);
-      setEndSecPassed(false);
-      setChartPlaying(true);
-      const now =
-        (ytPlayer.current?.getCurrentTime?.() ?? -Infinity) -
-        chartSeq.offset -
-        offsetPlusLatency * playbackRate;
-      initJudge(now);
-      ytPlayer.current?.setVolume?.(ytVolume);
-    }
-    document.body.focus();
-    filteredStartTimeStamp.current = perfStarted.current = null;
-    notifyHost("onStart", null);
-  }, [chartSeq, initJudge, ytVolume, playbackRate, offsetPlusLatency]);
-  const onStop = useCallback(() => {
-    console.log("stop ->", ytPlayer.current?.getPlayerState?.());
-    switch (ytPlayer.current?.getPlayerState?.()) {
-      case 0:
-        if (chartPlaying) {
-          setYtPlayerFinished(true);
-        }
-        break;
-      case 2:
-        if (chartPlaying) {
-          setChartPlaying(false);
-          notifyHost("onStop", null);
-        }
-        // ytPlayer.current?.seekTo(begin, true);
-        break;
-    }
-    document.body.focus();
-    filteredStartTimeStamp.current = perfStarted.current = null;
-  }, [chartPlaying]);
-  const onError = useCallback((ec: number) => {
-    console.error(ec);
-    notifyHost("onError", String(ec));
-  }, []);
-
   useEffect(() => {
     const disableMenu = (e: Event) => {
       e.preventDefault();
@@ -547,12 +449,19 @@ export default function EmbeddedPlay() {
 
   // Animation loop: send time updates to Flutter
   useEffect(() => {
+    let chartEndedAt: number | null = null;
     const loop = () => {
       animFrameRef.current = requestAnimationFrame(loop);
-      if (!chartPlaying) return;
+      if (!chartPlaying) {
+        chartEndedAt = null;
+        return;
+      }
 
       const now = getCurrentTimeSec();
-      if (now === undefined) return;
+      if (now === undefined) {
+        chartEndedAt = null;
+        return;
+      }
 
       // Send time update (throttled to ~60fps)
       const perfNow = performance.now();
@@ -560,12 +469,19 @@ export default function EmbeddedPlay() {
         timeUpdateThrottle.current = perfNow;
         notifyHost("onTimeUpdate", now);
       }
+
+      if (checkChartEnd() && endSecPassed && chartEndedAt === null) {
+        chartEndedAt = now;
+      }
+      if (chartEndedAt !== null && now - chartEndedAt > 1) {
+        ytFinish();
+      }
     };
     animFrameRef.current = requestAnimationFrame(loop);
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-  }, [getCurrentTimeSec, chartPlaying]);
+  }, [getCurrentTimeSec, chartPlaying, checkChartEnd, endSecPassed, ytFinish]);
 
   // Initialize chart data via method call
   const initChart = useCallback((cidParam: string, lvParam: number) => {
@@ -650,15 +566,15 @@ export default function EmbeddedPlay() {
       init(cid: string, lvIndex: number) {
         initChart(cid, lvIndex);
       },
-      start,
-      pause: stop,
-      resume: start,
-      restart: start,
+      start: ytStart,
+      pause: ytStop,
+      resume: ytStart,
+      restart: ytStart,
       setVolume: setYtVolume,
     };
 
     notifyHost("onLoaded", null);
-  }, [initChart, start, stop, setYtVolume]);
+  }, [initChart, ytStart, ytStop, setYtVolume]);
 
   // Listen for control commands from parent window (Host iframe via postMessage)
   useEffect(() => {
@@ -708,10 +624,10 @@ export default function EmbeddedPlay() {
         id={ytId}
         control={false}
         ytPlayer={ytPlayer}
-        onReady={onReady}
-        onStart={onStart}
-        onStop={onStop}
-        onError={onError}
+        onReady={ytOnReady}
+        onStart={ytOnStart}
+        onStop={ytOnStop}
+        onError={ytOnError}
         fixedSide="width"
       />
     </div>
