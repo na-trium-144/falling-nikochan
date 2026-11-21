@@ -165,6 +165,7 @@ export function PlayOption(props: Props) {
                 record={props.record}
                 selectedLevel={selectedLevel}
                 locale={props.locale}
+                containerRef={props.containerRef}
               />
             ) : null}
           </div>
@@ -248,6 +249,7 @@ function SelectedLevelInfo(props: {
   record: RecordGetSummary[] | Error | null;
   selectedLevel: number;
   locale: string;
+  containerRef?: RefObject<HTMLDivElement | null>;
 }) {
   const t = useTranslations("share");
   const te = useTranslations("error");
@@ -305,6 +307,10 @@ function SelectedLevelInfo(props: {
     selectedBestScore?.sign,
     selectedBestScore?.resultParams.date?.getTime()
   );
+
+  useLayoutEffect(() => {
+    props.containerRef?.current?.dispatchEvent(new Event("scroll"));
+  }, [showBestDetail, selectedRecord, bestScoreState, props.containerRef]);
 
   return (
     <>
