@@ -577,6 +577,7 @@ export default function EmbeddedPlay() {
 
   // Set up the bridge on window (Host → Web control commands)
   useEffect(() => {
+    const firstInit = (!window.nikochanEmbed);
     window.nikochanEmbed = {
       init(cid: string, lvIndex: number) {
         initChart(cid, lvIndex);
@@ -587,8 +588,8 @@ export default function EmbeddedPlay() {
       restart: ytStart,
       setVolume: setYtVolume,
     };
+    if(firstInit){notifyHost("onLoaded", null);}
 
-    notifyHost("onLoaded", null);
   }, [initChart, ytStart, ytStop, setYtVolume]);
 
   // Listen for control commands from parent window (Host iframe via postMessage)
