@@ -8,6 +8,8 @@
  * Input (touch/keyboard) is handled but nothing will be displayed in this page.
  *
  * URL: /embed-play
+ *   Query patameters:
+ *     ?background=00FFFF  set background color (without # )
  *
  * Host → Web (control commands only, no input):
  *   window.nikochanEmbed.init(cid, lvIndex)
@@ -28,7 +30,13 @@
  *   onError
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import {
   ChartSeqData,
@@ -151,6 +159,13 @@ function notifyHost(handlerName: string, data: any) {
 }
 
 export default function EmbeddedPlay() {
+  useLayoutEffect(() => {
+    const bgColor = new URLSearchParams(location.search).get("background");
+    if (bgColor) {
+      document.body.style.background = "#" + bgColor;
+    }
+  }, []);
+
   // Chart data
   const [chartSeq, setChartSeq] = useState<ChartSeqData | null>(null);
   const [brief, setBrief] = useState<ChartBrief | null>(null);
