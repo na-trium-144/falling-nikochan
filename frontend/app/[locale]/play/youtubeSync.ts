@@ -133,8 +133,12 @@ export function useYouTubeSync(
     }
   }, [chartPlaying, userOffsetPlusLatency, playbackRate, offset, ytPlayer]);
 
+  const fadeoutTimeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
   const start = useCallback(() => {
     // Space(スタートボタン)が押されたとき
+    fadeoutTimeouts.current.forEach((t) => clearTimeout(t));
+    fadeoutTimeouts.current = [];
+    ytPlayer.current?.setVolume?.(ytVolume);
     switch (ytPlayer.current?.getPlayerState?.()) {
       case 2:
       case 0:
@@ -146,15 +150,21 @@ export function useYouTubeSync(
         ytPlayer.current?.seekTo?.(begin, true);
         break;
     }
-  }, [begin, ytPlayer]);
+  }, [begin, ytPlayer, ytVolume]);
   const fadeout = useCallback(() => {
-    for (let i = 1; i < 10; i++) {
-      setTimeout(() => {
-        ytPlayer.current?.setVolume?.(((10 - i) * ytVolume) / 10);
-      }, i * 100);
-      setTimeout(() => {
-        ytPlayer.current?.pauseVideo?.();
-      }, 1000);
+    fadeoutTimeouts.current.forEach((t) => clearTimeout(t));
+    fadeoutTimeouts.current = [];
+    for (let i = 1; i <= 10; i++) {
+      fadeoutTimeouts.current.push(
+        setTimeout(() => {
+          ytPlayer.current?.setVolume?.(((10 - i) * ytVolume) / 10);
+        }, i * 100)
+      );
+      fadeoutTimeouts.current.push(
+        setTimeout(() => {
+          ytPlayer.current?.pauseVideo?.();
+        }, 1000)
+      );
     }
   }, [ytPlayer, ytVolume]);
   const stop = useCallback(() => {
@@ -192,6 +202,8 @@ export function useYouTubeSync(
     console.log("start ->", ytPlayer.current?.getPlayerState?.());
     setEndSecPassed(false);
     setPlayState("playing");
+    fadeoutTimeouts.current.forEach((t) => clearTimeout(t));
+    fadeoutTimeouts.current = [];
     ytPlayer.current?.setVolume?.(ytVolume);
     filteredStartTimeStamp.current = perfStarted.current = null;
     setMinActualPlaybackRate((minActualPlaybackRateRef.current = playbackRate));
