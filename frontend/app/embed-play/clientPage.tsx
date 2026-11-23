@@ -14,9 +14,7 @@
  * Host → Web (control commands only, no input):
  *   window.nikochanEmbed.init(cid, lvIndex)
  *   window.nikochanEmbed.start()
- *   window.nikochanEmbed.pause()
- *   window.nikochanEmbed.resume()
- *   window.nikochanEmbed.restart()
+ *   window.nikochanEmbed.stop()
  *   window.nikochanEmbed.setVolume(volume)
  *
  * Web → Host (via flutter_inappwebview / postMessage):
@@ -44,11 +42,7 @@ import {
   JudgeOptions,
   HitCandidate,
   NoteInGame,
-  okBaseScore,
   bonusMax,
-  baseScoreRate,
-  chainScoreRate,
-  bigScoreRate,
   ChartBrief,
 } from "@falling-nikochan/chart";
 import * as msgpack from "@msgpack/msgpack";
@@ -67,69 +61,30 @@ declare global {
 interface NikochanEmbed {
   init(cid: string, lvIndex: number): void;
   start(): void;
-  pause(): void;
-  resume(): void;
-  restart(): void;
+  stop(): void;
   setVolume(volume: number): void;
 }
 
+export interface ScoreData {
+  judgeCount: [number, number, number, number]; // [good, ok, bad, miss]
+  notesTotal: number;
+  bigCount: number;
+  bigMiss: number;
+  bigTotal: number;
+  bonusSum: number;
+  bonusTotal: number;
+  chain: number;
+}
+
+export type FinishData = ScoreData;
+
 interface JudgeEvent {
   noteId: number;
-  judge: "good" | "ok" | "bad" | "miss";
+  judge: 1 | 2 | 3 | 4 | 5;
   late: number;
-  isBig: boolean;
   bigHit: boolean;
-  targetX: number;
-  score: {
-    base: number;
-    chain: number;
-    big: number;
-    total: number;
-  };
-  combo: number;
-  maxCombo: number;
-  judgeCount: [number, number, number, number]; // good, ok, bad, miss
-  notesDone: number;
-}
-
-interface ReadyData {
-  notes: Array<{
-    id: number;
-    big: boolean;
-    hitTimeSec: number;
-    appearTimeSec: number;
-    targetX: number;
-    vx: number;
-    vy: number;
-    ay: number;
-    uRange: [number, number] | null;
-    display: Array<{
-      timeSecBefore: number;
-      u0: number;
-      du: number;
-      ddu: number;
-    }>;
-  }>;
-  bpmChanges: Array<{ timeSec: number; bpm: number }>;
-  speedChanges: Array<{ timeSec: number; bpm: number; interp: boolean }>;
-  offset: number;
-  ytId: string;
-  ytBegin: number;
-  ytEndSec: number;
-  notesTotal: number;
-  bigTotal: number;
-}
-
-interface FinishData {
-  score: {
-    base: number;
-    chain: number;
-    big: number;
-    total: number;
-  };
-  maxCombo: number;
-  judgeCount: [number, number, number, number]; // good, ok, bad, miss
-  bigCount: number;
+  thisChain: number;
+  score: ScoreData;
 }
 
 // Helper to send to Host (supports both native flutter_inappwebview and Web postMessage)
@@ -204,7 +159,6 @@ export default function EmbeddedPlay() {
     finish: ytFinish,
     ytReady,
     ytError,
-    ytPlayerFinished,
     endSecPassed,
     onStart: ytOnStart,
     onStop: ytOnStop,
@@ -225,24 +179,28 @@ export default function EmbeddedPlay() {
             chartSeq.offset -
             offsetPlusLatency * playbackRate;
           initJudge(now);
+          playStartedAt.current = null;
+          timeUpdateThrottle.current = 0;
           document.body.focus();
           notifyHost("onStart", null);
         }
       },
       onStop() {
+        playStartedAt.current = null;
         notifyHost("onStop", null);
         document.body.focus();
       },
       onFinish() {
         const s = scoreState.current;
-        const base = (s.judgeScoreSum / (s.notesTotal || 1)) * baseScoreRate;
-        const chain = (s.bonusSum / (s.bonusTotal || 1)) * chainScoreRate;
-        const big = (s.bigCount / (s.bigTotal || 1)) * bigScoreRate;
         const result: FinishData = {
-          score: { base, big, chain, total: base + chain + big },
-          maxCombo: s.maxCombo,
           judgeCount: [s.goodCount, s.okCount, s.badCount, s.missCount],
+          notesTotal: s.notesTotal,
           bigCount: s.bigCount,
+          bigMiss: s.bigMiss,
+          bigTotal: s.bigTotal,
+          bonusSum: s.bonusSum,
+          bonusTotal: s.bonusTotal,
+          chain: s.chain,
         };
         notifyHost("onFinish", result);
       },
@@ -258,19 +216,17 @@ export default function EmbeddedPlay() {
     okCount: 0,
     badCount: 0,
     missCount: 0,
-    combo: 0,
-    maxCombo: 0,
+    chain: 0,
     bigCount: 0,
     bigMiss: 0,
     bigTotal: 0,
     notesTotal: 0,
     bonusTotal: 0,
-    judgeScoreSum: 0, // good=1, ok=0.3
     bonusSum: 0,
-    notesDone: 0,
   });
   const animFrameRef = useRef<number | null>(null);
   const timeUpdateThrottle = useRef<number>(0);
+  const playStartedAt = useRef<number | null>(null);
   const onJudge = useCallback(
     (
       candidate: HitCandidate,
@@ -279,14 +235,6 @@ export default function EmbeddedPlay() {
       thisChain: number
     ) => {
       const s = scoreState.current;
-      const judgeMap = {
-        1: "good",
-        2: "ok",
-        3: "bad",
-        4: "miss",
-        5: "miss",
-      } as const;
-      const judgeName = judgeMap[candidate.judge] || "miss";
 
       if (bigHit) {
         if (candidate.judge <= 2) {
@@ -295,18 +243,15 @@ export default function EmbeddedPlay() {
           s.bigMiss++;
         }
       } else {
-        s.combo = thisChain;
-        s.notesDone++;
+        s.chain = thisChain;
         switch (candidate.judge) {
           case 1:
             s.goodCount++;
-            s.judgeScoreSum += 1.0;
-            s.bonusSum += Math.min(s.combo, bonusMax);
+            s.bonusSum += Math.min(s.chain, bonusMax);
             break;
           case 2:
             s.okCount++;
-            s.judgeScoreSum += okBaseScore;
-            s.bonusSum += Math.min(s.combo, bonusMax);
+            s.bonusSum += Math.min(s.chain, bonusMax);
             break;
           case 3:
             s.badCount++;
@@ -318,22 +263,24 @@ export default function EmbeddedPlay() {
         }
       }
 
-      const base = (s.judgeScoreSum / (s.notesTotal || 1)) * baseScoreRate;
-      const chain = (s.bonusSum / (s.bonusTotal || 1)) * chainScoreRate;
-      const big = (s.bigCount / (s.bigTotal || 1)) * bigScoreRate;
+      const score: ScoreData = {
+        judgeCount: [s.goodCount, s.okCount, s.badCount, s.missCount],
+        notesTotal: s.notesTotal,
+        bigCount: s.bigCount,
+        bigMiss: s.bigMiss,
+        bigTotal: s.bigTotal,
+        bonusSum: s.bonusSum,
+        bonusTotal: s.bonusTotal,
+        chain: s.chain,
+      };
 
       const event: JudgeEvent = {
         noteId: candidate.note.id,
-        judge: judgeName,
+        judge: candidate.judge,
         late: candidate.late,
-        isBig: candidate.note.big,
         bigHit,
-        targetX: candidate.note.targetX,
-        score: { base, chain, big, total: base + chain + big },
-        combo: s.combo,
-        maxCombo: s.maxCombo,
-        judgeCount: [s.goodCount, s.okCount, s.badCount, s.missCount],
-        notesDone: s.notesDone,
+        thisChain,
+        score,
       };
 
       notifyHost("onJudge", event);
@@ -387,8 +334,7 @@ export default function EmbeddedPlay() {
         okCount: 0,
         badCount: 0,
         missCount: 0,
-        combo: 0,
-        maxCombo: 0,
+        chain: 0,
         bigCount: 0,
         bigMiss: 0,
         bigTotal: chartSeq.notes.filter((n: any) => n.big).length,
@@ -398,9 +344,7 @@ export default function EmbeddedPlay() {
             ? (chartSeq.notes.length * (chartSeq.notes.length + 1)) / 2
             : (bonusMax * (bonusMax + 1)) / 2 +
               bonusMax * (chartSeq.notes.length - bonusMax),
-        judgeScoreSum: 0,
         bonusSum: 0,
-        notesDone: 0,
       };
 
       // Create notes for game
@@ -478,9 +422,14 @@ export default function EmbeddedPlay() {
         return;
       }
 
-      // Send time update (throttled to ~60fps)
+      // Send time update (throttled: frequent at start, then ~1s)
       const perfNow = performance.now();
-      if (perfNow - timeUpdateThrottle.current > 16) {
+      if (playStartedAt.current === null) {
+        playStartedAt.current = perfNow;
+      }
+      const elapsedSinceStart = perfNow - playStartedAt.current;
+      const interval = elapsedSinceStart < 3000 ? 200 : 1000;
+      if (perfNow - timeUpdateThrottle.current >= interval) {
         timeUpdateThrottle.current = perfNow;
         notifyHost("onTimeUpdate", now);
       }
@@ -536,60 +485,24 @@ export default function EmbeddedPlay() {
   // When chart data + YouTube are both ready, send onReady to Host
   useEffect(() => {
     if (chartSeq && ytReady && brief) {
-      const readyData: ReadyData = {
-        notes: chartSeq.notes.map((n: any) => ({
-          id: n.id,
-          big: n.big,
-          hitTimeSec: n.hitTimeSec,
-          appearTimeSec: n.appearTimeSec,
-          targetX: n.targetX,
-          vx: n.vx,
-          vy: n.vy,
-          ay: n.ay,
-          uRange: n.uRange || null,
-          display: (n.display || []).map((d: any) => ({
-            timeSecBefore: d.timeSecBefore,
-            u0: d.u0,
-            du: d.du,
-            ddu: d.ddu,
-          })),
-        })),
-        bpmChanges: (chartSeq.bpmChanges || []).map((b: any) => ({
-          timeSec: b.timeSec,
-          bpm: b.bpm,
-        })),
-        speedChanges: (chartSeq.speedChanges || []).map((s: any) => ({
-          timeSec: s.timeSec,
-          bpm: s.bpm,
-          interp: s.interp,
-        })),
-        offset: chartSeq.offset,
-        ytId: brief.ytId,
-        ytBegin: (chartSeq as any).ytBegin ?? 0,
-        ytEndSec: (chartSeq as any).ytEndSec ?? 0,
-        notesTotal: chartSeq.notes.length,
-        bigTotal: chartSeq.notes.filter((n: any) => n.big).length,
-      };
-
-      notifyHost("onReady", readyData);
+      notifyHost("onReady", null);
     }
   }, [chartSeq, ytReady, brief]);
 
   // Set up the bridge on window (Host → Web control commands)
   useEffect(() => {
-    const firstInit = (!window.nikochanEmbed);
+    const firstInit = !window.nikochanEmbed;
     window.nikochanEmbed = {
       init(cid: string, lvIndex: number) {
         initChart(cid, lvIndex);
       },
       start: ytStart,
-      pause: ytStop,
-      resume: ytStart,
-      restart: ytStart,
+      stop: ytStop,
       setVolume: setYtVolume,
     };
-    if(firstInit){notifyHost("onLoaded", null);}
-
+    if (firstInit) {
+      notifyHost("onLoaded", null);
+    }
   }, [initChart, ytStart, ytStop, setYtVolume]);
 
   // Listen for control commands from parent window (Host iframe via postMessage)
@@ -621,9 +534,7 @@ export default function EmbeddedPlay() {
 
         if (action === "init") embed.init(args[0], Number(args[1] ?? 0));
         else if (action === "start") embed.start();
-        else if (action === "pause") embed.pause();
-        else if (action === "resume") embed.resume();
-        else if (action === "restart") embed.restart();
+        else if (action === "stop") embed.stop();
         else if (action === "setVolume") embed.setVolume(args[0]);
       }
     };
