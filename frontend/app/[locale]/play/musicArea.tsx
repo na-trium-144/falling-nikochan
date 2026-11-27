@@ -108,7 +108,7 @@ const MusicAreaInner = memo(function MusicAreaInner(props: Props) {
       const t = setTimeout(() => {
         setVolumeCtrlOpen(true);
         initialVolumeCtrlOpenDone.current = true;
-        for (let delay = 0; delay <= 250; delay += 50) {
+        for (let delay = 0; delay <= 500; delay += 50) {
           setTimeout(() => {
             setRerenderVolume((prev) => prev + 1);
           }, delay);
