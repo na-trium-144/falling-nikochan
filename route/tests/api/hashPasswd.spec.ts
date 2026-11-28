@@ -76,11 +76,30 @@ describe("GET /api/hashPasswd/:cid", () => {
     expect(body.flattened.nested.cid[0]).to.be.a("string");
   });
   test("should return 404 for nonexistent cid", async () => {
+    await initDb();
     const res = await app.request("/api/hashPasswd/100002?p=p");
     expect(res.status).to.equal(404);
   });
   test("should return 404 for deleted cid", async () => {
+    await initDb();
     const res = await app.request("/api/hashPasswd/100001?p=p");
     expect(res.status).to.equal(404);
   });
+  test(
+    "should return 429 for too many requests",
+    {
+      skip:
+        process.env.API_ENV === "development" && !!process.env.API_NO_RATELIMIT,
+    },
+    async () => {
+      await initDb();
+      const res1 = await app.request("/api/hashPasswd/100000?p=p");
+      expect(res1.status).to.equal(200);
+
+      const res2 = await app.request("/api/hashPasswd/100000?p=p");
+      expect(res2.status).to.equal(429);
+      const body = await res2.json();
+      expect(body).to.deep.equal({ message: "tooManyRequest" });
+    }
+  );
 });

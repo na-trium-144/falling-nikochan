@@ -1,3 +1,12 @@
+## ver. 18.18 - 2026/11/28
+
+- edit ページの cid クエリ検証
+- /:lang/main/... のオープンリダイレクト対策
+- /api/hashPasswd への rate limit 追加
+- cron/twitter.ts の Discord Markdown リンクエスケープ
+- cron/twitter.ts の長いタイトル切り詰め処理の高速化 (O(N²) 解消)
+- stepSimplifyの計算量削減
+
 ## ver. 18.17 - 2026/11/21
 
 - ?fes=... パラメータを含むURLでトップページにアクセスした場合、プレイ記録にそれを含めて送信する

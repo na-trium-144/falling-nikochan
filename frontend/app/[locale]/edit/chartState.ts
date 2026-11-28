@@ -23,6 +23,7 @@ import {
   updateBpmTimeSec,
   updateBarNum,
   ChartSchema,
+  CidSchema,
   InitNoteStyle,
   initNoteStyles,
 } from "@falling-nikochan/chart";
@@ -650,7 +651,7 @@ export function useChartState(props: Props) {
           state: "ok",
         });
         onLoadRef.current("new");
-      } else if (cid) {
+      } else if (cid && v.safeParse(CidSchema(), cid).success) {
         void fetchChart(cid, { isFirst: true, editPasswd: "", savePasswd });
       } else {
         router.push(`/${locale}/main/edit`);
