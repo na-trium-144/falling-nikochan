@@ -50,13 +50,20 @@ import type Ace from "ace-builds";
 // https://github.com/vercel/next.js/discussions/29415
 // import "remote-web-worker";
 // nikochanでは同一originからも同じスクリプトにアクセス可能なので、
-// 無理にクロスオリジンのスクリプトを読み込まず単にurlのoriginを書き換えるだけでok
+// 単にurlのoriginを書き換えるだけでも動作はするが、
+// luaコードがjs globalに到達した時にcacheStorageやcookieにアクセスできないようdata urlでオリジンを分離する
 if (typeof window !== "undefined") {
   const BaseWorker = window.Worker;
   window.Worker = class Worker extends BaseWorker {
     constructor(scriptURL: string | URL, options?: WorkerOptions) {
       super(
-        new URL(new URL(scriptURL).pathname, window.location.origin),
+        // new URL(new URL(scriptURL).pathname, window.location.origin),
+        // URL.createObjectURL(new Blob([`importScripts("${new URL(new URL(scriptURL).pathname, window.location.origin)}")`])),
+        'data:application/javascript;charset=utf-8,' + encodeURIComponent(`
+          globalThis.importScripts=((i)=>(u)=>i(new URL(u,"${window.location.origin}")))(importScripts);
+          globalThis.fetch=((f)=>(u,o)=>f(new URL(u,"${window.location.origin}"),o))(fetch);
+          importScripts("${new URL(new URL(scriptURL).pathname, window.location.origin)}");
+        `),
         options
       );
     }
