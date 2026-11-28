@@ -1,4 +1,8 @@
-## ver. 18.18 - 2026/11/28
+## ver. 18.19 - 2026/11/28 [#1487](https://github.com/na-trium-144/falling-nikochan/pull/1487)
+
+- lua実行を常に別オリジン扱いのworkerで行う
+
+## ver. 18.18 - 2026/11/28 [#1483](https://github.com/na-trium-144/falling-nikochan/pull/1483)
 
 - edit ページの cid クエリ検証
 - /:lang/main/... のオープンリダイレクト対策
