@@ -30,6 +30,7 @@ import { compress } from "hono/compress";
 import { requestId } from "hono/request-id";
 import { structuredLogger } from "@hono/structured-logger";
 import pino from "pino";
+import { cors } from "hono/cors";
 
 const port = 8787;
 
@@ -110,7 +111,7 @@ app
   .route("/rss.xml", await rssApp({ dbMiddleware }))
   .route("/share", shareApp({ fetchBrief, fetchStatic }))
   .route("/", redirectApp({ fetchStatic }))
-  .use("/*", serveStatic)
+  .use("/*", cors(), serveStatic)
   .use(languageDetector())
   .onError(
     onError({
