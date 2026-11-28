@@ -13,14 +13,12 @@ import {
 } from "react";
 import { useDisplayMode } from "@/scale.js";
 import {
-  LuaExecOptions,
-  LuaExecResult,
-} from "@falling-nikochan/chart/dist/luaExec";
-import {
   ChartEditing,
   LevelEditing,
   LuaExecutor,
   LuaExecutorLastResult,
+  LuaExecOptions,
+  LuaExecResult,
 } from "@falling-nikochan/chart";
 import { Step } from "@falling-nikochan/chart";
 import { findStepFromLua } from "@falling-nikochan/chart";

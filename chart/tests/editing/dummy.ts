@@ -2,11 +2,12 @@ import {
   ChartEdit,
   currentChartVer,
   defaultCopyBufferObj,
+  LuaExecOptions,
+  LuaExecResult,
   LuaExecutor,
   stepZero,
 } from "@falling-nikochan/chart";
 import { inspect } from "node:util";
-import { LuaExecOptions, LuaExecResult } from "../../dist/luaExec/exec";
 inspect.defaultOptions.depth = null;
 
 export const emptyResult: LuaExecResult = {
