@@ -23,6 +23,7 @@ import {
   updateBpmTimeSec,
   updateBarNum,
   ChartSchema,
+  CidSchema,
   InitNoteStyle,
   initNoteStyles,
 } from "@falling-nikochan/chart";
@@ -37,7 +38,7 @@ import * as v from "valibot";
 import fnCommandsLib from "fn-commands?raw";
 import fnCommandsPackageJson from "fn-commands/package.json";
 import { captureAndWrap, fetchBackend } from "@/common/fetch";
-import { markAsExpected } from "@/common/apiError";
+import { APIError, markAsExpected } from "@/common/apiError";
 import { removeRecent } from "@/common/recent";
 import type Ace from "ace-builds";
 
@@ -174,6 +175,18 @@ export function useChartState(props: Props) {
 
   const fetchChart = useCallback(
     async (cid: string, options: FetchChartOptions) => {
+      if (!v.safeParse(CidSchema(), cid).success) {
+        const err = new APIError(
+          window.location.href,
+          400,
+          "badRequest",
+          undefined,
+          undefined
+        );
+        err.expected = true;
+        setChartState({ state: err });
+        return;
+      }
       setChartState({ state: "loading" });
       setSavePasswd(options.savePasswd);
 

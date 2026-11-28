@@ -4,6 +4,7 @@ export const rateLimit = {
   newChartFile: 600,
   chartFile: 3,
   record: 10,
+  hashPasswd: 3,
 } as const;
 export const chartMaxEvent = 20000;
 export const fileMaxSize = chartMaxEvent * (100 + 150);

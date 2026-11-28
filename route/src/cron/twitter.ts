@@ -3,8 +3,43 @@ import twitterText from "twitter-text";
 import { ChartBrief } from "@falling-nikochan/chart";
 // import { checkTextSafety } from "./gemini.js";
 import { reportToDiscord, announceToDiscord } from "./discord.js";
+import { escapeMarkdown } from "discord.js";
 // import OAuth from "oauth-1.0a";
 // import crypto from "crypto";
+
+export function escapeDiscordText(text: string): string {
+  return escapeMarkdown(text, { maskedLink: true }).replaceAll("@", "＠");
+}
+
+export function truncateToTweetLimit(
+  text: string,
+  maxWeightedLength: number,
+  buildTweet: (candidate: string) => string
+): string {
+  if (
+    twitterText.parseTweet(buildTweet(text)).weightedLength <= maxWeightedLength
+  ) {
+    return text;
+  }
+  const chars = Array.from(text);
+  let lo = 0;
+  let hi = chars.length - 1;
+  let best = "";
+  while (lo <= hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    const candidate = chars.slice(0, mid).join("") + "…";
+    if (
+      twitterText.parseTweet(buildTweet(candidate)).weightedLength <=
+      maxWeightedLength
+    ) {
+      best = candidate;
+      lo = mid + 1;
+    } else {
+      hi = mid - 1;
+    }
+  }
+  return best;
+}
 
 /*
 async function tweet(env: Bindings, content: string) {
@@ -58,7 +93,7 @@ export async function postChart(
   brief: ChartBrief,
   postType: "new" | "update"
 ): Promise<"ok" | "error" | "skipped"> {
-  let messageAboutSong = `${brief.title} / ${brief.composer}`;
+  const messageAboutSong = `${brief.title} / ${brief.composer}`;
   const messageAboutLevel =
     brief.levels
       .slice(0, 3)
@@ -73,14 +108,12 @@ export async function postChart(
     "\n",
     `https://nikochan.utcode.net/share/${cid}\n\n`,
     // `ID: ${cid}\n`,
-    messageAboutSong + "\n",
-    messageAboutLevel,
-  ]
-    .join("")
-    .replaceAll("@", "＠");
+    escapeDiscordText(messageAboutSong) + "\n",
+    escapeDiscordText(messageAboutLevel),
+  ].join("");
   await announceToDiscord(env, messageForDiscord);
 
-  const messageJoined = () =>
+  const messageJoined = (song: string) =>
     [
       postType === "new"
         ? `新しい譜面が公開されました!`
@@ -88,16 +121,16 @@ export async function postChart(
       ` (${new Date().getUTCFullYear()}/${new Date().getUTCMonth() + 1}/${new Date().getUTCDate()})\n`,
       `誰でもこのURLから遊べます: https://nikochan.utcode.net/share/${cid}\n\n`,
       // `ID: ${cid}\n`,
-      messageAboutSong + "\n\n",
+      song + "\n\n",
       // messageAboutLevel,
       "#fallingnikochan #リズムゲーム #音ゲー",
     ]
       .join("")
       .replaceAll("@", "＠");
-  while (twitterText.parseTweet(messageJoined()).weightedLength > 280) {
-    messageAboutSong = messageAboutSong.slice(0, -2) + "…";
-  }
-  const message = messageJoined();
+  const message = messageJoined(
+    truncateToTweetLimit(messageAboutSong, 280, messageJoined)
+  );
+  const escapedMessage = escapeDiscordText(message);
 
   try {
     if (
@@ -108,7 +141,7 @@ export async function postChart(
         env,
         "Skipped posting tweet due to URL in song title or composer.\n\n" +
           "Original message:\n" +
-          message
+          escapedMessage
       );
       return "skipped";
     }
@@ -129,7 +162,7 @@ export async function postChart(
 
     // await tweet(env, message);
     const intentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(message)}`;
-    const adminMessage = `以下のメッセージをポストしてください: ${intentUrl}\noriginal message:\n${message}`;
+    const adminMessage = `以下のメッセージをポストしてください: ${intentUrl}\noriginal message:\n${escapedMessage}`;
     await reportToDiscord(env, adminMessage);
 
     return "ok";
@@ -139,7 +172,7 @@ export async function postChart(
         env,
         "Skipped posting tweet due to duplicate tweet error.\n\n" +
           "Original message:\n" +
-          message
+          escapedMessage
       );
       return "skipped";
     }
@@ -148,7 +181,7 @@ export async function postChart(
       "Error trying to post tweet:\n" +
         String(e) +
         "\n\nOriginal message:\n" +
-        message
+        escapedMessage
     );
     return "error";
   }
@@ -166,13 +199,16 @@ export async function postPopular(
   );
   const messageEntries: string[] = [];
   for (const [index, brief] of briefs.entries()) {
-    let line = `${index + 1}. ${brief.title} / ${brief.composer}\n`;
-    while (twitterText.parseTweet(line).weightedLength > maxEntryLen) {
-      line = line.slice(0, -3) + "…\n";
-    }
-    messageEntries.push(line.replaceAll("@", "＠"));
+    const line = `${index + 1}. ${brief.title} / ${brief.composer}`;
+    const truncated = truncateToTweetLimit(
+      line,
+      maxEntryLen,
+      (candidate) => `${candidate}\n`
+    );
+    messageEntries.push(`${truncated}\n`.replaceAll("@", "＠"));
   }
   const message = messageHeader + messageEntries.join("");
+  const escapedMessage = escapeDiscordText(message);
   try {
     if (
       messageEntries.some((entry) => twitterText.extractUrls(entry).length > 0)
@@ -181,7 +217,7 @@ export async function postPopular(
         env,
         "Skipped posting popular charts tweet due to URL in song title or composer.\n\n" +
           "Original message:\n" +
-          message
+          escapedMessage
       );
       return "skipped";
     }
@@ -202,7 +238,7 @@ export async function postPopular(
 
     // await tweet(env, message);
     const intentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(message)}`;
-    const adminMessage = `以下のメッセージをポストしてください: ${intentUrl}\noriginal message:\n${message}`;
+    const adminMessage = `以下のメッセージをポストしてください: ${intentUrl}\noriginal message:\n${escapedMessage}`;
     await reportToDiscord(env, adminMessage);
     return "ok";
   } catch (e) {
@@ -211,7 +247,7 @@ export async function postPopular(
         env,
         "Skipped posting popular charts tweet due to duplicate tweet error.\n\n" +
           "Original message:\n" +
-          message
+          escapedMessage
       );
       return "skipped";
     }
@@ -220,7 +256,7 @@ export async function postPopular(
       "Error trying to post popular charts tweet:\n" +
         String(e) +
         "\n\nOriginal message:\n" +
-        message
+        escapedMessage
     );
     return "error";
   }

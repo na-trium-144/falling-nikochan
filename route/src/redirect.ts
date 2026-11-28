@@ -6,6 +6,7 @@ import {
   languageDetector,
   ResponseOK,
 } from "./env.js";
+import { locales } from "@falling-nikochan/i18n/dynamic.js";
 import { isbot } from "isbot";
 import { env } from "hono/adapter";
 
@@ -29,6 +30,9 @@ const redirectApp = (config: {
       // deprecated (used until ver15.3)
       const q = new URLSearchParams(new URL(c.req.url).search);
       const lang = c.req.param("lang");
+      if (!(locales as readonly string[]).includes(lang)) {
+        return c.notFound();
+      }
       const sort = c.req.param("sort");
       q.set("sort", sort);
       c.header("cache-control", immutable());
@@ -41,6 +45,9 @@ const redirectApp = (config: {
       // deprecated (used until ver15.12)
       const search = new URL(c.req.url).search;
       const lang = c.req.param("lang");
+      if (!(locales as readonly string[]).includes(lang)) {
+        return c.notFound();
+      }
       const page = Number(c.req.param("page"));
       switch (page) {
         case 1:

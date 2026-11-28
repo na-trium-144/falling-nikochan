@@ -75,6 +75,19 @@ describe("redirectApp", () => {
     expect(location.searchParams.get("foo")).to.equal("bar");
   });
 
+  test("should return 404 for invalid lang in /:lang/main/:sort", async () => {
+    const res = await app.request(
+      "http://example.com/%2fevil.example/main/latest"
+    );
+    expect(res.status).to.equal(404);
+  });
+  test("should return 404 for invalid lang in /:lang/main/about/:page", async () => {
+    const res = await app.request(
+      "http://example.com/%2fevil.example/main/about/1"
+    );
+    expect(res.status).to.equal(404);
+  });
+
   test("should 307 redirect play route with language prefix", async () => {
     const res = await app.request("http://example.com/play");
     expect(res.status).to.equal(307);

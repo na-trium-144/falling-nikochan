@@ -139,7 +139,10 @@ const apiApp = async (config: {
       );
     })
     .route("/search", searchApp)
-    .route("/hashPasswd", hashPasswdApp)
+    .route(
+      "/hashPasswd",
+      await hashPasswdApp({ getConnInfo: config.getConnInfo })
+    )
     .route("/record", await recordApp({ getConnInfo: config.getConnInfo }))
     .route(
       "/resultSigning",

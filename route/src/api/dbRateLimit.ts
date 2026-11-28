@@ -10,9 +10,10 @@ interface RateLimitEntry {
   lastCreate: Date; // for /api/newChartFile
   lastChartFileAccess: Date; // for /api/chartFile
   lastRecordPost: Date; // for /api/record
+  lastHashPasswdAccess: Date; // for /api/hashPasswd
 }
 
-type Route = "newChartFile" | "chartFile" | "record";
+type Route = "newChartFile" | "chartFile" | "record" | "hashPasswd";
 
 export const forwardCheckApp = (config: {
   getConnInfo: (c: Context) => ConnInfo | null;
@@ -60,6 +61,9 @@ export async function updateIp(
     case "record":
       lastAccess = entry?.lastRecordPost;
       break;
+    case "hashPasswd":
+      lastAccess = entry?.lastHashPasswdAccess;
+      break;
     default:
       route satisfies never;
   }
@@ -94,6 +98,15 @@ export async function updateIp(
           .updateOne(
             { ip },
             { $set: { ip, lastRecordPost: new Date() } },
+            { upsert: true }
+          );
+        break;
+      case "hashPasswd":
+        await db
+          .collection<RateLimitEntry>("rateLimit")
+          .updateOne(
+            { ip },
+            { $set: { ip, lastHashPasswdAccess: new Date() } },
             { upsert: true }
           );
         break;
