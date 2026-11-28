@@ -1,5 +1,6 @@
-import { LevelFreeze } from "../chart.js";
-import { Step } from "../step.js";
+import { LevelFreezeSchema } from "../chart.js";
+import { StepSchema } from "../step.js";
+import * as v from "valibot";
 
 export const eventTypes = [
   "rerender", // 再render用
@@ -8,23 +9,35 @@ export const eventTypes = [
 ] as const;
 export type EventType = (typeof eventTypes)[number];
 
-export interface LuaExecResultSuccess {
-  stdout: string[];
-  err: string[];
-  errorLine: null;
-  levelFreezed: LevelFreeze;
-  rawReturnValue: unknown;
-  step: Step;
-}
-export interface LuaExecResultError {
-  stdout: string[];
-  err: string[];
-  errorLine: number | null;
-  levelFreezed: null;
-  rawReturnValue: unknown;
-  step: null;
-}
-export type LuaExecResult = LuaExecResultSuccess | LuaExecResultError;
+export const LuaExecResultSuccessSchema = () =>
+  v.object({
+    stdout: v.array(v.string()),
+    err: v.array(v.string()),
+    errorLine: v.null(),
+    levelFreezed: LevelFreezeSchema(),
+    rawReturnValue: v.unknown(),
+    step: StepSchema(),
+  });
+export const LuaExecResultErrorSchema = () =>
+  v.object({
+    stdout: v.array(v.string()),
+    err: v.array(v.string()),
+    errorLine: v.nullable(v.number()),
+    levelFreezed: v.null(),
+    rawReturnValue: v.unknown(),
+    step: v.null(),
+  });
+export type LuaExecResultSuccess = v.InferOutput<
+  ReturnType<typeof LuaExecResultSuccessSchema>
+>;
+export type LuaExecResultError = v.InferOutput<
+  ReturnType<typeof LuaExecResultErrorSchema>
+>;
+export const LuaExecResultSchema = () =>
+  v.union([LuaExecResultSuccessSchema(), LuaExecResultErrorSchema()]);
+export type LuaExecResult = v.InferOutput<
+  ReturnType<typeof LuaExecResultSchema>
+>;
 export interface LuaExecOptions {
   catchError?: boolean;
   needReturnValue?: boolean;

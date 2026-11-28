@@ -19,6 +19,7 @@ import {
   LuaExecutorLastResult,
   LuaExecOptions,
   LuaExecResult,
+  LuaExecResultSchema,
 } from "@falling-nikochan/chart";
 import { Step } from "@falling-nikochan/chart";
 import { findStepFromLua } from "@falling-nikochan/chart";
@@ -46,6 +47,7 @@ const AceEditor = dynamic(
 import type { Selection } from "ace-builds-internal/selection";
 import type { WorkerInput } from "./luaExecWorker";
 import type Ace from "ace-builds";
+import * as v from "valibot";
 
 // https://github.com/vercel/next.js/discussions/29415
 // import "remote-web-worker";
@@ -130,6 +132,12 @@ export function useLuaExecutor(): LuaExecutor {
               // すでに別のworkerが動き始めているので、無視
               return;
             } else {
+              try {
+                v.parse(LuaExecResultSchema(), data);
+              } catch (e) {
+                console.error(`Invalid message from worker`, data, e);
+                return;
+              }
               workerResolver.current?.(data);
               workerResolver.current = null;
             }

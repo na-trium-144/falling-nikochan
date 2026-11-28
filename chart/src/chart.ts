@@ -71,6 +71,7 @@ import {
   ChartUntil15,
   Level15Freeze,
   Level15Meta,
+  LevelFreezeSchema15,
 } from "./legacy/chart15.js";
 import { docRefs, Reference, Schema } from "./docSchema.js";
 import { maxLv, minLv } from "./apiConfig.js";
@@ -191,6 +192,7 @@ export type ChartEdit = Chart17;
 export const ChartSchema = ChartSchema17;
 export type LevelMin = Level15Meta;
 export type LevelFreeze = Level15Freeze;
+export const LevelFreezeSchema = LevelFreezeSchema15;
 export const convertToMin = convertToMin14;
 
 export async function convertToLatest(chart: ChartUntil17): Promise<ChartEdit> {
