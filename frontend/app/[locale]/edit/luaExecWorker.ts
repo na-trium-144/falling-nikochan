@@ -5,6 +5,11 @@ const worker = self as unknown as Worker;
 
 export interface WorkerInput {
   code: string;
+  options: {
+    catchError?: boolean;
+    needReturnValue?: boolean;
+    isChartFile?: boolean;
+  }
 }
 
 worker.addEventListener(
@@ -14,7 +19,7 @@ worker.addEventListener(
       process.env.ASSET_PREFIX + "/wasmoon_glue.wasm",
       fnCommandsLib,
       data.code,
-      { catchError: true, needReturnValue: false }
+      data.options,
     );
     worker.postMessage(result);
   }

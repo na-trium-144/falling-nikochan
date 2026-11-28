@@ -12,11 +12,13 @@ import {
   useState,
 } from "react";
 import { useDisplayMode } from "@/scale.js";
-import { LuaExecResult } from "@falling-nikochan/chart/dist/luaExec";
+import {
+  LuaExecOptions,
+  LuaExecResult,
+} from "@falling-nikochan/chart/dist/luaExec";
 import {
   ChartEditing,
   LevelEditing,
-  LevelFreeze,
   LuaExecutor,
   LuaExecutorLastResult,
 } from "@falling-nikochan/chart";
@@ -59,7 +61,8 @@ if (typeof window !== "undefined") {
       super(
         // new URL(new URL(scriptURL).pathname, window.location.origin),
         // URL.createObjectURL(new Blob([`importScripts("${new URL(new URL(scriptURL).pathname, window.location.origin)}")`])),
-        'data:application/javascript;charset=utf-8,' + encodeURIComponent(`
+        "data:application/javascript;charset=utf-8," +
+          encodeURIComponent(`
           globalThis.importScripts=((i)=>(u)=>i(new URL(u,"${window.location.origin}")))(importScripts);
           globalThis.fetch=((f)=>(u,o)=>f(new URL(u,"${window.location.origin}"),o))(fetch);
           importScripts("${new URL(new URL(scriptURL).pathname, window.location.origin)}");
@@ -85,15 +88,7 @@ export function useLuaExecutor(): LuaExecutor {
   const worker = useRef<Worker | null>(null);
   // コードが実行中の場合、promiseに結果を返し上2つのstateを更新するコールバックを保持する。
   // 実行が完了したらresolverを呼び出した後これをnullにする。
-  const workerResolver = useRef<
-    | ((
-        stdout: string[],
-        err: string[],
-        errLine: number | null,
-        freeze: LevelFreeze | null
-      ) => void)
-    | null
-  >(null);
+  const workerResolver = useRef<((result: LuaExecResult) => void) | null>(null);
 
   const initWorker = useCallback(() => {
     if (worker.current === null) {
@@ -115,13 +110,15 @@ export function useLuaExecutor(): LuaExecutor {
           // すでに別のworkerが動き始めているので、無視
           return;
         } else {
-          workerResolver.current?.(
-            [],
+          workerResolver.current?.({
+            stdout: [],
             // e.messageが空の場合がある
-            [e.message || "Unknown error"],
-            null,
-            null
-          );
+            err: [e.message || "Unknown error"],
+            errorLine: null,
+            levelFreezed: null,
+            rawReturnValue: null,
+            step: null,
+          });
           workerResolver.current = null;
         }
       });
@@ -135,12 +132,7 @@ export function useLuaExecutor(): LuaExecutor {
               // すでに別のworkerが動き始めているので、無視
               return;
             } else {
-              workerResolver.current?.(
-                data.stdout,
-                data.err,
-                data.errorLine,
-                data.err.length === 0 ? data.levelFreezed : null
-              );
+              workerResolver.current?.(data);
               workerResolver.current = null;
             }
           }
@@ -159,23 +151,36 @@ export function useLuaExecutor(): LuaExecutor {
         worker.current.terminate();
         worker.current = null;
       }
-      workerResolver.current?.([], ["terminated"], null, null);
+      workerResolver.current?.({
+        stdout: [],
+        // e.messageが空の場合がある
+        err: ["Terminated"],
+        errorLine: null,
+        levelFreezed: null,
+        rawReturnValue: null,
+        step: null,
+      });
       workerResolver.current = null;
     }
   }, []);
   const exec = useCallback(
-    (code: string, levelIndex: number) => {
+    (code: string, levelIndex: number, options: LuaExecOptions) => {
       abortExec();
       initWorker();
       setRunning(true);
-      const p = new Promise<LevelFreeze | null>((resolve) => {
-        workerResolver.current = (stdout, err, errLine, freeze) => {
+      const p = new Promise<LuaExecResult>((resolve) => {
+        workerResolver.current = (data) => {
           setRunning(false);
-          setResult({ stdout, err, errLine, levelIndex });
-          resolve(freeze);
+          setResult({
+            stdout: data.stdout,
+            err: data.err,
+            errLine: data.errorLine,
+            levelIndex,
+          });
+          resolve(data);
         };
       });
-      worker.current!.postMessage({ code } satisfies WorkerInput);
+      worker.current!.postMessage({ code, options } satisfies WorkerInput);
       return p;
     },
     [abortExec, initWorker]

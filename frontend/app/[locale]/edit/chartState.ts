@@ -32,7 +32,6 @@ import * as msgpack from "@msgpack/msgpack";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import saveAs from "file-saver";
-import { luaExec } from "@falling-nikochan/chart/dist/luaExec";
 import { isInsideFrame, isStandalone } from "@/common/pwaInstall";
 import * as v from "valibot";
 import fnCommandsLib from "fn-commands?raw";
@@ -41,6 +40,7 @@ import { captureAndWrap, fetchBackend } from "@/common/fetch";
 import { markAsExpected } from "@/common/apiError";
 import { removeRecent } from "@/common/recent";
 import type Ace from "ace-builds";
+import { LuaExecResultSuccess } from "@falling-nikochan/chart/dist/luaExec";
 
 interface Props {
   onLoad: (cid: string) => void;
@@ -474,12 +474,11 @@ export function useChartState(props: Props) {
               published: false,
               levelsFreeze: await Promise.all(
                 (newChartMin as Chart14Min).lua.map(async (l) => {
-                  const { levelFreezed } = await luaExec(
-                    process.env.ASSET_PREFIX + "/wasmoon_glue.wasm",
-                    fnCommandsLib,
+                  const { levelFreezed } = await luaExecutorRef.current.exec(
                     l.join("\n"),
+                    -1,
                     { catchError: false, needReturnValue: false }
-                  );
+                  ) as LuaExecResultSuccess;
                   const { bpm, speed } = updateBpmTimeSec(
                     levelFreezed.bpmChanges,
                     levelFreezed.speedChanges
@@ -513,10 +512,9 @@ export function useChartState(props: Props) {
           console.log("msgpack deserialize failed:", e2);
           try {
             const rawCode = new TextDecoder().decode(buffer);
-            const luaResult = await luaExec(
-              process.env.ASSET_PREFIX + "/wasmoon_glue.wasm",
-              fnCommandsLib,
+            const luaResult = await luaExecutorRef.current.exec(
               rawCode,
+              -1,
               { catchError: true, needReturnValue: true, isChartFile: true }
             );
             if (luaResult.err.length > 0) {

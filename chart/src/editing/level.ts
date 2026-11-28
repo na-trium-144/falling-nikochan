@@ -195,10 +195,12 @@ export class LevelEditing extends EventEmitter<EventType> {
       if (this.#luaCache.includes(luaCode)) {
         levelFreezed = this.#luaResultCache.get(luaCode)!;
       } else {
-        levelFreezed = await this.#luaExecutorRef.current.exec(
-          luaCode,
-          this.index
-        );
+        levelFreezed = (
+          await this.#luaExecutorRef.current.exec(luaCode, this.index, {
+            catchError: true,
+            needReturnValue: false,
+          })
+        ).levelFreezed;
         if (levelFreezed) {
           this.#luaResultCache.set(luaCode, levelFreezed);
           this.#luaCache.push(luaCode);

@@ -3,23 +3,33 @@ import { LevelFreeze } from "../chart.js";
 import * as v from "valibot";
 import { LevelFreezeSchema15 } from "../legacy/chart15.js";
 
-export interface LuaExecResult {
+export interface LuaExecResultSuccess {
   stdout: string[];
   err: string[];
-  errorLine: number | null;
+  errorLine: null;
   levelFreezed: LevelFreeze;
   rawReturnValue: unknown;
   step: Step;
+}
+export interface LuaExecResultError {
+  stdout: string[];
+  err: string[];
+  errorLine: number | null;
+  levelFreezed: null;
+  rawReturnValue: unknown;
+  step: null;
+}
+export type LuaExecResult = LuaExecResultSuccess | LuaExecResultError;
+export interface LuaExecOptions {
+  catchError?: boolean;
+  needReturnValue?: boolean;
+  isChartFile?: boolean;
 }
 export async function luaExec(
   wasmPath: string,
   fnCommandsLib: string,
   code: string,
-  options: {
-    catchError?: boolean;
-    needReturnValue?: boolean;
-    isChartFile?: boolean;
-  }
+  options: LuaExecOptions
 ): Promise<LuaExecResult> {
   const { LuaFactory } = await import("wasmoon");
   const factory = new LuaFactory(wasmPath);
@@ -28,19 +38,13 @@ export async function luaExec(
     fnCommandsLib
   );
   const lua = await factory.createEngine();
-  const result: LuaExecResult = {
+  let result: LuaExecResult = {
     stdout: [],
     err: [],
     errorLine: null,
-    levelFreezed: {
-      notes: [],
-      rest: [],
-      bpmChanges: [],
-      speedChanges: [],
-      signature: [],
-    },
+    levelFreezed: null,
     rawReturnValue: undefined,
-    step: stepZero(),
+    step: null,
   };
   try {
     lua.global.set("print", (...args: unknown[]) => {
@@ -126,14 +130,17 @@ export async function luaExec(
       }
     }
     if (fnState) {
-      result.levelFreezed = v.parse(LevelFreezeSchema15(), {
-        notes: parseArrayOrEmpty(fnState.notes),
-        rest: parseArrayOrEmpty(fnState.rest),
-        bpmChanges: parseArrayOrEmpty(fnState.bpmChanges),
-        speedChanges: parseArrayOrEmpty(fnState.speedChanges),
-        signature: parseArrayOrEmpty(fnState.signature),
-      });
-      result.step = v.parse(StepSchema(), fnState.step);
+      result = {
+        ...(result as Omit<LuaExecResultSuccess, "levelFreezed" | "step">),
+        levelFreezed: v.parse(LevelFreezeSchema15(), {
+          notes: parseArrayOrEmpty(fnState.notes),
+          rest: parseArrayOrEmpty(fnState.rest),
+          bpmChanges: parseArrayOrEmpty(fnState.bpmChanges),
+          speedChanges: parseArrayOrEmpty(fnState.speedChanges),
+          signature: parseArrayOrEmpty(fnState.signature),
+        }),
+        step: v.parse(StepSchema(), fnState.step),
+      };
     }
   } catch (e) {
     if (!options.catchError) {
@@ -162,28 +169,30 @@ export async function luaExec(
   } finally {
     lua.global.close();
   }
-  if (result.levelFreezed.bpmChanges.length === 0) {
-    result.levelFreezed.bpmChanges.push({
-      bpm: 120,
-      step: stepZero(),
-      luaLine: null,
-    });
-  }
-  if (result.levelFreezed.speedChanges.length === 0) {
-    result.levelFreezed.speedChanges.push({
-      bpm: 120,
-      step: stepZero(),
-      luaLine: null,
-      interp: false,
-    });
-  }
-  if (result.levelFreezed.signature.length === 0) {
-    result.levelFreezed.signature.push({
-      step: stepZero(),
-      offset: stepZero(),
-      bars: [[4, 4, 4, 4]],
-      luaLine: null,
-    });
+  if (result.levelFreezed) {
+    if (result.levelFreezed.bpmChanges.length === 0) {
+      result.levelFreezed.bpmChanges.push({
+        bpm: 120,
+        step: stepZero(),
+        luaLine: null,
+      });
+    }
+    if (result.levelFreezed.speedChanges.length === 0) {
+      result.levelFreezed.speedChanges.push({
+        bpm: 120,
+        step: stepZero(),
+        luaLine: null,
+        interp: false,
+      });
+    }
+    if (result.levelFreezed.signature.length === 0) {
+      result.levelFreezed.signature.push({
+        step: stepZero(),
+        offset: stepZero(),
+        bars: [[4, 4, 4, 4]],
+        luaLine: null,
+      });
+    }
   }
   return result;
 }

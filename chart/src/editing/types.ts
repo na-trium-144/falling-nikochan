@@ -1,4 +1,4 @@
-import { LevelFreeze } from "../chart.js";
+import { LuaExecOptions, LuaExecResult } from "../luaExec/exec.js";
 
 export const eventTypes = [
   "rerender", // 再render用
@@ -17,7 +17,7 @@ export interface LuaExecutor {
   result: LuaExecutorLastResult | null;
   running: boolean;
   clearResult: () => void;
-  exec: (code: string, levelIndex: number) => Promise<LevelFreeze | null>;
+  exec: (code: string, levelIndex: number, options: LuaExecOptions) => Promise<LuaExecResult>;
   abortExec: () => void;
 }
 export type LuaExecutorRef = { current: LuaExecutor };

@@ -2,15 +2,27 @@ import {
   ChartEdit,
   currentChartVer,
   defaultCopyBufferObj,
-  LevelFreeze,
   LuaExecutor,
   stepZero,
 } from "@falling-nikochan/chart";
 import { inspect } from "node:util";
+import { LuaExecOptions, LuaExecResult } from "../../dist/luaExec/exec";
 inspect.defaultOptions.depth = null;
 
+export const emptyResult: LuaExecResult = {
+  stdout: [],
+  err: [],
+  errorLine: null,
+  levelFreezed: null,
+  rawReturnValue: null,
+  step: null,
+};
 export function dummyLuaExecutor(
-  exec: (code: string) => Promise<LevelFreeze | null> = async () => null,
+  exec: (
+    code: string,
+    levelIndex: number,
+    options: LuaExecOptions
+  ) => Promise<LuaExecResult> = async () => emptyResult,
   abortExec: () => void = () => undefined
 ): { current: LuaExecutor } {
   return {
@@ -19,6 +31,7 @@ export function dummyLuaExecutor(
       running: false,
       exec,
       abortExec,
+      clearResult: () => undefined,
     },
   };
 }
@@ -166,4 +179,13 @@ export const dummyChartData: ChartEdit = {
   lua: [["print('Hello, World!')"], []],
   zoom: 1,
   copyBuffer: defaultCopyBufferObj(),
+};
+
+export const dummyLevelResult: LuaExecResult = {
+  stdout: [],
+  err: [],
+  errorLine: null,
+  levelFreezed: dummyChartData.levelsFreeze[0],
+  rawReturnValue: null,
+  step: dummyChartData.levelsFreeze[0].notes.at(-1)!.step,
 };
