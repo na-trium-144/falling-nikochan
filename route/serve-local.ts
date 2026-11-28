@@ -25,6 +25,7 @@ import { Db, MongoClient } from "mongodb";
 import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 import { structuredLogger } from "@hono/structured-logger";
+import { cors } from "hono/cors";
 
 const port = 8787;
 
@@ -78,7 +79,7 @@ app
   .route("/rss.xml", await rssApp({ dbMiddleware }))
   .route("/share", shareApp({ fetchBrief, fetchStatic }))
   .route("/", redirectApp({ fetchStatic }))
-  .use("/*", serveStatic)
+  .use("/*", cors(), serveStatic)
   .use(languageDetector())
   .onError(
     onError({ fetchStatic, captureException: null, setTransactionName: null })

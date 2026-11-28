@@ -1,23 +1,198 @@
-import { luaExec } from "@falling-nikochan/chart/dist/luaExec";
 import fnCommandsLib from "fn-commands?raw";
+import {
+  StepSchema,
+  stepZero,
+  LevelFreezeSchema15,
+  LuaExecOptions,
+  LuaExecResult,
+  LuaExecResultSuccess,
+} from "@falling-nikochan/chart";
+import * as v from "valibot";
+import { LuaFactory } from "wasmoon";
 
 const worker = self as unknown as Worker;
 
 export interface WorkerInput {
   code: string;
+  options: LuaExecOptions;
 }
 
-worker.addEventListener(
-  "message",
-  async ({ data }: MessageEvent<WorkerInput>) => {
-    const result = await luaExec(
-      process.env.ASSET_PREFIX + "/wasmoon_glue.wasm",
-      fnCommandsLib,
-      data.code,
-      { catchError: true, needReturnValue: false }
-    );
-    worker.postMessage(result);
-  }
-);
+(async () => {
+  const factory = new LuaFactory(
+    process.env.ASSET_PREFIX + "/wasmoon_glue.wasm"
+  );
+  await factory.mountFile(
+    "/usr/local/share/lua/5.4/fn-commands.lua",
+    fnCommandsLib
+  );
 
-worker.postMessage("initDone");
+  worker.addEventListener(
+    "message",
+    async ({ data: { code, options } }: MessageEvent<WorkerInput>) => {
+      const lua = await factory.createEngine();
+      let result: LuaExecResult = {
+        stdout: [],
+        err: [],
+        errorLine: null,
+        levelFreezed: null,
+        rawReturnValue: undefined,
+        step: null,
+      };
+      try {
+        lua.global.set("print", (...args: unknown[]) => {
+          result.stdout.push(args.map((a) => String(a)).join("\t"));
+        });
+
+        /*
+      実行前に Note(...) → NoteStatic(行番号, ...) に置き換え、
+      引数に渡された行番号をNoteCommandといっしょに保存
+      保存した行番号は、その音符を(Noteタブなどから)編集したときに
+      luaの該当の部分を修正するために使う。
+      Note()の引数に変数が入っていたりする場合は置き換えない (行番号はnullにする)
+      この場合Noteタブなどから編集できない
+    */
+
+        const lines = code.split("\n");
+        let codeStatic: string[] = [];
+        let levelBeginLn = 0;
+        let isLevelCode = false;
+        for (let ln = 0; ln < lines.length; ln++) {
+          const lineStr = lines[ln];
+          // luaコードが単一のレベルデータでない場合、
+          // LEVEL_CODE_BEGIN〜LEVEL_CODE_ENDのみを置き換え対象にする & それに合わせて行番号も調整する
+          if (options.isChartFile && lineStr.includes("LEVEL_CODE_BEGIN")) {
+            levelBeginLn = ln + 1;
+            isLevelCode = true;
+          }
+          if (options.isChartFile && lineStr.includes("LEVEL_CODE_END")) {
+            isLevelCode = false;
+          }
+          if (options.isChartFile && !isLevelCode) {
+            codeStatic.push(lineStr);
+            continue;
+          }
+          codeStatic.push(
+            lineStr
+              .replace(
+                /^( *)Note\(( *-?[\d.]+ *(?:, *-?[\d.]+ *){2}(?:, *(?:true|false) *){1,2})\)( *)$/,
+                `$1NoteStatic(${ln - levelBeginLn},$2)$3`
+              )
+              .replace(
+                /^( *)Step\(( *[\d.]+ *, *[\d.]+ *)\)( *)$/,
+                `$1StepStatic(${ln - levelBeginLn},$2)$3`
+              )
+              .replace(
+                /^( *)Beat\(( *{[-\d.,{} ]+} *(?:, *[\d.]+ *){0,2})\)( *)$/,
+                `$1BeatStatic(${ln - levelBeginLn},$2)$3`
+              )
+              .replace(
+                /^( *)BPM\(( *[\d.]+ *)\)( *)$/,
+                `$1BPMStatic(${ln - levelBeginLn},$2)$3`
+              )
+              .replace(
+                /^( *)Accel\(( *-?[\d.]+ *)\)( *)$/,
+                `$1AccelStatic(${ln - levelBeginLn},$2)$3`
+              )
+              .replace(
+                /^( *)AccelBegin\(( *-?[\d.]+ *)\)( *)$/,
+                `$1AccelBeginStatic(${ln - levelBeginLn},$2)$3`
+              )
+              .replace(
+                /^( *)AccelEnd\(( *-?[\d.]+ *)\)( *)$/,
+                `$1AccelEndStatic(${ln - levelBeginLn},$2)$3`
+              )
+          );
+        }
+        // console.log(codeStatic);
+        await lua.doString('require("fn-commands")');
+        const value = await lua.doString(codeStatic.join("\n"));
+        if (options.needReturnValue) {
+          result.rawReturnValue = value;
+        }
+
+        const fnState = await lua.doString("return _G.fnState");
+        console.log(fnState);
+        function parseArrayOrEmpty(a: unknown): unknown[] {
+          if (Array.isArray(a)) {
+            return a;
+          } else if (
+            typeof a === "object" &&
+            a &&
+            Object.keys(a).length === 0
+          ) {
+            return [];
+          } else {
+            throw new Error(`unexpected object: ${JSON.stringify(a)}`);
+          }
+        }
+        if (fnState) {
+          result = {
+            ...(result as Omit<LuaExecResultSuccess, "levelFreezed" | "step">),
+            levelFreezed: v.parse(LevelFreezeSchema15(), {
+              notes: parseArrayOrEmpty(fnState.notes),
+              rest: parseArrayOrEmpty(fnState.rest),
+              bpmChanges: parseArrayOrEmpty(fnState.bpmChanges),
+              speedChanges: parseArrayOrEmpty(fnState.speedChanges),
+              signature: parseArrayOrEmpty(fnState.signature),
+            }),
+            step: v.parse(StepSchema(), fnState.step),
+          };
+        }
+      } catch (e) {
+        if (!options.catchError) {
+          throw e;
+        }
+        result.err = String(e).split("\n");
+        let firstErrorLine: number | null = null;
+        // tracebackをパース
+        result.err = result.err.map((s) => {
+          const errorLineMatch = s.match(/\[string ".*"\]:(\d+):/);
+          if (errorLineMatch !== null) {
+            if (firstErrorLine === null) {
+              firstErrorLine = Number(errorLineMatch[1]) - 1;
+            }
+            return s.replace(/\[string ".*"\]:(\d+):/, "$1:");
+          }
+          const errorLineMatchShort = s.match(/Error: (\d+):/);
+          if (errorLineMatchShort !== null) {
+            if (firstErrorLine === null) {
+              firstErrorLine = Number(errorLineMatchShort[1]) - 1;
+            }
+          }
+          return s;
+        });
+        result.errorLine = firstErrorLine;
+      } finally {
+        lua.global.close();
+      }
+      if (result.levelFreezed) {
+        if (result.levelFreezed.bpmChanges.length === 0) {
+          result.levelFreezed.bpmChanges.push({
+            bpm: 120,
+            step: stepZero(),
+            luaLine: null,
+          });
+        }
+        if (result.levelFreezed.speedChanges.length === 0) {
+          result.levelFreezed.speedChanges.push({
+            bpm: 120,
+            step: stepZero(),
+            luaLine: null,
+            interp: false,
+          });
+        }
+        if (result.levelFreezed.signature.length === 0) {
+          result.levelFreezed.signature.push({
+            step: stepZero(),
+            offset: stepZero(),
+            bars: [[4, 4, 4, 4]],
+            luaLine: null,
+          });
+        }
+      }
+      worker.postMessage(result);
+    }
+  );
+
+  worker.postMessage("initDone");
+})();

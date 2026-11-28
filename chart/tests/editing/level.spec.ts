@@ -1,7 +1,12 @@
 import { test, describe } from "node:test";
 import { expect } from "chai";
-import { EventType, LevelEditing } from "@falling-nikochan/chart";
-import { dummyChartData, dummyLuaExecutor } from "./dummy";
+import { EventType, LevelEditing, stepZero } from "@falling-nikochan/chart";
+import {
+  dummyChartData,
+  dummyLevelResult,
+  dummyLuaExecutor,
+  emptyResult,
+} from "./dummy";
 
 describe("LevelEditing", () => {
   describe("constructor", () => {
@@ -265,7 +270,7 @@ describe("LevelEditing", () => {
               () => {},
               () => dummyChartData.offset,
               dummyLuaExecutor(
-                async () => null,
+                async () => emptyResult,
                 () => {
                   aborted = true;
                 }
@@ -284,7 +289,7 @@ describe("LevelEditing", () => {
               () => dummyChartData.offset,
               dummyLuaExecutor(async (code: string) => {
                 executedCode = code;
-                return null;
+                return emptyResult;
               })
             );
             await level.updateLua(
@@ -305,7 +310,7 @@ describe("LevelEditing", () => {
               () => dummyChartData.offset,
               dummyLuaExecutor(async (code: string) => {
                 executedCode = code;
-                return dummyChartData.levelsFreeze[0];
+                return dummyLevelResult;
               })
             );
             await level.updateLua(
@@ -341,7 +346,7 @@ describe("LevelEditing", () => {
               dummyChartData.lua[0],
               () => {},
               () => dummyChartData.offset,
-              dummyLuaExecutor(async () => dummyChartData.levelsFreeze[0])
+              dummyLuaExecutor(async () => dummyLevelResult)
             );
             const newLua = [...level.lua, "print('new line')"];
             const p = level.updateLua(newLua, fromLuaEditor);
@@ -357,22 +362,29 @@ describe("LevelEditing", () => {
               () => {},
               () => dummyChartData.offset,
               dummyLuaExecutor(async () => ({
-                notes: [
-                  ...dummyChartData.levelsFreeze[0].notes,
-                  {
-                    step: { fourth: 5, numerator: 0, denominator: 1 },
-                    big: false,
-                    hitX: -1,
-                    hitVX: 1,
-                    hitVY: 3,
-                    fall: true,
-                    luaLine: null,
-                  },
-                ],
-                rest: dummyChartData.levelsFreeze[0].rest,
-                bpmChanges: dummyChartData.levelsFreeze[0].bpmChanges,
-                speedChanges: dummyChartData.levelsFreeze[0].speedChanges,
-                signature: dummyChartData.levelsFreeze[0].signature,
+                stdout: [],
+                err: [],
+                errorLine: null,
+                levelFreezed: {
+                  notes: [
+                    ...dummyChartData.levelsFreeze[0].notes,
+                    {
+                      step: { fourth: 5, numerator: 0, denominator: 1 },
+                      big: false,
+                      hitX: -1,
+                      hitVX: 1,
+                      hitVY: 3,
+                      fall: true,
+                      luaLine: null,
+                    },
+                  ],
+                  rest: dummyChartData.levelsFreeze[0].rest,
+                  bpmChanges: dummyChartData.levelsFreeze[0].bpmChanges,
+                  speedChanges: dummyChartData.levelsFreeze[0].speedChanges,
+                  signature: dummyChartData.levelsFreeze[0].signature,
+                },
+                rawReturnValue: null,
+                step: { fourth: 5, numerator: 0, denominator: 1 },
               }))
             );
             const newLua = [...level.lua, "print('new line')"];
@@ -388,7 +400,7 @@ describe("LevelEditing", () => {
               dummyChartData.lua[0],
               () => {},
               () => dummyChartData.offset,
-              dummyLuaExecutor(async () => null)
+              dummyLuaExecutor(async () => emptyResult)
             );
             const newLua = [...level.lua, "print('new line')"];
             const p = level.updateLua(newLua, fromLuaEditor);
@@ -403,7 +415,7 @@ describe("LevelEditing", () => {
               dummyChartData.lua[0],
               () => {},
               () => dummyChartData.offset,
-              dummyLuaExecutor(async () => null)
+              dummyLuaExecutor(async () => emptyResult)
             );
             const newLua = [...level.lua, "print('new line')"];
             const p = level.updateLua(newLua, fromLuaEditor);
@@ -420,7 +432,7 @@ describe("LevelEditing", () => {
               dummyChartData.lua[0],
               () => {},
               () => dummyChartData.offset,
-              dummyLuaExecutor(async () => null)
+              dummyLuaExecutor(async () => emptyResult)
             );
             const oldLua = level.lua;
             const newLua = [...level.lua, "print('new line')"];
@@ -441,7 +453,7 @@ describe("LevelEditing", () => {
                 dummyChartData.lua[0],
                 () => {},
                 () => dummyChartData.offset,
-                dummyLuaExecutor(async () => dummyChartData.levelsFreeze[0])
+                dummyLuaExecutor(async () => dummyLevelResult)
               );
               const oldLua = level.lua;
               expect(level.luaEditorValue).to.equal(oldLua.join("\n"));
@@ -459,7 +471,7 @@ describe("LevelEditing", () => {
                 dummyChartData.lua[0],
                 () => {},
                 () => dummyChartData.offset,
-                dummyLuaExecutor(async () => dummyChartData.levelsFreeze[0])
+                dummyLuaExecutor(async () => dummyLevelResult)
               );
               expect(level.luaEditorValue).to.equal(level.lua.join("\n"));
               const newLua = [...level.lua, "print('new line')"];
@@ -475,7 +487,7 @@ describe("LevelEditing", () => {
                 dummyChartData.lua[0],
                 () => {},
                 () => dummyChartData.offset,
-                dummyLuaExecutor(async () => dummyChartData.levelsFreeze[0])
+                dummyLuaExecutor(async () => dummyLevelResult)
               );
               let luaUpdated = false;
               level.on("rerender", () => {
@@ -495,7 +507,7 @@ describe("LevelEditing", () => {
               dummyChartData.lua[0],
               () => {},
               () => dummyChartData.offset,
-              dummyLuaExecutor(async () => null)
+              dummyLuaExecutor(async () => emptyResult)
             );
             const newLua = [...level.lua, "print('new line')"];
             const p = level.updateLua(newLua, fromLuaEditor);
@@ -522,7 +534,7 @@ describe("LevelEditing", () => {
             dummyChartData.lua[0],
             () => {},
             () => dummyChartData.offset,
-            dummyLuaExecutor(async () => dummyChartData.levelsFreeze[0])
+            dummyLuaExecutor(async () => dummyLevelResult)
           );
           const newLua = [...level.lua, "print('new line')"];
           level.setLuaEditorValue(newLua.join("\n"), inLuaEditor);
@@ -535,7 +547,7 @@ describe("LevelEditing", () => {
             dummyChartData.lua[0],
             () => {},
             () => dummyChartData.offset,
-            dummyLuaExecutor(async () => dummyChartData.levelsFreeze[0])
+            dummyLuaExecutor(async () => dummyLevelResult)
           );
           let luaUpdated = false;
           level.on("rerender", () => {
@@ -553,7 +565,7 @@ describe("LevelEditing", () => {
               dummyChartData.lua[0],
               () => {},
               () => dummyChartData.offset,
-              dummyLuaExecutor(async () => dummyChartData.levelsFreeze[0])
+              dummyLuaExecutor(async () => dummyLevelResult)
             );
             const oldLua = level.lua;
             const newLua = [...level.lua, "print('new line')"];
@@ -569,7 +581,7 @@ describe("LevelEditing", () => {
               dummyChartData.lua[0],
               () => {},
               () => dummyChartData.offset,
-              dummyLuaExecutor(async () => dummyChartData.levelsFreeze[0])
+              dummyLuaExecutor(async () => dummyLevelResult)
             );
             const oldLua = level.lua;
             const newLua = [...level.lua, "print('new line')"];
@@ -598,7 +610,7 @@ describe("LevelEditing", () => {
               dummyChartData.lua[0],
               () => {},
               () => dummyChartData.offset,
-              dummyLuaExecutor(async () => dummyChartData.levelsFreeze[0])
+              dummyLuaExecutor(async () => dummyLevelResult)
             );
             const newLua = [...level.lua, "print('new line')"];
             level.setLuaEditorValue(newLua.join("\n"), inLuaEditor);
@@ -946,7 +958,7 @@ describe("LevelEditing", () => {
         () => dummyChartData.offset,
         dummyLuaExecutor(async (code: string) => {
           executedCode = code;
-          return null;
+          return emptyResult;
         })
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset);
@@ -965,7 +977,7 @@ describe("LevelEditing", () => {
         () => dummyChartData.offset,
         dummyLuaExecutor(async (code: string) => {
           executedCode = code;
-          return null;
+          return emptyResult;
         })
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset);
@@ -984,7 +996,7 @@ describe("LevelEditing", () => {
         () => dummyChartData.offset,
         dummyLuaExecutor(async (code: string) => {
           executedCode = code;
-          return null;
+          return emptyResult;
         })
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset);
@@ -1011,7 +1023,7 @@ describe("LevelEditing", () => {
         () => dummyChartData.offset,
         dummyLuaExecutor(async (code: string) => {
           executedCode = code;
-          return null;
+          return emptyResult;
         })
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset);
@@ -1038,7 +1050,7 @@ describe("LevelEditing", () => {
         () => dummyChartData.offset,
         dummyLuaExecutor(async (code: string) => {
           executedCode = code;
-          return null;
+          return emptyResult;
         })
       );
       // Set to a position between bpm changes
@@ -1059,7 +1071,7 @@ describe("LevelEditing", () => {
         () => dummyChartData.offset,
         dummyLuaExecutor(async (code: string) => {
           executedCode = code;
-          return null;
+          return emptyResult;
         })
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset);
@@ -1080,7 +1092,7 @@ describe("LevelEditing", () => {
         () => dummyChartData.offset,
         dummyLuaExecutor(async (code: string) => {
           executedCode = code;
-          return null;
+          return emptyResult;
         })
       );
       // Set to a position between speed changes
@@ -1101,7 +1113,7 @@ describe("LevelEditing", () => {
         () => dummyChartData.offset,
         dummyLuaExecutor(async (code: string) => {
           executedCode = code;
-          return null;
+          return emptyResult;
         })
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset);
@@ -1122,7 +1134,7 @@ describe("LevelEditing", () => {
         () => dummyChartData.offset,
         dummyLuaExecutor(async (code: string) => {
           executedCode = code;
-          return null;
+          return emptyResult;
         })
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset);
@@ -1145,7 +1157,7 @@ describe("LevelEditing", () => {
         () => dummyChartData.offset,
         dummyLuaExecutor(async (code: string) => {
           executedCode = code;
-          return null;
+          return emptyResult;
         })
       );
       // Set to a position between signature changes
@@ -1166,7 +1178,7 @@ describe("LevelEditing", () => {
         () => dummyChartData.offset,
         dummyLuaExecutor(async (code: string) => {
           executedCode = code;
-          return null;
+          return emptyResult;
         })
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset + 1);
@@ -1187,7 +1199,7 @@ describe("LevelEditing", () => {
         () => dummyChartData.offset,
         dummyLuaExecutor(async (code: string) => {
           executedCode = code;
-          return null;
+          return emptyResult;
         })
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset);
@@ -1210,7 +1222,7 @@ describe("LevelEditing", () => {
         () => dummyChartData.offset,
         dummyLuaExecutor(async (code: string) => {
           executedCode = code;
-          return null;
+          return emptyResult;
         })
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset + 0.5);
@@ -1240,7 +1252,7 @@ describe("LevelEditing", () => {
         () => dummyChartData.offset,
         dummyLuaExecutor(async (code: string) => {
           executedCode = code;
-          return null;
+          return emptyResult;
         })
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset);
@@ -1261,7 +1273,7 @@ describe("LevelEditing", () => {
         () => dummyChartData.offset,
         dummyLuaExecutor(async (code: string) => {
           executedCode = code;
-          return null;
+          return emptyResult;
         })
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset + 5);
@@ -1285,7 +1297,7 @@ describe("LevelEditing", () => {
         () => dummyChartData.offset,
         dummyLuaExecutor(async (code: string) => {
           executedCode = code;
-          return null;
+          return emptyResult;
         })
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset);
@@ -1313,7 +1325,7 @@ describe("LevelEditing", () => {
         () => dummyChartData.offset,
         dummyLuaExecutor(async (code: string) => {
           executedCode = code;
-          return null;
+          return emptyResult;
         })
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset + 5);

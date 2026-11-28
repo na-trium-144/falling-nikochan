@@ -192,6 +192,20 @@ let nextConfig = {
       "slash-div",
     ],
   },
+  async headers() {
+    return [
+      {
+        // 開発環境でluaExecWorkerがwasmoon_glue.wasmをfetchするのに必要
+        source: "/:path*",
+        headers: [
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "*",
+          },
+        ],
+      },
+    ];
+  },
   webpack: (config, options) => {
     return {
       ...config,
