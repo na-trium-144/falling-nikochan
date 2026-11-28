@@ -38,7 +38,7 @@ import * as v from "valibot";
 import fnCommandsLib from "fn-commands?raw";
 import fnCommandsPackageJson from "fn-commands/package.json";
 import { captureAndWrap, fetchBackend } from "@/common/fetch";
-import { APIError, markAsExpected } from "@/common/apiError";
+import { markAsExpected } from "@/common/apiError";
 import { removeRecent } from "@/common/recent";
 import type Ace from "ace-builds";
 
@@ -175,18 +175,6 @@ export function useChartState(props: Props) {
 
   const fetchChart = useCallback(
     async (cid: string, options: FetchChartOptions) => {
-      if (!v.safeParse(CidSchema(), cid).success) {
-        const err = new APIError(
-          window.location.href,
-          400,
-          "badRequest",
-          undefined,
-          undefined
-        );
-        err.expected = true;
-        setChartState({ state: err });
-        return;
-      }
       setChartState({ state: "loading" });
       setSavePasswd(options.savePasswd);
 
@@ -663,7 +651,7 @@ export function useChartState(props: Props) {
           state: "ok",
         });
         onLoadRef.current("new");
-      } else if (cid) {
+      } else if (cid && v.safeParse(CidSchema(), cid).success) {
         void fetchChart(cid, { isFirst: true, editPasswd: "", savePasswd });
       } else {
         router.push(`/${locale}/main/edit`);
