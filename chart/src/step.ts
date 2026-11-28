@@ -66,17 +66,26 @@ export function stepAdd(s1: Step, s2: Step) {
   };
   return stepSimplify(sa);
 }
+function gcd(a: number, b: number): number {
+  a = Math.abs(a);
+  b = Math.abs(b);
+  while (b !== 0) {
+    const t = b;
+    b = a % b;
+    a = t;
+  }
+  return a;
+}
+
 export function stepSimplify(s: Step) {
   s.fourth += Math.floor(s.numerator / s.denominator);
   s.numerator -= Math.floor(s.numerator / s.denominator) * s.denominator;
-  for (let i = 2; i <= s.numerator && i <= s.denominator; i++) {
-    while (s.numerator % i == 0 && s.denominator % i == 0) {
-      s.numerator /= i;
-      s.denominator /= i;
-    }
-  }
   if (s.numerator === 0) {
     s.denominator = 1;
+  } else {
+    const g = gcd(s.numerator, s.denominator);
+    s.numerator /= g;
+    s.denominator /= g;
   }
   // キーの順序を保つために新しいオブジェクトを返す
   return {
