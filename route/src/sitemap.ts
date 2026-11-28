@@ -46,7 +46,7 @@ const sitemapApp = async (config: { dbMiddleware: MiddlewareHandler }) =>
       allCharts = (
         await db
           .collection<ChartEntryCompressed>("chart")
-          .find({ published: true })
+          .find({ published: true, deleted: false })
           .project<{
             cid: string;
             updatedAt: number;
